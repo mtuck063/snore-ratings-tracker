@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0F1419">
+    <title>Snore Timeline · Ratings Tracker</title>
+    <link rel="stylesheet" href="styles.css?v=21">
+</head>
+<body>
+    <main>
+        <header>
+            <h1>Snore Timeline Ratings</h1>
+            <p id="meta">Loading…</p>
+        </header>
+
+        <div id="recent" hidden></div>
+
+        <section id="week-reviews" hidden>
+            <h2>New reviews this week</h2>
+            <div class="week-row" id="week-row"></div>
+        </section>
+
+        <div class="table-wrap">
+            <table id="ratings">
+                <thead>
+                    <tr>
+                        <th class="col-country">Country</th>
+                        <th class="col-num">Total</th>
+                        <th class="col-num">Δ 24h</th>
+                        <th class="col-num">Avg</th>
+                        <th class="col-num" title="New 5-star ratings needed for the displayed average to reach 5.0">5★ to 5.0</th>
+                        <th class="col-spark">30 days</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <section id="reviews-section" hidden>
+            <h2>Written reviews</h2>
+            <div id="reviews"></div>
+        </section>
+
+        <section id="events-section">
+            <h2>Rating events</h2>
+            <p class="section-sub">Every rating change the hourly check has caught, newest first, with the country it came from.</p>
+            <ol id="events"></ol>
+        </section>
+
+    </main>
+    <div id="tooltip" hidden></div>
+    <script src="app.js?v=24"></script>
+</body>
+</html>
