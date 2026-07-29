@@ -26,8 +26,8 @@ jobs:
       - name: Fetch ratings
         run: node scripts/collect.mjs
 
-      # Single-commit history: new data is amended into the one "v1.0" commit.
-      - name: Amend data into the single commit
+      # Normal commits: force-pushed history stalls GitHub's cron scheduler.
+      - name: Commit data
         run: |
           git config user.name "ratings-bot"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -35,6 +35,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit --amend --no-edit
-            git push --force-with-lease
+            git commit -m "data: $(date -u '+%F %H:%M')"
+            git pull --rebase
+            git push
           fi
