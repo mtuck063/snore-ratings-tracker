@@ -549,7 +549,17 @@ function renderKeywords(kw) {
 
             const tdDelta = document.createElement("td");
             tdDelta.className = "col-num";
-            const prevRank = prevRow?.markets?.[cc]?.[term]?.[0];
+            // Day-over-day when a previous day exists; otherwise fall back to
+            // the earliest rank event of the last 24h so intra-day movement
+            // (and day one) still shows a delta consistent with the log below.
+            let prevRank = prevRow?.markets?.[cc]?.[term]?.[0];
+            if (prevRank === undefined) {
+                const dayAgo = Date.now() - 864e5;
+                const ev = (kw.events ?? []).find(
+                    (e) => e.type === "rank" && e.cc === cc && e.kw === term && new Date(e.at) >= dayAgo
+                );
+                if (ev) prevRank = ev.from;
+            }
             const span = document.createElement("span");
             span.className = "delta";
             if (prevRank == null || cur.rank == null || prevRank === cur.rank) {
