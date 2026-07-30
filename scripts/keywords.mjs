@@ -11,11 +11,11 @@
 //  - Discovery: the full suggestion list under each watch prefix, so a new
 //    term Apple starts suggesting shows up as an event.
 //
-// Search requests all fire in parallel (verified: 210 simultaneous calls, no
-// throttling). The hints endpoint starts returning 429 somewhere past ~300
-// concurrent requests, so those go through a concurrency gate instead.
-// A failed fetch retries with backoff, then keeps the previous value, so an
-// outage can't fake a rank drop.
+// Both Apple endpoints throttle far harder for GitHub-runner IPs (shared
+// across thousands of projects) than for residential ones, so every request
+// goes through a small concurrency gate with retry+backoff. Runtime is a few
+// minutes in CI, which costs nothing. A fetch that still fails keeps the
+// previous value, so an outage can't fake a rank drop.
 
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -44,6 +44,23 @@ const MIN_PREFIX = 2;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+function makeGate(limit) {
+  let active = 0;
+  const queue = [];
+  return async (fn) => {
+    if (active >= limit) await new Promise((r) => queue.push(r));
+    active++;
+    try {
+      return await fn();
+    } finally {
+      active--;
+      queue.shift()?.();
+    }
+  };
+}
+const searchGate = makeGate(8);
+const hintsGate = makeGate(16);
+
 async function readJson(file, fallback) {
   try {
     return JSON.parse(await readFile(file, "utf8"));
@@ -58,15 +75,17 @@ async function readJson(file, fallback) {
 async function fetchRank(kw, cc, attempt = 1) {
   const url = `https://itunes.apple.com/search?term=${encodeURIComponent(kw)}&country=${cc}&entity=software&limit=200`;
   try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const results = (await res.json()).results ?? [];
+    const results = await searchGate(async () => {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return (await res.json()).results ?? [];
+    });
     const idx = results.findIndex((r) => String(r.trackId) === appId);
     return idx === -1 ? null : idx + 1;
   } catch (err) {
-    if (attempt === 1) {
-      await sleep(RETRY_BACKOFF_MS);
-      return fetchRank(kw, cc, 2);
+    if (attempt <= 2) {
+      await sleep(RETRY_BACKOFF_MS * attempt);
+      return fetchRank(kw, cc, attempt + 1);
     }
     console.warn(`${cc} "${kw}": ${err.message}, keeping previous rank`);
     return "error";
@@ -86,24 +105,10 @@ async function rankPass(cc, prevMarket) {
 
 // --- Popularity: search-hints prefix probing --------------------------------
 
-const HINTS_CONCURRENCY = 50;
-let hintsActive = 0;
-const hintsQueue = [];
-async function hintsSlot(fn) {
-  if (hintsActive >= HINTS_CONCURRENCY) await new Promise((r) => hintsQueue.push(r));
-  hintsActive++;
-  try {
-    return await fn();
-  } finally {
-    hintsActive--;
-    hintsQueue.shift()?.();
-  }
-}
-
 async function fetchHints(prefix, storefront, attempt = 1) {
   const url = `https://search.itunes.apple.com/WebObjects/MZSearchHints.woa/wa/hints?clientApplication=Software&term=${encodeURIComponent(prefix)}`;
   try {
-    const xml = await hintsSlot(async () => {
+    const xml = await hintsGate(async () => {
       const res = await fetch(url, { headers: { "X-Apple-Store-Front": storefront } });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return res.text();
