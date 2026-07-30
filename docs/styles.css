@@ -224,16 +224,6 @@ svg.spark { display: block; margin-left: auto; touch-action: none; }
 #keywords th[data-sort] { cursor: pointer; user-select: none; }
 #keywords th[data-sort]:hover { color: var(--text); }
 .sort-arrow { font-size: 0.6rem; margin-left: 3px; }
-.kw-badge {
-    color: var(--accent);
-    background: rgba(91, 127, 255, 0.14);
-    font-size: 0.66rem;
-    font-weight: 600;
-    border-radius: 5px;
-    padding: 1px 5px;
-    margin-left: 8px;
-    vertical-align: 1px;
-}
 .mix-gain {
     color: var(--good);
     font-size: 0.72rem;

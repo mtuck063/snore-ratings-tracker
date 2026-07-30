@@ -563,14 +563,6 @@ function renderKeywords(kw) {
             const tdKw = document.createElement("td");
             tdKw.textContent = term;
             if (cur.prefix) tdKw.title = `Suggested at “${cur.prefix}”, position ${cur.pos}`;
-            // The money keywords: real demand, ranked, but not yet top 3.
-            if (cur.pop >= 60 && cur.rank != null && cur.rank > 3) {
-                const badge = document.createElement("span");
-                badge.className = "kw-badge";
-                badge.textContent = "TARGET";
-                badge.title = "High demand and not yet top 3: the most leverage per rank gained";
-                tdKw.appendChild(badge);
-            }
 
             const tdPop = document.createElement("td");
             tdPop.className = "col-num";
