@@ -16,12 +16,17 @@ function placeTooltip(e) {
 }
 // Touch screens have no pointerleave: a tap outside any tooltip source
 // dismisses the tooltip instead.
+const hideTooltip = () => {
+    if (tooltip.hidden) return;
+    tooltip.hidden = true;
+    document.querySelectorAll(".spark-hover").forEach((h) => h.setAttribute("visibility", "hidden"));
+};
 document.addEventListener("pointerdown", (e) => {
-    if (!e.target.closest(".spark, .star-bar")) {
-        tooltip.hidden = true;
-        document.querySelectorAll(".spark-hover").forEach((h) => h.setAttribute("visibility", "hidden"));
-    }
+    if (!e.target.closest(".spark, .star-bar")) hideTooltip();
 });
+// The tooltip is position:fixed, so scrolling moves the page out from under
+// it; any scroll (page or a sideways table pan - hence capture) dismisses.
+document.addEventListener("scroll", hideTooltip, { capture: true, passive: true });
 
 const flag = (cc) =>
     String.fromCodePoint(...[...cc.toUpperCase()].map((ch) => 0x1f1a5 + ch.charCodeAt(0)));
