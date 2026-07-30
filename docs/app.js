@@ -136,29 +136,58 @@ function starGains(events) {
     return gains;
 }
 
-// Histogram as self-labeled pairs, "133×5★ 9×4★ 2×3★": zero counts can be
-// omitted without ambiguity because every number names its star. Stars that
-// gained in the last 24h carry a small green +n.
+// Star histogram as a tiny stacked bar: segments in fixed 5★→1★ order
+// (position carries identity), colored good→bad, 2px gaps, slivers kept
+// visible by a min width. Exact counts live in the hover tooltip; a green +n
+// after the bar marks ratings added in the last 24h.
 function mixCell(counts, gains) {
-    if (!counts) return null;
-    const frag = document.createElement("span");
-    let any = false;
+    if (!counts || !counts.some((c) => c > 0)) return null;
+    const wrap = document.createElement("span");
+    wrap.className = "star-bar-wrap";
+
+    const bar = document.createElement("span");
+    bar.className = "star-bar";
+    const label = counts
+        .map((c, i) => (c > 0 ? `${c}×${5 - i}★` : null))
+        .filter(Boolean)
+        .join(" · ");
+    bar.setAttribute("role", "img");
+    bar.setAttribute("aria-label", label);
     counts.forEach((c, i) => {
         if (!c) return;
-        const star = 5 - i;
-        if (any) frag.appendChild(document.createTextNode(" "));
-        frag.appendChild(document.createTextNode(`${c}×${star}★`));
-        const g = gains?.[star];
-        if (g) {
-            const gs = document.createElement("span");
-            gs.className = "mix-gain";
-            gs.textContent = `+${g}`;
-            gs.title = `+${g} ${star}-star rating${g === 1 ? "" : "s"} in the last 24 h`;
-            frag.appendChild(gs);
-        }
-        any = true;
+        const seg = document.createElement("span");
+        seg.className = `star-seg s${5 - i}`;
+        seg.style.flexGrow = c;
+        bar.appendChild(seg);
     });
-    return any ? frag : null;
+    bar.addEventListener("pointermove", (e) => {
+        tooltip.innerHTML = "";
+        const strong = document.createElement("span");
+        strong.className = "tip-value";
+        strong.textContent = label;
+        tooltip.appendChild(strong);
+        tooltip.hidden = false;
+        const tw = tooltip.offsetWidth;
+        tooltip.style.left = `${Math.min(e.clientX + 12, window.innerWidth - tw - 8)}px`;
+        tooltip.style.top = `${e.clientY - 36}px`;
+    });
+    bar.addEventListener("pointerleave", () => {
+        tooltip.hidden = true;
+    });
+    wrap.appendChild(bar);
+
+    const total = Object.entries(gains ?? {}).reduce((s, [, n]) => s + n, 0);
+    if (total > 0) {
+        const gs = document.createElement("span");
+        gs.className = "mix-gain";
+        gs.textContent = `+${total}`;
+        gs.title = Object.entries(gains)
+            .sort((a, b) => b[0] - a[0])
+            .map(([s, n]) => `+${n} ${s}-star`)
+            .join(", ") + " in the last 24 h";
+        wrap.appendChild(gs);
+    }
+    return wrap;
 }
 
 function row({ name, sub, total, delta, avg, mix, to5, spark, isTotal, title }) {

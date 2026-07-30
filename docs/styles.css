@@ -224,12 +224,29 @@ svg.spark { display: block; margin-left: auto; touch-action: none; }
 #keywords th[data-sort] { cursor: pointer; user-select: none; }
 #keywords th[data-sort]:hover { color: var(--text); }
 .sort-arrow { font-size: 0.6rem; margin-left: 3px; }
+.star-bar-wrap { display: inline-flex; align-items: center; gap: 5px; }
+.star-bar {
+    display: inline-flex;
+    gap: 2px;
+    width: 110px;
+    height: 10px;
+    cursor: default;
+    touch-action: none;
+}
+.star-seg { flex-basis: 0; min-width: 3px; border-radius: 2px; }
+/* Ordinal good-to-bad ramp, validated on the dark surface: hue = severity
+   band, alternating lightness separates in-hue neighbors; fixed 5-to-1
+   position + 2px gaps + tooltip carry identity beyond color. */
+.star-seg.s5 { background: #4ade80; }
+.star-seg.s4 { background: #fde68a; }
+.star-seg.s3 { background: #d97706; }
+.star-seg.s2 { background: #fca5a5; }
+.star-seg.s1 { background: #dc2626; }
+
 .mix-gain {
     color: var(--good);
     font-size: 0.72rem;
     font-weight: 600;
-    margin-left: 2px;
-    vertical-align: 2px;
 }
 
 .pop-delta { font-size: 0.72rem; margin-left: 4px; }
