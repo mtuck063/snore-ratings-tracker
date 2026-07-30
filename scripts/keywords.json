@@ -107,8 +107,18 @@
     },
     "fr": {
       "storefront": "143442,29",
-      "watchPrefixes": ["ronfle", "apn", "sommeil"],
-      "seedTokens": ["ronfl", "sommeil", "apn", "dormir", "nuit"],
+      "watchPrefixes": [
+        "ronfle",
+        "apn",
+        "sommeil"
+      ],
+      "seedTokens": [
+        "ronfl",
+        "sommeil",
+        "apn",
+        "dormir",
+        "nuit"
+      ],
       "keywords": [
         "snore timeline",
         "ronflement",
@@ -133,8 +143,19 @@
     },
     "es": {
       "storefront": "143454,29",
-      "watchPrefixes": ["ronqu", "apnea", "sueño", "desperta"],
-      "seedTokens": ["ronqu", "ronc", "sueño", "apnea", "dormir"],
+      "watchPrefixes": [
+        "ronqu",
+        "apnea",
+        "sueño",
+        "desperta"
+      ],
+      "seedTokens": [
+        "ronqu",
+        "ronc",
+        "sueño",
+        "apnea",
+        "dormir"
+      ],
       "keywords": [
         "snore timeline",
         "ronquidos",
@@ -159,8 +180,19 @@
     },
     "mx": {
       "storefront": "143468,29",
-      "watchPrefixes": ["ronqu", "apnea", "sueño", "desperta"],
-      "seedTokens": ["ronqu", "ronc", "sueño", "apnea", "dormir"],
+      "watchPrefixes": [
+        "ronqu",
+        "apnea",
+        "sueño",
+        "desperta"
+      ],
+      "seedTokens": [
+        "ronqu",
+        "ronc",
+        "sueño",
+        "apnea",
+        "dormir"
+      ],
       "keywords": [
         "snore timeline",
         "ronquidos",
@@ -184,8 +216,20 @@
       ]
     }
   },
-  "watchPrefixes": ["snore", "snoring", "sleep t", "sleep ta", "free sn"],
-  "seedTokens": ["snor", "sleep", "cpap", "apnea", "breathing"],
+  "watchPrefixes": [
+    "snore",
+    "snoring",
+    "sleep t",
+    "sleep ta",
+    "free sn"
+  ],
+  "seedTokens": [
+    "snor",
+    "sleep",
+    "cpap",
+    "apnea",
+    "breathing"
+  ],
   "keywords": [
     "snore timeline",
     "snore",
@@ -221,6 +265,9 @@
     "free sleep talking app",
     "sleep monitor free",
     "breathing monitor",
-    "breathing monitor sleep"
+    "breathing monitor sleep",
+    "sleep talking recorder 2025",
+    "my sleep talks",
+    "sleep talk ai recorder"
   ]
 }
