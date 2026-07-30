@@ -101,10 +101,22 @@ function globalTotal(row) {
 
 // New 5-star ratings needed for the displayed (one-decimal) average to reach
 // 5.0, i.e. true average >= 4.95: ceil(20 * n * (4.95 - avg)). 0 = already there.
+// Fallback for storefronts without a histogram snapshot; the rounded average
+// can push this one too high.
 function fiveStarsToFive(count, avg) {
     if (!count || avg == null) return null;
     if (avg >= 4.95) return 0;
     return Math.ceil(20 * count * (4.95 - avg));
+}
+
+// Exact version from the star histogram: (S+5x)/(n+x) >= 4.95 solved for the
+// smallest integer x reduces to 99n - 20S with S the total star sum.
+function fiveStarsToFiveExact(counts) {
+    if (!counts) return null;
+    const n = counts.reduce((a, b) => a + b, 0);
+    if (!n) return null;
+    const stars = counts.reduce((s, c, i) => s + c * (5 - i), 0);
+    return Math.max(0, 99 * n - 20 * stars);
 }
 
 // Histogram counts [5★..1★] as "133·9·2", trailing zeros trimmed (but 2★/1★
@@ -684,7 +696,7 @@ async function main() {
             delta: totalDelta,
             avg: worldAvg,
             mix: starMix(worldCounts),
-            to5: fiveStarsToFive(worldCount, worldAvg),
+            to5: fiveStarsToFiveExact(worldCounts) ?? fiveStarsToFive(worldCount, worldAvg),
             spark: sparkline(seriesFor(history, null), "Global total, last 30 days"),
             isTotal: true,
         })
@@ -704,7 +716,7 @@ async function main() {
             delta,
             avg: cur?.avg ?? null,
             mix: starMix(hist?.countries[cc]?.counts),
-            to5: fiveStarsToFive(cur?.count, cur?.avg),
+            to5: fiveStarsToFiveExact(hist?.countries[cc]?.counts) ?? fiveStarsToFive(cur?.count, cur?.avg),
             spark: sparkline(seriesFor(history, cc), `${countryName} ratings, last 30 days`),
         });
         tr.hidden = hidden;
