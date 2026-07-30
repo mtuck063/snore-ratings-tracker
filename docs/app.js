@@ -119,13 +119,11 @@ function fiveStarsToFiveExact(counts) {
     return Math.max(0, 99 * n - 20 * stars);
 }
 
-// Histogram counts [5★..1★] as "133·9·2", trailing zeros trimmed (but 2★/1★
-// shown whenever present).
+// Histogram counts as "133·9·2·0·0", always all five positions (5★ first) so
+// every row reads the same way.
 function starMix(counts) {
     if (!counts) return null;
-    let last = counts.length - 1;
-    while (last > 2 && counts[last] === 0) last--;
-    return counts.slice(0, last + 1).join("·");
+    return counts.join("·");
 }
 
 function row({ name, sub, total, delta, avg, mix, to5, spark, isTotal, title }) {
