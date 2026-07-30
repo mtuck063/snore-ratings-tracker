@@ -2,8 +2,9 @@ name: Track keywords
 
 on:
   schedule:
-    # Daily; rank moves slowly, so more often would just record noise.
-    - cron: "23 6 * * *"
+    # Four samples a day: single runs jitter a few positions, so the daily
+    # history row keeps a running average and min-max range instead.
+    - cron: "23 0,6,12,18 * * *"
   workflow_dispatch:
 
 permissions:

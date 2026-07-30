@@ -74,7 +74,7 @@ function sparkline(points, label, fmtVal = fmt) {
         hover.setAttribute("cx", x(i));
         hover.setAttribute("cy", y(points[i].count));
         hover.setAttribute("visibility", "visible");
-        tooltip.innerHTML = `<span class="tip-value">${fmtVal(points[i].count)}</span> <span class="tip-date">${points[i].date}</span>`;
+        tooltip.innerHTML = `<span class="tip-value">${points[i].label ?? fmtVal(points[i].count)}</span> <span class="tip-date">${points[i].date}</span>`;
         tooltip.hidden = false;
         const tw = tooltip.offsetWidth;
         tooltip.style.left = `${Math.min(e.clientX + 12, window.innerWidth - tw - 8)}px`;
@@ -501,7 +501,7 @@ function renderKeywords(kw) {
             for (const [term, [rank]] of Object.entries(kws)) {
                 if (rank == null) continue;
                 bestRank[cc] ??= {};
-                bestRank[cc][term] = Math.min(bestRank[cc][term] ?? Infinity, rank);
+                bestRank[cc][term] = Math.min(bestRank[cc][term] ?? Infinity, Math.round(rank));
             }
         }
     }
@@ -560,6 +560,7 @@ function renderKeywords(kw) {
                 );
                 if (ev) prevRank = ev.from;
             }
+            if (prevRank != null) prevRank = Math.round(prevRank); // daily averages can be fractional
             const span = document.createElement("span");
             span.className = "delta";
             if (prevRank == null || cur.rank == null || prevRank === cur.rank) {
@@ -582,9 +583,14 @@ function renderKeywords(kw) {
             tdSpark.className = "col-spark";
             const points = kw.history
                 .slice(-SPARK_DAYS)
-                .map((row) => ({ date: row.date, count: row.markets?.[cc]?.[term]?.[0] }))
-                .filter((p) => p.count != null)
-                .map((p) => ({ date: p.date, count: -p.count }));
+                .map((row) => {
+                    const v = row.markets?.[cc]?.[term];
+                    if (!v || v[0] == null) return null;
+                    const [avg, , min, max] = v;
+                    const range = min != null && max != null && min !== max ? ` (${min}–${max})` : "";
+                    return { date: row.date, count: -avg, label: `#${avg}${range}` };
+                })
+                .filter(Boolean);
             tdSpark.appendChild(sparkline(points, `${term} rank, last 30 days`, (v) => `#${-v}`));
 
             tr.append(tdKw, tdPop, tdRank, tdDelta, tdBest, tdSpark);

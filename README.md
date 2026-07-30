@@ -6,7 +6,7 @@ Hourly App Store ratings dashboard for [Snore Timeline](https://snoretimeline.co
 
 ## Keyword tracking
 
-A second daily Action (`scripts/keywords.mjs`) tracks App Store search performance for the keywords in `scripts/keywords.json`, per market:
+A second Action (`scripts/keywords.mjs`, four runs a day) tracks App Store search performance for the keywords in `scripts/keywords.json`, per market. Ranks jitter a few positions between runs, so each day's history row keeps a running average plus the min–max range:
 
 - **Rank**: the app's position in iTunes Search API results, the public proxy for App Store search.
 - **Popularity**: a 5–100 demand score derived from Apple's search-hints (autocomplete) endpoint. The shorter the prefix at which a phrase surfaces in the suggestions and the higher its position, the more people search it. Ordinal, not calibrated; comparable day over day.

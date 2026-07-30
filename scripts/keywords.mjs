@@ -263,14 +263,31 @@ for (const [cc, terms] of Object.entries(discovered)) {
 }
 if (configChanged) await writeFile(configFile, JSON.stringify(config, null, 2) + "\n");
 
-// History: one row per day, upserted so a rerun replaces today's row.
+// History: one row per day, aggregated across the day's runs. Per keyword:
+// [avgRank, pop, minRank, maxRank, samples] — a running average with range,
+// so intra-run jitter washes out. Null ranks don't dilute the average.
+// (Older rows may hold the legacy [rank, pop] shape; treated as one sample.)
 const history = prev?.history ?? [];
+const existing = history.findIndex((r) => r.date === today);
+const prevRow = existing >= 0 ? history[existing] : null;
 const row = { date: today, markets: {} };
 for (const [cc, kws] of Object.entries(latest)) {
   row.markets[cc] = {};
-  for (const [kw, { rank, pop }] of Object.entries(kws)) row.markets[cc][kw] = [rank, pop];
+  for (const [kw, { rank, pop }] of Object.entries(kws)) {
+    const p = prevRow?.markets?.[cc]?.[kw];
+    if (!p || p[0] == null) {
+      row.markets[cc][kw] = rank != null ? [rank, pop, rank, rank, 1] : [null, pop];
+    } else if (rank == null) {
+      const [pAvg, , pMin = p[0], pMax = p[0], pN = 1] = p;
+      row.markets[cc][kw] = [pAvg, pop, pMin, pMax, pN];
+    } else {
+      const [pAvg, , pMin = p[0], pMax = p[0], pN = 1] = p;
+      const n = pN + 1;
+      const avg = Math.round(((pAvg * pN + rank) / n) * 10) / 10;
+      row.markets[cc][kw] = [avg, pop, Math.min(pMin, rank), Math.max(pMax, rank), n];
+    }
+  }
 }
-const existing = history.findIndex((r) => r.date === today);
 if (existing >= 0) history[existing] = row;
 else history.push(row);
 history.sort((a, b) => a.date.localeCompare(b.date));
