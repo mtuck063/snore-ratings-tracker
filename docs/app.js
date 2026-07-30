@@ -220,6 +220,16 @@ function row({ name, sub, total, delta, avg, mix, to5, spark, isTotal, title }) 
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// "just now" / "14m ago" / "3h ago" / "2d ago"; older than a week: the date.
+function ago(iso) {
+    const s = (Date.now() - new Date(iso)) / 1000;
+    if (s < 90) return "just now";
+    if (s < 3600) return `${Math.round(s / 60)}m ago`;
+    if (s < 86400) return `${Math.round(s / 3600)}h ago`;
+    if (s < 7 * 86400) return `${Math.round(s / 86400)}d ago`;
+    return new Date(iso).toLocaleDateString(undefined, { dateStyle: "medium" });
+}
+
 // The lookup API has no CORS headers but supports JSONP, so the browser can
 // query it directly for a live recheck without any server.
 function jsonpLookup(cc) {
@@ -523,7 +533,8 @@ function renderKeywords(kw) {
     if (kw.fetchedAt) {
         const updated = document.getElementById("kw-updated");
         updated.hidden = false;
-        updated.textContent = `Keywords last checked: ${new Date(kw.fetchedAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}`;
+        updated.textContent = `Keywords checked ${ago(kw.fetchedAt)}`;
+        updated.title = new Date(kw.fetchedAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
     }
     const tabs = document.getElementById("kw-tabs");
     const tbody = document.querySelector("#keywords tbody");
@@ -831,15 +842,15 @@ async function main() {
     const stamp = (iso) =>
         new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
     meta.textContent = "";
-    const addMeta = (text) => {
+    const addMeta = (text, title) => {
         const span = document.createElement("span");
         span.className = "meta-item";
         span.textContent = text;
+        if (title) span.title = title;
         meta.appendChild(span);
     };
     addMeta(`Ratings in ${rated.length} of ${entries.filter((e) => e.cur).length} storefronts`);
-    addMeta(`Data updated: ${stamp(latest.fetchedAt)}`);
-    addMeta(`Page loaded: ${new Date().toLocaleTimeString(undefined, { timeStyle: "short" })}`);
+    addMeta(`Last change ${ago(latest.fetchedAt)}`, stamp(latest.fetchedAt));
 
     // Live recheck: query Apple directly from the browser for the 20 biggest
     // storefronts, one call per 3s to respect the API throttle. Display-only;
@@ -946,7 +957,7 @@ async function main() {
             "https://api.github.com/repos/mtuck063/snore-ratings-tracker/actions/workflows/collect.yml/runs?status=success&per_page=1"
         );
         const run = (await res.json()).workflow_runs?.[0];
-        if (run) addMeta(`Last checked: ${stamp(run.updated_at)}`);
+        if (run) addMeta(`Checked ${ago(run.updated_at)}`, stamp(run.updated_at));
     } catch {
         /* leave the meta line as is */
     }
