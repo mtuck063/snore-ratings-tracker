@@ -977,12 +977,7 @@ async function main() {
     recordBtn.addEventListener("click", async () => {
         let token = localStorage.getItem("ghDispatchToken");
         if (!token) {
-            token = prompt(
-                "Paste a fine-grained GitHub token to trigger the collector.\n" +
-                    "github.com → Settings → Developer settings → Fine-grained tokens:\n" +
-                    "repository access: snore-ratings-tracker only · permission: Actions, read and write.\n" +
-                    "Stored only in this browser."
-            )?.trim();
+            token = prompt("GitHub token")?.trim();
             if (!token) return;
             localStorage.setItem("ghDispatchToken", token);
         }
