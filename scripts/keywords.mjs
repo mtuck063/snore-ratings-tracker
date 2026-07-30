@@ -202,7 +202,16 @@ const hints = {};
 for (const [cc, ranks, pops, watch] of perMarket) {
   const list = kwFor(cc);
   latest[cc] = {};
-  for (const kw of list) latest[cc][kw] = { rank: ranks[kw], ...pops[kw] };
+  for (const kw of list) {
+    // Carry the previous run's values so the dashboard can show run-over-run
+    // deltas for rank and popularity. Absent for a keyword's first run.
+    const prevKw = prev?.latest?.[cc]?.[kw];
+    latest[cc][kw] = {
+      rank: ranks[kw],
+      ...pops[kw],
+      ...(prevKw && { prevRank: prevKw.rank ?? null, prevPop: prevKw.pop ?? null }),
+    };
+  }
   hints[cc] = watch;
   const ranked = list.filter((kw) => ranks[kw] != null).length;
   console.log(`${cc}: ranked for ${ranked}/${list.length} keywords`);

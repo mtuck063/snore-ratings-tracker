@@ -505,8 +505,6 @@ function renderKeywords(kw) {
             }
         }
     }
-    const prevRow = kw.history.length >= 2 ? kw.history.at(-2) : null;
-
     const rankText = (r) => (r == null ? "—" : `#${r}`);
 
     // Sortable by demand or by rank; header click toggles direction.
@@ -540,6 +538,13 @@ function renderKeywords(kw) {
             tdPop.className = "col-num";
             tdPop.textContent = cur.pop;
             if (cur.pop <= 5) tdPop.classList.add("muted");
+            if (cur.prevPop != null && cur.prevPop !== cur.pop) {
+                const pd = document.createElement("span");
+                pd.className = `pop-delta ${cur.pop > cur.prevPop ? "up" : "down"}`;
+                pd.textContent = `${cur.pop > cur.prevPop ? "▲" : "▼"}${Math.abs(cur.pop - cur.prevPop)}`;
+                pd.title = `Demand ${cur.prevPop} → ${cur.pop} since the previous run`;
+                tdPop.appendChild(pd);
+            }
 
             const tdRank = document.createElement("td");
             tdRank.className = "col-num";
@@ -549,18 +554,7 @@ function renderKeywords(kw) {
 
             const tdDelta = document.createElement("td");
             tdDelta.className = "col-num";
-            // Day-over-day when a previous day exists; otherwise fall back to
-            // the earliest rank event of the last 24h so intra-day movement
-            // (and day one) still shows a delta consistent with the log below.
-            let prevRank = prevRow?.markets?.[cc]?.[term]?.[0];
-            if (prevRank === undefined) {
-                const dayAgo = Date.now() - 864e5;
-                const ev = (kw.events ?? []).find(
-                    (e) => e.type === "rank" && e.cc === cc && e.kw === term && new Date(e.at) >= dayAgo
-                );
-                if (ev) prevRank = ev.from;
-            }
-            if (prevRank != null) prevRank = Math.round(prevRank); // daily averages can be fractional
+            const prevRank = cur.prevRank; // rank change since the previous run
             const span = document.createElement("span");
             span.className = "delta";
             if (prevRank == null || cur.rank == null || prevRank === cur.rank) {
@@ -574,6 +568,17 @@ function renderKeywords(kw) {
                 span.textContent = `▼${cur.rank - prevRank}`;
             }
             tdDelta.appendChild(span);
+
+            const tdRange = document.createElement("td");
+            tdRange.className = "col-num muted";
+            const todayV = kw.history.at(-1)?.markets?.[cc]?.[term];
+            if (todayV && todayV[0] != null && todayV[2] != null) {
+                const [, , min, max] = todayV;
+                tdRange.textContent = min === max ? `#${min}` : `#${min}–${max}`;
+                tdRange.title = "Today's rank range across runs";
+            } else {
+                tdRange.textContent = "—";
+            }
 
             const tdBest = document.createElement("td");
             tdBest.className = "col-num muted";
@@ -593,7 +598,7 @@ function renderKeywords(kw) {
                 .filter(Boolean);
             tdSpark.appendChild(sparkline(points, `${term} rank, last 30 days`, (v) => `#${-v}`));
 
-            tr.append(tdKw, tdPop, tdRank, tdDelta, tdBest, tdSpark);
+            tr.append(tdKw, tdPop, tdRank, tdDelta, tdRange, tdBest, tdSpark);
             tbody.appendChild(tr);
         }
     };
@@ -637,7 +642,8 @@ function renderKeywords(kw) {
         list.hidden = false;
         for (const ev of kwEvents) {
             const li = document.createElement("li");
-            const day = new Date(ev.at).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+            const when = new Date(ev.at);
+            const day = `${when.toLocaleDateString(undefined, { month: "short", day: "numeric" })} ${when.toLocaleTimeString(undefined, { timeStyle: "short" })}`;
             const time = `<span class="event-time">${day}</span>`;
             if (ev.type === "hint") {
                 li.innerHTML = `${time}${flag(ev.cc)} Apple now suggests <strong></strong> under “${ev.prefix}”<span class="badge new">NEW</span>`;
