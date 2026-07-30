@@ -227,17 +227,19 @@ function mixCell(counts, gains) {
     });
     wrap.appendChild(bar);
 
+    // The gain slot always exists (empty when nothing changed) so every bar
+    // occupies identical width and the column edges stay aligned.
     const total = Object.entries(gains ?? {}).reduce((s, [, n]) => s + n, 0);
+    const gs = document.createElement("span");
+    gs.className = "mix-gain";
     if (total > 0) {
-        const gs = document.createElement("span");
-        gs.className = "mix-gain";
         gs.textContent = `+${total}`;
         gs.title = Object.entries(gains)
             .sort((a, b) => b[0] - a[0])
             .map(([s, n]) => `+${n} ${s}-star`)
             .join(", ") + " in the last 24 h";
-        wrap.appendChild(gs);
     }
+    wrap.appendChild(gs);
     return wrap;
 }
 

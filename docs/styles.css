@@ -101,7 +101,7 @@ a.check-now { display: inline-block; text-decoration: none; }
 @media (max-width: 640px) {
     th, td { padding: 7px 6px; }
     table { font-size: 0.84rem; }
-    .star-bar { width: 84px; }
+    .star-bar { width: 72px; }
     #ratings td:first-child, #keywords td:first-child {
         max-width: 44vw;
         overflow: hidden;
@@ -254,7 +254,7 @@ svg.spark { display: block; margin-left: auto; touch-action: none; }
 .star-bar {
     display: inline-flex;
     gap: 2px;
-    width: 110px;
+    width: 96px;
     height: 10px;
     cursor: default;
     position: relative;
@@ -280,6 +280,9 @@ svg.spark { display: block; margin-left: auto; touch-action: none; }
     color: var(--good);
     font-size: 0.72rem;
     font-weight: 600;
+    width: 22px;
+    flex: none;
+    text-align: left;
 }
 
 .pop-delta { font-size: 0.72rem; margin-left: 4px; }
