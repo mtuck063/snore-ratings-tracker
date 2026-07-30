@@ -29,7 +29,7 @@ function deltaCell(delta) {
     return span;
 }
 
-function sparkline(points, label) {
+function sparkline(points, label, fmtVal = fmt) {
     // points: [{date, count}] oldest→newest, nulls already dropped
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("width", SPARK_W);
@@ -74,7 +74,7 @@ function sparkline(points, label) {
         hover.setAttribute("cx", x(i));
         hover.setAttribute("cy", y(points[i].count));
         hover.setAttribute("visibility", "visible");
-        tooltip.innerHTML = `<span class="tip-value">${fmt(points[i].count)}</span> <span class="tip-date">${points[i].date}</span>`;
+        tooltip.innerHTML = `<span class="tip-value">${fmtVal(points[i].count)}</span> <span class="tip-date">${points[i].date}</span>`;
         tooltip.hidden = false;
         const tw = tooltip.offsetWidth;
         tooltip.style.left = `${Math.min(e.clientX + 12, window.innerWidth - tw - 8)}px`;
@@ -448,17 +448,169 @@ function renderEvents(history, events) {
     list.appendChild(baseLi);
 }
 
+// Keyword rankings: one table, tab per market. Rank sparklines plot -rank so
+// an improving keyword trends upward like every other chart on the page.
+function renderKeywords(kw) {
+    if (!kw?.latest || !Object.keys(kw.latest).length) return;
+    document.getElementById("keywords-section").hidden = false;
+    const tabs = document.getElementById("kw-tabs");
+    const tbody = document.querySelector("#keywords tbody");
+    const marketCcs = Object.keys(kw.latest);
+
+    // Best rank ever and the previous day's rank, from the daily history.
+    const bestRank = {};
+    for (const row of kw.history) {
+        for (const [cc, kws] of Object.entries(row.markets ?? {})) {
+            for (const [term, [rank]] of Object.entries(kws)) {
+                if (rank == null) continue;
+                bestRank[cc] ??= {};
+                bestRank[cc][term] = Math.min(bestRank[cc][term] ?? Infinity, rank);
+            }
+        }
+    }
+    const prevRow = kw.history.length >= 2 ? kw.history.at(-2) : null;
+
+    const rankText = (r) => (r == null ? "—" : `#${r}`);
+
+    // Sortable by demand or by rank; header click toggles direction.
+    const sort = { key: "pop", dir: -1 };
+    let currentCc = marketCcs[0];
+
+    const render = (cc) => {
+        currentCc = cc;
+        tbody.replaceChildren();
+        const val = ([, e]) => (sort.key === "rank" ? (e.rank ?? Infinity) : e.pop);
+        const entries = Object.entries(kw.latest[cc]).sort(
+            (a, b) => (val(a) - val(b)) * sort.dir || (a[1].rank ?? 999) - (b[1].rank ?? 999)
+        );
+        for (const [term, cur] of entries) {
+            const tr = document.createElement("tr");
+
+            const tdKw = document.createElement("td");
+            tdKw.textContent = term;
+            if (cur.prefix) tdKw.title = `Suggested at “${cur.prefix}”, position ${cur.pos}`;
+            // The money keywords: real demand, ranked, but not yet top 3.
+            if (cur.pop >= 60 && cur.rank != null && cur.rank > 3) {
+                const badge = document.createElement("span");
+                badge.className = "kw-badge";
+                badge.textContent = "TARGET";
+                badge.title = "High demand and not yet top 3: the most leverage per rank gained";
+                tdKw.appendChild(badge);
+            }
+
+            const tdPop = document.createElement("td");
+            tdPop.className = "col-num";
+            tdPop.textContent = cur.pop;
+            if (cur.pop <= 5) tdPop.classList.add("muted");
+
+            const tdRank = document.createElement("td");
+            tdRank.className = "col-num";
+            tdRank.textContent = rankText(cur.rank);
+            if (cur.rank == null) tdRank.classList.add("muted");
+            else if (cur.rank <= 3) tdRank.classList.add("at-five");
+
+            const tdDelta = document.createElement("td");
+            tdDelta.className = "col-num";
+            const prevRank = prevRow?.markets?.[cc]?.[term]?.[0];
+            const span = document.createElement("span");
+            span.className = "delta";
+            if (prevRank == null || cur.rank == null || prevRank === cur.rank) {
+                span.classList.add("flat");
+                span.textContent = "—";
+            } else if (cur.rank < prevRank) {
+                span.classList.add("up");
+                span.textContent = `▲${prevRank - cur.rank}`;
+            } else {
+                span.classList.add("down");
+                span.textContent = `▼${cur.rank - prevRank}`;
+            }
+            tdDelta.appendChild(span);
+
+            const tdBest = document.createElement("td");
+            tdBest.className = "col-num muted";
+            tdBest.textContent = rankText(bestRank[cc]?.[term]);
+
+            const tdSpark = document.createElement("td");
+            tdSpark.className = "col-spark";
+            const points = kw.history
+                .slice(-SPARK_DAYS)
+                .map((row) => ({ date: row.date, count: row.markets?.[cc]?.[term]?.[0] }))
+                .filter((p) => p.count != null)
+                .map((p) => ({ date: p.date, count: -p.count }));
+            tdSpark.appendChild(sparkline(points, `${term} rank, last 30 days`, (v) => `#${-v}`));
+
+            tr.append(tdKw, tdPop, tdRank, tdDelta, tdBest, tdSpark);
+            tbody.appendChild(tr);
+        }
+    };
+
+    for (const cc of marketCcs) {
+        const btn = document.createElement("button");
+        btn.className = "kw-tab";
+        btn.textContent = `${flag(cc)} ${cc.toUpperCase()}`;
+        btn.addEventListener("click", () => {
+            tabs.querySelectorAll(".kw-tab").forEach((b) => b.classList.remove("active"));
+            btn.classList.add("active");
+            render(cc);
+        });
+        tabs.appendChild(btn);
+    }
+    tabs.firstChild.classList.add("active");
+
+    const sortHeaders = document.querySelectorAll("#keywords th[data-sort]");
+    const updateArrows = () => {
+        for (const th of sortHeaders) {
+            th.querySelector(".sort-arrow").textContent =
+                th.dataset.sort === sort.key ? (sort.dir === 1 ? "▲" : "▼") : "";
+        }
+    };
+    for (const th of sortHeaders) {
+        th.addEventListener("click", () => {
+            const key = th.dataset.sort;
+            if (sort.key === key) sort.dir *= -1;
+            else Object.assign(sort, { key, dir: key === "pop" ? -1 : 1 });
+            updateArrows();
+            render(currentCc);
+        });
+    }
+    updateArrows();
+    render(marketCcs[0]);
+
+    // Movement log: notable rank moves and newly appearing suggestions.
+    const kwEvents = (kw.events ?? []).slice(-30).reverse();
+    if (kwEvents.length) {
+        const list = document.getElementById("kw-events");
+        list.hidden = false;
+        for (const ev of kwEvents) {
+            const li = document.createElement("li");
+            const day = new Date(ev.at).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+            const time = `<span class="event-time">${day}</span>`;
+            if (ev.type === "hint") {
+                li.innerHTML = `${time}${flag(ev.cc)} Apple now suggests <strong></strong> under “${ev.prefix}”<span class="badge new">NEW</span>`;
+                li.querySelector("strong").textContent = `“${ev.term}”`;
+            } else {
+                const better = ev.to != null && (ev.from == null || ev.to < ev.from);
+                li.className = better ? "first-rating" : "";
+                li.innerHTML = `${time}${flag(ev.cc)} <strong></strong> ${rankText(ev.from)} → ${rankText(ev.to)}`;
+                li.querySelector("strong").textContent = ev.kw;
+            }
+            list.appendChild(li);
+        }
+    }
+}
+
 async function main() {
     const meta = document.getElementById("meta");
-    let latest, history, events, reviews;
+    let latest, history, events, reviews, kwData;
     try {
-        // no-cache: revalidate every load so the four files can't come from
+        // no-cache: revalidate every load so the data files can't come from
         // differently-aged browser caches and contradict each other.
-        [latest, history, events, reviews] = await Promise.all([
+        [latest, history, events, reviews, kwData] = await Promise.all([
             fetch("data/latest.json", { cache: "no-cache" }).then((r) => r.json()),
             fetch("data/history.json", { cache: "no-cache" }).then((r) => r.json()),
             fetch("data/events.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => []),
             fetch("data/reviews.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => []),
+            fetch("data/keywords.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => null),
         ]);
     } catch {
         meta.textContent = "No data yet. Run the collect workflow once to seed data/.";
@@ -546,6 +698,7 @@ async function main() {
     }
 
     renderRecent(events);
+    renderKeywords(kwData);
     renderWeekReviews(reviews);
     renderReviews(reviews);
     renderEvents(history, events);

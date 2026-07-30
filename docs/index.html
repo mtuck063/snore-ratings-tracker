@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0F1419">
     <title>Snore Timeline · Ratings Tracker</title>
-    <link rel="stylesheet" href="styles.css?v=21">
+    <link rel="stylesheet" href="styles.css?v=23">
 </head>
 <body>
     <main>
@@ -37,6 +37,28 @@
             </table>
         </div>
 
+        <section id="keywords-section" hidden>
+            <h2>Keyword rankings</h2>
+            <p class="section-sub">Where the app places in App Store search results, and how much demand each phrase has (Pop, 5–100, derived from Apple's search suggestions). Updated daily.</p>
+            <div id="kw-tabs"></div>
+            <div class="table-wrap">
+                <table id="keywords">
+                    <thead>
+                        <tr>
+                            <th>Keyword</th>
+                            <th class="col-num" data-sort="pop" title="Search demand, 5–100: how early and how high the phrase surfaces in App Store autocomplete">Pop<span class="sort-arrow"></span></th>
+                            <th class="col-num" data-sort="rank">Rank<span class="sort-arrow"></span></th>
+                            <th class="col-num">Δ</th>
+                            <th class="col-num">Best</th>
+                            <th class="col-spark">30 days</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <ol id="kw-events" hidden></ol>
+        </section>
+
         <section id="reviews-section" hidden>
             <h2>Written reviews</h2>
             <div id="reviews"></div>
@@ -50,6 +72,6 @@
 
     </main>
     <div id="tooltip" hidden></div>
-    <script src="app.js?v=24"></script>
+    <script src="app.js?v=26"></script>
 </body>
 </html>
