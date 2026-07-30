@@ -107,7 +107,16 @@ function fiveStarsToFive(count, avg) {
     return Math.ceil(20 * count * (4.95 - avg));
 }
 
-function row({ name, sub, total, delta, avg, to5, spark, isTotal, title }) {
+// Histogram counts [5★..1★] as "133·9·2", trailing zeros trimmed (but 2★/1★
+// shown whenever present).
+function starMix(counts) {
+    if (!counts) return null;
+    let last = counts.length - 1;
+    while (last > 2 && counts[last] === 0) last--;
+    return counts.slice(0, last + 1).join("·");
+}
+
+function row({ name, sub, total, delta, avg, mix, to5, spark, isTotal, title }) {
     const tr = document.createElement("tr");
     if (isTotal) tr.className = "total-row";
     else if (delta) tr.className = "changed";
@@ -136,6 +145,12 @@ function row({ name, sub, total, delta, avg, to5, spark, isTotal, title }) {
     tdAvg.textContent = avg == null ? "—" : avg.toFixed(1);
     if (avg == null) tdAvg.classList.add("muted");
 
+    const tdMix = document.createElement("td");
+    tdMix.className = "col-num";
+    tdMix.textContent = mix ?? "—";
+    if (!mix) tdMix.classList.add("muted");
+    else tdMix.title = "Ratings by stars, 5★ first";
+
     const tdTo5 = document.createElement("td");
     tdTo5.className = "col-num";
     if (to5 == null) {
@@ -152,7 +167,7 @@ function row({ name, sub, total, delta, avg, to5, spark, isTotal, title }) {
     tdSpark.className = "col-spark";
     tdSpark.appendChild(spark);
 
-    tr.append(tdCountry, tdTotal, tdDelta, tdAvg, tdTo5, tdSpark);
+    tr.append(tdCountry, tdTotal, tdDelta, tdAvg, tdMix, tdTo5, tdSpark);
     return tr;
 }
 
@@ -424,7 +439,13 @@ function renderEvents(history, events) {
             }
         } else {
             const d = ev.to - ev.from;
-            const starBadge = ev.stars ? `<span class="badge review">★${ev.stars}</span>` : "";
+            let starBadge = ev.stars ? `<span class="badge review">★${ev.stars}</span>` : "";
+            if (ev.starsMix) {
+                starBadge = Object.entries(ev.starsMix)
+                    .sort((a, b) => b[0] - a[0])
+                    .map(([s, n]) => `<span class="badge review">${n > 0 ? "+" : "−"}${Math.abs(n)} ★${s}</span>`)
+                    .join("");
+            }
             li.innerHTML = `${time}${name} ${d > 0 ? `+${fmt(d)}` : `−${fmt(Math.abs(d))}`} rating${Math.abs(d) === 1 ? "" : "s"}${starBadge}<span class="event-note">${fmt(ev.from)} → ${fmt(ev.to)}</span>`;
         }
         list.appendChild(li);
@@ -610,16 +631,17 @@ function renderKeywords(kw) {
 
 async function main() {
     const meta = document.getElementById("meta");
-    let latest, history, events, reviews, kwData;
+    let latest, history, events, reviews, kwData, hist;
     try {
         // no-cache: revalidate every load so the data files can't come from
         // differently-aged browser caches and contradict each other.
-        [latest, history, events, reviews, kwData] = await Promise.all([
+        [latest, history, events, reviews, kwData, hist] = await Promise.all([
             fetch("data/latest.json", { cache: "no-cache" }).then((r) => r.json()),
             fetch("data/history.json", { cache: "no-cache" }).then((r) => r.json()),
             fetch("data/events.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => []),
             fetch("data/reviews.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => []),
             fetch("data/keywords.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => null),
+            fetch("data/histograms.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => null),
         ]);
     } catch {
         meta.textContent = "No data yet. Run the collect workflow once to seed data/.";
@@ -648,6 +670,12 @@ async function main() {
     const worldStars = rated_.reduce((s, c) => s + c.count * c.avg, 0);
     const worldCount = rated_.reduce((s, c) => s + c.count, 0);
     const worldAvg = worldCount ? worldStars / worldCount : null;
+    const worldCounts = hist
+        ? Object.values(hist.countries).reduce(
+              (sum, h) => sum.map((n, i) => n + (h.counts[i] ?? 0)),
+              [0, 0, 0, 0, 0]
+          )
+        : null;
     tbody.appendChild(
         row({
             name: "🌍 Worldwide",
@@ -655,6 +683,7 @@ async function main() {
             total,
             delta: totalDelta,
             avg: worldAvg,
+            mix: starMix(worldCounts),
             to5: fiveStarsToFive(worldCount, worldAvg),
             spark: sparkline(seriesFor(history, null), "Global total, last 30 days"),
             isTotal: true,
@@ -674,6 +703,7 @@ async function main() {
             total: cur?.count ?? null,
             delta,
             avg: cur?.avg ?? null,
+            mix: starMix(hist?.countries[cc]?.counts),
             to5: fiveStarsToFive(cur?.count, cur?.avg),
             spark: sparkline(seriesFor(history, cc), `${countryName} ratings, last 30 days`),
         });
@@ -688,7 +718,7 @@ async function main() {
     if (unrated.length) {
         const toggleTr = document.createElement("tr");
         const td = document.createElement("td");
-        td.colSpan = 6;
+        td.colSpan = 7;
         const btn = document.createElement("button");
         btn.className = "toggle-unrated";
         btn.textContent = `Show ${unrated.length} storefronts with no ratings yet`;

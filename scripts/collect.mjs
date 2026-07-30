@@ -106,6 +106,29 @@ async function fetchReviews(cc) {
   }
 }
 
+// Star histograms: the storefront web page embeds exact per-star counts
+// ([5★..1★]) that the lookup API doesn't expose. Pages are ~500KB, so a
+// storefront is fetched only when it has no snapshot yet or its recorded
+// count changed; diffing snapshots attributes exact stars to rating events.
+async function fetchHistogram(cc, attempt = 1) {
+  const url = `https://apps.apple.com/${cc}/app/id${APP_ID}`;
+  try {
+    const res = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36" },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const m = (await res.text()).match(/"ratingCounts":\[([0-9,]+)\]/);
+    return m ? m[1].split(",").map(Number) : null;
+  } catch (err) {
+    if (attempt === 1) {
+      await sleep(RETRY_BACKOFF_MS);
+      return fetchHistogram(cc, 2);
+    }
+    console.warn(`${cc} histogram: ${err.message}`);
+    return null;
+  }
+}
+
 const fetchedAt = new Date().toISOString();
 const today = fetchedAt.slice(0, 10);
 
@@ -173,8 +196,20 @@ if (prevLatest) {
 }
 if (JSON.stringify(pending) !== pendingBefore) await writeFile(pendingFile, JSON.stringify(pending));
 
+// Storefronts whose star histogram needs (re)fetching: no snapshot yet, or
+// the recorded count moved away from the snapshot's total.
+const histFile = path.join(servedDataDir, "histograms.json");
+const histograms = await readJson(histFile, { countries: {} });
+const needHist = Object.entries(countries)
+  .filter(([, c]) => c?.count > 0)
+  .filter(([cc, c]) => {
+    const h = histograms.countries[cc];
+    return !h || h.counts.reduce((a, b) => a + b, 0) !== c.count;
+  })
+  .map(([cc]) => cc);
+
 const ratingsChanged = !prevLatest || JSON.stringify(prevLatest.countries) !== JSON.stringify(countries);
-if (!ratingsChanged && newReviews.length === 0) {
+if (!ratingsChanged && newReviews.length === 0 && needHist.length === 0) {
   console.log("No rating or review changes since last fetch; nothing written.");
   process.exit(0);
 }
@@ -222,6 +257,41 @@ if (!isReviewSeed) {
     events.push({ at: fetchedAt, cc: r.cc, type: "review", rating: r.rating, title: r.title.slice(0, 80) });
   }
 }
+// Refresh histograms for changed/uninitialized storefronts, a few pages at a
+// time. A snapshot diff pins the exact stars behind this run's delta event,
+// overriding the average-math inference (which stays as the fallback).
+let histUpdated = false;
+for (let i = 0; i < needHist.length; i += 8) {
+  await Promise.all(
+    needHist.slice(i, i + 8).map(async (cc) => {
+      const counts = await fetchHistogram(cc);
+      if (!counts) return;
+      // The page and the lookup API sit on different CDNs and can disagree
+      // briefly (or during a pending-decrease hold). Only store a snapshot
+      // that agrees with the recorded count; mismatches retry next run.
+      if (counts.reduce((a, b) => a + b, 0) !== countries[cc].count) {
+        console.warn(`${cc} histogram: page total disagrees with recorded count, will retry`);
+        return;
+      }
+      const prevH = histograms.countries[cc];
+      if (prevH) {
+        const changed = counts
+          .map((n, j) => [5 - j, n - prevH.counts[j]])
+          .filter(([, d]) => d !== 0);
+        const ev = events.find((e) => e.at === fetchedAt && e.cc === cc && e.type === "delta");
+        if (ev && changed.length) {
+          if (changed.length === 1 && Math.abs(changed[0][1]) === 1) ev.stars = changed[0][0];
+          else ev.starsMix = Object.fromEntries(changed);
+        }
+      }
+      histograms.countries[cc] = { counts, at: fetchedAt };
+      histUpdated = true;
+    })
+  );
+}
+if (needHist.length) console.log(`histograms: ${needHist.length} storefront(s) refreshed`);
+if (histUpdated) await writeFile(histFile, JSON.stringify(histograms));
+
 await writeFile(path.join(servedDataDir, "events.json"), JSON.stringify(events));
 
 if (ratingsChanged) {
