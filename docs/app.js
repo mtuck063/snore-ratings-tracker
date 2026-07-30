@@ -473,7 +473,8 @@ function renderKeywords(kw) {
     const rankText = (r) => (r == null ? "—" : `#${r}`);
 
     // Sortable by demand or by rank; header click toggles direction.
-    const sort = { key: "pop", dir: -1 };
+    // Default: rank, best first (unranked keywords sink to the bottom).
+    const sort = { key: "rank", dir: 1 };
     let currentCc = marketCcs[0];
 
     const render = (cc) => {
