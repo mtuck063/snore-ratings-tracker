@@ -952,6 +952,54 @@ async function main() {
     checkBtn.textContent = "Check all storefronts now";
     checkRow.appendChild(checkBtn);
     meta.insertAdjacentElement("afterend", checkRow);
+
+    // Owner-only: dispatch the collector workflow so the check is recorded,
+    // not just displayed. The fine-grained token (this repo, Actions
+    // read/write) lives only in this browser's localStorage — never in the
+    // repo, where it would be public and auto-revoked.
+    const recordBtn = document.createElement("button");
+    recordBtn.className = "check-now";
+    recordBtn.textContent = "Record a check";
+    checkRow.appendChild(recordBtn);
+    recordBtn.addEventListener("click", async () => {
+        let token = localStorage.getItem("ghDispatchToken");
+        if (!token) {
+            token = prompt(
+                "Paste a fine-grained GitHub token to trigger the collector.\n" +
+                    "github.com → Settings → Developer settings → Fine-grained tokens:\n" +
+                    "repository access: snore-ratings-tracker only · permission: Actions, read and write.\n" +
+                    "Stored only in this browser."
+            )?.trim();
+            if (!token) return;
+            localStorage.setItem("ghDispatchToken", token);
+        }
+        recordBtn.disabled = true;
+        recordBtn.textContent = "Queuing run…";
+        try {
+            const res = await fetch(
+                "https://api.github.com/repos/mtuck063/snore-ratings-tracker/actions/workflows/collect.yml/dispatches",
+                {
+                    method: "POST",
+                    headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
+                    body: JSON.stringify({ ref: "main" }),
+                }
+            );
+            if (res.status === 204) {
+                recordBtn.textContent = "Run queued — data lands in ~2 min, then reload";
+            } else if (res.status === 401 || res.status === 403) {
+                localStorage.removeItem("ghDispatchToken");
+                recordBtn.textContent = "Token rejected — tap to enter a new one";
+            } else {
+                recordBtn.textContent = `GitHub said ${res.status} — tap to retry`;
+            }
+        } catch {
+            recordBtn.textContent = "Network error — tap to retry";
+        }
+        setTimeout(() => {
+            recordBtn.disabled = false;
+            recordBtn.textContent = "Record a check";
+        }, 8000);
+    });
     checkBtn.addEventListener("click", async () => {
         checkBtn.disabled = true;
         const top = entries.filter((e) => e.cur);
