@@ -380,9 +380,7 @@ function renderRecent(events) {
                 ? `★${ev.rating} review`
                 : ev.type === "tracked"
                   ? "now tracked"
-                  : d > 0
-                    ? `+${fmt(d)}`
-                    : `−${fmt(Math.abs(d))}`;
+                  : (d > 0 ? `+${fmt(d)}` : `−${fmt(Math.abs(d))}`) + (ev.stars ? ` ★${ev.stars}` : "");
         item.innerHTML = `${name} <strong${d < 0 && ev.type !== "review" ? ' class="down"' : ""}>${change}</strong> <span class="recent-time">${timeText}</span>`;
         box.appendChild(item);
     }
@@ -426,7 +424,8 @@ function renderEvents(history, events) {
             }
         } else {
             const d = ev.to - ev.from;
-            li.innerHTML = `${time}${name} ${d > 0 ? `+${fmt(d)}` : `−${fmt(Math.abs(d))}`} rating${Math.abs(d) === 1 ? "" : "s"}<span class="event-note">${fmt(ev.from)} → ${fmt(ev.to)}</span>`;
+            const starBadge = ev.stars ? `<span class="badge review">★${ev.stars}</span>` : "";
+            li.innerHTML = `${time}${name} ${d > 0 ? `+${fmt(d)}` : `−${fmt(Math.abs(d))}`} rating${Math.abs(d) === 1 ? "" : "s"}${starBadge}<span class="event-note">${fmt(ev.from)} → ${fmt(ev.to)}</span>`;
         }
         list.appendChild(li);
     }

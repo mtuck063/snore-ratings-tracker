@@ -63,7 +63,10 @@ async function fetchCountry(cc, attempt = 1) {
     if (!app) return null;
     return {
       count: app.userRatingCount ?? 0,
-      avg: app.averageUserRating != null ? Number(app.averageUserRating.toFixed(2)) : null,
+      // Full API precision (5 decimals): with exact averages, a +1 count
+      // change pins down the new rating's star value via
+      // (n+1)*newAvg - n*oldAvg. Rounding here would destroy that.
+      avg: app.averageUserRating ?? null,
     };
   } catch (err) {
     if (attempt === 1) {
@@ -193,7 +196,21 @@ if (ratingsChanged && prevLatest) {
     } else if ((prevCount ?? 0) === 0 && curCount > 0) {
       events.push({ at: fetchedAt, cc, type: "first", to: curCount, avg: cur.avg });
     } else if (prevCount != null && curCount !== prevCount) {
-      events.push({ at: fetchedAt, cc, type: "delta", from: prevCount, to: curCount });
+      const ev = { at: fetchedAt, cc, type: "delta", from: prevCount, to: curCount };
+      // A single added/removed rating's star value falls out of the two
+      // averages. Only annotate when the arithmetic lands cleanly on an
+      // integer: stored 2-decimal averages from before this feature (and
+      // any same-hour rating edits) fail the tolerance and stay unlabeled.
+      const prevAvg = prevLatest.countries[cc]?.avg;
+      if (Math.abs(curCount - prevCount) === 1 && cur.avg != null && prevAvg != null) {
+        const est =
+          curCount > prevCount
+            ? curCount * cur.avg - prevCount * prevAvg
+            : prevCount * prevAvg - curCount * cur.avg;
+        const star = Math.round(est);
+        if (star >= 1 && star <= 5 && Math.abs(est - star) < 0.25) ev.stars = star;
+      }
+      events.push(ev);
     }
   }
 }
