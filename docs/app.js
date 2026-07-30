@@ -4,6 +4,11 @@ const SPARK_H = 28;
 
 const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
 const tooltip = document.getElementById("tooltip");
+// Touch screens have no pointerleave: a tap outside any tooltip source
+// dismisses the tooltip instead.
+document.addEventListener("pointerdown", (e) => {
+    if (!e.target.closest(".spark, .star-bar")) tooltip.hidden = true;
+});
 
 const flag = (cc) =>
     String.fromCodePoint(...[...cc.toUpperCase()].map((ch) => 0x1f1a5 + ch.charCodeAt(0)));
@@ -67,7 +72,7 @@ function sparkline(points, label, fmtVal = fmt) {
     hover.setAttribute("visibility", "hidden");
     svg.appendChild(hover);
 
-    svg.addEventListener("pointermove", (e) => {
+    const showTip = (e) => {
         const rect = svg.getBoundingClientRect();
         const rel = (e.clientX - rect.left - pad) / (SPARK_W - pad * 2);
         const i = Math.max(0, Math.min(points.length - 1, Math.round(rel * (points.length - 1))));
@@ -79,7 +84,9 @@ function sparkline(points, label, fmtVal = fmt) {
         const tw = tooltip.offsetWidth;
         tooltip.style.left = `${Math.min(e.clientX + 12, window.innerWidth - tw - 8)}px`;
         tooltip.style.top = `${e.clientY - 36}px`;
-    });
+    };
+    svg.addEventListener("pointermove", showTip);
+    svg.addEventListener("pointerdown", showTip); // taps on touch screens
     svg.addEventListener("pointerleave", () => {
         hover.setAttribute("visibility", "hidden");
         tooltip.hidden = true;
@@ -160,7 +167,7 @@ function mixCell(counts, gains) {
         seg.style.flexGrow = c;
         bar.appendChild(seg);
     });
-    bar.addEventListener("pointermove", (e) => {
+    const showTip = (e) => {
         tooltip.innerHTML = "";
         const strong = document.createElement("span");
         strong.className = "tip-value";
@@ -170,7 +177,9 @@ function mixCell(counts, gains) {
         const tw = tooltip.offsetWidth;
         tooltip.style.left = `${Math.min(e.clientX + 12, window.innerWidth - tw - 8)}px`;
         tooltip.style.top = `${e.clientY - 36}px`;
-    });
+    };
+    bar.addEventListener("pointermove", showTip);
+    bar.addEventListener("pointerdown", showTip); // taps on touch screens
     bar.addEventListener("pointerleave", () => {
         tooltip.hidden = true;
     });

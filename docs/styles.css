@@ -81,7 +81,28 @@ a.check-now { display: inline-block; text-decoration: none; }
 .recent-item strong.down { color: var(--bad); }
 .recent-time { color: var(--text-secondary); font-size: 0.78rem; }
 
-.table-wrap { overflow-x: auto; }
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+/* The identity column stays pinned while the rest scrolls sideways. */
+#ratings th:first-child, #ratings td:first-child,
+#keywords th:first-child, #keywords td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: var(--bg);
+}
+#ratings tr.total-row td:first-child { background: var(--bg-raised); }
+
+@media (max-width: 640px) {
+    th, td { padding: 7px 6px; }
+    table { font-size: 0.84rem; }
+    .star-bar { width: 84px; }
+    #ratings td:first-child, #keywords td:first-child {
+        max-width: 44vw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+}
 
 table {
     width: 100%;
@@ -209,7 +230,7 @@ svg.spark { display: block; margin-left: auto; touch-action: none; }
 
 #keywords-section { margin-top: 32px; }
 #keywords-section h2 { font-size: 1.05rem; margin-bottom: 2px; }
-#kw-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+#kw-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
 .kw-tab {
     background: var(--bg-raised);
     border: 1px solid var(--border);
