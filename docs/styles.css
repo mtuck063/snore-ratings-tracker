@@ -257,7 +257,14 @@ svg.spark { display: block; margin-left: auto; touch-action: none; }
     width: 110px;
     height: 10px;
     cursor: default;
-    touch-action: none;
+    position: relative;
+    touch-action: manipulation; /* taps without blocking page scroll */
+}
+/* Invisible halo so the 10px bar has a finger-sized hit target. */
+.star-bar::before {
+    content: "";
+    position: absolute;
+    inset: -13px -8px;
 }
 .star-seg { flex-basis: 0; min-width: 3px; border-radius: 2px; }
 /* Ordinal good-to-bad ramp, validated on the dark surface: hue = severity
