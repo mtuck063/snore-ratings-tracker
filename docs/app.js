@@ -498,25 +498,32 @@ function renderRecent(events) {
     const box = document.getElementById("recent");
     box.hidden = false;
 
-    const label = document.createElement("span");
-    label.className = "recent-label";
-    label.textContent = "Latest";
-    box.appendChild(label);
-
     // Rolling gains from the event log: new ratings only, so storefronts
     // merely added to tracking don't inflate the totals.
     const gainSince = (ms) =>
         events
             .filter((ev) => (ev.type === "delta" || ev.type === "first") && Date.now() - new Date(ev.at) <= ms)
             .reduce((sum, ev) => sum + (ev.to - (ev.from ?? 0)), 0);
-    for (const [labelText, ms] of [["last 24 h", 864e5], ["last 7 days", 7 * 864e5]]) {
-        const gain = gainSince(ms);
-        const chip = document.createElement("span");
-        chip.className = "recent-item recent-sum";
-        chip.innerHTML = `<strong${gain < 0 ? ' class="down"' : ""}>${gain >= 0 ? "+" : "−"}${fmt(Math.abs(gain))}</strong> <span class="recent-time">${labelText}</span>`;
-        box.appendChild(chip);
-    }
 
+    const head = document.createElement("div");
+    head.className = "recent-head";
+    const label = document.createElement("span");
+    label.className = "recent-label";
+    label.textContent = "Latest";
+    head.appendChild(label);
+    const sums = document.createElement("span");
+    sums.className = "recent-sums";
+    sums.innerHTML = [["last 24 h", 864e5], ["last 7 days", 7 * 864e5]]
+        .map(([t, ms]) => {
+            const g = gainSince(ms);
+            return `<strong${g < 0 ? ' class="down"' : ""}>${g >= 0 ? "+" : "−"}${fmt(Math.abs(g))}</strong> ${t}`;
+        })
+        .join(" · ");
+    head.appendChild(sums);
+    box.appendChild(head);
+
+    const list = document.createElement("div");
+    list.className = "recent-list";
     const today = new Date().toLocaleDateString();
     for (const ev of events.slice(-3).reverse()) {
         const when = new Date(ev.at);
@@ -525,7 +532,7 @@ function renderRecent(events) {
                 ? when.toLocaleTimeString(undefined, { timeStyle: "short" })
                 : when.toLocaleDateString(undefined, { month: "short", day: "numeric" });
         const item = document.createElement("a");
-        item.className = "recent-item";
+        item.className = "recent-row";
         item.href = ev.type === "review" ? "#reviews-section" : "#events-section";
         const name = `${flag(ev.cc)} ${regionNames.of(ev.cc.toUpperCase())}`;
         const d = (ev.to ?? 0) - (ev.from ?? 0);
@@ -535,9 +542,10 @@ function renderRecent(events) {
                 : ev.type === "tracked"
                   ? "now tracked"
                   : (d > 0 ? `+${fmt(d)}` : `−${fmt(Math.abs(d))}`) + (ev.stars ? ` ★${ev.stars}` : "");
-        item.innerHTML = `${name} <strong${d < 0 && ev.type !== "review" ? ' class="down"' : ""}>${change}</strong> <span class="recent-time">${timeText}</span>`;
-        box.appendChild(item);
+        item.innerHTML = `<span class="recent-name">${name}</span> <strong${d < 0 && ev.type !== "review" ? ' class="down"' : ""}>${change}</strong> <span class="recent-time">${timeText}</span>`;
+        list.appendChild(item);
     }
+    box.appendChild(list);
 }
 
 function renderEvents(history, events) {

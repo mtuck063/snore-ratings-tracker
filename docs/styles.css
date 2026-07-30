@@ -55,13 +55,8 @@ h1 { font-size: 1.35rem; margin-bottom: 4px; }
 a.check-now { display: inline-block; text-decoration: none; }
 #check-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 
-#recent {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 16px;
-}
+#recent { margin-bottom: 18px; }
+.recent-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 2px; }
 .recent-label {
     color: var(--text-secondary);
     font-size: 0.72rem;
@@ -69,22 +64,24 @@ a.check-now { display: inline-block; text-decoration: none; }
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
-.recent-item {
-    display: inline-flex;
+.recent-sums { color: var(--text-secondary); font-size: 0.85rem; }
+.recent-sums strong { color: var(--good); font-weight: 600; }
+.recent-sums strong.down { color: var(--bad); }
+.recent-list { max-width: 460px; }
+.recent-row {
+    display: flex;
     align-items: center;
-    gap: 5px;
-    background: var(--bg-raised);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 5px 10px;
-    font-size: 0.85rem;
+    gap: 8px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.88rem;
     color: var(--text);
     text-decoration: none;
 }
-.recent-item strong { color: var(--good); font-weight: 600; }
-.recent-sum { background: none; }
-.recent-item strong.down { color: var(--bad); }
-.recent-time { color: var(--text-secondary); font-size: 0.78rem; }
+.recent-row:last-child { border-bottom: none; }
+.recent-row strong { color: var(--good); font-weight: 600; }
+.recent-row strong.down { color: var(--bad); }
+.recent-row .recent-time { margin-left: auto; color: var(--text-secondary); font-size: 0.78rem; }
 
 .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
