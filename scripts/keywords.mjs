@@ -207,7 +207,9 @@ async function merge(partials) {
     const dayAgo = Date.now() - 864e5;
     for (const kw of list) {
       const prevKw = prev?.latest?.[cc]?.[kw];
-      const rawRank = part?.ranks?.[kw] ?? "error";
+      // `in` check, not ??: a legitimate "not in the top 200" is null, which
+      // must not read as a fetch failure.
+      const rawRank = part && kw in (part.ranks ?? {}) ? part.ranks[kw] : "error";
       if (rawRank === "error") rankFailures++;
       const rank = rawRank === "error" ? (prevKw?.rank ?? null) : rawRank;
       // A failed prefix fetch can only understate the score, so keep the
