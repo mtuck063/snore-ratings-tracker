@@ -234,6 +234,14 @@ svg.spark { display: block; margin-left: auto; touch-action: none; }
     margin-left: 8px;
     vertical-align: 1px;
 }
+.mix-gain {
+    color: var(--good);
+    font-size: 0.72rem;
+    font-weight: 600;
+    margin-left: 2px;
+    vertical-align: 2px;
+}
+
 .pop-delta { font-size: 0.72rem; margin-left: 4px; }
 .pop-delta.up { color: var(--good); }
 .pop-delta.down { color: var(--bad); }

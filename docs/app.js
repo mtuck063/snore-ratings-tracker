@@ -119,12 +119,46 @@ function fiveStarsToFiveExact(counts) {
     return Math.max(0, 99 * n - 20 * stars);
 }
 
+// Per-country star additions of the last 24h, from the exactly-attributed
+// delta events: cc -> { star: count }. Only additions; removals stay in the
+// event log.
+function starGains(events) {
+    const dayAgo = Date.now() - 864e5;
+    const gains = {};
+    for (const ev of events) {
+        if (ev.type !== "delta" || new Date(ev.at) < dayAgo) continue;
+        const add = (star, n) => {
+            if (n > 0) (gains[ev.cc] ??= {})[star] = (gains[ev.cc]?.[star] ?? 0) + n;
+        };
+        if (ev.stars && ev.to > ev.from) add(ev.stars, ev.to - ev.from);
+        if (ev.starsMix) for (const [s, d] of Object.entries(ev.starsMix)) add(s, d);
+    }
+    return gains;
+}
+
 // Histogram as self-labeled pairs, "133×5★ 9×4★ 2×3★": zero counts can be
-// omitted without ambiguity because every number names its star.
-function starMix(counts) {
+// omitted without ambiguity because every number names its star. Stars that
+// gained in the last 24h carry a small green +n.
+function mixCell(counts, gains) {
     if (!counts) return null;
-    const parts = counts.map((c, i) => (c > 0 ? `${c}×${5 - i}★` : null)).filter(Boolean);
-    return parts.length ? parts.join(" ") : null;
+    const frag = document.createElement("span");
+    let any = false;
+    counts.forEach((c, i) => {
+        if (!c) return;
+        const star = 5 - i;
+        if (any) frag.appendChild(document.createTextNode(" "));
+        frag.appendChild(document.createTextNode(`${c}×${star}★`));
+        const g = gains?.[star];
+        if (g) {
+            const gs = document.createElement("span");
+            gs.className = "mix-gain";
+            gs.textContent = `+${g}`;
+            gs.title = `+${g} ${star}-star rating${g === 1 ? "" : "s"} in the last 24 h`;
+            frag.appendChild(gs);
+        }
+        any = true;
+    });
+    return any ? frag : null;
 }
 
 function row({ name, sub, total, delta, avg, mix, to5, spark, isTotal, title }) {
@@ -158,9 +192,11 @@ function row({ name, sub, total, delta, avg, mix, to5, spark, isTotal, title }) 
 
     const tdMix = document.createElement("td");
     tdMix.className = "col-num";
-    tdMix.textContent = mix ?? "—";
-    if (!mix) tdMix.classList.add("muted");
-    else tdMix.title = "Ratings by stars, 5★ first";
+    if (mix) tdMix.appendChild(mix);
+    else {
+        tdMix.textContent = "—";
+        tdMix.classList.add("muted");
+    }
 
     const tdTo5 = document.createElement("td");
     tdTo5.className = "col-num";
@@ -730,6 +766,10 @@ async function main() {
               [0, 0, 0, 0, 0]
           )
         : null;
+    const gains = starGains(events);
+    const worldGains = {};
+    for (const g of Object.values(gains))
+        for (const [s, n] of Object.entries(g)) worldGains[s] = (worldGains[s] ?? 0) + n;
     tbody.appendChild(
         row({
             name: "🌍 Worldwide",
@@ -737,7 +777,7 @@ async function main() {
             total,
             delta: totalDelta,
             avg: worldAvg,
-            mix: starMix(worldCounts),
+            mix: mixCell(worldCounts, worldGains),
             to5: fiveStarsToFiveExact(worldCounts) ?? fiveStarsToFive(worldCount, worldAvg),
             spark: sparkline(seriesFor(history, null), "Global total, last 30 days"),
             isTotal: true,
@@ -757,7 +797,7 @@ async function main() {
             total: cur?.count ?? null,
             delta,
             avg: cur?.avg ?? null,
-            mix: starMix(hist?.countries[cc]?.counts),
+            mix: mixCell(hist?.countries[cc]?.counts, gains[cc]),
             to5: fiveStarsToFiveExact(hist?.countries[cc]?.counts) ?? fiveStarsToFive(cur?.count, cur?.avg),
             spark: sparkline(seriesFor(history, cc), `${countryName} ratings, last 30 days`),
         });
