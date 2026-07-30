@@ -974,23 +974,30 @@ async function main() {
             localStorage.setItem("ghDispatchToken", token);
         }
         recordBtn.disabled = true;
-        recordBtn.textContent = "Queuing run…";
+        recordBtn.textContent = "Queuing runs…";
         try {
-            const res = await fetch(
-                "https://api.github.com/repos/mtuck063/snore-ratings-tracker/actions/workflows/collect.yml/dispatches",
-                {
-                    method: "POST",
-                    headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
-                    body: JSON.stringify({ ref: "main" }),
-                }
+            // Ratings and keywords both; they share a concurrency group, so
+            // the runs queue politely rather than fighting over the push.
+            const results = await Promise.all(
+                ["collect.yml", "keywords.yml"].map((wf) =>
+                    fetch(
+                        `https://api.github.com/repos/mtuck063/snore-ratings-tracker/actions/workflows/${wf}/dispatches`,
+                        {
+                            method: "POST",
+                            headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
+                            body: JSON.stringify({ ref: "main" }),
+                        }
+                    )
+                )
             );
-            if (res.status === 204) {
-                recordBtn.textContent = "Run queued — data lands in ~2 min, then reload";
-            } else if (res.status === 401 || res.status === 403) {
+            const ok = results.filter((r) => r.status === 204).length;
+            if (ok === results.length) {
+                recordBtn.textContent = "Ratings + keywords queued — data lands in ~3 min, then reload";
+            } else if (results.some((r) => r.status === 401 || r.status === 403)) {
                 localStorage.removeItem("ghDispatchToken");
                 recordBtn.textContent = "Token rejected — tap to enter a new one";
             } else {
-                recordBtn.textContent = `GitHub said ${res.status} — tap to retry`;
+                recordBtn.textContent = `${ok}/2 queued (GitHub said ${results.map((r) => r.status).join("/")}) — tap to retry`;
             }
         } catch {
             recordBtn.textContent = "Network error — tap to retry";
