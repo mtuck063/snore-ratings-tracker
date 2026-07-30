@@ -498,10 +498,13 @@ function renderKeywords(kw) {
     const bestRank = {};
     for (const row of kw.history) {
         for (const [cc, kws] of Object.entries(row.markets ?? {})) {
-            for (const [term, [rank]] of Object.entries(kws)) {
-                if (rank == null) continue;
+            for (const [term, v] of Object.entries(kws)) {
+                if (v[0] == null) continue;
+                // Daily minimum when the row has one (aggregated days), else
+                // the single sample: Best means best ever measured.
+                const dayBest = v[2] ?? v[0];
                 bestRank[cc] ??= {};
-                bestRank[cc][term] = Math.min(bestRank[cc][term] ?? Infinity, Math.round(rank));
+                bestRank[cc][term] = Math.min(bestRank[cc][term] ?? Infinity, Math.round(dayBest));
             }
         }
     }
@@ -557,7 +560,13 @@ function renderKeywords(kw) {
             const prevRank = cur.prevRank; // rank change since the previous run
             const span = document.createElement("span");
             span.className = "delta";
-            if (prevRank == null || cur.rank == null || prevRank === cur.rank) {
+            if (prevRank != null && prevRank === cur.rank) {
+                // Compared against the previous run and nothing moved: "=" so
+                // it reads differently from "no previous run yet" below.
+                span.classList.add("flat");
+                span.textContent = "=";
+                span.title = "Unchanged since the previous run";
+            } else if (prevRank == null || cur.rank == null) {
                 span.classList.add("flat");
                 span.textContent = "—";
             } else if (cur.rank < prevRank) {
