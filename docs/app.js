@@ -658,6 +658,11 @@ function renderKeywords(kw) {
         const entries = Object.entries(kw.latest[cc]).sort(
             (a, b) => (val(a) - val(b)) * sort.dir || (a[1].rank ?? 999) - (b[1].rank ?? 999)
         );
+        // Yesterday's row: the stable comparison baseline. Runs minutes apart
+        // all diff against the same anchor, so manual runs can't wobble Δ.
+        const curDate = (kw.fetchedAt ?? "").slice(0, 10);
+        const prevDayRow = [...kw.history].reverse().find((r) => r.date < curDate) ?? null;
+
         for (const [term, cur] of entries) {
             const tr = document.createElement("tr");
 
@@ -669,11 +674,13 @@ function renderKeywords(kw) {
             tdPop.className = "col-num";
             tdPop.textContent = cur.pop;
             if (cur.pop <= 5) tdPop.classList.add("muted");
-            if (cur.prevPop != null && cur.prevPop !== cur.pop) {
+            const prevDayVals = prevDayRow?.markets?.[cc]?.[term];
+            const prevPop = prevDayVals?.[1];
+            if (prevPop != null && prevPop !== cur.pop) {
                 const pd = document.createElement("span");
-                pd.className = `pop-delta ${cur.pop > cur.prevPop ? "up" : "down"}`;
-                pd.textContent = `${cur.pop > cur.prevPop ? "▲" : "▼"}${Math.abs(cur.pop - cur.prevPop)}`;
-                pd.title = `Demand ${cur.prevPop} → ${cur.pop} since the previous run`;
+                pd.className = `pop-delta ${cur.pop > prevPop ? "up" : "down"}`;
+                pd.textContent = `${cur.pop > prevPop ? "▲" : "▼"}${Math.abs(cur.pop - prevPop)}`;
+                pd.title = `Demand ${prevPop} → ${cur.pop} vs yesterday`;
                 tdPop.appendChild(pd);
             }
 
@@ -685,15 +692,19 @@ function renderKeywords(kw) {
 
             const tdDelta = document.createElement("td");
             tdDelta.className = "col-num";
-            const prevRank = cur.prevRank; // rank change since the previous run
+            // Rank vs yesterday's daily average; on day one, vs the oldest
+            // sample in the rolling 24h window.
+            let prevRank = prevDayVals?.[0];
+            if (prevRank == null) prevRank = (cur.recent ?? []).find(([, r]) => r != null)?.[1];
+            if (prevRank != null) prevRank = Math.round(prevRank);
             const span = document.createElement("span");
             span.className = "delta";
             if (prevRank != null && prevRank === cur.rank) {
-                // Compared against the previous run and nothing moved: "=" so
-                // it reads differently from "no previous run yet" below.
+                // Compared against yesterday and nothing moved: "=" so it
+                // reads differently from "no baseline yet" below.
                 span.classList.add("flat");
                 span.textContent = "=";
-                span.title = "Unchanged since the previous run";
+                span.title = "Unchanged vs yesterday";
             } else if (prevRank == null || cur.rank == null) {
                 span.classList.add("flat");
                 span.textContent = "—";
