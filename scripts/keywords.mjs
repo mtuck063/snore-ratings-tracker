@@ -25,13 +25,17 @@ const repoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const servedDataDir = path.join(repoRoot, "docs", "data");
 const dataFile = path.join(servedDataDir, "keywords.json");
 
-const { appId, markets, keywords, watchPrefixes } = JSON.parse(
-  await readFile(path.join(repoRoot, "scripts", "keywords.json"), "utf8")
-);
-// A market entry may carry its own localized keywords/watchPrefixes;
+const configFile = path.join(repoRoot, "scripts", "keywords.json");
+const config = JSON.parse(await readFile(configFile, "utf8"));
+const { appId, markets, keywords, watchPrefixes } = config;
+// A market entry may carry its own localized keywords/watchPrefixes/seedTokens;
 // otherwise it tracks the global (English) lists.
 const kwFor = (cc) => markets[cc].keywords ?? keywords;
 const watchFor = (cc) => markets[cc].watchPrefixes ?? watchPrefixes;
+const seedFor = (cc) => markets[cc].seedTokens ?? config.seedTokens ?? [];
+
+// Accent-insensitive comparison, so "apnée" and "apnee" count as one keyword.
+const fold = (s) => s.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
 
 const RETRY_BACKOFF_MS = 10000;
 const MIN_PREFIX = 2;
@@ -200,6 +204,7 @@ function rankMoved(from, to) {
 }
 
 const events = prev?.events ?? [];
+const discovered = {}; // cc -> new suggestion terms this run
 if (prev) {
   for (const [cc, kws] of Object.entries(latest)) {
     for (const [kw, cur] of Object.entries(kws)) {
@@ -212,11 +217,38 @@ if (prev) {
       const before = new Set(prev.hints?.[cc]?.[prefix] ?? []);
       if (before.size === 0) continue; // first sighting of this prefix: baseline
       for (const term of list) {
-        if (!before.has(term)) events.push({ at: fetchedAt, cc, prefix, term, type: "hint" });
+        if (!before.has(term)) {
+          events.push({ at: fetchedAt, cc, prefix, term, type: "hint" });
+          (discovered[cc] ??= new Set()).add(term);
+        }
       }
     }
   }
 }
+
+// Auto-discovery: a new suggestion containing one of the market's seed tokens
+// is a real search phrase in this niche, so promote it to the tracked list.
+// It gets its first rank/pop measurement on the next run. Guardrails: skip
+// app-title-looking strings, cap additions per market per run so a hints
+// hiccup can't flood the config.
+const MAX_AUTOTRACK = 5;
+let configChanged = false;
+for (const [cc, terms] of Object.entries(discovered)) {
+  const target = markets[cc].keywords ?? keywords; // shared ref into config
+  let added = 0;
+  for (const term of terms) {
+    if (added >= MAX_AUTOTRACK) break;
+    if (term.length > 30 || /[:&™|]/.test(term)) continue;
+    if (!seedFor(cc).some((tok) => fold(term).includes(fold(tok)))) continue;
+    if (target.some((k) => fold(k) === fold(term))) continue;
+    target.push(term);
+    added++;
+    configChanged = true;
+    events.push({ at: fetchedAt, cc, term, type: "autotrack" });
+    console.log(`${cc}: now tracking "${term}"`);
+  }
+}
+if (configChanged) await writeFile(configFile, JSON.stringify(config, null, 2) + "\n");
 
 // History: one row per day, upserted so a rerun replaces today's row.
 const history = prev?.history ?? [];

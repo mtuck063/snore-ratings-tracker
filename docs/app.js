@@ -588,6 +588,10 @@ function renderKeywords(kw) {
             if (ev.type === "hint") {
                 li.innerHTML = `${time}${flag(ev.cc)} Apple now suggests <strong></strong> under “${ev.prefix}”<span class="badge new">NEW</span>`;
                 li.querySelector("strong").textContent = `“${ev.term}”`;
+            } else if (ev.type === "autotrack") {
+                li.className = "first-rating";
+                li.innerHTML = `${time}${flag(ev.cc)} now tracking <strong></strong><span class="badge new">AUTO</span>`;
+                li.querySelector("strong").textContent = `“${ev.term}”`;
             } else {
                 const better = ev.to != null && (ev.from == null || ev.to < ev.from);
                 li.className = better ? "first-rating" : "";

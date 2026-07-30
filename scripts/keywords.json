@@ -1,12 +1,29 @@
 {
   "appId": "6751759381",
   "markets": {
-    "us": { "storefront": "143441-1,29" },
-    "ca": { "storefront": "143455-1,29" },
-    "gb": { "storefront": "143444-2,29" },
+    "us": {
+      "storefront": "143441-1,29"
+    },
+    "ca": {
+      "storefront": "143455-1,29"
+    },
+    "gb": {
+      "storefront": "143444-2,29"
+    },
     "fr": {
       "storefront": "143442,29",
-      "watchPrefixes": ["ronfle", "apn", "sommeil"],
+      "watchPrefixes": [
+        "ronfle",
+        "apn",
+        "sommeil"
+      ],
+      "seedTokens": [
+        "ronfl",
+        "sommeil",
+        "apn",
+        "dormir",
+        "nuit"
+      ],
       "keywords": [
         "snore timeline",
         "ronflement",
@@ -31,7 +48,12 @@
     },
     "es": {
       "storefront": "143454,29",
-      "watchPrefixes": ["ronqu", "apnea", "sueño", "desperta"],
+      "watchPrefixes": [
+        "ronqu",
+        "apnea",
+        "sueño",
+        "desperta"
+      ],
       "keywords": [
         "snore timeline",
         "ronquidos",
@@ -52,11 +74,23 @@
         "seguimiento del sueño",
         "hablar dormido",
         "sueño apple watch"
+      ],
+      "seedTokens": [
+        "ronqu",
+        "ronc",
+        "sueño",
+        "apnea",
+        "dormir"
       ]
     },
     "mx": {
       "storefront": "143468,29",
-      "watchPrefixes": ["ronqu", "apnea", "sueño", "desperta"],
+      "watchPrefixes": [
+        "ronqu",
+        "apnea",
+        "sueño",
+        "desperta"
+      ],
       "keywords": [
         "snore timeline",
         "ronquidos",
@@ -77,10 +111,30 @@
         "seguimiento del sueño",
         "hablar dormido",
         "sueño apple watch"
+      ],
+      "seedTokens": [
+        "ronqu",
+        "ronc",
+        "sueño",
+        "apnea",
+        "dormir"
       ]
     }
   },
-  "watchPrefixes": ["snore", "snoring", "sleep t", "free sn"],
+  "watchPrefixes": [
+    "snore",
+    "snoring",
+    "sleep t",
+    "sleep ta",
+    "free sn"
+  ],
+  "seedTokens": [
+    "snor",
+    "sleep",
+    "cpap",
+    "apnea",
+    "breathing"
+  ],
   "keywords": [
     "snore timeline",
     "snore",

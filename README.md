@@ -10,6 +10,6 @@ A second daily Action (`scripts/keywords.mjs`) tracks App Store search performan
 
 - **Rank**: the app's position in iTunes Search API results, the public proxy for App Store search.
 - **Popularity**: a 5–100 demand score derived from Apple's search-hints (autocomplete) endpoint. The shorter the prefix at which a phrase surfaces in the suggestions and the higher its position, the more people search it. Ordinal, not calibrated; comparable day over day.
-- **Discovery**: the suggestion lists under a few watch prefixes, so new terms Apple starts suggesting get logged as events.
+- **Discovery**: the suggestion lists under a few watch prefixes. A new suggestion containing one of the market's seed tokens is auto-added to the tracked list (capped at 5 per market per run) and measured from the next run; anything else is just logged as an event.
 
-Edit `scripts/keywords.json` to change tracked keywords or markets. History lives in `docs/data/keywords.json` and renders as the "Keyword rankings" dashboard section.
+Edit `scripts/keywords.json` to change tracked keywords, watch prefixes, seed tokens, or markets. History lives in `docs/data/keywords.json` and renders as the "Keyword rankings" dashboard section.
