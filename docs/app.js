@@ -4,10 +4,23 @@ const SPARK_H = 28;
 
 const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
 const tooltip = document.getElementById("tooltip");
+
+// Place the tooltip near the pointer, above it when there's room, clamped to
+// the viewport.
+function placeTooltip(e) {
+    tooltip.hidden = false;
+    const tw = tooltip.offsetWidth;
+    const th = tooltip.offsetHeight;
+    tooltip.style.left = `${Math.min(e.clientX + 12, window.innerWidth - tw - 8)}px`;
+    tooltip.style.top = `${Math.max(8, e.clientY - th - 14)}px`;
+}
 // Touch screens have no pointerleave: a tap outside any tooltip source
 // dismisses the tooltip instead.
 document.addEventListener("pointerdown", (e) => {
-    if (!e.target.closest(".spark, .star-bar")) tooltip.hidden = true;
+    if (!e.target.closest(".spark, .star-bar")) {
+        tooltip.hidden = true;
+        document.querySelectorAll(".spark-hover").forEach((h) => h.setAttribute("visibility", "hidden"));
+    }
 });
 
 const flag = (cc) =>
@@ -79,15 +92,15 @@ function sparkline(points, label, fmtVal = fmt) {
         hover.setAttribute("cx", x(i));
         hover.setAttribute("cy", y(points[i].count));
         hover.setAttribute("visibility", "visible");
-        tooltip.innerHTML = `<span class="tip-value">${points[i].label ?? fmtVal(points[i].count)}</span> <span class="tip-date">${points[i].date}</span>`;
-        tooltip.hidden = false;
-        const tw = tooltip.offsetWidth;
-        tooltip.style.left = `${Math.min(e.clientX + 12, window.innerWidth - tw - 8)}px`;
-        tooltip.style.top = `${e.clientY - 36}px`;
+        tooltip.innerHTML = `<span class="tip-value">${points[i].label ?? fmtVal(points[i].count)}</span><span class="tip-date">${points[i].date}</span>`;
+        placeTooltip(e);
     };
     svg.addEventListener("pointermove", showTip);
     svg.addEventListener("pointerdown", showTip); // taps on touch screens
-    svg.addEventListener("pointerleave", () => {
+    // Touch fires pointerleave the moment the finger lifts, which would hide
+    // the tooltip instantly; touch dismissal is the outside tap instead.
+    svg.addEventListener("pointerleave", (e) => {
+        if (e.pointerType === "touch") return;
         hover.setAttribute("visibility", "hidden");
         tooltip.hidden = true;
     });
@@ -169,18 +182,33 @@ function mixCell(counts, gains) {
     });
     const showTip = (e) => {
         tooltip.innerHTML = "";
-        const strong = document.createElement("span");
-        strong.className = "tip-value";
-        strong.textContent = label;
-        tooltip.appendChild(strong);
-        tooltip.hidden = false;
-        const tw = tooltip.offsetWidth;
-        tooltip.style.left = `${Math.min(e.clientX + 12, window.innerWidth - tw - 8)}px`;
-        tooltip.style.top = `${e.clientY - 36}px`;
+        counts.forEach((c, i) => {
+            if (!c) return;
+            const star = 5 - i;
+            const row = document.createElement("div");
+            row.className = "tip-row";
+            const sw = document.createElement("span");
+            sw.className = `tip-swatch s${star}`;
+            row.appendChild(sw);
+            const val = document.createElement("span");
+            val.className = "tip-value";
+            val.textContent = `${c} × ${star}★`;
+            row.appendChild(val);
+            const g = gains?.[star];
+            if (g) {
+                const gp = document.createElement("span");
+                gp.className = "tip-gain";
+                gp.textContent = `+${g} today`;
+                row.appendChild(gp);
+            }
+            tooltip.appendChild(row);
+        });
+        placeTooltip(e);
     };
     bar.addEventListener("pointermove", showTip);
     bar.addEventListener("pointerdown", showTip); // taps on touch screens
-    bar.addEventListener("pointerleave", () => {
+    bar.addEventListener("pointerleave", (e) => {
+        if (e.pointerType === "touch") return; // dismissed by tapping outside
         tooltip.hidden = true;
     });
     wrap.appendChild(bar);

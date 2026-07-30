@@ -7,6 +7,11 @@
     --accent: #5B7FFF;
     --good: #4ADE80;
     --bad: #F87171;
+    --star5: #4ADE80;
+    --star4: #FDE68A;
+    --star3: #D97706;
+    --star2: #FCA5A5;
+    --star1: #DC2626;
 }
 
 * { box-sizing: border-box; margin: 0; }
@@ -258,11 +263,11 @@ svg.spark { display: block; margin-left: auto; touch-action: none; }
 /* Ordinal good-to-bad ramp, validated on the dark surface: hue = severity
    band, alternating lightness separates in-hue neighbors; fixed 5-to-1
    position + 2px gaps + tooltip carry identity beyond color. */
-.star-seg.s5 { background: #4ade80; }
-.star-seg.s4 { background: #fde68a; }
-.star-seg.s3 { background: #d97706; }
-.star-seg.s2 { background: #fca5a5; }
-.star-seg.s1 { background: #dc2626; }
+.s5 { background: var(--star5); }
+.s4 { background: var(--star4); }
+.s3 { background: var(--star3); }
+.s2 { background: var(--star2); }
+.s1 { background: var(--star1); }
 
 .mix-gain {
     color: var(--good);
@@ -333,12 +338,16 @@ svg.spark { display: block; margin-left: auto; touch-action: none; }
     position: fixed;
     background: var(--bg-raised);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 6px 10px;
-    font-size: 0.78rem;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    line-height: 1.55;
     pointer-events: none;
     z-index: 10;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
 }
 #tooltip .tip-value { font-weight: 600; font-variant-numeric: tabular-nums; }
-#tooltip .tip-date { color: var(--text-secondary); }
+#tooltip .tip-date { display: block; color: var(--text-secondary); font-size: 0.72rem; }
+.tip-row { display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+.tip-swatch { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+.tip-gain { color: var(--good); font-weight: 600; font-size: 0.72rem; }
