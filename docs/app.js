@@ -578,16 +578,28 @@ function renderKeywords(kw) {
             }
             tdDelta.appendChild(span);
 
-            const tdRange = document.createElement("td");
-            tdRange.className = "col-num muted";
-            const todayV = kw.history.at(-1)?.markets?.[cc]?.[term];
-            if (todayV && todayV[0] != null && todayV[2] != null) {
-                const [, , min, max] = todayV;
-                tdRange.textContent = min === max ? `#${min}` : `#${min}–${max}`;
-                tdRange.title = "Today's rank range across runs";
-            } else {
-                tdRange.textContent = "—";
+            const rangeText = (ranks) => {
+                if (!ranks.length) return "—";
+                const min = Math.min(...ranks);
+                const max = Math.max(...ranks);
+                return min === max ? `#${min}` : `#${min}–${max}`;
+            };
+
+            const td24 = document.createElement("td");
+            td24.className = "col-num muted";
+            td24.textContent = rangeText((cur.recent ?? []).map(([, r]) => r).filter((r) => r != null));
+            td24.title = "Rank range over the last 24 hours of runs";
+
+            const td7d = document.createElement("td");
+            td7d.className = "col-num muted";
+            const week = [];
+            for (const hrow of kw.history.slice(-7)) {
+                const v = hrow.markets?.[cc]?.[term];
+                if (!v || v[0] == null) continue;
+                week.push(Math.round(v[2] ?? v[0]), Math.round(v[3] ?? v[0]));
             }
+            td7d.textContent = rangeText(week);
+            td7d.title = "Rank range over the last 7 days";
 
             const tdBest = document.createElement("td");
             tdBest.className = "col-num muted";
@@ -607,7 +619,7 @@ function renderKeywords(kw) {
                 .filter(Boolean);
             tdSpark.appendChild(sparkline(points, `${term} rank, last 30 days`, (v) => `#${-v}`));
 
-            tr.append(tdKw, tdPop, tdRank, tdDelta, tdRange, tdBest, tdSpark);
+            tr.append(tdKw, tdPop, tdRank, tdDelta, td24, td7d, tdBest, tdSpark);
             tbody.appendChild(tr);
         }
     };

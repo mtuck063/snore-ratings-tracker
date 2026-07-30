@@ -205,11 +205,19 @@ for (const [cc, ranks, pops, watch] of perMarket) {
   for (const kw of list) {
     // Carry the previous run's values so the dashboard can show run-over-run
     // deltas for rank and popularity. Absent for a keyword's first run.
+    // `recent` keeps the last 24 hours of [timestamp, rank] samples for the
+    // rolling 24h range, whatever the run cadence.
     const prevKw = prev?.latest?.[cc]?.[kw];
+    const dayAgo = Date.now() - 864e5;
+    const recent = [
+      ...(prevKw?.recent ?? []).filter(([at]) => new Date(at) >= dayAgo),
+      [fetchedAt, ranks[kw]],
+    ];
     latest[cc][kw] = {
       rank: ranks[kw],
       ...pops[kw],
       ...(prevKw && { prevRank: prevKw.rank ?? null, prevPop: prevKw.pop ?? null }),
+      recent,
     };
   }
   hints[cc] = watch;
