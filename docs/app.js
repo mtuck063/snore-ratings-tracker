@@ -119,11 +119,12 @@ function fiveStarsToFiveExact(counts) {
     return Math.max(0, 99 * n - 20 * stars);
 }
 
-// Histogram counts as "133·9·2·0·0", always all five positions (5★ first) so
-// every row reads the same way.
+// Histogram as self-labeled pairs, "133×5★ 9×4★ 2×3★": zero counts can be
+// omitted without ambiguity because every number names its star.
 function starMix(counts) {
     if (!counts) return null;
-    return counts.join("·");
+    const parts = counts.map((c, i) => (c > 0 ? `${c}×${5 - i}★` : null)).filter(Boolean);
+    return parts.length ? parts.join(" ") : null;
 }
 
 function row({ name, sub, total, delta, avg, mix, to5, spark, isTotal, title }) {
