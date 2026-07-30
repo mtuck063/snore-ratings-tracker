@@ -58,8 +58,11 @@ function makeGate(limit) {
     }
   };
 }
-const searchGate = makeGate(8);
+const searchGate = makeGate(4);
 const hintsGate = makeGate(16);
+// Growing waits: 429s are refill-rate limits, so patience genuinely helps.
+const BACKOFFS_MS = [15000, 45000, 90000];
+let rankFailures = 0;
 
 async function readJson(file, fallback) {
   try {
@@ -83,11 +86,12 @@ async function fetchRank(kw, cc, attempt = 1) {
     const idx = results.findIndex((r) => String(r.trackId) === appId);
     return idx === -1 ? null : idx + 1;
   } catch (err) {
-    if (attempt <= 2) {
-      await sleep(RETRY_BACKOFF_MS * attempt);
+    if (attempt <= BACKOFFS_MS.length) {
+      await sleep(BACKOFFS_MS[attempt - 1]);
       return fetchRank(kw, cc, attempt + 1);
     }
     console.warn(`${cc} "${kw}": ${err.message}, keeping previous rank`);
+    rankFailures++;
     return "error";
   }
 }
@@ -316,3 +320,5 @@ history.sort((a, b) => a.date.localeCompare(b.date));
 
 await writeFile(dataFile, JSON.stringify({ fetchedAt, latest, hints, events, history }));
 console.log(`${today}: ${keywords.length} keywords across ${Object.keys(markets).length} markets`);
+// The workflow greps this to decide whether to requeue on a bad runner IP.
+console.log(`RANK_FAILURES=${rankFailures}`);

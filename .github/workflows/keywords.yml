@@ -6,9 +6,14 @@ on:
     # history row keeps a running average and min-max range instead.
     - cron: "23 0,6,12,18 * * *"
   workflow_dispatch:
+    inputs:
+      attempt:
+        description: "Requeue counter; runs never requeue past attempt 2"
+        default: "1"
 
 permissions:
   contents: write
+  actions: write
 
 # Same group as the ratings collector so the two never push over each other.
 concurrency:
@@ -26,7 +31,9 @@ jobs:
           node-version: 22
 
       - name: Track keywords
-        run: node scripts/keywords.mjs
+        run: |
+          set -o pipefail
+          node scripts/keywords.mjs 2>&1 | tee run.log
 
       - name: Commit data
         run: |
@@ -39,4 +46,19 @@ jobs:
             git commit -m "keywords: $(date -u '+%F')"
             git pull --rebase
             git push
+          fi
+
+      # Some runner IPs are throttled or blocked by Apple; carried-over values
+      # keep the data sane, but a fresh runner usually draws a clean IP. One
+      # requeue max, guarded by the attempt input.
+      - name: Requeue on a bad runner IP
+        if: github.event.inputs.attempt == '' || github.event.inputs.attempt == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          fails=$(grep -o "RANK_FAILURES=[0-9]*" run.log | cut -d= -f2)
+          echo "rank failures this run: ${fails:-unknown}"
+          if [ -n "$fails" ] && [ "$fails" -gt 40 ]; then
+            echo "requeueing once for a fresh runner"
+            gh workflow run keywords.yml -f attempt=2 --repo ${{ github.repository }}
           fi

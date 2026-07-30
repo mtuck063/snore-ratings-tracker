@@ -960,7 +960,8 @@ async function main() {
     checkRow.id = "check-row";
     const checkBtn = document.createElement("button");
     checkBtn.className = "check-now";
-    checkBtn.textContent = "Check all storefronts now";
+    checkBtn.textContent = "Quick check (live view)";
+    checkBtn.title = "Queries Apple from this browser and shows changes immediately; nothing is saved";
     checkRow.appendChild(checkBtn);
     meta.insertAdjacentElement("afterend", checkRow);
 
@@ -970,7 +971,8 @@ async function main() {
     // repo, where it would be public and auto-revoked.
     const recordBtn = document.createElement("button");
     recordBtn.className = "check-now";
-    recordBtn.textContent = "Record a check";
+    recordBtn.textContent = "Full update (~3 min)";
+    recordBtn.title = "Runs the ratings + keywords collectors on GitHub and saves the results (owner token required)";
     checkRow.appendChild(recordBtn);
     recordBtn.addEventListener("click", async () => {
         let token = localStorage.getItem("ghDispatchToken");
@@ -1015,7 +1017,7 @@ async function main() {
         }
         setTimeout(() => {
             recordBtn.disabled = false;
-            recordBtn.textContent = "Record a check";
+            recordBtn.textContent = "Full update (~3 min)";
         }, 8000);
     });
     checkBtn.addEventListener("click", async () => {
