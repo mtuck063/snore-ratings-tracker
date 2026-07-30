@@ -453,6 +453,11 @@ function renderEvents(history, events) {
 function renderKeywords(kw) {
     if (!kw?.latest || !Object.keys(kw.latest).length) return;
     document.getElementById("keywords-section").hidden = false;
+    if (kw.fetchedAt) {
+        const updated = document.getElementById("kw-updated");
+        updated.hidden = false;
+        updated.textContent = `Keywords last checked: ${new Date(kw.fetchedAt).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })}`;
+    }
     const tabs = document.getElementById("kw-tabs");
     const tbody = document.querySelector("#keywords tbody");
     const marketCcs = Object.keys(kw.latest);
