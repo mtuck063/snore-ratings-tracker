@@ -2,28 +2,112 @@
   "appId": "6751759381",
   "markets": {
     "us": {
-      "storefront": "143441-1,29"
+      "storefront": "143441-1,29",
+      "extraKeywords": [
+        "snore detector",
+        "snore diary",
+        "sleep diary",
+        "sleep log",
+        "rem sleep",
+        "night recorder",
+        "sleep sounds",
+        "snoring sounds",
+        "sleep quality",
+        "sleep quality tracker",
+        "cpap tracker",
+        "sleep monitor",
+        "snoring recorder",
+        "snoring monitor",
+        "sleep talk recorder",
+        "do i snore",
+        "sleep score",
+        "sleep stages",
+        "sleep analysis",
+        "sleep breathing",
+        "sleep cycle",
+        "auto sleep tracker",
+        "smart alarm",
+        "snore alarm",
+        "snoring app",
+        "sleep tracker",
+        "apple watch sleep tracker"
+      ]
     },
     "ca": {
-      "storefront": "143455-1,29"
+      "storefront": "143455-1,29",
+      "extraKeywords": [
+        "snore detector",
+        "sleep diary",
+        "sleep log",
+        "sleep sounds",
+        "snoring sounds",
+        "cpap tracker",
+        "sleep monitor",
+        "snoring recorder",
+        "sleep talk recorder",
+        "do i snore",
+        "sleep score",
+        "snore alarm",
+        "snoring app",
+        "sleep tracker",
+        "sleep tracker apple watch",
+        "sleep cycle",
+        "sleep cycle tracker"
+      ]
     },
     "gb": {
-      "storefront": "143444-2,29"
+      "storefront": "143444-2,29",
+      "extraKeywords": [
+        "snore detector",
+        "sleep diary",
+        "sleep log",
+        "rem sleep",
+        "night recorder",
+        "sleep sounds",
+        "snoring sounds",
+        "sleep quality",
+        "cpap tracker",
+        "sleep monitor",
+        "snoring recorder",
+        "sleep talk recorder",
+        "sleep talk",
+        "do i snore",
+        "sleep score",
+        "smart alarm",
+        "snore alarm",
+        "snoring app",
+        "sleep tracker",
+        "sleep tracker apple watch",
+        "sleep tracker free",
+        "sleep cycle",
+        "snorelab"
+      ]
+    },
+    "au": {
+      "storefront": "143460,29",
+      "extraKeywords": [
+        "snore detector",
+        "sleep diary",
+        "sleep log",
+        "sleep sounds",
+        "snoring sounds",
+        "cpap tracker",
+        "sleep monitor",
+        "sleep talk recorder",
+        "do i snore",
+        "sleep score",
+        "smart alarm",
+        "snore alarm",
+        "snoring app",
+        "sleep tracker",
+        "sleep tracker apple watch",
+        "sleep cycle"
+      ]
     },
     "fr": {
       "storefront": "143442,29",
-      "watchPrefixes": [
-        "ronfle",
-        "apn",
-        "sommeil"
-      ],
-      "seedTokens": [
-        "ronfl",
-        "sommeil",
-        "apn",
-        "dormir",
-        "nuit"
-      ],
+      "watchPrefixes": ["ronfle", "apn", "sommeil"],
+      "seedTokens": ["ronfl", "sommeil", "apn", "dormir", "nuit"],
       "keywords": [
         "snore timeline",
         "ronflement",
@@ -48,12 +132,8 @@
     },
     "es": {
       "storefront": "143454,29",
-      "watchPrefixes": [
-        "ronqu",
-        "apnea",
-        "sueño",
-        "desperta"
-      ],
+      "watchPrefixes": ["ronqu", "apnea", "sueño", "desperta"],
+      "seedTokens": ["ronqu", "ronc", "sueño", "apnea", "dormir"],
       "keywords": [
         "snore timeline",
         "ronquidos",
@@ -74,23 +154,12 @@
         "seguimiento del sueño",
         "hablar dormido",
         "sueño apple watch"
-      ],
-      "seedTokens": [
-        "ronqu",
-        "ronc",
-        "sueño",
-        "apnea",
-        "dormir"
       ]
     },
     "mx": {
       "storefront": "143468,29",
-      "watchPrefixes": [
-        "ronqu",
-        "apnea",
-        "sueño",
-        "desperta"
-      ],
+      "watchPrefixes": ["ronqu", "apnea", "sueño", "desperta"],
+      "seedTokens": ["ronqu", "ronc", "sueño", "apnea", "dormir"],
       "keywords": [
         "snore timeline",
         "ronquidos",
@@ -111,30 +180,11 @@
         "seguimiento del sueño",
         "hablar dormido",
         "sueño apple watch"
-      ],
-      "seedTokens": [
-        "ronqu",
-        "ronc",
-        "sueño",
-        "apnea",
-        "dormir"
       ]
     }
   },
-  "watchPrefixes": [
-    "snore",
-    "snoring",
-    "sleep t",
-    "sleep ta",
-    "free sn"
-  ],
-  "seedTokens": [
-    "snor",
-    "sleep",
-    "cpap",
-    "apnea",
-    "breathing"
-  ],
+  "watchPrefixes": ["snore", "snoring", "sleep t", "sleep ta", "free sn"],
+  "seedTokens": ["snor", "sleep", "cpap", "apnea", "breathing"],
   "keywords": [
     "snore timeline",
     "snore",

@@ -29,8 +29,10 @@ const configFile = path.join(repoRoot, "scripts", "keywords.json");
 const config = JSON.parse(await readFile(configFile, "utf8"));
 const { appId, markets, keywords, watchPrefixes } = config;
 // A market entry may carry its own localized keywords/watchPrefixes/seedTokens;
-// otherwise it tracks the global (English) lists.
-const kwFor = (cc) => markets[cc].keywords ?? keywords;
+// otherwise it tracks the global (English) lists. extraKeywords extend the
+// global list for markets that share the English core plus local phrases.
+const kwFor = (cc) =>
+  markets[cc].keywords ?? [...new Set([...keywords, ...(markets[cc].extraKeywords ?? [])])];
 const watchFor = (cc) => markets[cc].watchPrefixes ?? watchPrefixes;
 const seedFor = (cc) => markets[cc].seedTokens ?? config.seedTokens ?? [];
 
@@ -126,7 +128,7 @@ function popScore(term, prefixLen, position) {
   return Math.round(5 + 95 * (0.7 * depth + 0.3 * pos));
 }
 
-async function popularityPass(storefront, list) {
+async function popularityPass(storefront, list, prevMarket) {
   const prefixes = [...new Set(list.flatMap((term) => {
     const out = [];
     for (let len = MIN_PREFIX; len <= term.length; len++) out.push(term.slice(0, len));
@@ -145,12 +147,23 @@ async function popularityPass(storefront, list) {
   const out = {};
   for (const term of list) {
     let f = null;
+    let sawFailure = false;
     for (let len = MIN_PREFIX; len <= term.length && !f; len++) {
       const prefix = term.slice(0, len);
-      const idx = byPrefix.get(prefix)?.indexOf(term) ?? -1;
+      const hits = byPrefix.get(prefix);
+      if (hits === null) sawFailure = true; // fetch failed; term may have surfaced here
+      const idx = hits?.indexOf(term) ?? -1;
       if (idx !== -1) f = { prefix, pos: idx + 1 };
     }
-    out[term] = { pop: popScore(term, f?.prefix.length, f?.pos), ...(f && { prefix: f.prefix, pos: f.pos }) };
+    const measured = { pop: popScore(term, f?.prefix.length, f?.pos), ...(f && { prefix: f.prefix, pos: f.pos }) };
+    // A failed prefix fetch can only understate the score, so when one was
+    // involved keep the previous day's value if it was higher: an outage
+    // shouldn't read as a demand collapse.
+    const prev = prevMarket?.[term];
+    out[term] =
+      sawFailure && prev?.pop > measured.pop
+        ? { pop: prev.pop, ...(prev.prefix && { prefix: prev.prefix, pos: prev.pos }) }
+        : measured;
   }
   return out;
 }
@@ -177,7 +190,7 @@ const perMarket = await Promise.all(
   Object.entries(markets).map(async ([cc, { storefront }]) => {
     const [ranks, pops, watch] = await Promise.all([
       rankPass(cc, prev?.latest?.[cc]),
-      popularityPass(storefront, kwFor(cc)),
+      popularityPass(storefront, kwFor(cc), prev?.latest?.[cc]),
       watchPass(storefront, prev?.hints?.[cc], watchFor(cc)),
     ]);
     return [cc, ranks, pops, watch];
