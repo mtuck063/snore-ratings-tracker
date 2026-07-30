@@ -95,8 +95,14 @@ function sparkline(points, label, fmtVal = fmt) {
         tooltip.innerHTML = `<span class="tip-value">${points[i].label ?? fmtVal(points[i].count)}</span><span class="tip-date">${points[i].date}</span>`;
         placeTooltip(e);
     };
-    svg.addEventListener("pointermove", showTip);
-    svg.addEventListener("pointerdown", showTip); // taps on touch screens
+    // Hover-tracking is mouse-only; touch would flash the tooltip while the
+    // finger settles into a scroll.
+    svg.addEventListener("pointermove", (e) => {
+        if (e.pointerType !== "touch") showTip(e);
+    });
+    // click, not pointerdown: a click only fires for a completed tap, so a
+    // scroll that happens to start on the chart doesn't pop the tooltip.
+    svg.addEventListener("click", showTip);
     // Touch fires pointerleave the moment the finger lifts, which would hide
     // the tooltip instantly; touch dismissal is the outside tap instead.
     svg.addEventListener("pointerleave", (e) => {
@@ -205,8 +211,11 @@ function mixCell(counts, gains) {
         });
         placeTooltip(e);
     };
-    bar.addEventListener("pointermove", showTip);
-    bar.addEventListener("pointerdown", showTip); // taps on touch screens
+    bar.addEventListener("pointermove", (e) => {
+        if (e.pointerType !== "touch") showTip(e);
+    });
+    // click, not pointerdown: scrolls that start on the bar stay scrolls.
+    bar.addEventListener("click", showTip);
     bar.addEventListener("pointerleave", (e) => {
         if (e.pointerType === "touch") return; // dismissed by tapping outside
         tooltip.hidden = true;
