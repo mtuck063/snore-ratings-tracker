@@ -842,24 +842,29 @@ async function main() {
         return;
     }
 
-    const prev = history.length >= 2 ? history.at(-2) : null; // first run: nothing to diff
     const tbody = document.querySelector("#ratings tbody");
 
-    const entries = Object.entries(latest.countries).map(([cc, cur]) => {
-        const prevCount = prev?.countries[cc]?.count;
-        return {
-            cc,
-            cur,
-            delta: cur && prevCount != null ? cur.count - prevCount : null,
-        };
-    });
+    // Rolling last-24h gains from the event log — the same window the Latest
+    // strip sums, so the two can never disagree. (Day-row diffs bucket by UTC
+    // date and made a morning rating vanish from the column at UTC midnight.)
+    const gain24 = {};
+    for (const ev of events) {
+        if ((ev.type === "delta" || ev.type === "first") && Date.now() - new Date(ev.at) <= 864e5) {
+            gain24[ev.cc] = (gain24[ev.cc] ?? 0) + (ev.to - (ev.from ?? 0));
+        }
+    }
+    const entries = Object.entries(latest.countries).map(([cc, cur]) => ({
+        cc,
+        cur,
+        delta: cur ? (gain24[cc] ?? 0) : null,
+    }));
 
     entries.sort(
         (a, b) => (b.delta ?? -Infinity) - (a.delta ?? -Infinity) || (b.cur?.count ?? -1) - (a.cur?.count ?? -1)
     );
 
     const total = globalTotal(latest);
-    const totalDelta = prev ? total - globalTotal(prev) : null;
+    const totalDelta = Object.values(gain24).reduce((s, n) => s + n, 0);
     const rated_ = Object.values(latest.countries).filter((c) => c?.count > 0 && c.avg != null);
     const worldStars = rated_.reduce((s, c) => s + c.count * c.avg, 0);
     const worldCount = rated_.reduce((s, c) => s + c.count, 0);
