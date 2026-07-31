@@ -291,6 +291,10 @@ svg.spark { display: block; margin-left: auto; touch-action: none; }
     text-align: left;
 }
 
+.rank-top { color: var(--good); font-weight: 600; }
+.rank-page1 { color: var(--accent); }
+.pop-hot { color: #facc15; font-weight: 600; }
+
 .pop-delta { font-size: 0.72rem; margin-left: 4px; }
 .pop-delta.up { color: var(--good); }
 .pop-delta.down { color: var(--bad); }

@@ -707,6 +707,10 @@ function renderKeywords(kw) {
             tdPop.className = "col-num";
             tdPop.textContent = cur.pop;
             if (cur.pop <= 5) tdPop.classList.add("muted");
+            else if (cur.pop >= 80) {
+                tdPop.classList.add("pop-hot");
+                tdPop.title = "High demand (80+)";
+            }
             const prevDayVals = prevDayRow?.markets?.[cc]?.[term];
             const prevPop = prevDayVals?.[1];
             if (prevPop != null && prevPop !== cur.pop) {
@@ -721,7 +725,13 @@ function renderKeywords(kw) {
             tdRank.className = "col-num";
             tdRank.textContent = rankText(cur.rank);
             if (cur.rank == null) tdRank.classList.add("muted");
-            else if (cur.rank <= 3) tdRank.classList.add("at-five");
+            else if (cur.rank <= 3) {
+                tdRank.classList.add("rank-top");
+                tdRank.title = "Top 3";
+            } else if (cur.rank <= 10) {
+                tdRank.classList.add("rank-page1");
+                tdRank.title = "Top 10";
+            }
 
             const tdDelta = document.createElement("td");
             tdDelta.className = "col-num";
