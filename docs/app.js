@@ -702,28 +702,35 @@ function renderKeywords(kw) {
 
             const tdDelta = document.createElement("td");
             tdDelta.className = "col-num";
-            // Rank vs yesterday's daily average; on day one, vs the oldest
-            // sample in the rolling 24h window.
-            let prevRank = prevDayVals?.[0];
-            if (prevRank == null) prevRank = (cur.recent ?? []).find(([, r]) => r != null)?.[1];
-            if (prevRank != null) prevRank = Math.round(prevRank);
+            // Δ: today's daily average vs yesterday's — the exact quantities
+            // the sparkline's last segment draws, so the arrow can never
+            // contradict the trend line. Unrounded baselines: yesterday
+            // averaging 2.5 against a 3 today is a real slip, not "=".
+            const todayRow = kw.history.at(-1);
+            const todayAvg =
+                (todayRow?.date === curDate ? todayRow.markets?.[cc]?.[term]?.[0] : null) ?? cur.rank;
+            let baseAvg = prevDayVals?.[0];
+            if (baseAvg == null) baseAvg = (cur.recent ?? []).find(([, r]) => r != null)?.[1];
             const span = document.createElement("span");
             span.className = "delta";
-            if (prevRank != null && prevRank === cur.rank) {
-                // Compared against yesterday and nothing moved: "=" so it
-                // reads differently from "no baseline yet" below.
-                span.classList.add("flat");
-                span.textContent = "=";
-                span.title = "Unchanged vs yesterday";
-            } else if (prevRank == null || cur.rank == null) {
+            if (todayAvg == null || baseAvg == null) {
                 span.classList.add("flat");
                 span.textContent = "—";
-            } else if (cur.rank < prevRank) {
-                span.classList.add("up");
-                span.textContent = `▲${prevRank - cur.rank}`;
             } else {
-                span.classList.add("down");
-                span.textContent = `▼${cur.rank - prevRank}`;
+                const diff = Math.round(todayAvg - baseAvg); // positive = slipped
+                if (diff === 0) {
+                    span.classList.add("flat");
+                    span.textContent = "=";
+                    span.title = `Steady vs yesterday (avg ${baseAvg} → ${todayAvg})`;
+                } else if (diff < 0) {
+                    span.classList.add("up");
+                    span.textContent = `▲${-diff}`;
+                    span.title = `Daily average ${baseAvg} → ${todayAvg}`;
+                } else {
+                    span.classList.add("down");
+                    span.textContent = `▼${diff}`;
+                    span.title = `Daily average ${baseAvg} → ${todayAvg}`;
+                }
             }
             tdDelta.appendChild(span);
 
