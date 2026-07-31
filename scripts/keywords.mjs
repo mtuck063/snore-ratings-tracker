@@ -255,11 +255,11 @@ async function merge(partials) {
         rawPop.failed && prevKw?.pop > measured.pop
           ? { pop: prevKw.pop, ...(prevKw.prefix && { prefix: prevKw.prefix, pos: prevKw.pos }) }
           : measured;
-      // `recent` keeps the last 24 hours of [timestamp, rank] samples for the
-      // rolling 24h range, whatever the run cadence.
+      // `recent` keeps the last 24 hours of [timestamp, rank, pop] samples
+      // for the rolling 24h windows, whatever the run cadence.
       const recent = [
         ...(prevKw?.recent ?? []).filter(([at]) => new Date(at) >= dayAgo),
-        [fetchedAt, rank],
+        [fetchedAt, rank, pops.pop],
       ];
       // Top-5 result lists carry over on failure like everything else.
       // Legacy carried entries ([id, name] pairs) fold into the apps map.

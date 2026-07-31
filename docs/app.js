@@ -80,13 +80,19 @@ function sparkline(points, label, fmtVal = fmt, minSpan = 0) {
             ? SPARK_H / 2
             : SPARK_H - pad - ((v - min) / (max - min)) * (SPARK_H - pad * 2);
 
+    // Net direction colors the line: at least one whole unit of movement so
+    // sub-unit drift doesn't read as an alarm. (Rank charts plot -rank, so
+    // "up" is better for both chart kinds.)
+    const net = counts.at(-1) - counts[0];
+    const dir = net >= 1 ? " up" : net <= -1 ? " down" : "";
+
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("class", "spark-line");
+    path.setAttribute("class", "spark-line" + dir);
     path.setAttribute("d", points.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.count).toFixed(1)}`).join(""));
     svg.appendChild(path);
 
     const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    dot.setAttribute("class", "spark-dot");
+    dot.setAttribute("class", "spark-dot" + dir);
     dot.setAttribute("r", 3);
     dot.setAttribute("cx", x(points.length - 1));
     dot.setAttribute("cy", y(counts.at(-1)));
@@ -769,7 +775,11 @@ function renderKeywords(kw) {
                 tdPop.title = "High demand (70+)";
             }
             const prevDayVals = prevDayRow?.markets?.[cc]?.[term];
-            const prevPop = prevDayVals?.[1];
+            // Pop baseline: the oldest sample in the rolling 24h window (i.e.
+            // the value ~24 hours ago); yesterday's daily value fills in until
+            // pop samples accumulate.
+            const popSamples = (cur.recent ?? []).filter((s) => s[2] != null);
+            const prevPop = popSamples.length > 1 ? popSamples[0][2] : prevDayVals?.[1];
             if (prevPop != null && prevPop !== cur.pop) {
                 const pd = document.createElement("span");
                 pd.className = `pop-delta ${cur.pop > prevPop ? "up" : "down"}`;
@@ -806,6 +816,13 @@ function renderKeywords(kw) {
                     add(`+ ${now.posPts.toFixed(1)} of 28.5 · suggestion #${cur.pos} of 10`, "tip-text");
                 } else {
                     add("Never appears in App Store autocomplete at any prefix — floor score of 5.", "tip-text");
+                }
+                // Intra-day flux stays visible even when it reverted.
+                if (popSamples.length > 1) {
+                    const vals = popSamples.map((s) => s[2]);
+                    const lo = Math.min(...vals);
+                    const hi = Math.max(...vals);
+                    if (lo !== hi) add(`Last 24 h: ranged ${lo}–${hi}`, "tip-change");
                 }
                 const ds = cur.daySurf;
                 if (ds && ds[0] != null && ds[0] !== cur.pop) {

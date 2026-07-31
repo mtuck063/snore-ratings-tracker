@@ -156,6 +156,10 @@ tr.changed td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 svg.spark { display: block; margin-left: auto; touch-action: none; }
 .spark-line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
 .spark-dot { fill: var(--accent); stroke: var(--bg); stroke-width: 2; }
+.spark-line.up { stroke: var(--good); }
+.spark-dot.up { fill: var(--good); }
+.spark-line.down { stroke: var(--bad); }
+.spark-dot.down { fill: var(--bad); }
 .spark-hover { fill: var(--text); stroke: var(--bg); stroke-width: 2; }
 
 .footnote { color: var(--text-secondary); font-size: 0.78rem; margin-top: 20px; line-height: 1.5; }
