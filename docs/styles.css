@@ -299,6 +299,32 @@ svg.spark { display: block; margin-left: auto; touch-action: none; }
 .pop-delta.up { color: var(--good); }
 .pop-delta.down { color: var(--bad); }
 
+.kw-name { cursor: pointer; }
+.kw-name:hover { color: var(--accent); }
+tr.kw-detail td {
+    background: var(--bg-raised);
+    white-space: normal;
+    font-size: 0.82rem;
+    padding: 8px 12px;
+}
+.kw-detail ol { margin: 0; padding-left: 20px; line-height: 1.7; }
+.kw-detail li.you { color: var(--good); font-weight: 600; }
+.kw-detail-note { color: var(--good); font-size: 0.78rem; margin-top: 4px; }
+
+#kw-competitors { margin-top: 16px; max-width: 460px; }
+.kw-comp-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+}
+.kw-comp-row:last-child { border-bottom: none; }
+.kw-comp-row.you { color: var(--good); font-weight: 600; }
+.kw-comp-stat { color: var(--text-secondary); font-size: 0.78rem; white-space: nowrap; }
+.kw-comp-row.you .kw-comp-stat { color: var(--good); }
+
 #kw-events { list-style: none; padding: 0; margin-top: 14px; }
 #kw-events li { padding: 6px 0 6px 12px; border-left: 2px solid var(--border); font-size: 0.85rem; }
 #kw-events li.first-rating { border-left-color: var(--good); }

@@ -702,6 +702,41 @@ function renderKeywords(kw) {
             const tdKw = document.createElement("td");
             tdKw.textContent = term;
             if (cur.prefix) tdKw.title = `Suggested at “${cur.prefix}”, position ${cur.pos}`;
+            // Tap the keyword to expand who holds its top 5.
+            if (cur.top?.length) {
+                tdKw.classList.add("kw-name");
+                tdKw.addEventListener("click", () => {
+                    const next = tr.nextElementSibling;
+                    if (next?.classList.contains("kw-detail")) {
+                        next.remove();
+                        return;
+                    }
+                    tbody.querySelectorAll(".kw-detail").forEach((d) => d.remove());
+                    const det = document.createElement("tr");
+                    det.className = "kw-detail";
+                    const td = document.createElement("td");
+                    td.colSpan = 8;
+                    const ol = document.createElement("ol");
+                    cur.top.forEach(([id, name]) => {
+                        const li = document.createElement("li");
+                        li.textContent = name;
+                        if (id === "6751759381") {
+                            li.classList.add("you");
+                            li.textContent += " — you";
+                        }
+                        ol.appendChild(li);
+                    });
+                    td.appendChild(ol);
+                    if (cur.rank != null && cur.rank > 5) {
+                        const note = document.createElement("div");
+                        note.className = "kw-detail-note";
+                        note.textContent = `you: #${cur.rank}`;
+                        td.appendChild(note);
+                    }
+                    det.appendChild(td);
+                    tr.after(det);
+                });
+            }
 
             const tdPop = document.createElement("td");
             tdPop.className = "col-num";
@@ -810,6 +845,47 @@ function renderKeywords(kw) {
 
             tr.append(tdKw, tdPop, tdRank, tdDelta, td24, td7d, tdBest, tdSpark);
             tbody.appendChild(tr);
+        }
+
+        // Aggregate: how many of this market's tracked keywords each app
+        // holds a top-5 slot on. Your own share is part of the picture.
+        const comp = document.getElementById("kw-competitors");
+        comp.replaceChildren();
+        const slots = new Map();
+        let measured = 0;
+        for (const cur of Object.values(kw.latest[cc])) {
+            if (!cur.top?.length) continue;
+            measured++;
+            cur.top.forEach(([id, name], i) => {
+                const e = slots.get(id) ?? { name, slots: 0, firsts: 0 };
+                e.slots++;
+                if (i === 0) e.firsts++;
+                e.name = name;
+                slots.set(id, e);
+            });
+        }
+        if (measured) {
+            comp.hidden = false;
+            const head = document.createElement("div");
+            head.className = "recent-label";
+            head.textContent = `Who owns these keywords`;
+            comp.appendChild(head);
+            const top = [...slots.entries()].sort((a, b) => b[1].slots - a[1].slots).slice(0, 8);
+            // Your own share always shows, even from outside the top 8.
+            if (!top.some(([id]) => id === "6751759381")) {
+                top.push(["6751759381", slots.get("6751759381") ?? { name: "Snore Timeline", slots: 0, firsts: 0 }]);
+            }
+            for (const [id, e] of top) {
+                const row = document.createElement("div");
+                row.className = "kw-comp-row" + (id === "6751759381" ? " you" : "");
+                const name = document.createElement("span");
+                name.textContent = id === "6751759381" ? `${e.name} — you` : e.name;
+                const stat = document.createElement("span");
+                stat.className = "kw-comp-stat";
+                stat.textContent = `top-5 on ${e.slots}/${measured}${e.firsts ? ` · ${e.firsts}× #1` : ""}`;
+                row.append(name, stat);
+                comp.appendChild(row);
+            }
         }
     };
 

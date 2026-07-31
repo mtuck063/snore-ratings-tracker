@@ -79,7 +79,9 @@ async function readJson(file, fallback) {
 
 // --- Rank: iTunes Search API -----------------------------------------------
 
-// Resolves to a 1-based rank, null (not in the top 200), or "error".
+// Resolves to { rank (1-based | null if outside top 200), top (the top five
+// [appId, name] results — competitor context that comes free with the same
+// request) } or "error".
 async function fetchRank(kw, cc, attempt = 1) {
   const url = `https://itunes.apple.com/search?term=${encodeURIComponent(kw)}&country=${cc}&entity=software&limit=200`;
   try {
@@ -89,7 +91,10 @@ async function fetchRank(kw, cc, attempt = 1) {
       return (await res.json()).results ?? [];
     });
     const idx = results.findIndex((r) => String(r.trackId) === appId);
-    return idx === -1 ? null : idx + 1;
+    return {
+      rank: idx === -1 ? null : idx + 1,
+      top: results.slice(0, 5).map((r) => [String(r.trackId), (r.trackName ?? "").slice(0, 42)]),
+    };
   } catch (err) {
     if (attempt <= BACKOFFS_MS.length) {
       await sleep(BACKOFFS_MS[attempt - 1]);
@@ -183,11 +188,17 @@ async function collectMarket(cc) {
       )
     ),
   ]);
-  const ranks = Object.fromEntries(list.map((kw, i) => [kw, rankResults[i]]));
+  const ranks = {};
+  const tops = {};
+  list.forEach((kw, i) => {
+    const r = rankResults[i];
+    ranks[kw] = r === "error" ? "error" : r.rank;
+    if (r !== "error") tops[kw] = r.top;
+  });
   const watch = Object.fromEntries(watchFor(cc).map((p, i) => [p, watchLists[i]]));
   const errors = rankResults.filter((r) => r === "error").length;
   console.log(`${cc}: collected (${errors} rank fetches failed)`);
-  return { cc, ranks, pops, watch };
+  return { cc, ranks, pops, watch, tops };
 }
 
 // --- Merge: previous-state logic, events, history, writes -------------------
@@ -227,7 +238,9 @@ async function merge(partials) {
         ...(prevKw?.recent ?? []).filter(([at]) => new Date(at) >= dayAgo),
         [fetchedAt, rank],
       ];
-      latest[cc][kw] = { rank, ...pops, recent };
+      // Top-5 result lists carry over on failure like everything else.
+      const top = part?.tops?.[kw] ?? prevKw?.top;
+      latest[cc][kw] = { rank, ...pops, recent, ...(top && { top }) };
     }
     hints[cc] = {};
     for (const p of watchFor(cc)) {
