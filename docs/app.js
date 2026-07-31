@@ -536,12 +536,22 @@ function renderRecent(events) {
         item.href = ev.type === "review" ? "#reviews-section" : "#events-section";
         const name = `${flag(ev.cc)} ${regionNames.of(ev.cc.toUpperCase())}`;
         const d = (ev.to ?? 0) - (ev.from ?? 0);
+        // Single rating -> " ★5"; several in one run -> from starsMix, with
+        // the count shown only when a star level has more than one ("★5" for
+        // a homogeneous pair since the +2 already carries the quantity).
+        let starText = "";
+        if (ev.stars) starText = ` ★${ev.stars}`;
+        else if (ev.starsMix) {
+            const added = Object.entries(ev.starsMix).filter(([, n]) => n > 0).sort((a, b) => b[0] - a[0]);
+            if (added.length === 1) starText = ` ★${added[0][0]}`;
+            else if (added.length) starText = " " + added.map(([s, n]) => (n > 1 ? `★${s}×${n}` : `★${s}`)).join(" ");
+        }
         const change =
             ev.type === "review"
                 ? `★${ev.rating} review`
                 : ev.type === "tracked"
                   ? "now tracked"
-                  : (d > 0 ? `+${fmt(d)}` : `−${fmt(Math.abs(d))}`) + (ev.stars ? ` ★${ev.stars}` : "");
+                  : (d > 0 ? `+${fmt(d)}` : `−${fmt(Math.abs(d))}`) + starText;
         item.innerHTML = `<span class="recent-name">${name}</span> <strong${d < 0 && ev.type !== "review" ? ' class="down"' : ""}>${change}</strong> <span class="recent-time">${timeText}</span>`;
         list.appendChild(item);
     }
