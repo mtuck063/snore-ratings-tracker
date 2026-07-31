@@ -80,19 +80,26 @@ function sparkline(points, label, fmtVal = fmt, minSpan = 0) {
             ? SPARK_H / 2
             : SPARK_H - pad - ((v - min) / (max - min)) * (SPARK_H - pad * 2);
 
-    // Net direction colors the line: at least one whole unit of movement so
-    // sub-unit drift doesn't read as an alarm. (Rank charts plot -rank, so
-    // "up" is better for both chart kinds.)
-    const net = counts.at(-1) - counts[0];
-    const dir = net >= 1 ? " up" : net <= -1 ? " down" : "";
-
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("class", "spark-line" + dir);
-    path.setAttribute("d", points.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.count).toFixed(1)}`).join(""));
-    svg.appendChild(path);
+    // Per-segment coloring: only the stretch that actually moved carries a
+    // color (>=1 whole unit; sub-unit drift stays neutral). Rank charts plot
+    // -rank, so "up" is better for both chart kinds. Consecutive same-
+    // direction days merge into one subpath.
+    const segDir = (i) => {
+        const d = counts[i] - counts[i - 1];
+        return d >= 1 ? " up" : d <= -1 ? " down" : "";
+    };
+    for (let i = 1; i < points.length; i++) {
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("class", "spark-line" + segDir(i));
+        path.setAttribute(
+            "d",
+            `M${x(i - 1).toFixed(1)},${y(counts[i - 1]).toFixed(1)}L${x(i).toFixed(1)},${y(counts[i]).toFixed(1)}`
+        );
+        svg.appendChild(path);
+    }
 
     const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-    dot.setAttribute("class", "spark-dot" + dir);
+    dot.setAttribute("class", "spark-dot" + (points.length > 1 ? segDir(points.length - 1) : ""));
     dot.setAttribute("r", 3);
     dot.setAttribute("cx", x(points.length - 1));
     dot.setAttribute("cy", y(counts.at(-1)));
