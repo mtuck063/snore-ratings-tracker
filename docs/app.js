@@ -532,7 +532,6 @@ function renderRecent(events) {
 
     const list = document.createElement("div");
     list.className = "recent-list";
-    const today = new Date().toLocaleDateString();
     // Every event in the 7-day window, so the sums above are verifiable by
     // eye: rows above the divider add up to the 24h figure, all rows to the
     // 7-day figure.
@@ -548,12 +547,15 @@ function renderRecent(events) {
             div.textContent = "earlier this week";
             list.appendChild(div);
         }
-        const timeText =
-            when.toLocaleDateString() === today
-                ? when.toLocaleTimeString(undefined, { timeStyle: "short" })
-                : when.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+        // Rows in the 24h window show relative time — the same clock the
+        // divider runs on, so "11h ago" vs a dated row below it reads
+        // unambiguously even when both happened on the same calendar day.
+        const timeText = isOld
+            ? when.toLocaleDateString(undefined, { month: "short", day: "numeric" })
+            : ago(ev.at);
         const item = document.createElement("a");
         item.className = isOld ? "recent-row old" : "recent-row";
+        item.title = when.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
         item.href = ev.type === "review" ? "#reviews-section" : "#events-section";
         const name = `${flag(ev.cc)} ${regionNames.of(ev.cc.toUpperCase())}`;
         const d = (ev.to ?? 0) - (ev.from ?? 0);
