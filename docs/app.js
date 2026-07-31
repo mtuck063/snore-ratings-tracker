@@ -52,7 +52,7 @@ function deltaCell(delta) {
     return span;
 }
 
-function sparkline(points, label, fmtVal = fmt) {
+function sparkline(points, label, fmtVal = fmt, minSpan = 0) {
     // points: [{date, count}] oldest→newest, nulls already dropped
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("width", SPARK_W);
@@ -63,8 +63,16 @@ function sparkline(points, label, fmtVal = fmt) {
     if (points.length < 2) return svg;
 
     const counts = points.map((p) => p.count);
-    const min = Math.min(...counts);
-    const max = Math.max(...counts);
+    let min = Math.min(...counts);
+    let max = Math.max(...counts);
+    // Without a minimum span the y-axis zooms into whatever tiny range the
+    // data has, drawing a 0.4-rank drift as a cliff. Pad to at least minSpan
+    // so slope steepness stays proportional to real movement.
+    if (minSpan && max - min < minSpan) {
+        const extra = (minSpan - (max - min)) / 2;
+        min -= extra;
+        max += extra;
+    }
     const pad = 3;
     const x = (i) => pad + (i / (points.length - 1)) * (SPARK_W - pad * 2);
     const y = (v) =>
@@ -773,7 +781,7 @@ function renderKeywords(kw) {
                     return { date: row.date, count: -avg, label: `#${avg}${range}` };
                 })
                 .filter(Boolean);
-            tdSpark.appendChild(sparkline(points, `${term} rank, last 30 days`, (v) => `#${-v}`));
+            tdSpark.appendChild(sparkline(points, `${term} rank, last 30 days`, (v) => `#${-v}`, 4));
 
             tr.append(tdKw, tdPop, tdRank, tdDelta, td24, td7d, tdBest, tdSpark);
             tbody.appendChild(tr);
