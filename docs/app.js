@@ -774,9 +774,40 @@ function renderKeywords(kw) {
                 const pd = document.createElement("span");
                 pd.className = `pop-delta ${cur.pop > prevPop ? "up" : "down"}`;
                 pd.textContent = `${cur.pop > prevPop ? "▲" : "▼"}${Math.abs(cur.pop - prevPop)}`;
-                pd.title = `Demand ${prevPop} → ${cur.pop} vs yesterday`;
                 tdPop.appendChild(pd);
             }
+            // Tap the score for how it was computed and, if it moved, why.
+            tdPop.classList.add("kw-pop");
+            tdPop.addEventListener("click", (e) => {
+                tooltip.innerHTML = "";
+                const add = (text, cls) => {
+                    const div = document.createElement("div");
+                    div.className = cls;
+                    div.textContent = text;
+                    tooltip.appendChild(div);
+                };
+                add(`Demand ${cur.pop} / 100`, "tip-value");
+                if (cur.prefix) {
+                    add(
+                        `“${term}” appears in App Store autocomplete once you type “${cur.prefix}” (${cur.prefix.length} of ${term.length} letters), at suggestion #${cur.pos}.`,
+                        "tip-text"
+                    );
+                    add("Score = how early it appears (70%) + how high it sits (30%), scaled 5–100.", "tip-text");
+                } else {
+                    add("Never appears in App Store autocomplete at any prefix — floor score of 5.", "tip-text");
+                }
+                if (cur.prevSurf) {
+                    const [pp, ppre, ppos] = cur.prevSurf;
+                    let why = "";
+                    if ((ppre ?? null) !== (cur.prefix ?? null)) {
+                        why = `: now appears at “${cur.prefix ?? "never"}” instead of “${ppre ?? "never"}”`;
+                    } else if ((ppos ?? null) !== (cur.pos ?? null)) {
+                        why = `: suggestion position moved #${ppos} → #${cur.pos}`;
+                    }
+                    add(`Changed from ${pp}${why}.`, "tip-change");
+                }
+                placeTooltip(e);
+            });
 
             const tdRank = document.createElement("td");
             tdRank.className = "col-num";

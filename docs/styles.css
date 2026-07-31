@@ -405,5 +405,22 @@ tr.kw-detail td {
 #tooltip .tip-value { font-weight: 600; font-variant-numeric: tabular-nums; }
 #tooltip .tip-date { display: block; color: var(--text-secondary); font-size: 0.72rem; }
 .tip-row { display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+.tip-text {
+    display: block;
+    white-space: normal;
+    max-width: 250px;
+    color: var(--text-secondary);
+    font-size: 0.74rem;
+    margin-top: 3px;
+}
+.tip-change {
+    display: block;
+    white-space: normal;
+    max-width: 250px;
+    color: var(--text);
+    font-size: 0.74rem;
+    margin-top: 4px;
+}
+.kw-pop { cursor: pointer; }
 .tip-swatch { width: 9px; height: 9px; border-radius: 2px; flex: none; }
 .tip-gain { color: var(--good); font-weight: 600; font-size: 0.72rem; }

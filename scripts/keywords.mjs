@@ -265,7 +265,13 @@ async function merge(partials) {
         top = prevKw.top.map((e) => (Array.isArray(e) ? e[0] : e));
         for (const e of prevKw.top) if (Array.isArray(e)) apps[e[0]] ??= { name: e[1] };
       }
-      latest[cc][kw] = { rank, ...pops, recent, ...(top && { top }) };
+      // When demand moved, keep the previous surfacing details so the
+      // dashboard can explain what changed (prefix and/or position).
+      const prevSurf =
+        prevKw && prevKw.pop !== pops.pop
+          ? [prevKw.pop, prevKw.prefix ?? null, prevKw.pos ?? null]
+          : undefined;
+      latest[cc][kw] = { rank, ...pops, recent, ...(top && { top }), ...(prevSurf && { prevSurf }) };
     }
     hints[cc] = {};
     for (const p of watchFor(cc)) {
