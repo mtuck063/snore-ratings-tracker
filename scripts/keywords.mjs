@@ -93,7 +93,11 @@ async function fetchRank(kw, cc, attempt = 1) {
     const idx = results.findIndex((r) => String(r.trackId) === appId);
     return {
       rank: idx === -1 ? null : idx + 1,
-      top: results.slice(0, 5).map((r) => [String(r.trackId), (r.trackName ?? "").slice(0, 42)]),
+      top: results.slice(0, 5).map((r) => ({
+        id: String(r.trackId),
+        name: (r.trackName ?? "").slice(0, 42),
+        icon: r.artworkUrl60 ?? null,
+      })),
     };
   } catch (err) {
     if (attempt <= BACKOFFS_MS.length) {
@@ -189,16 +193,20 @@ async function collectMarket(cc) {
     ),
   ]);
   const ranks = {};
-  const tops = {};
+  const tops = {}; // kw -> [appId x5]; app metadata deduped into `apps`
+  const apps = {};
   list.forEach((kw, i) => {
     const r = rankResults[i];
     ranks[kw] = r === "error" ? "error" : r.rank;
-    if (r !== "error") tops[kw] = r.top;
+    if (r !== "error") {
+      tops[kw] = r.top.map((t) => t.id);
+      for (const t of r.top) apps[t.id] = { name: t.name, ...(t.icon && { icon: t.icon }) };
+    }
   });
   const watch = Object.fromEntries(watchFor(cc).map((p, i) => [p, watchLists[i]]));
   const errors = rankResults.filter((r) => r === "error").length;
   console.log(`${cc}: collected (${errors} rank fetches failed)`);
-  return { cc, ranks, pops, watch, tops };
+  return { cc, ranks, pops, watch, tops, apps };
 }
 
 // --- Merge: previous-state logic, events, history, writes -------------------
@@ -208,6 +216,18 @@ async function merge(partials) {
   const today = fetchedAt.slice(0, 10);
   const prev = await readJson(dataFile, null);
   let rankFailures = 0;
+
+  // Shared app-metadata dictionary: every top-5 list stores bare app ids and
+  // resolves name/icon here, so nothing is duplicated per keyword or market.
+  // Icons are Apple CDN URLs — no image bytes stored anywhere. First market
+  // in config order wins the (localized) name, so English names take
+  // precedence; previous state only fills gaps.
+  const apps = {};
+  for (const cc of Object.keys(markets)) {
+    const part = partials.find((p) => p?.cc === cc);
+    if (part?.apps) for (const [id, meta] of Object.entries(part.apps)) apps[id] ??= meta;
+  }
+  for (const [id, meta] of Object.entries(prev?.apps ?? {})) apps[id] ??= meta;
 
   const latest = {};
   const hints = {};
@@ -239,7 +259,12 @@ async function merge(partials) {
         [fetchedAt, rank],
       ];
       // Top-5 result lists carry over on failure like everything else.
-      const top = part?.tops?.[kw] ?? prevKw?.top;
+      // Legacy carried entries ([id, name] pairs) fold into the apps map.
+      let top = part?.tops?.[kw];
+      if (!top && prevKw?.top) {
+        top = prevKw.top.map((e) => (Array.isArray(e) ? e[0] : e));
+        for (const e of prevKw.top) if (Array.isArray(e)) apps[e[0]] ??= { name: e[1] };
+      }
       latest[cc][kw] = { rank, ...pops, recent, ...(top && { top }) };
     }
     hints[cc] = {};
@@ -334,7 +359,13 @@ async function merge(partials) {
   else history.push(row);
   history.sort((a, b) => a.date.localeCompare(b.date));
 
-  await writeFile(dataFile, JSON.stringify({ fetchedAt, latest, hints, events, history }));
+  // Prune app metadata nothing references anymore.
+  const used = new Set();
+  for (const kws of Object.values(latest))
+    for (const cur of Object.values(kws)) for (const id of cur.top ?? []) used.add(id);
+  for (const id of Object.keys(apps)) if (!used.has(id)) delete apps[id];
+
+  await writeFile(dataFile, JSON.stringify({ fetchedAt, apps, latest, hints, events, history }));
   console.log(`${today}: ${Object.keys(markets).length} markets merged`);
   // The workflow greps this to decide whether to requeue on a bad runner IP.
   console.log(`RANK_FAILURES=${rankFailures}`);

@@ -679,6 +679,30 @@ function renderKeywords(kw) {
     }
     const rankText = (r) => (r == null ? "—" : `#${r}`);
 
+    // Top-5 lists hold bare app ids; names/icons resolve through the shared
+    // apps map (legacy [id, name] pairs still supported).
+    const appsMeta = kw.apps ?? {};
+    const appEntry = (e) => {
+        const id = Array.isArray(e) ? e[0] : e;
+        const meta =
+            appsMeta[id] ??
+            (Array.isArray(e) ? { name: e[1] } : { name: id === "6751759381" ? "Snore Timeline" : `app ${id}` });
+        return { id, ...meta };
+    };
+    const appLabel = ({ id, name, icon }) => {
+        const frag = document.createDocumentFragment();
+        if (icon) {
+            const img = document.createElement("img");
+            img.className = "kw-app-icon";
+            img.src = icon;
+            img.alt = "";
+            img.loading = "lazy";
+            frag.appendChild(img);
+        }
+        frag.appendChild(document.createTextNode(id === "6751759381" ? `${name} — you` : name));
+        return frag;
+    };
+
     // Sortable by demand or by rank; header click toggles direction.
     // Default: rank, best first (unranked keywords sink to the bottom).
     const sort = { key: "rank", dir: 1 };
@@ -717,13 +741,11 @@ function renderKeywords(kw) {
                     const td = document.createElement("td");
                     td.colSpan = 8;
                     const ol = document.createElement("ol");
-                    cur.top.forEach(([id, name]) => {
+                    cur.top.forEach((e) => {
+                        const entry = appEntry(e);
                         const li = document.createElement("li");
-                        li.textContent = name;
-                        if (id === "6751759381") {
-                            li.classList.add("you");
-                            li.textContent += " — you";
-                        }
+                        li.appendChild(appLabel(entry));
+                        if (entry.id === "6751759381") li.classList.add("you");
                         ol.appendChild(li);
                     });
                     td.appendChild(ol);
@@ -856,11 +878,11 @@ function renderKeywords(kw) {
         for (const cur of Object.values(kw.latest[cc])) {
             if (!cur.top?.length) continue;
             measured++;
-            cur.top.forEach(([id, name], i) => {
-                const e = slots.get(id) ?? { name, slots: 0, firsts: 0 };
+            cur.top.forEach((raw, i) => {
+                const { id } = appEntry(raw);
+                const e = slots.get(id) ?? { slots: 0, firsts: 0 };
                 e.slots++;
                 if (i === 0) e.firsts++;
-                e.name = name;
                 slots.set(id, e);
             });
         }
@@ -873,13 +895,14 @@ function renderKeywords(kw) {
             const top = [...slots.entries()].sort((a, b) => b[1].slots - a[1].slots).slice(0, 8);
             // Your own share always shows, even from outside the top 8.
             if (!top.some(([id]) => id === "6751759381")) {
-                top.push(["6751759381", slots.get("6751759381") ?? { name: "Snore Timeline", slots: 0, firsts: 0 }]);
+                top.push(["6751759381", slots.get("6751759381") ?? { slots: 0, firsts: 0 }]);
             }
             for (const [id, e] of top) {
                 const row = document.createElement("div");
                 row.className = "kw-comp-row" + (id === "6751759381" ? " you" : "");
                 const name = document.createElement("span");
-                name.textContent = id === "6751759381" ? `${e.name} — you` : e.name;
+                name.className = "kw-comp-name";
+                name.appendChild(appLabel(appEntry(id)));
                 const stat = document.createElement("span");
                 stat.className = "kw-comp-stat";
                 stat.textContent = `top-5 on ${e.slots}/${measured}${e.firsts ? ` · ${e.firsts}× #1` : ""}`;
