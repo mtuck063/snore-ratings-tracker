@@ -776,7 +776,16 @@ function renderKeywords(kw) {
                 pd.textContent = `${cur.pop > prevPop ? "▲" : "▼"}${Math.abs(cur.pop - prevPop)}`;
                 tdPop.appendChild(pd);
             }
-            // Tap the score for how it was computed and, if it moved, why.
+            // Tap the score for its arithmetic and, if it moved, a numeric
+            // before/after decomposition. Mirrors popScore in the collector:
+            // 5 base + up to 66.5 earliness + up to 28.5 list position.
+            const popParts = (prefix, pos) => {
+                if (!prefix) return null;
+                const depth = term.length === 2 ? 1 : 1 - (prefix.length - 2) / (term.length - 2);
+                const early = 0.7 * 95 * depth;
+                const posPts = 0.3 * 95 * ((10 - (pos - 1)) / 10);
+                return { early, posPts };
+            };
             tdPop.classList.add("kw-pop");
             tdPop.addEventListener("click", (e) => {
                 tooltip.innerHTML = "";
@@ -787,24 +796,41 @@ function renderKeywords(kw) {
                     tooltip.appendChild(div);
                 };
                 add(`Demand ${cur.pop} / 100`, "tip-value");
-                if (cur.prefix) {
+                const now = popParts(cur.prefix, cur.pos);
+                if (now) {
+                    add(`5 base`, "tip-text");
                     add(
-                        `“${term}” appears in App Store autocomplete once you type “${cur.prefix}” (${cur.prefix.length} of ${term.length} letters), at suggestion #${cur.pos}.`,
+                        `+ ${now.early.toFixed(1)} of 66.5 · appears after “${cur.prefix}” (${cur.prefix.length} of ${term.length} letters typed — earlier is more)`,
                         "tip-text"
                     );
-                    add("Score = how early it appears (70%) + how high it sits (30%), scaled 5–100.", "tip-text");
+                    add(`+ ${now.posPts.toFixed(1)} of 28.5 · suggestion #${cur.pos} of 10`, "tip-text");
                 } else {
                     add("Never appears in App Store autocomplete at any prefix — floor score of 5.", "tip-text");
                 }
-                if (cur.prevSurf) {
-                    const [pp, ppre, ppos] = cur.prevSurf;
-                    let why = "";
-                    if ((ppre ?? null) !== (cur.prefix ?? null)) {
-                        why = `: now appears at “${cur.prefix ?? "never"}” instead of “${ppre ?? "never"}”`;
-                    } else if ((ppos ?? null) !== (cur.pos ?? null)) {
-                        why = `: suggestion position moved #${ppos} → #${cur.pos}`;
+                const ds = cur.daySurf;
+                if (ds && ds[0] != null && ds[0] !== cur.pop) {
+                    const [dPop, dPrefix, dPos] = ds;
+                    add(
+                        `Yesterday ${dPop}: ${dPrefix ? `at “${dPrefix}” #${dPos}` : "not surfacing"}`,
+                        "tip-change"
+                    );
+                    const then = popParts(dPrefix, dPos);
+                    if (now && then) {
+                        const dEarly = now.early - then.early;
+                        const dPosP = now.posPts - then.posPts;
+                        const bits = [];
+                        if (Math.abs(dEarly) >= 0.5)
+                            bits.push(`prefix “${dPrefix}” → “${cur.prefix}”: ${dEarly > 0 ? "+" : ""}${dEarly.toFixed(1)} pts`);
+                        if (Math.abs(dPosP) >= 0.5)
+                            bits.push(`position #${dPos} → #${cur.pos}: ${dPosP > 0 ? "+" : ""}${dPosP.toFixed(1)} pts`);
+                        if (bits.length) add(`Change: ${bits.join(" · ")}`, "tip-change");
+                    } else if (now && !then) {
+                        add(`Change: started surfacing (+${(now.early + now.posPts).toFixed(1)} pts)`, "tip-change");
+                    } else if (!now && then) {
+                        add(`Change: stopped surfacing (−${(then.early + then.posPts).toFixed(1)} pts)`, "tip-change");
                     }
-                    add(`Changed from ${pp}${why}.`, "tip-change");
+                } else if (prevPop != null && prevPop !== cur.pop) {
+                    add(`Yesterday ${prevPop} — surfacing details start recording tomorrow.`, "tip-change");
                 }
                 placeTooltip(e);
             });

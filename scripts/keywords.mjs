@@ -229,6 +229,9 @@ async function merge(partials) {
   }
   for (const [id, meta] of Object.entries(prev?.apps ?? {})) apps[id] ??= meta;
 
+  // First run of a new UTC day: snapshot yesterday's closing surf details.
+  const newDay = Boolean(prev?.fetchedAt) && prev.fetchedAt.slice(0, 10) < today;
+
   const latest = {};
   const hints = {};
   for (const cc of Object.keys(markets)) {
@@ -265,13 +268,13 @@ async function merge(partials) {
         top = prevKw.top.map((e) => (Array.isArray(e) ? e[0] : e));
         for (const e of prevKw.top) if (Array.isArray(e)) apps[e[0]] ??= { name: e[1] };
       }
-      // When demand moved, keep the previous surfacing details so the
-      // dashboard can explain what changed (prefix and/or position).
-      const prevSurf =
-        prevKw && prevKw.pop !== pops.pop
-          ? [prevKw.pop, prevKw.prefix ?? null, prevKw.pos ?? null]
-          : undefined;
-      latest[cc][kw] = { rank, ...pops, recent, ...(top && { top }), ...(prevSurf && { prevSurf }) };
+      // Yesterday's surfacing details ([pop, prefix, pos] as of the previous
+      // day's last run), so the dashboard can decompose a day-over-day demand
+      // change into "prefix moved" vs "position moved" with point values.
+      const daySurf = newDay
+        ? [prevKw?.pop ?? null, prevKw?.prefix ?? null, prevKw?.pos ?? null]
+        : prevKw?.daySurf;
+      latest[cc][kw] = { rank, ...pops, recent, ...(top && { top }), ...(daySurf && { daySurf }) };
     }
     hints[cc] = {};
     for (const p of watchFor(cc)) {
