@@ -292,7 +292,7 @@ svg.spark { display: block; margin-left: auto; touch-action: none; }
 }
 
 .rank-top { color: var(--good); font-weight: 600; }
-.rank-page1 { color: var(--accent); }
+.rank-page1 { color: #7fbf94; } /* softer green: same family as top-3, one step down */
 .pop-hot { color: #facc15; font-weight: 600; }
 
 .pop-delta { font-size: 0.72rem; margin-left: 4px; }

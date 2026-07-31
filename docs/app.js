@@ -707,9 +707,9 @@ function renderKeywords(kw) {
             tdPop.className = "col-num";
             tdPop.textContent = cur.pop;
             if (cur.pop <= 5) tdPop.classList.add("muted");
-            else if (cur.pop >= 80) {
+            else if (cur.pop >= 70) {
                 tdPop.classList.add("pop-hot");
-                tdPop.title = "High demand (80+)";
+                tdPop.title = "High demand (70+)";
             }
             const prevDayVals = prevDayRow?.markets?.[cc]?.[term];
             const prevPop = prevDayVals?.[1];
