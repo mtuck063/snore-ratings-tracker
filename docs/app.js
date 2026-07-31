@@ -533,14 +533,27 @@ function renderRecent(events) {
     const list = document.createElement("div");
     list.className = "recent-list";
     const today = new Date().toLocaleDateString();
-    for (const ev of events.slice(-3).reverse()) {
+    // Every event in the 7-day window, so the sums above are verifiable by
+    // eye: rows above the divider add up to the 24h figure, all rows to the
+    // 7-day figure.
+    const weekEvents = events.filter((ev) => Date.now() - new Date(ev.at) <= 7 * 864e5).slice(-12).reverse();
+    let pastDayDivider = false;
+    for (const ev of weekEvents) {
         const when = new Date(ev.at);
+        const isOld = Date.now() - when > 864e5;
+        if (isOld && !pastDayDivider) {
+            pastDayDivider = true;
+            const div = document.createElement("div");
+            div.className = "recent-divider";
+            div.textContent = "earlier this week";
+            list.appendChild(div);
+        }
         const timeText =
             when.toLocaleDateString() === today
                 ? when.toLocaleTimeString(undefined, { timeStyle: "short" })
                 : when.toLocaleDateString(undefined, { month: "short", day: "numeric" });
         const item = document.createElement("a");
-        item.className = "recent-row";
+        item.className = isOld ? "recent-row old" : "recent-row";
         item.href = ev.type === "review" ? "#reviews-section" : "#events-section";
         const name = `${flag(ev.cc)} ${regionNames.of(ev.cc.toUpperCase())}`;
         const d = (ev.to ?? 0) - (ev.from ?? 0);

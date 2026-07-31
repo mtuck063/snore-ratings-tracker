@@ -79,6 +79,15 @@ a.check-now { display: inline-block; text-decoration: none; }
     text-decoration: none;
 }
 .recent-row:last-child { border-bottom: none; }
+.recent-row.old { opacity: 0.6; }
+.recent-divider {
+    color: var(--text-secondary);
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 8px 0 3px;
+}
 .recent-row strong { color: var(--good); font-weight: 600; }
 .recent-row strong.down { color: var(--bad); }
 .recent-row .recent-time { margin-left: auto; color: var(--text-secondary); font-size: 0.78rem; }
