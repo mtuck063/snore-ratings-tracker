@@ -389,6 +389,21 @@ tr.kw-detail td {
 }
 #kw-events .badge.new { color: var(--accent); background: rgba(91, 127, 255, 0.14); }
 
+/* NEW chip inside the keyword table itself, not just the movement log. Marks
+   rows whose blank delta columns and empty sparkline are down to the keyword
+   being new rather than to it not moving. */
+.badge.kw-new {
+    font-size: 0.65rem;
+    font-weight: 600;
+    border-radius: 5px;
+    padding: 1px 5px;
+    margin-left: 7px;
+    vertical-align: 1px;
+    color: var(--accent);
+    background: rgba(91, 127, 255, 0.14);
+    letter-spacing: 0.03em;
+}
+
 #events-section { margin-top: 32px; }
 #events-section h2 { font-size: 1.05rem; margin-bottom: 2px; }
 .section-sub { color: var(--text-secondary); font-size: 0.82rem; margin-bottom: 12px; }

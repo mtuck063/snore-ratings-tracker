@@ -296,7 +296,16 @@ async function merge(partials) {
       const daySurf = newDay
         ? [prevKw?.pop ?? null, prevKw?.prefix ?? null, prevKw?.pos ?? null]
         : prevKw?.daySurf;
-      latest[cc][kw] = { rank, ...pops, recent, ...(top && { top }), ...(daySurf && { daySurf }) };
+      // First run that ever measured this keyword, so the dashboard can badge
+      // newly tracked terms. Autotracked keywords already raise an event, but
+      // ones added by hand to the config did not show up as new anywhere.
+      // `prev &&` keeps a cold start from stamping the entire list at once.
+      const since = prevKw ? prevKw.since : prev ? today : undefined;
+      latest[cc][kw] = {
+        rank, ...pops, recent,
+        ...(since && { since }),
+        ...(top && { top }), ...(daySurf && { daySurf }),
+      };
     }
     hints[cc] = {};
     for (const p of watchFor(cc)) {

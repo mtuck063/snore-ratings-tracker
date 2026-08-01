@@ -1,4 +1,8 @@
 const SPARK_DAYS = 30;
+// How long a newly tracked keyword keeps its NEW chip in the table. Two weeks
+// is long enough to build a visible sparkline, so the chip retires about when
+// the row starts carrying real trend data.
+const NEW_KW_MS = 14 * 24 * 60 * 60 * 1000;
 const SPARK_W = 100;
 const SPARK_H = 28;
 
@@ -757,6 +761,16 @@ function renderKeywords(kw) {
             const tdKw = document.createElement("td");
             tdKw.textContent = term;
             if (cur.prefix) tdKw.title = `Suggested at “${cur.prefix}”, position ${cur.pos}`;
+            // Newly tracked terms have no history yet, so their delta columns
+            // and sparkline read as blank rather than as "no movement". The
+            // chip says which blanks are because the keyword is new.
+            if (cur.since && (Date.now() - new Date(`${cur.since}T00:00:00Z`)) < NEW_KW_MS) {
+                const chip = document.createElement("span");
+                chip.className = "badge new kw-new";
+                chip.textContent = "NEW";
+                chip.title = `Tracking started ${cur.since}`;
+                tdKw.appendChild(chip);
+            }
             // Tap the keyword to expand who holds its top 5.
             if (cur.top?.length) {
                 tdKw.classList.add("kw-name");
