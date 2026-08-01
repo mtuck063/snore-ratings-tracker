@@ -389,6 +389,40 @@ tr.kw-detail td {
 }
 #kw-events .badge.new { color: var(--accent); background: rgba(91, 127, 255, 0.14); }
 
+/* Full movement log page (keyword-log.html). The list itself reuses the
+   #kw-events rules above; everything here is the surrounding chrome. */
+.log-back { margin-bottom: 6px; }
+.log-back a { color: var(--text-secondary); font-size: 0.85rem; text-decoration: none; }
+.log-back a:hover { color: var(--accent); }
+.log-filters { margin: 14px 0 10px; display: flex; flex-direction: column; gap: 8px; }
+.log-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.log-row #log-types { display: flex; flex-wrap: wrap; gap: 6px; }
+#log-search {
+    flex: 1 1 190px;
+    min-width: 150px;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 6px 10px;
+    font-size: 0.85rem;
+}
+#log-search:focus { outline: none; border-color: var(--accent); }
+/* Day separator: hundreds of rows otherwise blur into one column of times. */
+li.log-day {
+    list-style: none;
+    border-left: none;
+    padding: 14px 0 4px;
+    color: var(--text-secondary);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.kw-log-link { font-size: 0.82rem; margin-top: 10px; }
+.kw-log-link a { color: var(--accent); text-decoration: none; }
+.kw-log-link a:hover { text-decoration: underline; }
+
 /* NEW chip inside the keyword table itself, not just the movement log. Marks
    rows whose blank delta columns and empty sparkline are down to the keyword
    being new rather than to it not moving. */

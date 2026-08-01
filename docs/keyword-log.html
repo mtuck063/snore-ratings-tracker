@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0F1419">
+    <title>Keyword movement log · Snore Timeline</title>
+    <link rel="stylesheet" href="styles.css?v=43">
+</head>
+<body>
+    <main>
+        <header>
+            <p class="log-back"><a href="./">&larr; Ratings tracker</a></p>
+            <h1>Keyword movement log</h1>
+            <p id="meta">Loading…</p>
+        </header>
+
+        <section>
+            <!-- The list keeps id="kw-events" so it inherits the same styling as
+                 the short log on the main page; only the filters are new. -->
+            <div class="log-filters">
+                <div class="log-row" id="log-markets"></div>
+                <div class="log-row">
+                    <div id="log-types"></div>
+                    <input id="log-search" type="search" placeholder="Filter by keyword…"
+                           autocomplete="off" spellcheck="false">
+                </div>
+            </div>
+            <p id="log-count" class="section-sub"></p>
+            <ol id="kw-events"></ol>
+            <p id="log-empty" class="section-sub" hidden>Nothing matches those filters.</p>
+        </section>
+    </main>
+    <script src="keyword-log.js?v=1"></script>
+</body>
+</html>

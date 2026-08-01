@@ -1119,8 +1119,18 @@ function renderKeywords(kw) {
     updateArrows();
     render(marketCcs[0]);
 
-    // Movement log: notable rank moves and newly appearing suggestions.
-    const kwEvents = (kw.events ?? []).slice(-30).reverse();
+    // Movement log: notable rank moves and newly appearing suggestions. Only
+    // the newest 30 here — keyword-log.html carries the full history.
+    const allKwEvents = kw.events ?? [];
+    const kwEvents = allKwEvents.slice(-30).reverse();
+    if (allKwEvents.length > kwEvents.length) {
+        const link = document.getElementById("kw-log-link");
+        if (link) {
+            link.hidden = false;
+            link.querySelector("a").textContent =
+                `See all ${allKwEvents.length.toLocaleString()} changes →`;
+        }
+    }
     if (kwEvents.length) {
         const list = document.getElementById("kw-events");
         list.hidden = false;

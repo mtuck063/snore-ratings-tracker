@@ -1,0 +1,152 @@
+// Full keyword movement log. The main page shows the last 30 entries; this
+// shows every one, with filters, because the log now runs to hundreds of rows
+// across seven markets and a single scroll of the newest 30 hid most of it.
+//
+// Row markup deliberately matches the main page's #kw-events list so the shared
+// CSS applies unchanged — only the filter bar and day headings are new here.
+
+const flag = (cc) =>
+    String.fromCodePoint(...[...cc.toUpperCase()].map((ch) => 0x1f1a5 + ch.charCodeAt(0)));
+
+const rankText = (r) => (r == null ? "—" : `#${r}`);
+
+const MARKET_NAMES = {
+    us: "United States", ca: "Canada", gb: "United Kingdom", au: "Australia",
+    fr: "France", es: "Spain", mx: "Mexico",
+};
+
+const state = { market: "all", type: "all", q: "" };
+let events = [];
+
+function chip(label, active, onClick) {
+    const b = document.createElement("button");
+    b.className = "kw-tab" + (active ? " active" : "");
+    b.textContent = label;
+    b.addEventListener("click", onClick);
+    return b;
+}
+
+function matches(ev) {
+    if (state.market !== "all" && ev.cc !== state.market) return false;
+    const type = ev.type ?? "rank";
+    if (state.type !== "all" && type !== state.type) return false;
+    if (state.q) {
+        const hay = `${ev.kw ?? ""} ${ev.term ?? ""} ${ev.prefix ?? ""}`.toLowerCase();
+        if (!hay.includes(state.q)) return false;
+    }
+    return true;
+}
+
+// Same three shapes the main page renders. Keyword text goes in via textContent
+// because it originates from Apple's API, not from us.
+function row(ev) {
+    const li = document.createElement("li");
+    const when = new Date(ev.at);
+    const time = `<span class="event-time">${when.toLocaleTimeString(undefined, { timeStyle: "short" })}</span>`;
+    if (ev.type === "hint") {
+        li.innerHTML = `${time}${flag(ev.cc)} Apple now suggests <strong></strong> under “${ev.prefix}”<span class="badge new">NEW</span>`;
+        li.querySelector("strong").textContent = `“${ev.term}”`;
+    } else if (ev.type === "autotrack") {
+        li.className = "first-rating";
+        li.innerHTML = `${time}${flag(ev.cc)} now tracking <strong></strong><span class="badge new">AUTO</span>`;
+        li.querySelector("strong").textContent = `“${ev.term}”`;
+    } else {
+        const better = ev.to != null && (ev.from == null || ev.to < ev.from);
+        li.className = better ? "first-rating" : "";
+        li.innerHTML = `${time}${flag(ev.cc)} <strong></strong> ${rankText(ev.from)} → ${rankText(ev.to)}`;
+        li.querySelector("strong").textContent = ev.kw;
+    }
+    return li;
+}
+
+function render() {
+    const list = document.getElementById("kw-events");
+    list.replaceChildren();
+    const shown = events.filter(matches);
+
+    // Day headings: with hundreds of rows, a bare timestamp column makes it hard
+    // to tell where one collection run ends and the next begins.
+    let lastDay = null;
+    for (const ev of shown) {
+        const day = new Date(ev.at).toLocaleDateString(undefined,
+            { weekday: "short", month: "short", day: "numeric" });
+        if (day !== lastDay) {
+            lastDay = day;
+            const h = document.createElement("li");
+            h.className = "log-day";
+            h.textContent = day;
+            list.appendChild(h);
+        }
+        list.appendChild(row(ev));
+    }
+
+    document.getElementById("log-count").textContent =
+        `${shown.length.toLocaleString()} of ${events.length.toLocaleString()} entries`;
+    document.getElementById("log-empty").hidden = shown.length > 0;
+}
+
+function buildFilters() {
+    const markets = [...new Set(events.map((e) => e.cc))].sort();
+    const mrow = document.getElementById("log-markets");
+    const paint = () => {
+        mrow.replaceChildren();
+        mrow.appendChild(chip("All markets", state.market === "all", () => {
+            state.market = "all"; paint(); render();
+        }));
+        for (const cc of markets) {
+            const n = events.filter((e) => e.cc === cc).length;
+            mrow.appendChild(chip(`${flag(cc)} ${cc.toUpperCase()} ${n}`, state.market === cc, () => {
+                state.market = cc; paint(); render();
+            }));
+        }
+    };
+    paint();
+
+    const trow = document.getElementById("log-types");
+    const types = [
+        ["all", "All changes"],
+        ["rank", "Rank moves"],
+        ["hint", "New suggestions"],
+        ["autotrack", "Newly tracked"],
+    ];
+    const paintTypes = () => {
+        trow.replaceChildren();
+        for (const [key, label] of types) {
+            const n = key === "all" ? events.length
+                : events.filter((e) => (e.type ?? "rank") === key).length;
+            if (!n && key !== "all") continue;
+            trow.appendChild(chip(`${label} ${n}`, state.type === key, () => {
+                state.type = key; paintTypes(); render();
+            }));
+        }
+    };
+    paintTypes();
+
+    let t;
+    document.getElementById("log-search").addEventListener("input", (e) => {
+        clearTimeout(t);
+        const v = e.target.value.trim().toLowerCase();
+        t = setTimeout(() => { state.q = v; render(); }, 120);
+    });
+}
+
+async function main() {
+    const meta = document.getElementById("meta");
+    try {
+        const kw = await fetch("data/keywords.json", { cache: "no-cache" }).then((r) => r.json());
+        events = (kw.events ?? []).slice().reverse();   // newest first
+        if (!events.length) { meta.textContent = "No keyword events recorded yet."; return; }
+        const newest = new Date(events[0].at);
+        const oldest = new Date(events[events.length - 1].at);
+        const fmt = (d) => d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+        meta.textContent =
+            `${events.length.toLocaleString()} entries · ${fmt(oldest)} to ${fmt(newest)} · `
+            + `${new Set(events.map((e) => e.cc)).size} markets`;
+        buildFilters();
+        render();
+    } catch (err) {
+        meta.textContent = `Could not load the keyword log: ${err.message}`;
+    }
+}
+
+main();
