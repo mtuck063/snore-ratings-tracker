@@ -324,28 +324,49 @@ tr.kw-detail td {
     background: var(--bg-raised);
 }
 
-/* Seven columns do not fit a phone, so the table pans sideways inside its own
-   box rather than widening the page. The app-name column stays put while the
-   numbers scroll under it. */
-#kw-competitors { margin-top: 16px; overflow-x: auto; }
+/* Seven columns do not fit a phone, so the table pans sideways. Only the table
+   scrolls — the heading and note sit outside .kw-comp-scroll so they do not
+   slide out of view with it. */
+#kw-competitors { margin-top: 16px; }
 .kw-comp-note {
     color: var(--text-secondary);
     font-size: 0.78rem;
     margin: 2px 0 10px;
     max-width: 560px;
 }
-.kw-comp-table { min-width: 560px; }
+.kw-comp-scroll { overflow-x: auto; }
+
+/* table-layout: fixed is load-bearing. Under the default auto layout a cell
+   grows to fit its content and max-width is ignored, so the name column got
+   wide enough to sit under the number columns. Fixed layout honours the widths
+   below, which also keeps thead and tbody in step. */
+.kw-comp-table { min-width: 588px; table-layout: fixed; }
 .kw-comp-table td { font-size: 0.85rem; }
 .kw-comp-table tbody tr:last-child td { border-bottom: none; }
-.kw-comp-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 230px;
+
+/* App, Top-5, #1, Released, Age, Ratings, Score */
+.kw-comp-table th:nth-child(1), .kw-comp-table td:nth-child(1) { width: 200px; }
+.kw-comp-table th:nth-child(2), .kw-comp-table td:nth-child(2) { width: 62px; }
+.kw-comp-table th:nth-child(3), .kw-comp-table td:nth-child(3) { width: 46px; }
+.kw-comp-table th:nth-child(4), .kw-comp-table td:nth-child(4) { width: 82px; }
+.kw-comp-table th:nth-child(5), .kw-comp-table td:nth-child(5) { width: 54px; }
+.kw-comp-table th:nth-child(6), .kw-comp-table td:nth-child(6) { width: 84px; }
+.kw-comp-table th:nth-child(7), .kw-comp-table td:nth-child(7) { width: 60px; }
+
+/* The name column pins while the numbers pan under it. The header cell has to
+   be sticky too or it drifts away from the body column. z-index is required:
+   sticky cells with z-index:auto paint in DOM order, so the later number cells
+   would otherwise draw on top of the pinned name — most visibly on the bold
+   "you" row, whose wider text reaches furthest right. */
+.kw-comp-table th:nth-child(1),
+.kw-comp-table td:nth-child(1) {
     position: sticky;
     left: 0;
+    z-index: 2;
     background: var(--bg);
+    box-shadow: 1px 0 0 var(--border);
 }
+.kw-comp-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .kw-comp-table tr.you td { color: var(--good); font-weight: 600; }
 .kw-comp-table tr.you td.muted { color: var(--good); opacity: 0.75; }
 

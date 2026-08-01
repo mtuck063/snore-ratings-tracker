@@ -1065,7 +1065,11 @@ function renderKeywords(kw) {
                 tb.appendChild(row);
             }
             table.appendChild(tb);
-            comp.appendChild(table);
+            // Only the table pans sideways; the heading and note stay put.
+            const scroller = document.createElement("div");
+            scroller.className = "kw-comp-scroll";
+            scroller.appendChild(table);
+            comp.appendChild(scroller);
         }
     };
 
