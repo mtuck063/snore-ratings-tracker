@@ -1,1970 +1,3454 @@
 {
- "fr": [
+ "us": [
   {
-   "term": "enregistrement nuit",
-   "demand": 97,
-   "via": "root",
-   "prefix": "nuit"
-  },
-  {
-   "term": "apnee du sommeil gratuit",
-   "demand": 94,
-   "via": "root",
-   "prefix": "apne"
-  },
-  {
-   "term": "dormir",
-   "demand": 90,
-   "via": "root",
-   "prefix": "dormir"
-  },
-  {
-   "term": "reveil gratuit",
-   "demand": 90,
-   "via": "root",
-   "prefix": "reveil"
-  },
-  {
-   "term": "alarme reveil",
-   "demand": 90,
-   "via": "root",
-   "prefix": "alarme"
-  },
-  {
-   "term": "sieste bebe",
-   "demand": 90,
-   "via": "root",
-   "prefix": "sieste"
-  },
-  {
-   "term": "sommeil enregistre",
-   "demand": 90,
-   "via": "both",
-   "prefix": "sommei"
-  },
-  {
-   "term": "il ronfle",
-   "demand": 90,
-   "via": "both",
-   "prefix": "il ron"
-  },
-  {
-   "term": "apnee du sommeil",
-   "demand": 89,
-   "via": "root",
-   "prefix": "apne"
-  },
-  {
-   "term": "dormir enregistrer",
-   "demand": 88,
-   "via": "root",
-   "prefix": "dormir"
-  },
-  {
-   "term": "reveil",
-   "demand": 88,
-   "via": "root",
-   "prefix": "reveil"
-  },
-  {
-   "term": "sieste",
-   "demand": 88,
-   "via": "root",
-   "prefix": "sieste"
-  },
-  {
-   "term": "sommeil",
-   "demand": 88,
-   "via": "both",
-   "prefix": "sommei"
-  },
-  {
-   "term": "bien dormir",
-   "demand": 88,
-   "via": "framing",
-   "prefix": "bien d"
-  },
-  {
-   "term": "ronfle",
-   "demand": 87,
-   "via": "root",
-   "prefix": "ronfl"
-  },
-  {
-   "term": "enregistreur nuit",
-   "demand": 87,
-   "via": "root",
-   "prefix": "nuit "
-  },
-  {
-   "term": "apnée sommeil",
-   "demand": 86,
-   "via": "root",
-   "prefix": "apne"
-  },
-  {
-   "term": "dormir moins bete",
-   "demand": 85,
-   "via": "root",
-   "prefix": "dormir"
-  },
-  {
-   "term": "reveil musique",
-   "demand": 85,
-   "via": "root",
-   "prefix": "reveil"
-  },
-  {
-   "term": "réveille gratuit",
-   "demand": 85,
-   "via": "root",
-   "prefix": "réveil"
-  },
-  {
-   "term": "alarme reveil gratuit",
-   "demand": 85,
-   "via": "root",
-   "prefix": "alarme"
-  },
-  {
-   "term": "sieste 15 min",
-   "demand": 85,
-   "via": "root",
-   "prefix": "sieste"
-  },
-  {
-   "term": "sommeil bebe",
-   "demand": 85,
-   "via": "both",
-   "prefix": "sommei"
-  },
-  {
-   "term": "je vais bien dormir",
-   "demand": 85,
-   "via": "framing",
-   "prefix": "bien d"
-  },
-  {
-   "term": "glimm - lumière pour dormir",
-   "demand": 82,
-   "via": "root",
-   "prefix": "dormir"
-  },
-  {
-   "term": "reveil photo",
-   "demand": 82,
-   "via": "root",
-   "prefix": "reveil"
-  },
-  {
-   "term": "sommeil apple watch",
-   "demand": 82,
-   "via": "both",
-   "prefix": "sommei"
-  },
-  {
-   "term": "suivi de sommeil",
-   "demand": 81,
-   "via": "root",
-   "prefix": "suivi"
-  },
-  {
-   "term": "insomnie",
-   "demand": 81,
-   "via": "root",
-   "prefix": "insomnie"
-  },
-  {
-   "term": "bruxisme",
-   "demand": 81,
-   "via": "root",
-   "prefix": "bruxisme"
-  },
-  {
-   "term": "y ronfle",
-   "demand": 80,
-   "via": "root",
-   "prefix": "ronfle "
-  },
-  {
-   "term": "reveil intelligent",
-   "demand": 80,
-   "via": "root",
-   "prefix": "reveil "
-  },
-  {
-   "term": "son dormir",
-   "demand": 79,
-   "via": "root",
-   "prefix": "dormir"
-  },
-  {
-   "term": "reveil simulateur d’aube",
-   "demand": 79,
-   "via": "root",
-   "prefix": "reveil"
-  },
-  {
-   "term": "réveil personnalisée",
-   "demand": 79,
-   "via": "root",
-   "prefix": "réveil"
-  },
-  {
-   "term": "sommeil de marmotte",
-   "demand": 79,
-   "via": "both",
-   "prefix": "sommei"
-  },
-  {
-   "term": "bruxisme+ grincements de dents",
-   "demand": 78,
-   "via": "root",
-   "prefix": "bruxisme"
-  },
-  {
-   "term": "e ronfle",
-   "demand": 77,
-   "via": "root",
-   "prefix": "ronfle "
-  },
-  {
-   "term": "application dormir",
-   "demand": 76,
-   "via": "root",
-   "prefix": "dormir"
-  },
-  {
-   "term": "réveil iphone gratuit",
-   "demand": 76,
-   "via": "root",
-   "prefix": "reveil"
-  },
-  {
-   "term": "la sieste - powernap manga",
-   "demand": 76,
-   "via": "root",
-   "prefix": "sieste"
-  },
-  {
-   "term": "sommeil petit bambou",
-   "demand": 76,
-   "via": "both",
-   "prefix": "sommei"
-  },
-  {
-   "term": "appli ronflement",
-   "demand": 76,
-   "via": "both",
-   "prefix": "appli ron"
-  },
-  {
-   "term": "suivi sommeil & ronflement #1",
-   "demand": 76,
-   "via": "both",
-   "prefix": "sommeil r"
-  },
-  {
-   "term": "i ronfle",
-   "demand": 75,
-   "via": "root",
-   "prefix": "ronfl"
-  },
-  {
-   "term": "insomnie - recherche cognitive",
-   "demand": 75,
-   "via": "root",
-   "prefix": "insomnie"
-  },
-  {
-   "term": "reveille fort",
-   "demand": 75,
-   "via": "root",
-   "prefix": "reveille"
-  },
-  {
-   "term": "mieux dormir",
-   "demand": 73,
-   "via": "root",
-   "prefix": "dormir"
-  },
-  {
-   "term": "reveille",
-   "demand": 73,
-   "via": "root",
-   "prefix": "reveil"
-  },
-  {
-   "term": "réveil cycle sommeil",
-   "demand": 73,
-   "via": "root",
-   "prefix": "réveil"
-  },
-  {
-   "term": "nap&up - la micro-sieste",
-   "demand": 73,
-   "via": "root",
-   "prefix": "sieste"
-  },
-  {
-   "term": "sommeil avec petit bambou",
-   "demand": 73,
-   "via": "both",
-   "prefix": "sommei"
-  },
-  {
-   "term": "mieux dormir avec science",
-   "demand": 73,
-   "via": "both",
-   "prefix": "mieux dor"
-  },
-  {
-   "term": "suivi sommeil gratuit",
-   "demand": 73,
-   "via": "both",
-   "prefix": "suivi som"
-  },
-  {
-   "term": "tracker de sommeil & réveil",
-   "demand": 73,
-   "via": "framing",
-   "prefix": "sommeil r"
-  },
-  {
-   "term": "apnee du sommeil - somnio+",
-   "demand": 72,
-   "via": "root",
-   "prefix": "apnee"
-  },
-  {
-   "term": "insomnie mouton",
-   "demand": 72,
-   "via": "root",
-   "prefix": "insomnie"
-  },
-  {
-   "term": "tolpie ∙ contrôlez le bruxisme",
-   "demand": 72,
-   "via": "root",
-   "prefix": "bruxisme"
-  },
-  {
-   "term": "reveille musique",
-   "demand": 72,
-   "via": "root",
-   "prefix": "reveille"
-  },
-  {
-   "term": "appli dormir",
-   "demand": 71,
-   "via": "root",
-   "prefix": "dormir"
-  },
-  {
-   "term": "reveil spotify",
-   "demand": 71,
-   "via": "root",
-   "prefix": "reveil"
-  },
-  {
-   "term": "réveil pour moi.",
-   "demand": 71,
-   "via": "root",
-   "prefix": "réveil"
-  },
-  {
-   "term": "sommeil enregistre gratuit",
-   "demand": 71,
-   "via": "both",
-   "prefix": "sommei"
-  },
-  {
-   "term": "horloge digitale - réveiller",
-   "demand": 71,
-   "via": "root",
-   "prefix": "réveiller"
-  },
-  {
-   "term": "enregistreur de sommeil™",
-   "demand": 71,
-   "via": "both",
-   "prefix": "enregi"
-  },
-  {
-   "term": "suivi sommeil bebe",
-   "demand": 71,
-   "via": "both",
-   "prefix": "suivi som"
-  },
-  {
-   "term": "sleep z - app pour bien dormir",
-   "demand": 71,
-   "via": "framing",
-   "prefix": "bien d"
-  },
-  {
-   "term": "reveille photo",
-   "demand": 70,
-   "via": "root",
-   "prefix": "reveille"
-  },
-  {
-   "term": "bruit dormir",
-   "demand": 68,
-   "via": "root",
-   "prefix": "dormir"
-  },
-  {
-   "term": "réveil musique gratuit",
-   "demand": 68,
-   "via": "root",
-   "prefix": "reveil"
-  },
-  {
-   "term": "réveil musique et radio",
-   "demand": 68,
-   "via": "root",
-   "prefix": "réveil"
-  },
-  {
-   "term": "sommeil gratuit",
-   "demand": 68,
-   "via": "both",
-   "prefix": "sommei"
-  },
-  {
-   "term": "berceuses pour mieux dormir",
-   "demand": 68,
-   "via": "both",
-   "prefix": "mieux dor"
-  },
-  {
-   "term": "suivi de dette de sommeil",
-   "demand": 68,
-   "via": "framing",
-   "prefix": "dette "
-  },
-  {
-   "term": "sons sommeil apaisants",
-   "demand": 68,
-   "via": "framing",
-   "prefix": "sommeil a"
-  },
-  {
-   "term": "histoire dormir",
-   "demand": 65,
-   "via": "root",
-   "prefix": "dormir"
-  },
-  {
-   "term": "réveil iphone",
-   "demand": 65,
-   "via": "root",
-   "prefix": "reveil"
-  },
-  {
-   "term": "réveil musique pour spotify",
-   "demand": 65,
-   "via": "root",
-   "prefix": "réveil"
-  },
-  {
-   "term": "alarme reveil gratuit musique",
-   "demand": 65,
-   "via": "root",
-   "prefix": "alarme"
-  },
-  {
-   "term": "tracker micro-sieste",
-   "demand": 65,
-   "via": "root",
-   "prefix": "sieste"
-  },
-  {
-   "term": "sommeil couple",
-   "demand": 65,
-   "via": "both",
-   "prefix": "sommei"
-  },
-  {
-   "term": "agenda du sommeil antifatigue",
-   "demand": 65,
-   "via": "framing",
-   "prefix": "sommeil a"
-  },
-  {
-   "term": "carnet de bébé + suivi sommeil",
-   "demand": 65,
-   "via": "framing",
-   "prefix": "suivi som"
-  },
-  {
-   "term": "reveille musique gratuit",
-   "demand": 64,
-   "via": "root",
-   "prefix": "reveille"
-  },
-  {
-   "term": "sommeil & reveil tracker",
-   "demand": 62,
-   "via": "framing",
-   "prefix": "sommeil r"
-  },
-  {
-   "term": "réveiller",
-   "demand": 61,
-   "via": "root",
-   "prefix": "reveille"
-  },
-  {
-   "term": "enregistreur ronflement",
-   "demand": 60,
-   "via": "root",
-   "prefix": "ronflement"
-  },
-  {
-   "term": "babyflow - repas sommeil bébé",
-   "demand": 59,
-   "via": "root",
-   "prefix": "sommeil bebe"
-  },
-  {
-   "term": "application reveil photo",
-   "demand": 59,
-   "via": "root",
-   "prefix": "reveil photo"
-  },
-  {
-   "term": "sommeil & relaxation",
-   "demand": 59,
-   "via": "framing",
-   "prefix": "sommeil r"
-  },
-  {
-   "term": "suivi sommeil cpap feeltracker",
-   "demand": 59,
-   "via": "framing",
-   "prefix": "suivi som"
-  },
-  {
-   "term": "reveille pompe",
-   "demand": 58,
-   "via": "root",
-   "prefix": "reveille"
-  },
-  {
-   "term": "snoretrackpro anti-ronflement",
-   "demand": 56,
-   "via": "both",
-   "prefix": "anti ronf"
-  },
-  {
-   "term": "enregistrer sommeil",
-   "demand": 56,
-   "via": "framing",
-   "prefix": "enregistrer "
-  },
-  {
-   "term": "enregistreur de sommeil appli",
-   "demand": 56,
-   "via": "framing",
-   "prefix": "sommeil a"
-  },
-  {
-   "term": "réveillez-vous - voici les intrus!",
-   "demand": 55,
-   "via": "root",
-   "prefix": "reveille"
-  },
-  {
-   "term": "détecteur ronflement sommeil",
-   "demand": 54,
-   "via": "root",
-   "prefix": "ronflement"
-  },
-  {
-   "term": "cycle sommeil gratuit",
-   "demand": 54,
-   "via": "root",
-   "prefix": "cycle sommeil"
-  },
-  {
-   "term": "application sommeil bebe",
-   "demand": 53,
-   "via": "root",
-   "prefix": "sommeil bebe"
-  },
-  {
-   "term": "anna sommeil relâchement jeu",
-   "demand": 53,
-   "via": "framing",
-   "prefix": "sommeil r"
-  },
-  {
-   "term": "méditation & sommeil apaisants",
-   "demand": 53,
-   "via": "framing",
-   "prefix": "sommeil a"
-  },
-  {
-   "term": "suivi sommeil & ronflement",
-   "demand": 53,
-   "via": "framing",
-   "prefix": "suivi som"
-  },
-  {
-   "term": "alarme reveil musique",
-   "demand": 52,
-   "via": "root",
-   "prefix": "alarme reveil"
-  },
-  {
-   "term": "appli sommeil couple",
-   "demand": 52,
-   "via": "root",
-   "prefix": "sommeil couple"
-  },
-  {
-   "term": "reveil spotify gratuit",
-   "demand": 52,
-   "via": "root",
-   "prefix": "reveil spotify"
-  },
-  {
-   "term": "sommeil bébé",
-   "demand": 51,
-   "via": "root",
-   "prefix": "sommeil bebe"
-  },
-  {
-   "term": "dreamer - suivi sommeil bébé",
-   "demand": 51,
-   "via": "both",
-   "prefix": "suivi som"
-  },
-  {
-   "term": "bruit brun - sommeil & relax",
-   "demand": 51,
-   "via": "framing",
-   "prefix": "sommeil r"
-  },
-  {
-   "term": "somno - suivi du sommeil ai",
-   "demand": 51,
-   "via": "framing",
-   "prefix": "sommeil a"
-  },
-  {
-   "term": "calcul cycle sommeil",
-   "demand": 49,
-   "via": "root",
-   "prefix": "cycle sommeil"
-  },
-  {
-   "term": "sommeil bébé & bruit blanc",
-   "demand": 48,
-   "via": "root",
-   "prefix": "sommeil bebe"
-  },
-  {
-   "term": "analyse sommeil gratuit",
-   "demand": 48,
-   "via": "root",
-   "prefix": "analyse sommeil"
-  },
-  {
-   "term": "journal sommeil",
-   "demand": 48,
-   "via": "root",
-   "prefix": "journal sommeil"
-  },
-  {
-   "term": "qualite sommeil",
-   "demand": 48,
-   "via": "root",
-   "prefix": "qualite sommeil"
-  },
-  {
-   "term": "appli sommeil gratuit",
-   "demand": 48,
-   "via": "root",
-   "prefix": "sommeil gratuit"
-  },
-  {
-   "term": "horloge reveil gratuit",
-   "demand": 47,
-   "via": "root",
-   "prefix": "reveil gratuit"
-  },
-  {
-   "term": "réveil spotify",
-   "demand": 47,
-   "via": "root",
-   "prefix": "reveil spotify"
-  },
-  {
-   "term": "detecteur de ronflements",
-   "demand": 46,
-   "via": "root",
-   "prefix": "ronflement"
-  },
-  {
-   "term": "alarme reveil hd",
-   "demand": 46,
-   "via": "root",
-   "prefix": "alarme reveil"
-  },
-  {
-   "term": "sommeil bébé berceuse",
-   "demand": 45,
-   "via": "root",
-   "prefix": "sommeil bebe"
-  },
-  {
-   "term": "tracker sommeil",
-   "demand": 45,
-   "via": "root",
-   "prefix": "tracker sommeil"
-  },
-  {
-   "term": "application sommeil",
-   "demand": 45,
-   "via": "both",
-   "prefix": "application som"
-  },
-  {
-   "term": "son reveil gratuit",
-   "demand": 44,
-   "via": "root",
-   "prefix": "reveil gratuit"
-  },
-  {
-   "term": "reveil musique deezer",
-   "demand": 44,
-   "via": "root",
-   "prefix": "reveil musique"
-  },
-  {
-   "term": "alarme reveil intelligent",
-   "demand": 43,
-   "via": "root",
-   "prefix": "alarme reveil"
-  },
-  {
-   "term": "suivi de sommeil gratuit",
-   "demand": 43,
-   "via": "root",
-   "prefix": "suivi de sommeil"
-  },
-  {
-   "term": "bruit blanc sommeil bébé",
-   "demand": 42,
-   "via": "root",
-   "prefix": "sommeil bébé"
-  },
-  {
-   "term": "ronflement - analyse sommeil",
-   "demand": 42,
-   "via": "root",
-   "prefix": "analyse sommeil"
-  },
-  {
-   "term": "mon journal sommeil bébé",
-   "demand": 42,
-   "via": "root",
-   "prefix": "journal sommeil"
-  },
-  {
-   "term": "enregistreur sommeil gratuit",
-   "demand": 42,
-   "via": "root",
-   "prefix": "sommeil gratuit"
-  },
-  {
-   "term": "application reveil musique",
-   "demand": 41,
-   "via": "root",
-   "prefix": "reveil musique"
-  },
-  {
-   "term": "math alarm - alarme réveil",
-   "demand": 40,
-   "via": "root",
-   "prefix": "alarme reveil"
-  },
-  {
-   "term": "widget santé & analyse sommeil",
-   "demand": 39,
-   "via": "root",
-   "prefix": "analyse sommeil"
-  },
-  {
-   "term": "baby tracker sommeil,activités",
-   "demand": 39,
-   "via": "root",
-   "prefix": "tracker sommeil"
-  },
-  {
-   "term": "sonnerie reveil gratuit",
-   "demand": 38,
-   "via": "root",
-   "prefix": "reveil gratuit"
-  },
-  {
-   "term": "sleep cycle - suivi de sommeil",
-   "demand": 37,
-   "via": "root",
-   "prefix": "suivi de sommeil"
-  },
-  {
-   "term": "radio reveil gratuit",
-   "demand": 35,
-   "via": "root",
-   "prefix": "reveil gratuit"
-  },
-  {
-   "term": "appli reveil musique",
-   "demand": 35,
-   "via": "root",
-   "prefix": "reveil musique"
-  },
-  {
-   "term": "le sommeil de marmotte",
-   "demand": 34,
-   "via": "root",
-   "prefix": "sommeil de marmotte "
-  },
-  {
-   "term": "réveil gratuit",
-   "demand": 33,
-   "via": "root",
-   "prefix": "reveil gratuit"
-  },
-  {
-   "term": "suivi de sommeil - wakey",
-   "demand": 32,
-   "via": "root",
-   "prefix": "suivi de sommeil"
-  },
-  {
-   "term": "enregistrement sommeil gratuit",
-   "demand": 31,
-   "via": "root",
-   "prefix": "sommeil gratuit"
-  },
-  {
-   "term": "détecteur de ronflements",
-   "demand": 31,
-   "via": "root",
-   "prefix": "detecteur de ronflements"
-  },
-  {
-   "term": "suivi de sommeil - sleep cycle",
-   "demand": 29,
-   "via": "root",
-   "prefix": "suivi de sommeil"
-  },
-  {
-   "term": "réveil intelligent du matin",
-   "demand": 28,
-   "via": "root",
-   "prefix": "reveil intelligent"
-  },
-  {
-   "term": "appli enregistrement sommeil",
-   "demand": 28,
-   "via": "root",
-   "prefix": "enregistrement sommeil"
-  },
-  {
-   "term": "bébé suivi de sommeil - caro",
-   "demand": 26,
-   "via": "root",
-   "prefix": "suivi de sommeil"
-  },
-  {
-   "term": "application sommeil gratuit",
-   "demand": 25,
-   "via": "root",
-   "prefix": "sommeil gratuit"
-  },
-  {
-   "term": "réveil intelligent - alarmer",
-   "demand": 25,
-   "via": "root",
-   "prefix": "reveil intelligent"
-  },
-  {
-   "term": "application enregistrement sommeil",
-   "demand": 25,
-   "via": "root",
-   "prefix": "enregistrement sommeil"
-  },
-  {
-   "term": "tracker sommeil gratuit",
-   "demand": 22,
-   "via": "root",
-   "prefix": "sommeil gratuit"
-  },
-  {
-   "term": "réveil intelligent - step out!",
-   "demand": 22,
-   "via": "root",
-   "prefix": "reveil intelligent"
-  },
-  {
-   "term": "sleepzy - réveil intelligent",
-   "demand": 19,
-   "via": "root",
-   "prefix": "reveil intelligent"
-  },
-  {
-   "term": "sleep timer réveil intelligent",
-   "demand": 8,
-   "via": "root",
-   "prefix": "reveil intelligent"
-  }
- ],
- "es": [
-  {
-   "term": "sueño seguimiento",
+   "term": "apnea trainer",
    "demand": 95,
    "via": "root",
-   "prefix": "sueño"
+   "prefix": "apnea"
   },
   {
-   "term": "dormir grabadora",
+   "term": "cpap supplies",
+   "demand": 94,
+   "via": "root",
+   "prefix": "cpap"
+  },
+  {
+   "term": "sleep apnea detector free",
+   "demand": 92,
+   "via": "both",
+   "prefix": "apnea"
+  },
+  {
+   "term": "cpap.com",
+   "demand": 91,
+   "via": "root",
+   "prefix": "cpap"
+  },
+  {
+   "term": "wake up alarm",
+   "demand": 91,
+   "via": "root",
+   "prefix": "wake"
+  },
+  {
+   "term": "sleep apnea detector",
+   "demand": 90,
+   "via": "both",
+   "prefix": "apnea"
+  },
+  {
+   "term": "insomnia cookies",
    "demand": 90,
    "via": "root",
-   "prefix": "dormir"
+   "prefix": "insomn"
   },
   {
-   "term": "ronco lab",
+   "term": "do i snore or grind",
    "demand": 90,
    "via": "framing",
-   "prefix": "ronco "
+   "prefix": "do i s"
   },
   {
-   "term": "dormir",
+   "term": "oscar cpap",
+   "demand": 89,
+   "via": "root",
+   "prefix": "cpap"
+  },
+  {
+   "term": "snorereel - sleep recorder",
    "demand": 88,
    "via": "root",
-   "prefix": "dormir"
+   "prefix": "snorer"
   },
   {
-   "term": "camping la siesta",
+   "term": "breathing exercises",
    "demand": 88,
    "via": "root",
-   "prefix": "siesta"
+   "prefix": "breath"
   },
   {
-   "term": "sueñovela",
+   "term": "insomniac",
+   "demand": 88,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "apnea assistant",
    "demand": 87,
    "via": "root",
-   "prefix": "sueño"
+   "prefix": "apnea"
   },
   {
-   "term": "la siesta salou",
+   "term": "cpap mini",
+   "demand": 86,
+   "via": "root",
+   "prefix": "cpap"
+  },
+  {
+   "term": "bruxism + fix teeth grinding",
+   "demand": 86,
+   "via": "root",
+   "prefix": "bruxism"
+  },
+  {
+   "term": "insomnia coach",
    "demand": 85,
    "via": "root",
-   "prefix": "siesta"
+   "prefix": "insomn"
   },
   {
-   "term": "sueño",
-   "demand": 84,
+   "term": "snoring recorder & detection",
+   "demand": 83,
    "via": "root",
-   "prefix": "sueño"
+   "prefix": "snor"
   },
   {
-   "term": "ruidos para dormir",
-   "demand": 84,
-   "via": "root",
-   "prefix": "ruido"
-  },
-  {
-   "term": "siesta exclusive",
+   "term": "insomnia",
    "demand": 82,
    "via": "root",
-   "prefix": "siesta"
+   "prefix": "insomn"
   },
   {
-   "term": "app sueño",
-   "demand": 82,
-   "via": "framing",
-   "prefix": "app su"
-  },
-  {
-   "term": "grabar sueño",
+   "term": "divenamic - buceo y apnea",
    "demand": 81,
    "via": "root",
-   "prefix": "sueño"
+   "prefix": "apnea"
   },
   {
-   "term": "bruxismo",
-   "demand": 81,
+   "term": "snore gym",
+   "demand": 80,
    "via": "root",
-   "prefix": "bruxismo"
+   "prefix": "snor"
   },
   {
-   "term": "siesta - mindfulness game",
+   "term": "philips cpap",
+   "demand": 80,
+   "via": "root",
+   "prefix": "cpap"
+  },
+  {
+   "term": "sleep tracker for free",
+   "demand": 80,
+   "via": "root",
+   "prefix": "sleep t"
+  },
+  {
+   "term": "insomniac radio",
    "demand": 79,
    "via": "root",
-   "prefix": "siesta"
+   "prefix": "insomn"
   },
   {
-   "term": "sueño seguimiento gratis",
+   "term": "snore clock",
+   "demand": 79,
+   "via": "root",
+   "prefix": "snore "
+  },
+  {
+   "term": "i can&#39;t wake up! alarm clock",
+   "demand": 79,
+   "via": "framing",
+   "prefix": "can't "
+  },
+  {
+   "term": "snoreclock",
    "demand": 78,
    "via": "root",
-   "prefix": "sueño"
+   "prefix": "snore"
   },
   {
-   "term": "grabadora sueño",
-   "demand": 78,
+   "term": "snore recorder app free",
+   "demand": 77,
    "via": "root",
-   "prefix": "sueno"
+   "prefix": "snor"
   },
   {
-   "term": "insomnio - investigación",
-   "demand": 78,
+   "term": "apria cpap",
+   "demand": 77,
    "via": "root",
-   "prefix": "insomnio"
+   "prefix": "cpap"
   },
   {
-   "term": "bruxismo + arregla los dientes",
-   "demand": 78,
+   "term": "tolpie ∙ control bruxism",
+   "demand": 77,
    "via": "root",
-   "prefix": "bruxismo"
+   "prefix": "bruxism"
   },
   {
-   "term": "dormir juego",
+   "term": "insomnia cookies llc",
    "demand": 76,
    "via": "root",
-   "prefix": "dormir"
+   "prefix": "insomn"
   },
   {
-   "term": "siestapp - focus fan noise app",
+   "term": "anti-snore lab",
    "demand": 76,
    "via": "root",
-   "prefix": "siesta"
+   "prefix": "anti snor"
   },
   {
-   "term": "descanso y sueño reparador",
+   "term": "stop snoring",
    "demand": 76,
+   "via": "root",
+   "prefix": "stop snor"
+  },
+  {
+   "term": "breathing app",
+   "demand": 76,
+   "via": "root",
+   "prefix": "breathing"
+  },
+  {
+   "term": "rem sleep alarm",
+   "demand": 76,
+   "via": "root",
+   "prefix": "rem sleep"
+  },
+  {
+   "term": "record my sleep",
+   "demand": 76,
+   "via": "framing",
+   "prefix": "record my"
+  },
+  {
+   "term": "sleep apnea apple watch",
+   "demand": 75,
    "via": "both",
-   "prefix": "descan"
+   "prefix": "apnea"
   },
   {
-   "term": "despertar sabiendo",
-   "demand": 76,
+   "term": "transcend cpap",
+   "demand": 74,
    "via": "root",
-   "prefix": "despertar"
+   "prefix": "cpap"
   },
   {
-   "term": "dormir mejor con rise",
-   "demand": 76,
-   "via": "framing",
-   "prefix": "dormir me"
+   "term": "wake up alarm free",
+   "demand": 73,
+   "via": "both",
+   "prefix": "wake u"
   },
   {
-   "term": "medir sueño",
-   "demand": 76,
-   "via": "framing",
-   "prefix": "medir sue"
-  },
-  {
-   "term": "glimm - llum per dormir",
+   "term": "snoreless - anti snoring",
    "demand": 73,
    "via": "root",
-   "prefix": "dormir"
+   "prefix": "anti snor"
   },
   {
-   "term": "the siesta breeze",
+   "term": "rem sleep tracker",
    "demand": 73,
    "via": "root",
-   "prefix": "siesta"
+   "prefix": "rem sleep"
   },
   {
-   "term": "grabar mientras duermes",
+   "term": "snore lab free",
+   "demand": 73,
+   "via": "root",
+   "prefix": "snore lab"
+  },
+  {
+   "term": "free sleep tracking app",
    "demand": 73,
    "via": "framing",
-   "prefix": "grabar mi"
+   "prefix": "free slee"
   },
   {
-   "term": "dormir mejor con ciencia",
-   "demand": 73,
-   "via": "framing",
-   "prefix": "dormir me"
-  },
-  {
-   "term": "tolpie ∙ controla el bruxismo",
+   "term": "snore control",
    "demand": 72,
    "via": "root",
-   "prefix": "bruxismo"
+   "prefix": "snore"
   },
   {
-   "term": "sonidos dormir",
+   "term": "freedive apnea",
+   "demand": 72,
+   "via": "root",
+   "prefix": "apnea"
+  },
+  {
+   "term": "sleep talk",
+   "demand": 72,
+   "via": "root",
+   "prefix": "sleep t"
+  },
+  {
+   "term": "sleep circle cpap",
+   "demand": 72,
+   "via": "root",
+   "prefix": "sleep c"
+  },
+  {
+   "term": "deep sleep sounds",
+   "demand": 72,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "sleep debt",
+   "demand": 72,
+   "via": "root",
+   "prefix": "sleep debt"
+  },
+  {
+   "term": "sleep apnea tracker",
+   "demand": 71,
+   "via": "both",
+   "prefix": "apnea "
+  },
+  {
+   "term": "insomnia coffee",
    "demand": 71,
    "via": "root",
-   "prefix": "dormir"
+   "prefix": "insomn"
   },
   {
-   "term": "siesta extranet",
+   "term": "airway trainer - stop snoring",
    "demand": 71,
    "via": "root",
-   "prefix": "siesta"
+   "prefix": "stop snor"
   },
   {
-   "term": "despertar ltd",
+   "term": "snore lab recorder tracker",
    "demand": 71,
    "via": "root",
-   "prefix": "despertar"
+   "prefix": "snore lab"
   },
   {
-   "term": "apnea del sueño - somnio+",
+   "term": "insomnia coach va",
+   "demand": 71,
+   "via": "both",
+   "prefix": "insomnia "
+  },
+  {
+   "term": "freediving apnea trainer",
    "demand": 70,
    "via": "root",
    "prefix": "apnea"
   },
   {
-   "term": "dormir gratis",
+   "term": "snoring recorder free",
+   "demand": 69,
+   "via": "root",
+   "prefix": "snoring"
+  },
+  {
+   "term": "sleep sound recorder",
+   "demand": 69,
+   "via": "root",
+   "prefix": "sleep s"
+  },
+  {
+   "term": "deep sleep",
+   "demand": 69,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "snoreclock - do you snore?",
+   "demand": 69,
+   "via": "root",
+   "prefix": "snoreclock"
+  },
+  {
+   "term": "sleepimage sleep analytics",
+   "demand": 69,
+   "via": "root",
+   "prefix": "sleepimage"
+  },
+  {
+   "term": "insomniac edc",
    "demand": 68,
    "via": "root",
-   "prefix": "dormir"
+   "prefix": "insomn"
   },
   {
-   "term": "siesta4u",
+   "term": "breathing exercises free",
    "demand": 68,
    "via": "root",
-   "prefix": "siesta"
+   "prefix": "breathing"
   },
   {
-   "term": "apnea sueño",
-   "demand": 67,
-   "via": "root",
-   "prefix": "apnea sueno"
-  },
-  {
-   "term": "despertador gratis",
-   "demand": 67,
-   "via": "root",
-   "prefix": "despertador"
-  },
-  {
-   "term": "fases sueño",
-   "demand": 67,
-   "via": "root",
-   "prefix": "fases sueno"
-  },
-  {
-   "term": "sonidos para dormir",
-   "demand": 67,
-   "via": "root",
-   "prefix": "para dormir"
-  },
-  {
-   "term": "grabar dormir",
-   "demand": 65,
-   "via": "root",
-   "prefix": "dormir"
-  },
-  {
-   "term": "siesta 1143",
-   "demand": 65,
-   "via": "root",
-   "prefix": "siesta"
-  },
-  {
-   "term": "sueño gratis",
-   "demand": 65,
-   "via": "root",
-   "prefix": "sueño "
-  },
-  {
-   "term": "mindllama respirar focus sueno",
-   "demand": 64,
-   "via": "root",
-   "prefix": "respirar"
-  },
-  {
-   "term": "despertador",
-   "demand": 64,
-   "via": "root",
-   "prefix": "despertador"
-  },
-  {
-   "term": "diario sueños",
-   "demand": 62,
-   "via": "root",
-   "prefix": "diario sueno"
-  },
-  {
-   "term": "control del sueño gratis",
-   "demand": 62,
-   "via": "root",
-   "prefix": "sueño gratis"
-  },
-  {
-   "term": "despertador matematicas",
-   "demand": 61,
-   "via": "root",
-   "prefix": "despertador"
-  },
-  {
-   "term": "juegos para dormir",
-   "demand": 61,
-   "via": "root",
-   "prefix": "para dormir"
-  },
-  {
-   "term": "para dormir",
-   "demand": 60,
-   "via": "root",
-   "prefix": "dormir "
-  },
-  {
-   "term": "alarmly - desafíos despertar",
-   "demand": 59,
-   "via": "root",
-   "prefix": "despertar"
-  },
-  {
-   "term": "diario sueños & analizador",
-   "demand": 59,
-   "via": "root",
-   "prefix": "diario sueno"
-  },
-  {
-   "term": "control sueño gratis",
-   "demand": 59,
-   "via": "root",
-   "prefix": "sueño gratis"
-  },
-  {
-   "term": "controlar sueño",
-   "demand": 59,
-   "via": "framing",
-   "prefix": "controlar"
-  },
-  {
-   "term": "despertador foto",
-   "demand": 58,
-   "via": "root",
-   "prefix": "despertador"
-  },
-  {
-   "term": "lluvia para dormir",
-   "demand": 58,
-   "via": "root",
-   "prefix": "para dormir"
-  },
-  {
-   "term": "calidad sueño",
-   "demand": 57,
-   "via": "root",
-   "prefix": "calidad sueno"
-  },
-  {
-   "term": "seguimiento del sueño gratis",
-   "demand": 56,
-   "via": "root",
-   "prefix": "sueño gratis"
-  },
-  {
-   "term": "despertador solar",
-   "demand": 55,
-   "via": "root",
-   "prefix": "despertador"
-  },
-  {
-   "term": "luz para dormir",
-   "demand": 55,
-   "via": "root",
-   "prefix": "para dormir"
-  },
-  {
-   "term": "antironquido",
-   "demand": 54,
-   "via": "root",
-   "prefix": "antirronquido"
-  },
-  {
-   "term": "despertador con musica",
-   "demand": 52,
-   "via": "root",
-   "prefix": "despertador"
-  },
-  {
-   "term": "musica para dormir gratis",
-   "demand": 52,
-   "via": "root",
-   "prefix": "para dormir"
-  },
-  {
-   "term": "registro sueño",
-   "demand": 52,
-   "via": "root",
-   "prefix": "registro sueno"
-  },
-  {
-   "term": "ronquidos - monitor de sueño",
-   "demand": 51,
-   "via": "root",
-   "prefix": "ronquidos"
-  },
-  {
-   "term": "despertador inteligente",
-   "demand": 50,
-   "via": "root",
-   "prefix": "despertador"
-  },
-  {
-   "term": "seguimiento de sueño",
-   "demand": 50,
-   "via": "root",
-   "prefix": "seguimiento"
-  },
-  {
-   "term": "sonidos para dormir gratis",
-   "demand": 50,
-   "via": "root",
-   "prefix": "para dormir"
-  },
-  {
-   "term": "dreamweaver - diario sueños ia",
-   "demand": 48,
-   "via": "root",
-   "prefix": "diario sueno"
-  },
-  {
-   "term": "despertador fuerte",
-   "demand": 47,
-   "via": "root",
-   "prefix": "despertador"
-  },
-  {
-   "term": "sonidos dormir y ruido blanco",
-   "demand": 47,
-   "via": "root",
-   "prefix": "sonidos dormir"
-  },
-  {
-   "term": "despertador amanecer",
-   "demand": 44,
-   "via": "root",
-   "prefix": "despertador"
-  },
-  {
-   "term": "musica para dormir",
-   "demand": 44,
-   "via": "root",
-   "prefix": "para dormir"
-  },
-  {
-   "term": "despertador musica",
-   "demand": 41,
-   "via": "root",
-   "prefix": "despertador"
-  },
-  {
-   "term": "pacifisoul sonidos dormir",
-   "demand": 41,
-   "via": "root",
-   "prefix": "sonidos dormir"
-  },
-  {
-   "term": "wakeup sun -despertador solar",
-   "demand": 35,
-   "via": "root",
-   "prefix": "despertador solar"
-  },
-  {
-   "term": "reloj despertador gratis",
-   "demand": 31,
-   "via": "root",
-   "prefix": "despertador gratis"
-  },
-  {
-   "term": "despertador fuerte pro",
-   "demand": 31,
-   "via": "root",
-   "prefix": "despertador fuerte"
-  },
-  {
-   "term": "beatwake - despertador musical",
-   "demand": 31,
-   "via": "root",
-   "prefix": "despertador musica"
-  },
-  {
-   "term": "sonido de lluvia para dormir",
-   "demand": 31,
-   "via": "root",
-   "prefix": "lluvia para dormir"
-  },
-  {
-   "term": "alarma despertador con música.",
-   "demand": 31,
-   "via": "root",
-   "prefix": "despertador con musica"
-  },
-  {
-   "term": "despertador matemáticas sueño",
-   "demand": 31,
-   "via": "root",
-   "prefix": "despertador matematicas"
-  },
-  {
-   "term": "despertador fuerte reloj",
-   "demand": 28,
-   "via": "root",
-   "prefix": "despertador fuerte"
-  },
-  {
-   "term": "sonidos de lluvia para dormir",
-   "demand": 28,
-   "via": "root",
-   "prefix": "lluvia para dormir"
-  },
-  {
-   "term": "música para dormir y sonidos",
-   "demand": 28,
-   "via": "root",
-   "prefix": "musica para dormir"
-  },
-  {
-   "term": "sonidos para dormir - dormir",
-   "demand": 28,
-   "via": "root",
-   "prefix": "sonidos para dormir"
-  },
-  {
-   "term": "alarma despertador con música",
-   "demand": 28,
-   "via": "root",
-   "prefix": "despertador con musica"
-  },
-  {
-   "term": "pushclock - despertador fuerte",
-   "demand": 25,
-   "via": "root",
-   "prefix": "despertador fuerte"
-  },
-  {
-   "term": "reloj despertador con música",
-   "demand": 25,
-   "via": "root",
-   "prefix": "despertador con musica"
-  },
-  {
-   "term": "alarmpro despertador fuerte",
-   "demand": 22,
-   "via": "root",
-   "prefix": "despertador fuerte"
-  },
-  {
-   "term": "música para dormir y meditar",
-   "demand": 22,
-   "via": "root",
-   "prefix": "musica para dormir"
-  },
-  {
-   "term": "sonidos para dormir l sleepi",
-   "demand": 22,
-   "via": "root",
-   "prefix": "sonidos para dormir"
-  },
-  {
-   "term": "seguimiento del sueño & alarma",
-   "demand": 22,
-   "via": "root",
-   "prefix": "seguimiento del sueño"
-  },
-  {
-   "term": "monitor e sueño seguimiento",
-   "demand": 21,
-   "via": "root",
-   "prefix": "sueño seguimiento"
-  },
-  {
-   "term": "sonidos para dormir, musica",
-   "demand": 19,
-   "via": "root",
-   "prefix": "sonidos para dormir"
-  },
-  {
-   "term": "seguimiento del sueño & watch",
-   "demand": 19,
-   "via": "root",
-   "prefix": "seguimiento del sueño"
-  },
-  {
-   "term": "sonidos para dormir hq",
-   "demand": 16,
-   "via": "root",
-   "prefix": "sonidos para dormir"
-  },
-  {
-   "term": "sleep - seguimiento del sueño",
-   "demand": 16,
-   "via": "root",
-   "prefix": "seguimiento del sueño"
-  },
-  {
-   "term": "slipy - música para dormir",
-   "demand": 14,
-   "via": "root",
-   "prefix": "musica para dormir"
-  },
-  {
-   "term": "sonidos para dormir schlaf",
-   "demand": 14,
-   "via": "root",
-   "prefix": "sonidos para dormir"
-  },
-  {
-   "term": "sonidos para dormir a niños",
-   "demand": 11,
-   "via": "root",
-   "prefix": "sonidos para dormir"
-  },
-  {
-   "term": "sonidos para dormir .",
-   "demand": 8,
-   "via": "root",
-   "prefix": "sonidos para dormir"
-  }
- ],
- "mx": [
-  {
-   "term": "sueño seguimiento dormir/sleep",
-   "demand": 95,
-   "via": "root",
-   "prefix": "sueño"
-  },
-  {
-   "term": "sueñovela",
-   "demand": 92,
-   "via": "root",
-   "prefix": "sueño"
-  },
-  {
-   "term": "dormir",
-   "demand": 90,
-   "via": "root",
-   "prefix": "dormir"
-  },
-  {
-   "term": "siesta exclusive",
-   "demand": 90,
-   "via": "root",
-   "prefix": "siesta"
-  },
-  {
-   "term": "ronco lab",
-   "demand": 90,
-   "via": "framing",
-   "prefix": "ronco "
-  },
-  {
-   "term": "siesta - mindfulness game",
-   "demand": 88,
-   "via": "root",
-   "prefix": "siesta"
-  },
-  {
-   "term": "sueño",
-   "demand": 87,
-   "via": "root",
-   "prefix": "sueño"
-  },
-  {
-   "term": "glimm - luz para dormir",
-   "demand": 85,
-   "via": "root",
-   "prefix": "dormir"
-  },
-  {
-   "term": "alarmas para despertar",
-   "demand": 85,
-   "via": "root",
-   "prefix": "alarma"
-  },
-  {
-   "term": "siestapp - focus fan noise app",
-   "demand": 85,
-   "via": "root",
-   "prefix": "siesta"
-  },
-  {
-   "term": "sonidos para dormir",
-   "demand": 82,
-   "via": "root",
-   "prefix": "dormir"
-  },
-  {
-   "term": "siesta",
-   "demand": 82,
-   "via": "root",
-   "prefix": "siesta"
-  },
-  {
-   "term": "insomnio・dormir mejor・cbt-i",
-   "demand": 81,
-   "via": "root",
-   "prefix": "insomnio"
-  },
-  {
-   "term": "bruxismo + arregla los dientes",
-   "demand": 81,
-   "via": "root",
-   "prefix": "bruxismo"
-  },
-  {
-   "term": "app para dormir",
-   "demand": 79,
-   "via": "root",
-   "prefix": "dormir"
-  },
-  {
-   "term": "siesta 1143",
-   "demand": 79,
-   "via": "root",
-   "prefix": "siesta"
-  },
-  {
-   "term": "ronquidos - monitor de sueño",
-   "demand": 78,
-   "via": "root",
-   "prefix": "ronqu"
-  },
-  {
-   "term": "sueño seguimiento",
-   "demand": 78,
-   "via": "root",
-   "prefix": "sueño"
-  },
-  {
-   "term": "insomnio - investigación",
-   "demand": 78,
-   "via": "root",
-   "prefix": "insomnio"
-  },
-  {
-   "term": "tolpie ∙ controla el bruxismo",
-   "demand": 78,
-   "via": "root",
-   "prefix": "bruxismo"
-  },
-  {
-   "term": "siesta extranet",
-   "demand": 76,
-   "via": "root",
-   "prefix": "siesta"
-  },
-  {
-   "term": "despertar sabiendo",
-   "demand": 76,
-   "via": "root",
-   "prefix": "despertar"
-  },
-  {
-   "term": "medir sueño",
-   "demand": 76,
-   "via": "framing",
-   "prefix": "medir sue"
-  },
-  {
-   "term": "sueño gratis",
-   "demand": 75,
-   "via": "root",
-   "prefix": "sueño"
-  },
-  {
-   "term": "the siesta breeze",
-   "demand": 73,
-   "via": "root",
-   "prefix": "siesta"
-  },
-  {
-   "term": "despertar",
-   "demand": 73,
-   "via": "root",
-   "prefix": "despertar"
-  },
-  {
-   "term": "dormir mejor con ciencia",
-   "demand": 73,
-   "via": "framing",
-   "prefix": "dormir me"
-  },
-  {
-   "term": "sueños festival",
-   "demand": 72,
-   "via": "root",
-   "prefix": "sueño"
-  },
-  {
-   "term": "calm stories - dormir meditar",
-   "demand": 71,
-   "via": "framing",
-   "prefix": "dormir me"
-  },
-  {
-   "term": "sueños music festival",
-   "demand": 70,
-   "via": "root",
-   "prefix": "sueño"
-  },
-  {
-   "term": "juegos para dormir",
+   "term": "rem sleep calculator & sounds",
    "demand": 68,
    "via": "root",
-   "prefix": "dormir"
+   "prefix": "rem sleep"
   },
   {
-   "term": "alarmas para despertar gratis",
-   "demand": 68,
-   "via": "root",
-   "prefix": "despertar"
-  },
-  {
-   "term": "app sueño",
-   "demand": 68,
-   "via": "framing",
-   "prefix": "app su"
-  },
-  {
-   "term": "despertador gratis",
+   "term": "sleep score free",
    "demand": 67,
    "via": "root",
-   "prefix": "despertador"
+   "prefix": "sleep score"
   },
   {
-   "term": "ciclo sueño",
+   "term": "sleep alarm clock",
    "demand": 67,
    "via": "root",
-   "prefix": "ciclo sueno"
+   "prefix": "sleep alarm"
   },
   {
-   "term": "la siesta salou",
+   "term": "snoring elephant",
    "demand": 66,
    "via": "root",
-   "prefix": "siesta "
+   "prefix": "snoring"
   },
   {
-   "term": "musica para dormir",
+   "term": "sleep tracker and sleep recorder",
+   "demand": 66,
+   "via": "root",
+   "prefix": "sleep t"
+  },
+  {
+   "term": "sleep alarm",
+   "demand": 66,
+   "via": "root",
+   "prefix": "sleep a"
+  },
+  {
+   "term": "sleep cycle alarm clock",
+   "demand": 66,
+   "via": "root",
+   "prefix": "sleep c"
+  },
+  {
+   "term": "deep sleep music",
+   "demand": 66,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "breathing zone",
    "demand": 65,
    "via": "root",
-   "prefix": "dormir"
+   "prefix": "breath"
   },
   {
-   "term": "catnapp - alarma de siestas",
+   "term": "insomniac events",
    "demand": 65,
    "via": "root",
-   "prefix": "siesta"
+   "prefix": "insomn"
   },
   {
-   "term": "despertador",
+   "term": "snore control - stop snoring",
+   "demand": 65,
+   "via": "root",
+   "prefix": "stop snor"
+  },
+  {
+   "term": "free sleep tracker app",
+   "demand": 65,
+   "via": "framing",
+   "prefix": "free slee"
+  },
+  {
+   "term": "teeth grinding",
    "demand": 64,
    "via": "root",
-   "prefix": "despertador"
+   "prefix": "teeth grind"
   },
   {
-   "term": "seguimiento de siesta",
+   "term": "apple watch sleep tracker free",
+   "demand": 64,
+   "via": "root",
+   "prefix": "watch sleep"
+  },
+  {
+   "term": "sleep talk recorder free",
+   "demand": 64,
+   "via": "root",
+   "prefix": "sleep talk "
+  },
+  {
+   "term": "sleep tracker ai",
    "demand": 63,
    "via": "root",
-   "prefix": "siesta "
+   "prefix": "sleep t"
   },
   {
-   "term": "despertar ltd",
+   "term": "breathing timer",
    "demand": 62,
    "via": "root",
-   "prefix": "despertar"
+   "prefix": "breathing"
   },
   {
-   "term": "diario sueños & analizador",
+   "term": "insomniacs",
    "demand": 62,
    "via": "root",
-   "prefix": "diario sueno"
+   "prefix": "insomniac"
   },
   {
-   "term": "reloj despertador gratis",
+   "term": "sleep score apple watch",
    "demand": 61,
    "via": "root",
-   "prefix": "despertador"
+   "prefix": "sleep score"
   },
   {
-   "term": "sunny siesta - free match 3",
+   "term": "sleep cycle free",
+   "demand": 61,
+   "via": "root",
+   "prefix": "sleep cycle"
+  },
+  {
+   "term": "deep sleep alarm",
    "demand": 60,
    "via": "root",
-   "prefix": "siesta "
+   "prefix": "deep sleep"
   },
   {
-   "term": "despertar del sur",
+   "term": "sleep app record",
    "demand": 59,
    "via": "root",
-   "prefix": "despertar"
+   "prefix": "sleep app"
   },
   {
-   "term": "monitor de sueño gratis",
+   "term": "insomniac stickers",
    "demand": 59,
    "via": "root",
-   "prefix": "sueño gratis"
+   "prefix": "insomniac"
   },
   {
-   "term": "despertador inteligente.",
+   "term": "record my sleep free",
+   "demand": 59,
+   "via": "framing",
+   "prefix": "record my"
+  },
+  {
+   "term": "cpap tracker & journal",
+   "demand": 59,
+   "via": "root",
+   "prefix": "cpap tracker"
+  },
+  {
+   "term": "sleep score max",
    "demand": 58,
    "via": "root",
-   "prefix": "despertador"
+   "prefix": "sleep score"
   },
   {
-   "term": "seguimiento de sueño",
+   "term": "dotsleep - sleep debt log",
+   "demand": 57,
+   "via": "root",
+   "prefix": "sleep debt"
+  },
+  {
+   "term": "stamina apnea trainer",
+   "demand": 57,
+   "via": "root",
+   "prefix": "apnea trainer"
+  },
+  {
+   "term": "breathing rate",
+   "demand": 56,
+   "via": "root",
+   "prefix": "breathing"
+  },
+  {
+   "term": "the insomniacs - stickers",
+   "demand": 56,
+   "via": "root",
+   "prefix": "insomniac"
+  },
+  {
+   "term": "insomnia radio",
+   "demand": 56,
+   "via": "root",
+   "prefix": "insomnia "
+  },
+  {
+   "term": "free sleep tracker for apple watch",
+   "demand": 56,
+   "via": "both",
+   "prefix": "free sleep t"
+  },
+  {
+   "term": "sleep score & ai coach",
    "demand": 55,
    "via": "root",
-   "prefix": "seguimiento"
+   "prefix": "sleep score"
   },
   {
-   "term": "grabador de ronquidos y sueno",
+   "term": "sleep cycle bedtime calculator",
+   "demand": 55,
+   "via": "root",
+   "prefix": "sleep cycle"
+  },
+  {
+   "term": "smart sleep alarm",
+   "demand": 55,
+   "via": "root",
+   "prefix": "sleep alarm"
+  },
+  {
+   "term": "sleeptalk sleep talk recorder",
+   "demand": 54,
+   "via": "root",
+   "prefix": "sleep talk"
+  },
+  {
+   "term": "free deep sleep",
+   "demand": 54,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "sleep snore tracker",
+   "demand": 54,
+   "via": "both",
+   "prefix": "snore tracker"
+  },
+  {
+   "term": "cpap supplies 1992 llc",
+   "demand": 54,
+   "via": "root",
+   "prefix": "cpap supplies"
+  },
+  {
+   "term": "breathing app for anxiety",
+   "demand": 54,
+   "via": "root",
+   "prefix": "breathing app"
+  },
+  {
+   "term": "breathing pacer",
    "demand": 53,
    "via": "root",
-   "prefix": "ronquidos"
+   "prefix": "breathing"
   },
   {
-   "term": "dreamweaver - diario sueños ia",
-   "demand": 53,
-   "via": "root",
-   "prefix": "diario sueno"
-  },
-  {
-   "term": "despertador spotify",
+   "term": "white noise deep sleep sounds",
    "demand": 52,
    "via": "root",
-   "prefix": "despertador"
+   "prefix": "deep sleep"
   },
   {
-   "term": "despertar.cr",
+   "term": "soluna - sleep debt tracker",
+   "demand": 52,
+   "via": "root",
+   "prefix": "sleep debt"
+  },
+  {
+   "term": "app for sleep apnea diagnosis",
+   "demand": 52,
+   "via": "root",
+   "prefix": "sleep apnea"
+  },
+  {
+   "term": "sleep cycle calculator",
+   "demand": 52,
+   "via": "root",
+   "prefix": "sleep cycle"
+  },
+  {
+   "term": "alarmx - mission & sleep alarm",
+   "demand": 52,
+   "via": "root",
+   "prefix": "sleep alarm"
+  },
+  {
+   "term": "sleep quality journal",
+   "demand": 52,
+   "via": "root",
+   "prefix": "sleep quality"
+  },
+  {
+   "term": "snore control pro",
+   "demand": 52,
+   "via": "root",
+   "prefix": "snore control"
+  },
+  {
+   "term": "sleep tracker for apple watch",
+   "demand": 52,
+   "via": "root",
+   "prefix": "sleep tracker"
+  },
+  {
+   "term": "free breathing app",
+   "demand": 52,
+   "via": "root",
+   "prefix": "breathing app"
+  },
+  {
+   "term": "sleep tracker free",
+   "demand": 52,
+   "via": "root",
+   "prefix": "sleep tracker "
+  },
+  {
+   "term": "sleep recorder free",
+   "demand": 52,
+   "via": "root",
+   "prefix": "sleep recorder"
+  },
+  {
+   "term": "the breathing room",
    "demand": 51,
    "via": "root",
-   "prefix": "despertar"
+   "prefix": "breathing"
   },
   {
-   "term": "alarma despertador",
+   "term": "insomnia explorer",
+   "demand": 51,
+   "via": "root",
+   "prefix": "insomnia "
+  },
+  {
+   "term": "watchpat sleep apnea",
    "demand": 50,
    "via": "root",
-   "prefix": "despertador"
+   "prefix": "sleep apnea"
   },
   {
-   "term": "despertador y tono con spotify",
+   "term": "sleep cycle alarm",
+   "demand": 50,
+   "via": "root",
+   "prefix": "sleep cycle"
+  },
+  {
+   "term": "freedive apnea breath trainer",
+   "demand": 50,
+   "via": "root",
+   "prefix": "freedive apnea"
+  },
+  {
+   "term": "deep sleep hypnotherapy",
+   "demand": 49,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "sleep tracker & sound by remly",
+   "demand": 49,
+   "via": "root",
+   "prefix": "sleep tracker"
+  },
+  {
+   "term": "sleep monitoring free",
+   "demand": 49,
+   "via": "root",
+   "prefix": "sleep monitor"
+  },
+  {
+   "term": "apnea trainer & spearfishing",
+   "demand": 49,
+   "via": "root",
+   "prefix": "apnea trainer"
+  },
+  {
+   "term": "free snoring tracker",
+   "demand": 48,
+   "via": "root",
+   "prefix": "snoring tracker"
+  },
+  {
+   "term": "empirical sleep & apnea care",
    "demand": 47,
    "via": "root",
-   "prefix": "despertador"
+   "prefix": "sleep apnea"
   },
   {
-   "term": "despertador alarma con música",
+   "term": "sleep cycle tracker",
+   "demand": 47,
+   "via": "root",
+   "prefix": "sleep cycle"
+  },
+  {
+   "term": "arise - mindful sleep alarm",
+   "demand": 47,
+   "via": "root",
+   "prefix": "sleep alarm"
+  },
+  {
+   "term": "insomnia coachㆍcbt-iㆍzomni app",
+   "demand": 47,
+   "via": "root",
+   "prefix": "insomnia coach"
+  },
+  {
+   "term": "sleep tracker watch",
+   "demand": 46,
+   "via": "root",
+   "prefix": "sleep tracker"
+  },
+  {
+   "term": "apnea trainer freedive",
+   "demand": 46,
+   "via": "root",
+   "prefix": "apnea trainer"
+  },
+  {
+   "term": "the breathing app resonance",
+   "demand": 46,
+   "via": "root",
+   "prefix": "breathing app"
+  },
+  {
+   "term": "snore tracker - plus1health",
+   "demand": 46,
+   "via": "root",
+   "prefix": "snore tracker"
+  },
+  {
+   "term": "snoring monitoring",
+   "demand": 45,
+   "via": "root",
+   "prefix": "snoring monitor"
+  },
+  {
+   "term": "breathing timer - guided calm",
+   "demand": 45,
+   "via": "root",
+   "prefix": "breathing timer"
+  },
+  {
+   "term": "insomnia coffee ie",
+   "demand": 45,
+   "via": "root",
+   "prefix": "insomnia coffee"
+  },
+  {
+   "term": "free sleep apnea",
    "demand": 44,
    "via": "root",
-   "prefix": "despertador"
+   "prefix": "sleep apnea"
   },
   {
-   "term": "musica para dormir gratis",
+   "term": "smart alarm-sleep cycle saving",
+   "demand": 44,
+   "via": "root",
+   "prefix": "smart alarm"
+  },
+  {
+   "term": "sleep cycle lincare",
+   "demand": 44,
+   "via": "root",
+   "prefix": "sleep cycle"
+  },
+  {
+   "term": "apps for snore detection",
+   "demand": 44,
+   "via": "root",
+   "prefix": "snore detector"
+  },
+  {
+   "term": "free sleep recorder app",
+   "demand": 44,
+   "via": "root",
+   "prefix": "sleep recorder"
+  },
+  {
+   "term": "otter freedive apnea",
+   "demand": 44,
+   "via": "root",
+   "prefix": "freedive apnea"
+  },
+  {
+   "term": "enhanced insomnia coach",
+   "demand": 44,
+   "via": "root",
+   "prefix": "insomnia coach"
+  },
+  {
+   "term": "sleep monitoring 2",
+   "demand": 43,
+   "via": "root",
+   "prefix": "sleep monitor"
+  },
+  {
+   "term": "snore tracker - record snoring",
+   "demand": 43,
+   "via": "root",
+   "prefix": "snore tracker"
+  },
+  {
+   "term": "tempur sleep tracker ai",
+   "demand": 43,
+   "via": "root",
+   "prefix": "sleep tracker ai"
+  },
+  {
+   "term": "dr. snore - snoring tracker",
+   "demand": 42,
+   "via": "root",
+   "prefix": "snoring tracker"
+  },
+  {
+   "term": "snoring monitor-sleep recorder",
+   "demand": 42,
+   "via": "root",
+   "prefix": "snoring monitor"
+  },
+  {
+   "term": "breathing timer b-mind",
+   "demand": 42,
+   "via": "root",
+   "prefix": "breathing timer"
+  },
+  {
+   "term": "breathepulse breathing pacer",
+   "demand": 42,
+   "via": "root",
+   "prefix": "breathing pacer"
+  },
+  {
+   "term": "insomnia coffee company",
+   "demand": 42,
+   "via": "root",
+   "prefix": "insomnia coffee"
+  },
+  {
+   "term": "sleep apnea detector - somnio+",
+   "demand": 41,
+   "via": "root",
+   "prefix": "sleep apnea"
+  }
+ ],
+ "ca": [
+  {
+   "term": "app for cpap machine users",
+   "demand": 100,
+   "via": "root",
+   "prefix": "cpap"
+  },
+  {
+   "term": "philips cpap",
+   "demand": 97,
+   "via": "root",
+   "prefix": "cpap"
+  },
+  {
+   "term": "wake up alarm",
+   "demand": 97,
+   "via": "root",
+   "prefix": "wake"
+  },
+  {
+   "term": "apnea trainer",
+   "demand": 95,
+   "via": "root",
+   "prefix": "apnea"
+  },
+  {
+   "term": "phillips cpap",
+   "demand": 91,
+   "via": "root",
+   "prefix": "cpap"
+  },
+  {
+   "term": "divenamic - buceo y apnea",
+   "demand": 90,
+   "via": "root",
+   "prefix": "apnea"
+  },
+  {
+   "term": "insomnia cookies",
+   "demand": 90,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "do i snore or grind",
+   "demand": 90,
+   "via": "framing",
+   "prefix": "do i s"
+  },
+  {
+   "term": "transcend cpap",
+   "demand": 89,
+   "via": "root",
+   "prefix": "cpap"
+  },
+  {
+   "term": "insomnia coach",
+   "demand": 88,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "sleep apnea detector",
+   "demand": 87,
+   "via": "both",
+   "prefix": "apnea"
+  },
+  {
+   "term": "cpap.com",
+   "demand": 86,
+   "via": "root",
+   "prefix": "cpap"
+  },
+  {
+   "term": "bruxism + fix teeth grinding",
+   "demand": 86,
+   "via": "root",
+   "prefix": "bruxism"
+  },
+  {
+   "term": "breathing exercises",
+   "demand": 85,
+   "via": "root",
+   "prefix": "breath"
+  },
+  {
+   "term": "insomniac events",
+   "demand": 85,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "sleep cycle free",
+   "demand": 83,
+   "via": "root",
+   "prefix": "sleep c"
+  },
+  {
+   "term": "cbt-i coach for insomnia",
+   "demand": 82,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "snorelogic",
+   "demand": 80,
+   "via": "root",
+   "prefix": "snor"
+  },
+  {
+   "term": "sleep tracker free app",
+   "demand": 80,
+   "via": "root",
+   "prefix": "sleep t"
+  },
+  {
+   "term": "insomniac",
+   "demand": 79,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "freedive apnea breath trainer",
+   "demand": 78,
+   "via": "root",
+   "prefix": "apnea"
+  },
+  {
+   "term": "snoregym",
+   "demand": 77,
+   "via": "root",
+   "prefix": "snor"
+  },
+  {
+   "term": "cpap supplies",
+   "demand": 77,
+   "via": "root",
+   "prefix": "cpap"
+  },
+  {
+   "term": "tolpie ∙ control bruxism",
+   "demand": 77,
+   "via": "root",
+   "prefix": "bruxism"
+  },
+  {
+   "term": "insomnia",
+   "demand": 76,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "anti-snore lab",
+   "demand": 76,
+   "via": "root",
+   "prefix": "anti snor"
+  },
+  {
+   "term": "airway trainer - stop snoring",
+   "demand": 76,
+   "via": "root",
+   "prefix": "stop snor"
+  },
+  {
+   "term": "free breathing app",
+   "demand": 76,
+   "via": "root",
+   "prefix": "breathing"
+  },
+  {
+   "term": "rem sleep calculator & sounds",
+   "demand": 76,
+   "via": "root",
+   "prefix": "rem sleep"
+  },
+  {
+   "term": "record my sleep",
+   "demand": 76,
+   "via": "framing",
+   "prefix": "record my"
+  },
+  {
+   "term": "freediving apnea trainer",
+   "demand": 75,
+   "via": "root",
+   "prefix": "apnea"
+  },
+  {
+   "term": "snore clock",
+   "demand": 74,
+   "via": "root",
+   "prefix": "snor"
+  },
+  {
+   "term": "cpap dash",
+   "demand": 74,
+   "via": "root",
+   "prefix": "cpap"
+  },
+  {
+   "term": "insomniac radio",
+   "demand": 73,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "snoreless - anti snoring",
+   "demand": 73,
+   "via": "root",
+   "prefix": "anti snor"
+  },
+  {
+   "term": "snore lab - snore tracker app",
+   "demand": 73,
+   "via": "root",
+   "prefix": "snore lab"
+  },
+  {
+   "term": "stamina apnea trainer",
+   "demand": 72,
+   "via": "root",
+   "prefix": "apnea"
+  },
+  {
+   "term": "sleep talk recorder free",
+   "demand": 72,
+   "via": "root",
+   "prefix": "sleep t"
+  },
+  {
+   "term": "sleep alarm",
+   "demand": 72,
+   "via": "root",
+   "prefix": "sleep a"
+  },
+  {
+   "term": "prime sleep recorder",
+   "demand": 72,
+   "via": "root",
+   "prefix": "sleep r"
+  },
+  {
+   "term": "snore control - stop snoring",
+   "demand": 71,
+   "via": "root",
+   "prefix": "stop snor"
+  },
+  {
+   "term": "breathing exercises free",
+   "demand": 71,
+   "via": "root",
+   "prefix": "breathing"
+  },
+  {
+   "term": "snore lab recorder tracker",
+   "demand": 71,
+   "via": "root",
+   "prefix": "snore lab"
+  },
+  {
+   "term": "snore control",
+   "demand": 70,
+   "via": "root",
+   "prefix": "snore"
+  },
+  {
+   "term": "apnea freedive breath hold",
+   "demand": 70,
+   "via": "root",
+   "prefix": "apnea"
+  },
+  {
+   "term": "sleep recorder free",
+   "demand": 68,
+   "via": "both",
+   "prefix": "sleep "
+  },
+  {
+   "term": "insomnia cookies llc",
+   "demand": 68,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "snore gym",
+   "demand": 68,
+   "via": "root",
+   "prefix": "snore "
+  },
+  {
+   "term": "breathing zone",
+   "demand": 68,
+   "via": "root",
+   "prefix": "breathing"
+  },
+  {
+   "term": "the insomniacs - stickers",
+   "demand": 68,
+   "via": "root",
+   "prefix": "insomniac"
+  },
+  {
+   "term": "sleep talk",
+   "demand": 66,
+   "via": "root",
+   "prefix": "sleep t"
+  },
+  {
+   "term": "sleep cycle alarm",
+   "demand": 66,
+   "via": "root",
+   "prefix": "sleep c"
+  },
+  {
+   "term": "breathing timer",
+   "demand": 65,
+   "via": "root",
+   "prefix": "breathing"
+  },
+  {
+   "term": "cbt insomnia",
+   "demand": 65,
+   "via": "root",
+   "prefix": "insomnia "
+  },
+  {
+   "term": "sleep score & ai coach",
+   "demand": 64,
+   "via": "root",
+   "prefix": "sleep score"
+  },
+  {
+   "term": "alarmx - mission & sleep alarm",
+   "demand": 64,
+   "via": "root",
+   "prefix": "sleep alarm"
+  },
+  {
+   "term": "snoring analyzer - sleep talk",
+   "demand": 63,
+   "via": "root",
+   "prefix": "snoring"
+  },
+  {
+   "term": "sleep tracking",
+   "demand": 63,
+   "via": "root",
+   "prefix": "sleep t"
+  },
+  {
+   "term": "sleep sound recorder",
+   "demand": 63,
+   "via": "root",
+   "prefix": "sleep s"
+  },
+  {
+   "term": "sleeptalk sleep talk recorder",
+   "demand": 63,
+   "via": "root",
+   "prefix": "sleep talk"
+  },
+  {
+   "term": "white noise deep sleep sounds",
+   "demand": 63,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "dotsleep - sleep debt log",
+   "demand": 63,
+   "via": "root",
+   "prefix": "sleep debt"
+  },
+  {
+   "term": "breathing",
+   "demand": 62,
+   "via": "root",
+   "prefix": "breathing"
+  },
+  {
+   "term": "snoring monitoring",
+   "demand": 60,
+   "via": "root",
+   "prefix": "snoring"
+  },
+  {
+   "term": "sleep cycle - sleep tracker",
+   "demand": 60,
+   "via": "root",
+   "prefix": "sleep c"
+  },
+  {
+   "term": "deep sleep fan for bedtime",
+   "demand": 60,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "soluna - sleep debt tracker",
+   "demand": 60,
+   "via": "root",
+   "prefix": "sleep debt"
+  },
+  {
+   "term": "sleep app：sleep tracker, sound",
+   "demand": 59,
+   "via": "root",
+   "prefix": "sleep app"
+  },
+  {
+   "term": "cpap tracker & journal",
+   "demand": 59,
+   "via": "root",
+   "prefix": "cpap tracker"
+  },
+  {
+   "term": "sleep apnea monitor - somnio+",
+   "demand": 58,
+   "via": "root",
+   "prefix": "sleep apnea"
+  },
+  {
+   "term": "smart alarm clock - fixsleep",
+   "demand": 58,
+   "via": "root",
+   "prefix": "smart alarm"
+  },
+  {
+   "term": "restx - rest sleep alarm clock",
+   "demand": 58,
+   "via": "root",
+   "prefix": "sleep alarm"
+  },
+  {
+   "term": "deep sleep with aj",
+   "demand": 57,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "sleep quality journal",
+   "demand": 57,
+   "via": "root",
+   "prefix": "sleep quality"
+  },
+  {
+   "term": "smart alarm-sleep cycle saving",
+   "demand": 55,
+   "via": "root",
+   "prefix": "smart alarm"
+  },
+  {
+   "term": "deep sleep and relaxation",
+   "demand": 54,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "recordi - sleep talk recorder",
+   "demand": 52,
+   "via": "root",
+   "prefix": "sleep talk"
+  },
+  {
+   "term": "deep sleep, insomnia help",
+   "demand": 52,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "sleep apnea & snore exercises",
+   "demand": 52,
+   "via": "root",
+   "prefix": "sleep apnea"
+  },
+  {
+   "term": "smart alarm clock captain wake",
+   "demand": 52,
+   "via": "root",
+   "prefix": "smart alarm"
+  },
+  {
+   "term": "sleep cycle ab",
+   "demand": 52,
+   "via": "root",
+   "prefix": "sleep cycle"
+  },
+  {
+   "term": "snore tracker - plus1health",
+   "demand": 52,
+   "via": "root",
+   "prefix": "snore tracker"
+  },
+  {
+   "term": "snore control pro",
+   "demand": 52,
+   "via": "root",
+   "prefix": "snore control"
+  },
+  {
+   "term": "sleep monitoring free",
+   "demand": 52,
+   "via": "root",
+   "prefix": "sleep monitor"
+  },
+  {
+   "term": "empirical sleep & apnea care",
+   "demand": 50,
+   "via": "root",
+   "prefix": "sleep apnea"
+  },
+  {
+   "term": "sleepzy - sleep cycle tracker",
+   "demand": 50,
+   "via": "root",
+   "prefix": "sleep cycle"
+  },
+  {
+   "term": "deep sleep sounds",
+   "demand": 49,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "snore tracker - sleep recorder",
+   "demand": 49,
+   "via": "root",
+   "prefix": "snore tracker"
+  },
+  {
+   "term": "apnea trainer freedive",
+   "demand": 49,
+   "via": "root",
+   "prefix": "apnea trainer"
+  },
+  {
+   "term": "sleep cycle wake up calculator",
+   "demand": 47,
+   "via": "root",
+   "prefix": "sleep cycle"
+  },
+  {
+   "term": "sleep time record charts",
+   "demand": 47,
+   "via": "root",
+   "prefix": "sleep time "
+  },
+  {
+   "term": "snore & sleep talk logger",
+   "demand": 46,
+   "via": "root",
+   "prefix": "sleep talk"
+  },
+  {
+   "term": "deep sleep app",
+   "demand": 46,
+   "via": "root",
+   "prefix": "sleep app "
+  },
+  {
+   "term": "snore tracker - record snoring",
+   "demand": 46,
+   "via": "root",
+   "prefix": "snore tracker"
+  },
+  {
+   "term": "sleep monitoring 2",
+   "demand": 46,
+   "via": "root",
+   "prefix": "sleep monitor"
+  },
+  {
+   "term": "breathing timer - guided calm",
+   "demand": 45,
+   "via": "root",
+   "prefix": "breathing timer"
+  },
+  {
+   "term": "vitals7-sleep apnea",
+   "demand": 44,
+   "via": "root",
+   "prefix": "sleep apnea"
+  },
+  {
+   "term": "sleep cycle tracker & analyzer",
+   "demand": 44,
+   "via": "root",
+   "prefix": "sleep cycle"
+  },
+  {
+   "term": "sleep recorder plus",
+   "demand": 44,
+   "via": "root",
+   "prefix": "sleep recorder"
+  },
+  {
+   "term": "sleepland - sleep tracking app",
+   "demand": 44,
+   "via": "root",
+   "prefix": "sleep tracking"
+  },
+  {
+   "term": "breathing timer b-mind",
+   "demand": 42,
+   "via": "root",
+   "prefix": "breathing timer"
+  },
+  {
+   "term": "smart alarm clock - wake me up",
+   "demand": 41,
+   "via": "root",
+   "prefix": "smart alarm"
+  },
+  {
+   "term": "sleep cycle tracker wellsleep",
+   "demand": 41,
+   "via": "root",
+   "prefix": "sleep cycle"
+  },
+  {
+   "term": "talkry - sleep talk recorder",
+   "demand": 41,
+   "via": "both",
+   "prefix": "sleep talk "
+  },
+  {
+   "term": "snore recorder & sleep tracker",
+   "demand": 41,
+   "via": "root",
+   "prefix": "snore recorder"
+  },
+  {
+   "term": "sleep recorder - night audio",
+   "demand": 41,
+   "via": "root",
+   "prefix": "sleep recorder"
+  },
+  {
+   "term": "dozzi - sleep monitor",
+   "demand": 40,
+   "via": "root",
+   "prefix": "sleep monitor"
+  },
+  {
+   "term": "snoring recorder & detection",
+   "demand": 40,
+   "via": "root",
+   "prefix": "snoring recorder"
+  },
+  {
+   "term": "box breathing timer - helm",
+   "demand": 39,
+   "via": "root",
+   "prefix": "breathing timer"
+  },
+  {
+   "term": "snore recorder,sleep tracker",
+   "demand": 38,
+   "via": "root",
+   "prefix": "snore recorder"
+  },
+  {
+   "term": "sleep recorder - somnio",
+   "demand": 38,
+   "via": "root",
+   "prefix": "sleep recorder"
+  },
+  {
+   "term": "pasa - sleep & snore tracker",
+   "demand": 37,
+   "via": "root",
+   "prefix": "snore tracker"
+  },
+  {
+   "term": "sleep tracker & sleep monitor",
+   "demand": 37,
+   "via": "root",
+   "prefix": "sleep monitor"
+  },
+  {
+   "term": "freedive ai - apnea trainer",
+   "demand": 37,
+   "via": "root",
+   "prefix": "apnea trainer"
+  },
+  {
+   "term": "sleep recorder plus pro",
+   "demand": 35,
+   "via": "root",
+   "prefix": "sleep recorder"
+  },
+  {
+   "term": "snorelog - snoring recorder",
    "demand": 34,
    "via": "root",
-   "prefix": "musica para dormir"
+   "prefix": "snoring recorder"
   },
   {
-   "term": "sonidos para dormir gratis",
-   "demand": 34,
+   "term": "snore recorder app - snorely",
+   "demand": 33,
    "via": "root",
-   "prefix": "sonidos para dormir"
+   "prefix": "snore recorder"
   },
   {
-   "term": "monitor de sueño y ronquidos",
+   "term": "snoozer - snore tracker",
    "demand": 32,
    "via": "root",
-   "prefix": "monitor de sueño"
+   "prefix": "snore tracker"
   },
   {
-   "term": "alarma despertador con música.",
+   "term": "oxyboost - apnea trainer",
+   "demand": 32,
+   "via": "root",
+   "prefix": "apnea trainer"
+  },
+  {
+   "term": "flow breath - breathing timer",
    "demand": 31,
    "via": "root",
-   "prefix": "alarma despertador"
+   "prefix": "breathing timer"
   },
   {
-   "term": "sleep cycle - monitor de sueño",
-   "demand": 29,
+   "term": "prime sleep recorder pro",
+   "demand": 31,
    "via": "root",
-   "prefix": "monitor de sueño"
+   "prefix": "prime sleep recorder"
   },
   {
-   "term": "alarma despertador con música",
-   "demand": 28,
+   "term": "stamina apnea trainer freedive",
+   "demand": 31,
    "via": "root",
-   "prefix": "alarma despertador"
+   "prefix": "stamina apnea trainer"
   },
   {
-   "term": "música para dormir y sonidos",
-   "demand": 25,
+   "term": "snore recorder pro",
+   "demand": 30,
    "via": "root",
-   "prefix": "musica para dormir"
+   "prefix": "snore recorder"
   },
   {
-   "term": "alarma despertador movimiento",
-   "demand": 25,
-   "via": "root",
-   "prefix": "alarma despertador"
-  },
-  {
-   "term": "sonidos para dormir - dormir",
-   "demand": 25,
-   "via": "root",
-   "prefix": "sonidos para dormir"
-  },
-  {
-   "term": "música para dormir, ventilador",
+   "term": "sleep cycle & snore recorder",
    "demand": 22,
    "via": "root",
-   "prefix": "musica para dormir"
+   "prefix": "snore recorder "
   },
   {
-   "term": "alarma despertador with música",
-   "demand": 22,
-   "via": "root",
-   "prefix": "alarma despertador"
-  },
-  {
-   "term": "música para dormir y meditar",
+   "term": "breathing exercises by breeeze",
    "demand": 19,
    "via": "root",
-   "prefix": "musica para dormir"
+   "prefix": "breathing exercises"
   },
   {
-   "term": "sonidos para dormir hq",
+   "term": "breathing exercises antistress",
    "demand": 16,
    "via": "root",
-   "prefix": "sonidos para dormir"
+   "prefix": "breathing exercises"
   },
   {
-   "term": "sonidos para dormir aplicación",
+   "term": "breathing exercises - breathee",
    "demand": 14,
    "via": "root",
-   "prefix": "sonidos para dormir"
+   "prefix": "breathing exercises"
   },
   {
-   "term": "slipy - música para dormir",
+   "term": "breathing exercises *",
    "demand": 11,
    "via": "root",
-   "prefix": "musica para dormir"
+   "prefix": "breathing exercises"
+  }
+ ],
+ "gb": [
+  {
+   "term": "wake up alarm",
+   "demand": 97,
+   "via": "root",
+   "prefix": "wake"
   },
   {
-   "term": "sonidos para dormir ٞ",
-   "demand": 11,
+   "term": "apnea trainer",
+   "demand": 95,
    "via": "root",
-   "prefix": "sonidos para dormir"
+   "prefix": "apnea"
   },
   {
-   "term": "sonidos para dormir y relajar",
-   "demand": 8,
+   "term": "snore recorder app free",
+   "demand": 94,
    "via": "root",
-   "prefix": "sonidos para dormir"
+   "prefix": "snor"
+  },
+  {
+   "term": "prisma cpap",
+   "demand": 94,
+   "via": "root",
+   "prefix": "cpap"
+  },
+  {
+   "term": "cpap.com",
+   "demand": 91,
+   "via": "root",
+   "prefix": "cpap"
+  },
+  {
+   "term": "freediving apnea trainer",
+   "demand": 90,
+   "via": "root",
+   "prefix": "apnea"
+  },
+  {
+   "term": "snorereel - sleep recorder",
+   "demand": 90,
+   "via": "root",
+   "prefix": "snorer"
+  },
+  {
+   "term": "insomnia cookies",
+   "demand": 90,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "do i snore or grind",
+   "demand": 90,
+   "via": "framing",
+   "prefix": "do i s"
+  },
+  {
+   "term": "insomnia coffee uk",
+   "demand": 88,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "snoring tracker free",
+   "demand": 86,
+   "via": "root",
+   "prefix": "snor"
+  },
+  {
+   "term": "cpap supplies",
+   "demand": 86,
+   "via": "root",
+   "prefix": "cpap"
+  },
+  {
+   "term": "bruxism + fix teeth grinding",
+   "demand": 86,
+   "via": "root",
+   "prefix": "bruxism"
+  },
+  {
+   "term": "insomnia",
+   "demand": 85,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "divenamic - buceo y apnea",
+   "demand": 84,
+   "via": "root",
+   "prefix": "apnea"
+  },
+  {
+   "term": "snoreeze",
+   "demand": 83,
+   "via": "root",
+   "prefix": "snor"
+  },
+  {
+   "term": "cpap tracker & journal",
+   "demand": 83,
+   "via": "root",
+   "prefix": "cpap"
+  },
+  {
+   "term": "sleep cycle free",
+   "demand": 83,
+   "via": "root",
+   "prefix": "sleep c"
+  },
+  {
+   "term": "breathing exercises",
+   "demand": 82,
+   "via": "root",
+   "prefix": "breath"
+  },
+  {
+   "term": "insomnia ireland",
+   "demand": 82,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "cpap dash",
+   "demand": 80,
+   "via": "root",
+   "prefix": "cpap"
+  },
+  {
+   "term": "insomnia coffee",
+   "demand": 79,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "free sleep apnea monitor",
+   "demand": 78,
+   "via": "root",
+   "prefix": "apnea"
+  },
+  {
+   "term": "snore ai - sleep recorder",
+   "demand": 78,
+   "via": "root",
+   "prefix": "snore ai"
+  },
+  {
+   "term": "free sleep recording",
+   "demand": 77,
+   "via": "root",
+   "prefix": "sleep r"
+  },
+  {
+   "term": "sleep cycle sleep tracker",
+   "demand": 77,
+   "via": "root",
+   "prefix": "sleep c"
+  },
+  {
+   "term": "tolpie ∙ control bruxism",
+   "demand": 77,
+   "via": "root",
+   "prefix": "bruxism"
+  },
+  {
+   "term": "record snoring",
+   "demand": 76,
+   "via": "both",
+   "prefix": "snorer"
+  },
+  {
+   "term": "insomnia coach",
+   "demand": 76,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "anti-snore lab",
+   "demand": 76,
+   "via": "root",
+   "prefix": "anti snor"
+  },
+  {
+   "term": "airway trainer - stop snoring",
+   "demand": 76,
+   "via": "root",
+   "prefix": "stop snor"
+  },
+  {
+   "term": "breathing app",
+   "demand": 76,
+   "via": "root",
+   "prefix": "breathing"
+  },
+  {
+   "term": "free sleep tracker app",
+   "demand": 76,
+   "via": "both",
+   "prefix": "free slee"
+  },
+  {
+   "term": "record my sleep",
+   "demand": 76,
+   "via": "framing",
+   "prefix": "record my"
+  },
+  {
+   "term": "snore gym",
+   "demand": 75,
+   "via": "root",
+   "prefix": "snore"
+  },
+  {
+   "term": "apnea freedive breath hold",
+   "demand": 75,
+   "via": "root",
+   "prefix": "apnea"
+  },
+  {
+   "term": "sleep talk recorder free",
+   "demand": 74,
+   "via": "root",
+   "prefix": "sleep t"
+  },
+  {
+   "term": "sleep cycle alarm",
+   "demand": 74,
+   "via": "root",
+   "prefix": "sleep c"
+  },
+  {
+   "term": "breathing zone",
+   "demand": 73,
+   "via": "root",
+   "prefix": "breath"
+  },
+  {
+   "term": "insomnia cookies uk",
+   "demand": 73,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "snoreless - anti snoring",
+   "demand": 73,
+   "via": "root",
+   "prefix": "anti snor"
+  },
+  {
+   "term": "rem sleep calculator & sounds",
+   "demand": 73,
+   "via": "root",
+   "prefix": "rem sleep"
+  },
+  {
+   "term": "snore lab recorder tracker",
+   "demand": 73,
+   "via": "root",
+   "prefix": "snore lab"
+  },
+  {
+   "term": "snore clock",
+   "demand": 72,
+   "via": "root",
+   "prefix": "snore"
+  },
+  {
+   "term": "sleep apnea detector",
+   "demand": 72,
+   "via": "both",
+   "prefix": "apnea"
+  },
+  {
+   "term": "sleep talking app free",
+   "demand": 72,
+   "via": "root",
+   "prefix": "sleep t"
+  },
+  {
+   "term": "sleep sound recorder",
+   "demand": 72,
+   "via": "root",
+   "prefix": "sleep s"
+  },
+  {
+   "term": "deep sleep tracker",
+   "demand": 72,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "sleep debt",
+   "demand": 72,
+   "via": "root",
+   "prefix": "sleep debt"
+  },
+  {
+   "term": "sleep recorder free",
+   "demand": 71,
+   "via": "both",
+   "prefix": "sleep "
+  },
+  {
+   "term": "insomniac events",
+   "demand": 71,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "snore control - stop snoring",
+   "demand": 71,
+   "via": "root",
+   "prefix": "stop snor"
+  },
+  {
+   "term": "sleep apnea free",
+   "demand": 70,
+   "via": "root",
+   "prefix": "apnea"
+  },
+  {
+   "term": "sleep alarm",
+   "demand": 69,
+   "via": "root",
+   "prefix": "sleep a"
+  },
+  {
+   "term": "snoring recorder & detection",
+   "demand": 68,
+   "via": "both",
+   "prefix": "snorer"
+  },
+  {
+   "term": "insomniac radio",
+   "demand": 68,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "stamina apnea trainer",
+   "demand": 68,
+   "via": "both",
+   "prefix": "apnea "
+  },
+  {
+   "term": "breathing exercises free",
+   "demand": 68,
+   "via": "root",
+   "prefix": "breathing"
+  },
+  {
+   "term": "the insomniacs - stickers",
+   "demand": 68,
+   "via": "root",
+   "prefix": "insomniac"
+  },
+  {
+   "term": "free apple watch sleep tracker",
+   "demand": 67,
+   "via": "root",
+   "prefix": "watch sleep"
+  },
+  {
+   "term": "sleep snore",
+   "demand": 66,
+   "via": "root",
+   "prefix": "sleep s"
+  },
+  {
+   "term": "deep sleep sounds",
+   "demand": 66,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "insomniac",
+   "demand": 65,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "free breathing app",
+   "demand": 65,
+   "via": "root",
+   "prefix": "breathing"
+  },
+  {
+   "term": "sleep recorder plus",
+   "demand": 65,
+   "via": "both",
+   "prefix": "sleep rec"
+  },
+  {
+   "term": "sleep score & ai coach",
+   "demand": 64,
+   "via": "root",
+   "prefix": "sleep score"
+  },
+  {
+   "term": "alarmx - mission & sleep alarm",
+   "demand": 64,
+   "via": "root",
+   "prefix": "sleep alarm"
+  },
+  {
+   "term": "sleep tracker & sleep recorder",
+   "demand": 63,
+   "via": "root",
+   "prefix": "sleep t"
+  },
+  {
+   "term": "deep sleep",
+   "demand": 63,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "box breathing",
+   "demand": 62,
+   "via": "root",
+   "prefix": "breathing"
+  },
+  {
+   "term": "pasa - sleep & snore tracker",
+   "demand": 61,
+   "via": "both",
+   "prefix": "sleep snore"
+  },
+  {
+   "term": "arise - mindful sleep alarm",
+   "demand": 61,
+   "via": "root",
+   "prefix": "sleep alarm"
+  },
+  {
+   "term": "sleep tracking",
+   "demand": 60,
+   "via": "root",
+   "prefix": "sleep t"
+  },
+  {
+   "term": "white noise deep sleep sounds",
+   "demand": 60,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "dotsleep - sleep debt log",
+   "demand": 60,
+   "via": "root",
+   "prefix": "sleep debt"
+  },
+  {
+   "term": "prime sleep recorder",
+   "demand": 59,
+   "via": "both",
+   "prefix": "sleep rec"
+  },
+  {
+   "term": "insomnia treats",
+   "demand": 56,
+   "via": "root",
+   "prefix": "insomnia "
+  },
+  {
+   "term": "sleep cycle - tracker & sounds",
+   "demand": 55,
+   "via": "root",
+   "prefix": "sleep cycle"
+  },
+  {
+   "term": "digital clock - sleep alarm",
+   "demand": 55,
+   "via": "root",
+   "prefix": "sleep alarm"
+  },
+  {
+   "term": "sleeptalk sleep talk recorder",
+   "demand": 54,
+   "via": "root",
+   "prefix": "sleep talk"
+  },
+  {
+   "term": "deep sleep with aj",
+   "demand": 54,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "snore tracker - plus1health",
+   "demand": 54,
+   "via": "root",
+   "prefix": "snore tracker"
+  },
+  {
+   "term": "box breathing assistant",
+   "demand": 54,
+   "via": "root",
+   "prefix": "box breathing"
+  },
+  {
+   "term": "sleep recorder - snoring app",
+   "demand": 53,
+   "via": "both",
+   "prefix": "sleep rec"
+  },
+  {
+   "term": "insomnia cookies llc",
+   "demand": 53,
+   "via": "both",
+   "prefix": "insomnia "
+  },
+  {
+   "term": "deep sleep and relaxation",
+   "demand": 52,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "sleep apnea monitor - somnio+",
+   "demand": 52,
+   "via": "root",
+   "prefix": "sleep apnea"
+  },
+  {
+   "term": "sleep cycle ab",
+   "demand": 52,
+   "via": "root",
+   "prefix": "sleep cycle"
+  },
+  {
+   "term": "recordi - sleep talk recorder",
+   "demand": 52,
+   "via": "both",
+   "prefix": "sleep talk "
+  },
+  {
+   "term": "restx - rest sleep alarm clock",
+   "demand": 52,
+   "via": "root",
+   "prefix": "sleep alarm"
+  },
+  {
+   "term": "snore tracker - sleep recorder",
+   "demand": 52,
+   "via": "root",
+   "prefix": "snore tracker"
+  },
+  {
+   "term": "box breathing & 4-7-8 timer",
+   "demand": 52,
+   "via": "root",
+   "prefix": "box breathing"
+  },
+  {
+   "term": "breathing timer",
+   "demand": 51,
+   "via": "root",
+   "prefix": "breathing"
+  },
+  {
+   "term": "sleep recorder plus pro",
+   "demand": 51,
+   "via": "both",
+   "prefix": "sleep rec"
+  },
+  {
+   "term": "insomnia coffee company",
+   "demand": 51,
+   "via": "root",
+   "prefix": "insomnia "
+  },
+  {
+   "term": "smart alarm clock captain wake",
+   "demand": 50,
+   "via": "root",
+   "prefix": "smart alarm"
+  },
+  {
+   "term": "sleepzy - sleep cycle tracker",
+   "demand": 50,
+   "via": "root",
+   "prefix": "sleep cycle"
+  },
+  {
+   "term": "insomnia coachㆍcbt-iㆍzomni",
+   "demand": 50,
+   "via": "root",
+   "prefix": "insomnia coach"
+  },
+  {
+   "term": "deep sleep fan for bedtime",
+   "demand": 49,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "snore tracker - record snoring",
+   "demand": 49,
+   "via": "root",
+   "prefix": "snore tracker"
+  },
+  {
+   "term": "sleep tracker and recorder",
+   "demand": 49,
+   "via": "root",
+   "prefix": "sleep tracker"
+  },
+  {
+   "term": "sleep monitoring free",
+   "demand": 49,
+   "via": "root",
+   "prefix": "sleep monitor"
+  },
+  {
+   "term": "apnea trainer freedive",
+   "demand": 49,
+   "via": "root",
+   "prefix": "apnea trainer"
+  },
+  {
+   "term": "dog breathing app",
+   "demand": 49,
+   "via": "root",
+   "prefix": "breathing app"
+  },
+  {
+   "term": "box breathing - breathe even",
+   "demand": 49,
+   "via": "root",
+   "prefix": "box breathing"
+  },
+  {
+   "term": "sleep apnea & snore exercises",
+   "demand": 47,
+   "via": "root",
+   "prefix": "sleep apnea"
+  },
+  {
+   "term": "smart alarm-sleep cycle saving",
+   "demand": 47,
+   "via": "root",
+   "prefix": "smart alarm"
+  },
+  {
+   "term": "sleep cycle tracker wellsleep",
+   "demand": 47,
+   "via": "root",
+   "prefix": "sleep cycle"
+  },
+  {
+   "term": "enhanced insomnia coach",
+   "demand": 47,
+   "via": "root",
+   "prefix": "insomnia coach"
+  },
+  {
+   "term": "deep sleep, insomnia help",
+   "demand": 46,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "ibf breathing app",
+   "demand": 46,
+   "via": "root",
+   "prefix": "breathing app"
+  },
+  {
+   "term": "box breathing technique",
+   "demand": 46,
+   "via": "root",
+   "prefix": "box breathing"
+  },
+  {
+   "term": "breathing timer - box 4-7-8",
+   "demand": 45,
+   "via": "root",
+   "prefix": "breathing timer"
+  },
+  {
+   "term": "empirical sleep & apnea care",
+   "demand": 44,
+   "via": "root",
+   "prefix": "sleep apnea"
+  },
+  {
+   "term": "smart alarm clock - fixsleep",
+   "demand": 44,
+   "via": "root",
+   "prefix": "smart alarm"
+  },
+  {
+   "term": "sleep cycle tracker & analyzer",
+   "demand": 44,
+   "via": "root",
+   "prefix": "sleep cycle"
+  },
+  {
+   "term": "sleepland - sleep tracking app",
+   "demand": 44,
+   "via": "root",
+   "prefix": "sleep tracking"
+  },
+  {
+   "term": "insomniapp - ai insomnia coach",
+   "demand": 44,
+   "via": "root",
+   "prefix": "insomnia coach"
+  },
+  {
+   "term": "sleep monitoring 2",
+   "demand": 43,
+   "via": "root",
+   "prefix": "sleep monitor"
+  },
+  {
+   "term": "ai apnea trainer",
+   "demand": 43,
+   "via": "root",
+   "prefix": "apnea trainer"
+  },
+  {
+   "term": "breathing app, llc",
+   "demand": 43,
+   "via": "root",
+   "prefix": "breathing app"
+  },
+  {
+   "term": "box breathing - breathcode",
+   "demand": 43,
+   "via": "root",
+   "prefix": "box breathing"
+  },
+  {
+   "term": "breathing timer b-mind",
+   "demand": 42,
+   "via": "root",
+   "prefix": "breathing timer"
+  },
+  {
+   "term": "snore less - sleep & apnea aid",
+   "demand": 41,
+   "via": "root",
+   "prefix": "sleep apnea"
+  },
+  {
+   "term": "sleep cycle wake up calculator",
+   "demand": 41,
+   "via": "root",
+   "prefix": "sleep cycle"
+  },
+  {
+   "term": "snoring analyzer - sleep talk",
+   "demand": 41,
+   "via": "root",
+   "prefix": "sleep talk "
+  },
+  {
+   "term": "sleep tracker rise",
+   "demand": 40,
+   "via": "root",
+   "prefix": "sleep tracker"
+  },
+  {
+   "term": "box breathing & 4 7 8",
+   "demand": 40,
+   "via": "root",
+   "prefix": "box breathing"
+  },
+  {
+   "term": "breathing timer - guided calm",
+   "demand": 39,
+   "via": "root",
+   "prefix": "breathing timer"
+  },
+  {
+   "term": "sleep tracker watch",
+   "demand": 38,
+   "via": "root",
+   "prefix": "sleep tracker "
+  },
+  {
+   "term": "box breath | box breathing app",
+   "demand": 37,
+   "via": "root",
+   "prefix": "breathing app"
+  },
+  {
+   "term": "box breathing relaxing",
+   "demand": 37,
+   "via": "root",
+   "prefix": "box breathing"
+  },
+  {
+   "term": "box breathing timer - helm",
+   "demand": 36,
+   "via": "root",
+   "prefix": "breathing timer"
+  },
+  {
+   "term": "snoozer - snore tracker",
+   "demand": 34,
+   "via": "root",
+   "prefix": "snore tracker"
+  },
+  {
+   "term": "sleep pilot - sleep monitor",
+   "demand": 34,
+   "via": "root",
+   "prefix": "sleep monitor"
+  },
+  {
+   "term": "freedive ai - apnea trainer",
+   "demand": 34,
+   "via": "root",
+   "prefix": "apnea trainer"
+  },
+  {
+   "term": "box breathing assistant pro",
+   "demand": 34,
+   "via": "root",
+   "prefix": "box breathing"
+  },
+  {
+   "term": "snoreiq - snoring tracker",
+   "demand": 34,
+   "via": "root",
+   "prefix": "snoring tracker"
+  },
+  {
+   "term": "breathe boy - breathing timer",
+   "demand": 34,
+   "via": "root",
+   "prefix": "breathing timer"
+  },
+  {
+   "term": "snorelog - snoring recorder",
+   "demand": 34,
+   "via": "root",
+   "prefix": "snoring recorder"
+  },
+  {
+   "term": "snore monitor - snore tracker",
+   "demand": 32,
+   "via": "root",
+   "prefix": "snore tracker"
+  },
+  {
+   "term": "sleep tracker & sleep monitor",
+   "demand": 32,
+   "via": "root",
+   "prefix": "sleep monitor"
+  },
+  {
+   "term": "prime sleep recorder pro",
+   "demand": 31,
+   "via": "root",
+   "prefix": "prime sleep recorder"
+  },
+  {
+   "term": "stamina apnea trainer freedive",
+   "demand": 31,
+   "via": "root",
+   "prefix": "stamina apnea trainer"
+  },
+  {
+   "term": "sleep recorder - night audio",
+   "demand": 30,
+   "via": "root",
+   "prefix": "sleep recorder"
+  },
+  {
+   "term": "sleep recorder - snore clinic",
+   "demand": 27,
+   "via": "root",
+   "prefix": "sleep recorder"
+  },
+  {
+   "term": "flow breath - breathing timer",
+   "demand": 25,
+   "via": "root",
+   "prefix": "breathing timer"
+  },
+  {
+   "term": "snore recorder app - snorely",
+   "demand": 25,
+   "via": "root",
+   "prefix": "snore recorder app"
+  },
+  {
+   "term": "deep breathing exercises",
+   "demand": 22,
+   "via": "root",
+   "prefix": "breathing exercises"
+  },
+  {
+   "term": "talkry - sleep talk recorder",
+   "demand": 19,
+   "via": "root",
+   "prefix": "sleep talk recorder"
+  }
+ ],
+ "au": [
+  {
+   "term": "snore lab free",
+   "demand": 97,
+   "via": "root",
+   "prefix": "snor"
+  },
+  {
+   "term": "bmc cpap",
+   "demand": 97,
+   "via": "root",
+   "prefix": "cpap"
+  },
+  {
+   "term": "apnea trainer",
+   "demand": 95,
+   "via": "root",
+   "prefix": "apnea"
+  },
+  {
+   "term": "cpap supplies",
+   "demand": 94,
+   "via": "root",
+   "prefix": "cpap"
+  },
+  {
+   "term": "wake up alarm",
+   "demand": 94,
+   "via": "root",
+   "prefix": "wake"
+  },
+  {
+   "term": "cpap.com",
+   "demand": 91,
+   "via": "root",
+   "prefix": "cpap"
+  },
+  {
+   "term": "divenamic - buceo y apnea",
+   "demand": 90,
+   "via": "root",
+   "prefix": "apnea"
+  },
+  {
+   "term": "insomnia coach",
+   "demand": 90,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "insomniac",
+   "demand": 88,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "stamina apnea trainer",
+   "demand": 87,
+   "via": "root",
+   "prefix": "apnea"
+  },
+  {
+   "term": "bruxism + fix teeth grinding",
+   "demand": 86,
+   "via": "root",
+   "prefix": "bruxism"
+  },
+  {
+   "term": "cbt-i coach for insomnia",
+   "demand": 85,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "freedive apnea breath trainer",
+   "demand": 84,
+   "via": "root",
+   "prefix": "apnea"
+  },
+  {
+   "term": "wakey - challenge alarm clock",
+   "demand": 84,
+   "via": "root",
+   "prefix": "wakey"
+  },
+  {
+   "term": "snore clock",
+   "demand": 83,
+   "via": "root",
+   "prefix": "snor"
+  },
+  {
+   "term": "cpap tracker & journal",
+   "demand": 83,
+   "via": "root",
+   "prefix": "cpap"
+  },
+  {
+   "term": "sleep recorder free",
+   "demand": 83,
+   "via": "root",
+   "prefix": "sleep r"
+  },
+  {
+   "term": "sleep cycle free",
+   "demand": 83,
+   "via": "root",
+   "prefix": "sleep c"
+  },
+  {
+   "term": "insomniac events",
+   "demand": 82,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "snoring monitoring",
+   "demand": 80,
+   "via": "root",
+   "prefix": "snor"
+  },
+  {
+   "term": "cpap dash",
+   "demand": 80,
+   "via": "root",
+   "prefix": "cpap"
+  },
+  {
+   "term": "sleep talk",
+   "demand": 80,
+   "via": "root",
+   "prefix": "sleep t"
+  },
+  {
+   "term": "wakey alarm for heavy sleeper",
+   "demand": 78,
+   "via": "root",
+   "prefix": "wakey"
+  },
+  {
+   "term": "snore gym",
+   "demand": 77,
+   "via": "root",
+   "prefix": "snor"
+  },
+  {
+   "term": "sleep diary, cpap, feeltracker",
+   "demand": 77,
+   "via": "root",
+   "prefix": "cpap"
+  },
+  {
+   "term": "sleep talk recorder free",
+   "demand": 77,
+   "via": "root",
+   "prefix": "sleep t"
+  },
+  {
+   "term": "sleep alarm",
+   "demand": 77,
+   "via": "root",
+   "prefix": "sleep a"
+  },
+  {
+   "term": "tolpie ∙ control bruxism",
+   "demand": 77,
+   "via": "root",
+   "prefix": "bruxism"
+  },
+  {
+   "term": "anti-snore lab",
+   "demand": 76,
+   "via": "root",
+   "prefix": "anti snor"
+  },
+  {
+   "term": "airway trainer - stop snoring",
+   "demand": 76,
+   "via": "root",
+   "prefix": "stop snor"
+  },
+  {
+   "term": "the breathing app",
+   "demand": 76,
+   "via": "root",
+   "prefix": "breathing"
+  },
+  {
+   "term": "rem sleep calculator & sounds",
+   "demand": 76,
+   "via": "root",
+   "prefix": "rem sleep"
+  },
+  {
+   "term": "do i snore or grind",
+   "demand": 75,
+   "via": "root",
+   "prefix": "snore"
+  },
+  {
+   "term": "freedive apnea",
+   "demand": 75,
+   "via": "root",
+   "prefix": "apnea"
+  },
+  {
+   "term": "insomniac radio",
+   "demand": 73,
+   "via": "root",
+   "prefix": "insomn"
+  },
+  {
+   "term": "snoreless - anti snoring",
+   "demand": 73,
+   "via": "root",
+   "prefix": "anti snor"
+  },
+  {
+   "term": "breathing exercises",
+   "demand": 73,
+   "via": "root",
+   "prefix": "breathing"
+  },
+  {
+   "term": "snorelog - snoring recorder",
+   "demand": 73,
+   "via": "root",
+   "prefix": "snorelog "
+  },
+  {
+   "term": "freediving apnea trainer",
+   "demand": 72,
+   "via": "root",
+   "prefix": "apnea"
+  },
+  {
+   "term": "wakey - cute alarm clock",
+   "demand": 72,
+   "via": "root",
+   "prefix": "wakey"
+  },
+  {
+   "term": "sleep tracker & sleep recorder",
+   "demand": 72,
+   "via": "root",
+   "prefix": "sleep t"
+  },
+  {
+   "term": "sleep sound recorder",
+   "demand": 72,
+   "via": "root",
+   "prefix": "sleep s"
+  },
+  {
+   "term": "deep sleep hypnotherapy",
+   "demand": 72,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "sleep debt",
+   "demand": 72,
+   "via": "root",
+   "prefix": "sleep debt"
+  },
+  {
+   "term": "snore control - stop snoring",
+   "demand": 71,
+   "via": "root",
+   "prefix": "stop snor"
+  },
+  {
+   "term": "breathing zone",
+   "demand": 71,
+   "via": "root",
+   "prefix": "breathing"
+  },
+  {
+   "term": "snore lab recorder tracker",
+   "demand": 71,
+   "via": "root",
+   "prefix": "snore lab"
+  },
+  {
+   "term": "snorelog",
+   "demand": 70,
+   "via": "root",
+   "prefix": "snore"
+  },
+  {
+   "term": "sleep tracker sleep recorder",
+   "demand": 69,
+   "via": "root",
+   "prefix": "sleep t"
+  },
+  {
+   "term": "deep sleep with aj",
+   "demand": 69,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "record sleep",
+   "demand": 68,
+   "via": "root",
+   "prefix": "record"
+  },
+  {
+   "term": "wakey - your last alarm",
+   "demand": 68,
+   "via": "root",
+   "prefix": "wakey "
+  },
+  {
+   "term": "breathing timer",
+   "demand": 68,
+   "via": "root",
+   "prefix": "breathing"
+  },
+  {
+   "term": "sleep app：sleep tracker, sound",
+   "demand": 68,
+   "via": "root",
+   "prefix": "sleep app"
+  },
+  {
+   "term": "free sleep record",
+   "demand": 68,
+   "via": "root",
+   "prefix": "sleep rec"
+  },
+  {
+   "term": "the insomniacs - stickers",
+   "demand": 68,
+   "via": "root",
+   "prefix": "insomniac"
+  },
+  {
+   "term": "box breathing",
+   "demand": 65,
+   "via": "root",
+   "prefix": "breathing"
+  },
+  {
+   "term": "sleep tracker - snore lab app",
+   "demand": 65,
+   "via": "root",
+   "prefix": "snore lab"
+  },
+  {
+   "term": "sleep score & ai coach",
+   "demand": 64,
+   "via": "root",
+   "prefix": "sleep score"
+  },
+  {
+   "term": "alarmx - mission & sleep alarm",
+   "demand": 64,
+   "via": "root",
+   "prefix": "sleep alarm"
+  },
+  {
+   "term": "snoring analyzer - sleep talk",
+   "demand": 63,
+   "via": "root",
+   "prefix": "snoring"
+  },
+  {
+   "term": "sleep analyzer",
+   "demand": 63,
+   "via": "root",
+   "prefix": "sleep a"
+  },
+  {
+   "term": "sleep cycle - sleep tracker",
+   "demand": 63,
+   "via": "root",
+   "prefix": "sleep c"
+  },
+  {
+   "term": "deep sleep and relaxation",
+   "demand": 63,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "wake me up | no snooze alarm",
+   "demand": 63,
+   "via": "root",
+   "prefix": "wake me up"
+  },
+  {
+   "term": "sleep apnea monitor - somnio+",
+   "demand": 61,
+   "via": "root",
+   "prefix": "sleep apnea"
+  },
+  {
+   "term": "snoring recorder & detection",
+   "demand": 60,
+   "via": "root",
+   "prefix": "snoring"
+  },
+  {
+   "term": "sleep tracking",
+   "demand": 60,
+   "via": "root",
+   "prefix": "sleep t"
+  },
+  {
+   "term": "sleep cycle ab",
+   "demand": 60,
+   "via": "root",
+   "prefix": "sleep c"
+  },
+  {
+   "term": "deep sleep, insomnia help",
+   "demand": 60,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "prime sleep recorder",
+   "demand": 59,
+   "via": "both",
+   "prefix": "sleep rec"
+  },
+  {
+   "term": "deep sleep app",
+   "demand": 59,
+   "via": "root",
+   "prefix": "sleep app"
+  },
+  {
+   "term": "restx - rest sleep alarm clock",
+   "demand": 58,
+   "via": "root",
+   "prefix": "sleep alarm"
+  },
+  {
+   "term": "sleep talk & snore recorder",
+   "demand": 57,
+   "via": "root",
+   "prefix": "sleep talk"
+  },
+  {
+   "term": "deep sleep fan for bedtime",
+   "demand": 57,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "box breathing assistant",
+   "demand": 57,
+   "via": "root",
+   "prefix": "box breathing"
+  },
+  {
+   "term": "sleep apnea & snore exercises",
+   "demand": 55,
+   "via": "root",
+   "prefix": "sleep apnea"
+  },
+  {
+   "term": "sleepzy - sleep cycle tracker",
+   "demand": 55,
+   "via": "root",
+   "prefix": "sleep cycle"
+  },
+  {
+   "term": "paced breathing",
+   "demand": 53,
+   "via": "root",
+   "prefix": "breathing"
+  },
+  {
+   "term": "recordi - sleep talk recorder",
+   "demand": 52,
+   "via": "root",
+   "prefix": "sleep talk"
+  },
+  {
+   "term": "smart alarm clock - wake me up",
+   "demand": 52,
+   "via": "root",
+   "prefix": "wake me up"
+  },
+  {
+   "term": "empirical sleep & apnea care",
+   "demand": 52,
+   "via": "root",
+   "prefix": "sleep apnea"
+  },
+  {
+   "term": "smart alarm clock captain wake",
+   "demand": 52,
+   "via": "root",
+   "prefix": "smart alarm"
+  },
+  {
+   "term": "sleep cycle tracker & analyzer",
+   "demand": 52,
+   "via": "root",
+   "prefix": "sleep cycle"
+  },
+  {
+   "term": "box breathing & 4-7-8 timer",
+   "demand": 52,
+   "via": "root",
+   "prefix": "box breathing"
+  },
+  {
+   "term": "wake up alarm clock -vamos-",
+   "demand": 52,
+   "via": "root",
+   "prefix": "wake up alarm"
+  },
+  {
+   "term": "sleep recorder plus",
+   "demand": 51,
+   "via": "both",
+   "prefix": "sleep rec"
+  },
+  {
+   "term": "smart alarm-sleep cycle saving",
+   "demand": 50,
+   "via": "root",
+   "prefix": "smart alarm"
+  },
+  {
+   "term": "sleep cycle tracker wellsleep",
+   "demand": 50,
+   "via": "root",
+   "prefix": "sleep cycle"
+  },
+  {
+   "term": "snore tracker - plus1health",
+   "demand": 50,
+   "via": "root",
+   "prefix": "snore tracker "
+  },
+  {
+   "term": "insomnia coachㆍcbt-iㆍzomni app",
+   "demand": 50,
+   "via": "root",
+   "prefix": "insomnia coach"
+  },
+  {
+   "term": "box breathing technique",
+   "demand": 49,
+   "via": "root",
+   "prefix": "box breathing"
+  },
+  {
+   "term": "wake up alarm sounds",
+   "demand": 49,
+   "via": "root",
+   "prefix": "wake up alarm"
+  },
+  {
+   "term": "vitals7-sleep apnea",
+   "demand": 47,
+   "via": "root",
+   "prefix": "sleep apnea"
+  },
+  {
+   "term": "sleep cycle bedtime calculator",
+   "demand": 47,
+   "via": "root",
+   "prefix": "sleep cycle"
+  },
+  {
+   "term": "sleep time record charts",
+   "demand": 47,
+   "via": "root",
+   "prefix": "sleep time "
+  },
+  {
+   "term": "snore tracker - sleep recorder",
+   "demand": 47,
+   "via": "root",
+   "prefix": "snore tracker "
+  },
+  {
+   "term": "otter freedive apnea",
+   "demand": 47,
+   "via": "root",
+   "prefix": "freedive apnea"
+  },
+  {
+   "term": "enhanced insomnia coach",
+   "demand": 47,
+   "via": "root",
+   "prefix": "insomnia coach"
+  },
+  {
+   "term": "sleeptalk sleep talk recorder",
+   "demand": 46,
+   "via": "root",
+   "prefix": "sleep talk"
+  },
+  {
+   "term": "deep sleep sounds - pro",
+   "demand": 46,
+   "via": "root",
+   "prefix": "deep sleep"
+  },
+  {
+   "term": "box breathing - breathe even",
+   "demand": 46,
+   "via": "root",
+   "prefix": "box breathing"
+  },
+  {
+   "term": "wake up alarm - move to stop",
+   "demand": 46,
+   "via": "root",
+   "prefix": "wake up alarm"
+  },
+  {
+   "term": "breathing timer b-mind",
+   "demand": 45,
+   "via": "root",
+   "prefix": "breathing timer"
+  },
+  {
+   "term": "paced breathing exercises zone",
+   "demand": 45,
+   "via": "root",
+   "prefix": "paced breathing"
+  },
+  {
+   "term": "smart alarm clock - fixsleep",
+   "demand": 44,
+   "via": "root",
+   "prefix": "smart alarm"
+  },
+  {
+   "term": "snore tracker - record snoring",
+   "demand": 44,
+   "via": "root",
+   "prefix": "snore tracker "
+  },
+  {
+   "term": "apnea trainer freedive",
+   "demand": 44,
+   "via": "root",
+   "prefix": "apnea trainer "
+  },
+  {
+   "term": "box breathing & 4 7 8",
+   "demand": 43,
+   "via": "root",
+   "prefix": "box breathing"
+  },
+  {
+   "term": "breathing timer - guided calm",
+   "demand": 42,
+   "via": "root",
+   "prefix": "breathing timer"
+  },
+  {
+   "term": "paced breathing llc",
+   "demand": 42,
+   "via": "root",
+   "prefix": "paced breathing"
+  },
+  {
+   "term": "sleep cycle - sleep calculator",
+   "demand": 41,
+   "via": "root",
+   "prefix": "sleep cycle"
+  },
+  {
+   "term": "sleep tracker watch",
+   "demand": 41,
+   "via": "root",
+   "prefix": "sleep tracker "
+  },
+  {
+   "term": "box breathing relaxing",
+   "demand": 40,
+   "via": "root",
+   "prefix": "box breathing"
+  },
+  {
+   "term": "wake up! alarm",
+   "demand": 40,
+   "via": "root",
+   "prefix": "wake up alarm"
+  },
+  {
+   "term": "snoreiq - snoring tracker",
+   "demand": 39,
+   "via": "root",
+   "prefix": "snoring tracker"
+  },
+  {
+   "term": "sleepland - sleep tracking app",
+   "demand": 39,
+   "via": "root",
+   "prefix": "sleep tracking "
+  },
+  {
+   "term": "box breathing timer - helm",
+   "demand": 39,
+   "via": "root",
+   "prefix": "breathing timer"
+  },
+  {
+   "term": "paced breathing - breath coach",
+   "demand": 39,
+   "via": "root",
+   "prefix": "paced breathing"
+  },
+  {
+   "term": "aida wake-up alarm",
+   "demand": 37,
+   "via": "root",
+   "prefix": "wake up alarm"
+  },
+  {
+   "term": "breathe boy - breathing timer",
+   "demand": 36,
+   "via": "root",
+   "prefix": "breathing timer"
+  },
+  {
+   "term": "paced breathing exercises app",
+   "demand": 36,
+   "via": "root",
+   "prefix": "paced breathing"
+  },
+  {
+   "term": "pasa - sleep & snore tracker",
+   "demand": 35,
+   "via": "root",
+   "prefix": "snore tracker "
+  },
+  {
+   "term": "box breathing offline",
+   "demand": 34,
+   "via": "root",
+   "prefix": "box breathing"
+  },
+  {
+   "term": "alarm clock - wake up alarm",
+   "demand": 34,
+   "via": "root",
+   "prefix": "wake up alarm"
+  },
+  {
+   "term": "sleep recorder plus pro",
+   "demand": 33,
+   "via": "root",
+   "prefix": "sleep recorder"
+  },
+  {
+   "term": "freedive ai - apnea trainer",
+   "demand": 33,
+   "via": "root",
+   "prefix": "apnea trainer "
+  },
+  {
+   "term": "alarmpro wake up alarm smart",
+   "demand": 32,
+   "via": "root",
+   "prefix": "wake up alarm"
+  },
+  {
+   "term": "breathe easy - paced breathing",
+   "demand": 31,
+   "via": "root",
+   "prefix": "paced breathing"
+  },
+  {
+   "term": "prime sleep recorder pro",
+   "demand": 31,
+   "via": "root",
+   "prefix": "prime sleep recorder"
+  },
+  {
+   "term": "stamina apnea trainer freedive",
+   "demand": 31,
+   "via": "root",
+   "prefix": "stamina apnea trainer"
+  },
+  {
+   "term": "snoozer - snore tracker",
+   "demand": 30,
+   "via": "root",
+   "prefix": "snore tracker "
+  },
+  {
+   "term": "sleep recorder - night audio",
+   "demand": 30,
+   "via": "root",
+   "prefix": "sleep recorder"
+  },
+  {
+   "term": "freedive and apnea trainer app",
+   "demand": 30,
+   "via": "root",
+   "prefix": "apnea trainer "
+  },
+  {
+   "term": "flow breath - breathing timer",
+   "demand": 28,
+   "via": "root",
+   "prefix": "breathing timer"
+  },
+  {
+   "term": "breathe zen - paced breathing",
+   "demand": 28,
+   "via": "root",
+   "prefix": "paced breathing"
+  },
+  {
+   "term": "snore recorder app - snorely",
+   "demand": 28,
+   "via": "root",
+   "prefix": "snore recorder app "
+  },
+  {
+   "term": "sleep tracker - sleep recorder",
+   "demand": 28,
+   "via": "root",
+   "prefix": "sleep tracker sleep recorder"
+  },
+  {
+   "term": "snore monitor - snore tracker",
+   "demand": 27,
+   "via": "root",
+   "prefix": "snore tracker "
+  },
+  {
+   "term": "sleep recorder - somnio",
+   "demand": 27,
+   "via": "root",
+   "prefix": "sleep recorder"
+  },
+  {
+   "term": "sleep tracker + sleep recorder",
+   "demand": 25,
+   "via": "root",
+   "prefix": "sleep tracker sleep recorder"
+  },
+  {
+   "term": "breathing exercises by breeeze",
+   "demand": 22,
+   "via": "root",
+   "prefix": "breathing exercises"
+  },
+  {
+   "term": "talkry - sleep talk recorder",
+   "demand": 19,
+   "via": "root",
+   "prefix": "sleep talk recorder"
+  },
+  {
+   "term": "breathing exercises antistress",
+   "demand": 19,
+   "via": "root",
+   "prefix": "breathing exercises"
+  },
+  {
+   "term": "breathing exercises - breathee",
+   "demand": 16,
+   "via": "root",
+   "prefix": "breathing exercises"
+  },
+  {
+   "term": "breathing exercises *",
+   "demand": 14,
+   "via": "root",
+   "prefix": "breathing exercises"
   }
  ]
 }

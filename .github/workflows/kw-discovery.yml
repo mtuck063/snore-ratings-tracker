@@ -16,25 +16,36 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Same reasoning as the keyword collector: Apple throttles /search per IP and
-  # runner IPs are a lottery, so keep each runner's call count low. 327
-  # candidates split nine ways is ~35-40 calls per runner, spaced ~1s apart.
+  # The matrix is derived from scripts/kw-candidates.json rather than hardcoded,
+  # so a new discovery batch only means replacing that file — no workflow edit.
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.gen.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: gen
+        # Same reasoning as the keyword collector: Apple throttles /search per
+        # IP and runner IPs are a lottery, so cap each runner near 40 calls.
+        run: |
+          node -e '
+            const c = require("./scripts/kw-candidates.json");
+            const PER = 40, include = [];
+            for (const [market, rows] of Object.entries(c)) {
+              const chunks = Math.max(1, Math.ceil(rows.length / PER));
+              for (let chunk = 0; chunk < chunks; chunk++) include.push({ market, chunk, chunks });
+            }
+            console.log("matrix=" + JSON.stringify({ include }));
+          ' >> "$GITHUB_OUTPUT"
+      - run: echo "${{ steps.gen.outputs.matrix }}"
+
   probe:
+    needs: setup
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       max-parallel: 4
-      matrix:
-        include:
-          - { market: fr, chunk: 0, chunks: 4 }
-          - { market: fr, chunk: 1, chunks: 4 }
-          - { market: fr, chunk: 2, chunks: 4 }
-          - { market: fr, chunk: 3, chunks: 4 }
-          - { market: es, chunk: 0, chunks: 3 }
-          - { market: es, chunk: 1, chunks: 3 }
-          - { market: es, chunk: 2, chunks: 3 }
-          - { market: mx, chunk: 0, chunks: 2 }
-          - { market: mx, chunk: 1, chunks: 2 }
+      matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
