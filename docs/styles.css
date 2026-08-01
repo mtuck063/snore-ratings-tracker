@@ -324,20 +324,30 @@ tr.kw-detail td {
     background: var(--bg-raised);
 }
 
-#kw-competitors { margin-top: 16px; max-width: 460px; }
-.kw-comp-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.kw-comp-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    padding: 5px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 0.85rem;
+/* Seven columns do not fit a phone, so the table pans sideways inside its own
+   box rather than widening the page. The app-name column stays put while the
+   numbers scroll under it. */
+#kw-competitors { margin-top: 16px; overflow-x: auto; }
+.kw-comp-note {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    margin: 2px 0 10px;
+    max-width: 560px;
 }
-.kw-comp-row:last-child { border-bottom: none; }
-.kw-comp-row.you { color: var(--good); font-weight: 600; }
-.kw-comp-stat { color: var(--text-secondary); font-size: 0.78rem; white-space: nowrap; }
-.kw-comp-row.you .kw-comp-stat { color: var(--good); }
+.kw-comp-table { min-width: 560px; }
+.kw-comp-table td { font-size: 0.85rem; }
+.kw-comp-table tbody tr:last-child td { border-bottom: none; }
+.kw-comp-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 230px;
+    position: sticky;
+    left: 0;
+    background: var(--bg);
+}
+.kw-comp-table tr.you td { color: var(--good); font-weight: 600; }
+.kw-comp-table tr.you td.muted { color: var(--good); opacity: 0.75; }
 
 #kw-events { list-style: none; padding: 0; margin-top: 14px; }
 #kw-events li { padding: 6px 0 6px 12px; border-left: 2px solid var(--border); font-size: 0.85rem; }

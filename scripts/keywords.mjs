@@ -97,6 +97,13 @@ async function fetchRank(kw, cc, attempt = 1) {
         id: String(r.trackId),
         name: (r.trackName ?? "").slice(0, 42),
         icon: r.artworkUrl60 ?? null,
+        // First-ever release, not the current version's date. Identical in
+        // every storefront, so it rides along in the shared `apps` map.
+        released: (r.releaseDate ?? "").slice(0, 10) || null,
+        // Rating count and score ARE per-storefront, so they are kept per
+        // market in `stats` — a US count shown under the MX tab would lie.
+        ratings: r.userRatingCount ?? null,
+        score: r.averageUserRating ?? null,
       })),
     };
   } catch (err) {
@@ -195,18 +202,26 @@ async function collectMarket(cc) {
   const ranks = {};
   const tops = {}; // kw -> [appId x5]; app metadata deduped into `apps`
   const apps = {};
+  const stats = {}; // id -> [ratings, score] for THIS storefront only
   list.forEach((kw, i) => {
     const r = rankResults[i];
     ranks[kw] = r === "error" ? "error" : r.rank;
     if (r !== "error") {
       tops[kw] = r.top.map((t) => t.id);
-      for (const t of r.top) apps[t.id] = { name: t.name, ...(t.icon && { icon: t.icon }) };
+      for (const t of r.top) {
+        apps[t.id] = {
+          name: t.name,
+          ...(t.icon && { icon: t.icon }),
+          ...(t.released && { released: t.released }),
+        };
+        if (t.ratings != null) stats[t.id] = [t.ratings, Math.round((t.score ?? 0) * 100) / 100];
+      }
     }
   });
   const watch = Object.fromEntries(watchFor(cc).map((p, i) => [p, watchLists[i]]));
   const errors = rankResults.filter((r) => r === "error").length;
   console.log(`${cc}: collected (${errors} rank fetches failed)`);
-  return { cc, ranks, pops, watch, tops, apps };
+  return { cc, ranks, pops, watch, tops, apps, stats };
 }
 
 // --- Merge: previous-state logic, events, history, writes -------------------
@@ -228,6 +243,13 @@ async function merge(partials) {
     if (part?.apps) for (const [id, meta] of Object.entries(part.apps)) apps[id] ??= meta;
   }
   for (const [id, meta] of Object.entries(prev?.apps ?? {})) apps[id] ??= meta;
+  // A market that errored this run keeps its previous numbers rather than
+  // blanking the column, same carry-forward rule the rank data uses.
+  const stats = {};
+  for (const cc of Object.keys(markets)) {
+    const part = partials.find((p) => p?.cc === cc);
+    stats[cc] = { ...(prev?.stats?.[cc] ?? {}), ...(part?.stats ?? {}) };
+  }
 
   // First run of a new UTC day: snapshot yesterday's closing surf details.
   const newDay = Boolean(prev?.fetchedAt) && prev.fetchedAt.slice(0, 10) < today;
@@ -373,8 +395,13 @@ async function merge(partials) {
   for (const kws of Object.values(latest))
     for (const cur of Object.values(kws)) for (const id of cur.top ?? []) used.add(id);
   for (const id of Object.keys(apps)) if (!used.has(id)) delete apps[id];
+  for (const perCc of Object.values(stats))
+    for (const id of Object.keys(perCc)) if (!used.has(id)) delete perCc[id];
 
-  await writeFile(dataFile, JSON.stringify({ fetchedAt, apps, latest, hints, events, history }));
+  await writeFile(
+    dataFile,
+    JSON.stringify({ fetchedAt, apps, stats, latest, hints, events, history })
+  );
   console.log(`${today}: ${Object.keys(markets).length} markets merged`);
   // The workflow greps this to decide whether to requeue on a bad runner IP.
   console.log(`RANK_FAILURES=${rankFailures}`);

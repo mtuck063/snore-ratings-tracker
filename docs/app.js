@@ -33,6 +33,24 @@ const flag = (cc) =>
 
 const fmt = (n) => n.toLocaleString("en-US");
 
+// "2012-10-26" -> "Oct 2012". Parsed as UTC so the day never shifts backwards
+// in western timezones and lands the label on the previous month.
+const monthYear = (iso) => {
+    const d = new Date(`${iso}T00:00:00Z`);
+    return Number.isNaN(+d)
+        ? "—"
+        : d.toLocaleDateString("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
+};
+
+// Whole-year age once an app is past its first birthday, one decimal below it,
+// so a 10-month-old app reads "0.9y" instead of rounding to a misleading "1y".
+const ageYears = (iso) => {
+    const d = new Date(`${iso}T00:00:00Z`);
+    if (Number.isNaN(+d)) return "—";
+    const y = (Date.now() - +d) / (365.25 * 24 * 3600 * 1000);
+    return y < 1 ? `${y.toFixed(1)}y` : `${Math.floor(y)}y`;
+};
+
 function deltaCell(delta) {
     const span = document.createElement("span");
     span.className = "delta";
@@ -973,23 +991,81 @@ function renderKeywords(kw) {
             head.className = "recent-label";
             head.textContent = `Who owns these keywords`;
             comp.appendChild(head);
+            const note = document.createElement("p");
+            note.className = "kw-comp-note";
+            note.textContent =
+                "Age is from each app's first App Store release. Ratings and score are " +
+                "for this storefront only, so they change as you switch markets.";
+            comp.appendChild(note);
+
             const top = [...slots.entries()].sort((a, b) => b[1].slots - a[1].slots).slice(0, 8);
             // Your own share always shows, even from outside the top 8.
             if (!top.some(([id]) => id === "6751759381")) {
                 top.push(["6751759381", slots.get("6751759381") ?? { slots: 0, firsts: 0 }]);
             }
-            for (const [id, e] of top) {
-                const row = document.createElement("div");
-                row.className = "kw-comp-row" + (id === "6751759381" ? " you" : "");
-                const name = document.createElement("span");
-                name.className = "kw-comp-name";
-                name.appendChild(appLabel(appEntry(id)));
-                const stat = document.createElement("span");
-                stat.className = "kw-comp-stat";
-                stat.textContent = `top-5 on ${e.slots}/${measured}${e.firsts ? ` · ${e.firsts}× #1` : ""}`;
-                row.append(name, stat);
-                comp.appendChild(row);
+
+            const table = document.createElement("table");
+            table.className = "kw-comp-table";
+            const thead = document.createElement("thead");
+            const hrow = document.createElement("tr");
+            for (const [label, cls] of [
+                ["App", ""],
+                ["Top-5", "col-num"],
+                ["#1", "col-num"],
+                ["Released", "col-num"],
+                ["Age", "col-num"],
+                ["Ratings", "col-num"],
+                ["Score", "col-num"],
+            ]) {
+                const th = document.createElement("th");
+                th.textContent = label;
+                if (cls) th.className = cls;
+                hrow.appendChild(th);
             }
+            thead.appendChild(hrow);
+            table.appendChild(thead);
+
+            const tb = document.createElement("tbody");
+            const perCc = kw.stats?.[cc] ?? {};
+            for (const [id, e] of top) {
+                const row = document.createElement("tr");
+                if (id === "6751759381") row.className = "you";
+                const meta = appEntry(id);
+
+                const tdName = document.createElement("td");
+                tdName.className = "kw-comp-name";
+                tdName.appendChild(appLabel(meta));
+
+                const tdSlots = document.createElement("td");
+                tdSlots.className = "col-num";
+                tdSlots.textContent = `${e.slots}/${measured}`;
+
+                const tdFirst = document.createElement("td");
+                tdFirst.className = "col-num muted";
+                tdFirst.textContent = e.firsts ? `${e.firsts}×` : "—";
+
+                const tdRel = document.createElement("td");
+                tdRel.className = "col-num muted";
+                tdRel.textContent = meta.released ? monthYear(meta.released) : "—";
+
+                const tdAge = document.createElement("td");
+                tdAge.className = "col-num";
+                tdAge.textContent = meta.released ? ageYears(meta.released) : "—";
+
+                const [ratings, score] = perCc[id] ?? [];
+                const tdRatings = document.createElement("td");
+                tdRatings.className = "col-num muted";
+                tdRatings.textContent = ratings == null ? "—" : ratings.toLocaleString();
+
+                const tdScore = document.createElement("td");
+                tdScore.className = "col-num muted";
+                tdScore.textContent = score ? score.toFixed(2) : "—";
+
+                row.append(tdName, tdSlots, tdFirst, tdRel, tdAge, tdRatings, tdScore);
+                tb.appendChild(row);
+            }
+            table.appendChild(tb);
+            comp.appendChild(table);
         }
     };
 
