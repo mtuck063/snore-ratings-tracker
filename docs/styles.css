@@ -52,7 +52,6 @@ h1 { font-size: 1.35rem; margin-bottom: 4px; }
     text-align: left;
 }
 .check-now:disabled { color: var(--text-secondary); cursor: default; }
-a.check-now { display: inline-block; text-decoration: none; }
 #check-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 
 #recent { margin-bottom: 18px; }
@@ -161,8 +160,6 @@ svg.spark { display: block; margin-left: auto; touch-action: none; }
 .spark-line.down { stroke: var(--bad); }
 .spark-dot.down { fill: var(--bad); }
 .spark-hover { fill: var(--text); stroke: var(--bg); stroke-width: 2; }
-
-.footnote { color: var(--text-secondary); font-size: 0.78rem; margin-top: 20px; line-height: 1.5; }
 
 #week-reviews { margin-bottom: 20px; }
 #week-reviews h2 { font-size: 1.05rem; margin-bottom: 10px; }

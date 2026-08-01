@@ -128,9 +128,7 @@ async function fetchHistogram(cc, attempt = 1) {
   const url = `https://apps.apple.com/${cc}/app/id${APP_ID}`;
   try {
     const html = await pageGate(async () => {
-      const res = await fetch(url, {
-        headers: { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36" },
-      });
+      const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return res.text();
     });
@@ -169,6 +167,14 @@ const prevRated = prevLatest
 
 async function ratingsPass() {
   const ratedSet = new Set(prevRated);
+  // Two sources on purpose; collapsing to either one alone loses something.
+  // The storefront page is the fresher number and carries the star histogram
+  // in the same fetch, but it's ~500KB and starts returning 429s under load,
+  // so it's spent only on storefronts that actually have ratings. The lookup
+  // API has no histogram at all, but at ~11KB it's the only sane way to poll
+  // the long tail of storefronts still sitting at zero (currently ~70% of the
+  // list). Routing everything through the page costs ~3x the bandwidth to
+  // learn nothing new about that tail.
   const results = await Promise.all(
     COUNTRIES.map((cc) => (ratedSet.has(cc) ? fetchCountryFromPage(cc) : fetchCountry(cc)))
   );
@@ -207,7 +213,7 @@ const newReviews = [];
 for (const r of fetchedReviews) {
   if (!knownIds.has(r.id)) {
     knownIds.add(r.id);
-    newReviews.push({ ...r, firstSeen: fetchedAt, ...(isReviewSeed && { seeded: true }) });
+    newReviews.push({ ...r, firstSeen: fetchedAt });
   }
 }
 console.log(`${newReviews.length} new written reviews`);
@@ -329,7 +335,7 @@ function applyHistogram(cc, counts) {
     }
     if (!changed.length) return;
   }
-  histograms.countries[cc] = { counts, at: fetchedAt };
+  histograms.countries[cc] = { counts };
   histUpdated = true;
 }
 for (const [cc, counts] of Object.entries(pageCounts)) applyHistogram(cc, counts);

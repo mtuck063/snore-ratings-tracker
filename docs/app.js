@@ -343,8 +343,6 @@ function row({ name, sub, total, delta, avg, mix, to5, spark, isTotal, title }) 
     return tr;
 }
 
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
 // "just now" / "14m ago" / "3h ago" / "2d ago"; older than a week: the date.
 function ago(iso) {
     const s = (Date.now() - new Date(iso)) / 1000;
@@ -1293,8 +1291,7 @@ async function main() {
     addMeta(`Last change ${ago(latest.fetchedAt)}`, stamp(latest.fetchedAt));
 
     // Live recheck: query Apple directly from the browser for the 20 biggest
-    // storefronts, one call per 3s to respect the API throttle. Display-only;
-    // the hourly workflow records changes officially.
+    // storefronts. Display-only; the hourly workflow records changes officially.
     const checkRow = document.createElement("div");
     checkRow.id = "check-row";
     const checkBtn = document.createElement("button");
@@ -1438,7 +1435,7 @@ async function main() {
         checkBtn.textContent = summary;
         setTimeout(() => {
             checkBtn.disabled = false;
-            if (!changes.length && !failed && !newReviews.length) checkBtn.textContent = "Check all storefronts now";
+            if (!changes.length && !failed && !newReviews.length) checkBtn.textContent = "Quick check (live view)";
         }, 5000);
     });
 

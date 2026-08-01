@@ -10,11 +10,6 @@ const flag = (cc) =>
 
 const rankText = (r) => (r == null ? "—" : `#${r}`);
 
-const MARKET_NAMES = {
-    us: "United States", ca: "Canada", gb: "United Kingdom", au: "Australia",
-    fr: "France", es: "Spain", mx: "Mexico",
-};
-
 const state = { market: "all", type: "all", q: "" };
 let events = [];
 
