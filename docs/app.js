@@ -947,34 +947,35 @@ async function renderKeywords(kw) {
 
             const tdDelta = document.createElement("td");
             tdDelta.className = "col-num";
-            // Δ: today's daily average vs yesterday's — the exact quantities
-            // the sparkline's last segment draws, so the arrow can never
-            // contradict the trend line. Unrounded baselines: yesterday
-            // averaging 2.5 against a 3 today is a real slip, not "=".
+            // Δ: where you stand now against yesterday's close — the exact
+            // quantities the sparkline's last segment draws, so the arrow can
+            // never contradict the trend line. Today's stored close is the
+            // latest rank while the day is still running, so this reads as the
+            // live move rather than a partial day's mean.
             const todayRow = kw.history.at(-1);
-            const todayAvg =
+            const todayClose =
                 (todayRow?.date === curDate ? todayRow.markets?.[cc]?.[term]?.[0] : null) ?? cur.rank;
-            let baseAvg = prevDayVals?.[0];
-            if (baseAvg == null) baseAvg = (cur.recent ?? []).find(([, r]) => r != null)?.[1];
+            let baseClose = prevDayVals?.[0];
+            if (baseClose == null) baseClose = (cur.recent ?? []).find(([, r]) => r != null)?.[1];
             const span = document.createElement("span");
             span.className = "delta";
-            if (todayAvg == null || baseAvg == null) {
+            if (todayClose == null || baseClose == null) {
                 span.classList.add("flat");
                 span.textContent = "—";
             } else {
-                const diff = Math.round(todayAvg - baseAvg); // positive = slipped
+                const diff = Math.round(todayClose - baseClose); // positive = slipped
                 if (diff === 0) {
                     span.classList.add("flat");
                     span.textContent = "=";
-                    span.title = `Steady vs yesterday (avg ${baseAvg} → ${todayAvg})`;
+                    span.title = `Steady vs yesterday's close (#${baseClose})`;
                 } else if (diff < 0) {
                     span.classList.add("up");
                     span.textContent = `▲${-diff}`;
-                    span.title = `Daily average ${baseAvg} → ${todayAvg}`;
+                    span.title = `Yesterday's close #${baseClose} → now #${todayClose}`;
                 } else {
                     span.classList.add("down");
                     span.textContent = `▼${diff}`;
-                    span.title = `Daily average ${baseAvg} → ${todayAvg}`;
+                    span.title = `Yesterday's close #${baseClose} → now #${todayClose}`;
                 }
             }
             tdDelta.appendChild(span);
@@ -1013,9 +1014,11 @@ async function renderKeywords(kw) {
                 .map((row) => {
                     const v = row.markets?.[cc]?.[term];
                     if (!v || v[0] == null) return null;
-                    const [avg, , min, max] = v;
+                    // Closing rank, with the day's range beside it so a quiet
+                    // day and a day that swung 34 places do not read alike.
+                    const [close, , min, max] = v;
                     const range = min != null && max != null && min !== max ? ` (${min}–${max})` : "";
-                    return { date: row.date, count: -avg, label: `#${avg}${range}` };
+                    return { date: row.date, count: -close, label: `#${close}${range}` };
                 })
                 .filter(Boolean);
             tdSpark.appendChild(sparkline(points, `${term} rank, last 30 days`, (v) => `#${-v}`, 4));

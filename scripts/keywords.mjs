@@ -418,9 +418,20 @@ async function merge(partials) {
   }
   if (configChanged) await writeFile(configFile, JSON.stringify(config, null, 2) + "\n");
 
-  // History: one row per day, aggregated across the day's runs. Per keyword:
-  // [avgRank, pop, minRank, maxRank, samples] — a running average with range,
-  // so intra-run jitter washes out. Null ranks don't dilute the average.
+  // History: one row per day. Per keyword:
+  // [closeRank, pop, minRank, maxRank, samples] — the day's *closing* rank,
+  // the way a stock chart plots a close, plus the day's range.
+  //
+  // This was a running average until the average started contradicting the
+  // page it sat on. A keyword that spent a day at 39 and jumped to 5 on the
+  // last run averaged 30.7, so the sparkline's final point read 30 while the
+  // Rank column beside it read 5, and the Δ column called a 34-place jump a
+  // 2-place drift. Because the row is upserted every run, the close is simply
+  // the latest rank, and during the day it equals the current rank — so the
+  // chart's right edge can no longer disagree with the number next to it.
+  //
+  // The range is what preserves the jitter the average used to smooth: a noisy
+  // day still shows as #5 (5–39) rather than pretending 5 was the whole story.
   // (Older rows may hold the legacy [rank, pop] shape; treated as one sample.)
   const history = prev?.history ?? [];
   const existing = history.findIndex((r) => r.date === today);
@@ -433,13 +444,13 @@ async function merge(partials) {
       if (!p || p[0] == null) {
         row.markets[cc][kw] = rank != null ? [rank, pop, rank, rank, 1] : [null, pop];
       } else if (rank == null) {
-        const [pAvg, , pMin = p[0], pMax = p[0], pN = 1] = p;
-        row.markets[cc][kw] = [pAvg, pop, pMin, pMax, pN];
+        // Fetch failed this run: hold the close and range rather than letting
+        // an outage read as a rank change.
+        const [pClose, , pMin = p[0], pMax = p[0], pN = 1] = p;
+        row.markets[cc][kw] = [pClose, pop, pMin, pMax, pN];
       } else {
-        const [pAvg, , pMin = p[0], pMax = p[0], pN = 1] = p;
-        const n = pN + 1;
-        const avg = Math.round(((pAvg * pN + rank) / n) * 10) / 10;
-        row.markets[cc][kw] = [avg, pop, Math.min(pMin, rank), Math.max(pMax, rank), n];
+        const [, , pMin = p[0], pMax = p[0], pN = 1] = p;
+        row.markets[cc][kw] = [rank, pop, Math.min(pMin, rank), Math.max(pMax, rank), pN + 1];
       }
     }
   }
