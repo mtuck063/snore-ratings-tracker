@@ -1073,16 +1073,9 @@ async function renderKeywords(kw) {
         }
         if (measured) {
             comp.hidden = false;
-            // Names the market it belongs to. This panel sits far enough below
-            // the tabs that on a phone you cannot see which one is selected
-            // while reading it, and every number here is per-storefront.
             const head = document.createElement("div");
             head.className = "recent-label";
             head.textContent = "Who owns these keywords";
-            const where = document.createElement("span");
-            where.className = "kw-comp-market";
-            where.textContent = `${flag(cc)} ${regionNames.of(cc.toUpperCase()) ?? cc.toUpperCase()}`;
-            head.appendChild(where);
             comp.appendChild(head);
             const note = document.createElement("p");
             note.className = "kw-comp-note";
@@ -1120,6 +1113,17 @@ async function renderKeywords(kw) {
                 th.textContent = label;
                 if (cls) th.className = cls;
                 if (tip) th.dataset.tip = tip;
+                // The market rides on the App header. Every figure in this
+                // table is per-storefront, and the panel sits far enough below
+                // the tabs that on a phone you cannot see which one is selected
+                // while reading it. On the header it stays visible because that
+                // column is sticky while the numbers pan sideways.
+                if (label === "App") {
+                    const where = document.createElement("span");
+                    where.className = "kw-comp-market";
+                    where.textContent = `${flag(cc)} ${regionNames.of(cc.toUpperCase()) ?? cc.toUpperCase()}`;
+                    th.appendChild(where);
+                }
                 hrow.appendChild(th);
             }
             thead.appendChild(hrow);
