@@ -8,6 +8,9 @@ on:
 
 permissions:
   contents: write
+  # Failures raise an issue: a scheduled workflow's failure mail is easy to
+  # filter away, and an issue is visible on the repo itself.
+  issues: write
 
 concurrency:
   group: ratings-data
@@ -38,3 +41,16 @@ jobs:
             git pull --rebase
             git push
           fi
+
+      - name: Raise an issue on failure
+        if: failure()
+        uses: ./.github/actions/alert
+        with:
+          token: ${{ github.token }}
+          title: "Ratings collector is failing"
+          body: |
+            `collect.mjs` exited non-zero, which it only does when more than a
+            quarter of storefronts failed to answer. Ratings on the dashboard
+            are being carried forward, not updated.
+
+            Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

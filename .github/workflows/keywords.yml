@@ -14,6 +14,7 @@ on:
 permissions:
   contents: write
   actions: write
+  issues: write
 
 # Same group as the ratings collector so the two never push over each other.
 concurrency:
@@ -94,3 +95,36 @@ jobs:
             echo "requeueing once for fresh runners"
             gh workflow run keywords.yml -f attempt=2 --repo ${{ github.repository }}
           fi
+
+      # The requeue above absorbs a single bad runner IP. If the retry is still
+      # failing this is not the IP, and carrying values forward silently would
+      # leave stale ranks looking current.
+      - name: Fail if the retry is still failing
+        if: github.event.inputs.attempt == '2'
+        run: |
+          fails=$(grep -o "RANK_FAILURES=[0-9]*" run.log | cut -d= -f2)
+          echo "rank failures on retry: ${fails:-unknown}"
+          if [ -n "$fails" ] && [ "$fails" -gt 40 ]; then
+            echo "::error::retry still failing ($fails rank fetches); ranks are carried forward, not updated"
+            exit 1
+          fi
+
+  # Its own job, not a step on `merge`: a failing market leg has to raise the
+  # alarm too, and `merge` runs with if:always() so a step there would never
+  # see the matrix failure.
+  alert:
+    needs: [collect, merge]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/alert
+        with:
+          token: ${{ github.token }}
+          title: "Keyword collector is failing"
+          body: |
+            A market leg failed, the merge failed, or a requeued run was still
+            failing on its second attempt. Ranks on the dashboard are being
+            carried forward, not updated.
+
+            Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

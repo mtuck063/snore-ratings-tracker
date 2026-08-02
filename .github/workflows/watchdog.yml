@@ -1,0 +1,49 @@
+name: Watchdog
+
+# Catches the failure the collectors cannot report themselves: runs that stop
+# happening. A workflow that never starts never fails, so it never emails —
+# the only way to notice is something else checking that the data moved.
+#
+# Blind spot worth knowing: this is a scheduled workflow too. If Actions is
+# disabled for the repo (GitHub does this after 60 days of inactivity), the
+# watchdog dies with everything else and nothing raises a hand. Closing that
+# hole needs a ping to something outside GitHub.
+
+on:
+  schedule:
+    # Four times a day, offset from the collectors so it reads settled data.
+    - cron: "47 2,8,14,20 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  freshness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check collectors are still reporting
+        run: node scripts/check-freshness.mjs
+
+      - name: Raise an issue if data has gone stale
+        if: failure()
+        uses: ./.github/actions/alert
+        with:
+          token: ${{ github.token }}
+          title: "Collector data has gone stale"
+          body: |
+            `status.json` has not been updated within the expected window, so a
+            collector has stopped running or stopped writing. The dashboard is
+            still serving its last known values, which will look current.
+
+            Check the Actions tab first: a scheduled workflow that stopped
+            firing produces no failed run to look at.
+
+            Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

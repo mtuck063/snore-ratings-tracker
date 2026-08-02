@@ -1,0 +1,42 @@
+name: Alert
+description: >
+  Open a tracking issue for a failure, or comment on the existing one. Used by
+  every scheduled workflow so a cron that breaks at 03:00 leaves something
+  visible on the repo rather than one filterable email.
+
+inputs:
+  title:
+    description: Issue title. Also the dedupe key, so keep it stable per failure kind.
+    required: true
+  body:
+    description: What broke and where to look.
+    required: true
+  token:
+    description: Token with issues:write.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        TITLE: ${{ inputs.title }}
+        BODY: ${{ inputs.body }}
+      run: |
+        set -euo pipefail
+        # One open issue per failure kind. A collector that has been broken for
+        # a week should be one issue with seven comments, not seven issues —
+        # otherwise the notifications become the thing you learn to ignore.
+        num=$(gh issue list --state open --limit 100 --json number,title \
+              | jq -r --arg t "$TITLE" '[.[] | select(.title == $t)] | .[0].number // empty')
+        stamp="$(date -u '+%F %H:%M UTC')"
+        if [ -n "$num" ]; then
+          printf 'Still failing at %s.\n\n%s\n' "$stamp" "$BODY" | gh issue comment "$num" --body-file -
+          echo "commented on #$num"
+        else
+          # Closing the issue is how you acknowledge it; the next failure after
+          # that opens a fresh one rather than resurrecting old context.
+          printf 'First seen %s.\n\n%s\n' "$stamp" "$BODY" | gh issue create --title "$TITLE" --body-file -
+          echo "opened a new issue"
+        fi

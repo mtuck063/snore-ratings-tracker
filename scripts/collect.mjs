@@ -193,7 +193,7 @@ async function ratingsPass() {
   });
   const failed = results.filter((r) => r === "error").length;
   console.log(`ratings done${failed ? ` (${failed} failed, values carried over)` : ""}`);
-  return { countries, pageCounts };
+  return { countries, pageCounts, failed };
 }
 
 async function reviewsPass() {
@@ -202,7 +202,10 @@ async function reviewsPass() {
   return perStorefront.flat();
 }
 
-const [{ countries, pageCounts }, fetchedReviews] = await Promise.all([ratingsPass(), reviewsPass()]);
+const [{ countries, pageCounts, failed: fetchFailures }, fetchedReviews] = await Promise.all([
+  ratingsPass(),
+  reviewsPass(),
+]);
 
 // Fold newly fetched reviews into the stored set.
 const reviewsFile = path.join(servedDataDir, "reviews.json");
@@ -265,6 +268,36 @@ const pageHistChanged = Object.entries(pageCounts).some(([cc, counts]) => {
 });
 
 const ratingsChanged = !prevLatest || JSON.stringify(prevLatest.countries) !== JSON.stringify(countries);
+
+// Heartbeat, written every run whether or not anything changed — and before
+// the early exit below, because the quiet path is exactly when it matters.
+// latest.json only moves when a rating moves, so a frozen timestamp there is
+// indistinguishable from a collector that has been dead since Tuesday. This
+// separates "checked at" from "changed at". Merged rather than overwritten so
+// the keywords collector's entry survives.
+const statusFile = path.join(servedDataDir, "status.json");
+const status = await readJson(statusFile, {});
+status.ratings = {
+  at: fetchedAt,
+  storefronts: COUNTRIES.length,
+  failed: fetchFailures,
+  changed: ratingsChanged,
+};
+await writeFile(statusFile, JSON.stringify(status));
+
+// Also before the early exit: a run where most fetches failed carries every
+// value forward, which leaves ratingsChanged false and would slip out through
+// the quiet path with exit 0. Past a quarter of storefronts this is not a
+// blip, and the run needs to be loud enough for the failure mail to fire.
+const FAIL_RATIO = 0.25;
+if (fetchFailures > COUNTRIES.length * FAIL_RATIO) {
+  console.error(
+    `FAILED: ${fetchFailures}/${COUNTRIES.length} storefronts did not answer ` +
+      `(threshold ${Math.floor(COUNTRIES.length * FAIL_RATIO)}). Data was carried forward, not updated.`
+  );
+  process.exit(1);
+}
+
 if (!ratingsChanged && newReviews.length === 0 && needHist.length === 0 && !pageHistChanged) {
   console.log("No rating or review changes since last fetch; nothing written.");
   process.exit(0);
@@ -368,3 +401,4 @@ if (ratingsChanged) {
 
 const total = Object.values(countries).reduce((sum, c) => sum + (c?.count ?? 0), 0);
 console.log(`${today}: ${total} total ratings across ${COUNTRIES.length} storefronts`);
+
