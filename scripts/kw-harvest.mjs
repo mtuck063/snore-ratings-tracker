@@ -34,23 +34,35 @@ const config = JSON.parse(await readFile(configFile, "utf8"));
 // Category stems and the modifiers buyers append, per market. A stem is a word
 // people search on its own; the framings are what they add when they want it
 // free or want an app specifically.
+//
+// Stems must cover every register the language actually uses, not just the one
+// an English term translates into. Chinese has a plain word for sleep (睡觉)
+// and a clinical one (睡眠); Japanese has a native reading (眠り), a
+// Sino-Japanese one (睡眠) and a katakana loan (スリープ); German builds
+// compounds (Schlafgeräusche) that no word-by-word translation reaches. A
+// harvest seeded from one register only ever finds that register, which is
+// how 睡觉记录 and 眠り — both scoring high — went missing on the first pass.
+// Teeth grinding sits here too: different complaint, same night recording.
 const HARVEST = {
   de: {
     stems: ["schnarchen", "schnarch app", "schnarchrekorder", "schlaf", "schlaftracker",
       "schlaftagebuch", "schlafapnoe", "schlafanalyse", "schlafqualität", "schlaf aufnahme",
-      "apnoe", "cpap", "wecker", "tiefschlaf", "nachts", "müde", "einschlafen"],
+      "apnoe", "cpap", "wecker", "tiefschlaf", "nachts", "müde", "einschlafen",
+      "schlafgeräusche", "schlafprotokoll", "im schlaf reden", "zähneknirschen"],
     framings: ["kostenlos", "app", "gratis", "apple watch", "aufnehmen", "test"],
   },
   jp: {
     stems: ["いびき", "いびき録音", "いびきアプリ", "いびき対策", "睡眠", "睡眠アプリ",
       "睡眠記録", "睡眠トラッカー", "睡眠計測", "睡眠管理", "睡眠の質", "寝言", "寝言録音",
-      "無呼吸", "無呼吸症候群", "快眠", "目覚まし", "熟睡", "不眠"],
+      "無呼吸", "無呼吸症候群", "快眠", "目覚まし", "熟睡", "不眠",
+      "眠り", "寝息", "寝てる間", "歯ぎしり", "スリープトラッカー", "睡眠負債", "よく眠れる"],
     framings: ["無料", "アプリ", "録音", "apple watch", "人気", "計測"],
   },
   cn: {
     stems: ["打鼾", "打呼", "打呼噜", "鼾声", "呼噜", "止鼾", "睡眠", "睡眠监测",
       "睡眠记录", "睡眠追踪", "睡眠质量", "睡眠周期", "梦话", "呼吸暂停", "助眠",
-      "白噪音", "失眠", "深度睡眠", "闹钟"],
+      "白噪音", "失眠", "深度睡眠", "闹钟",
+      "睡觉", "睡觉记录", "说梦话", "磨牙", "呼噜声", "呼吸机"],
     framings: ["免费", "软件", "记录", "苹果手表", "监测", "检测"],
   },
 };
