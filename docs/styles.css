@@ -154,9 +154,11 @@ tr.changed td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 
 .muted { color: var(--text-secondary); }
 .at-five { color: var(--good); }
-/* Sits beside the best-ever rank as the distance from it. Muted because the
-   headline number is the best itself; the gap is the footnote. */
-.best-gap { margin-left: 5px; font-size: 0.75rem; }
+/* Sits beside the best-ever rank as the distance from it. Red for ground lost
+   against the ceiling, green tick when sitting on it — same reading as the
+   delta column, so the two agree at a glance. Kept small: the headline number
+   is the best itself, the gap is the footnote. */
+.best-gap { margin-left: 5px; font-size: 0.75rem; color: var(--bad); }
 .best-gap.at-best { color: var(--good); }
 
 svg.spark { display: block; margin-left: auto; touch-action: none; }
