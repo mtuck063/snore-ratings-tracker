@@ -71,7 +71,7 @@ jobs:
         run: |
           git config user.name "ratings-bot"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/data scripts/keywords.json
+          git add docs/data scripts/keywords.json scripts/hints.json
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else

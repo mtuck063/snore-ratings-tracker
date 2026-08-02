@@ -31,6 +31,10 @@ import { fileURLToPath } from "node:url";
 const repoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const servedDataDir = path.join(repoRoot, "docs", "data");
 const dataFile = path.join(servedDataDir, "keywords.json");
+// Autocomplete state the merge diffs against to spot new suggestions. Kept in
+// the repo but out of docs/, because every visitor was downloading it and no
+// page has ever read it.
+const hintsFile = path.join(repoRoot, "scripts", "hints.json");
 const partialsDir = path.join(repoRoot, "partials");
 
 const configFile = path.join(repoRoot, "scripts", "keywords.json");
@@ -258,7 +262,21 @@ async function merge(partials) {
   // First run of a new UTC day: snapshot yesterday's closing surf details.
   const newDay = Boolean(prev?.fetchedAt) && prev.fetchedAt.slice(0, 10) < today;
 
+  // Interned run timestamps. `runAt` also accepts a raw ISO string so rows
+  // written before interning still resolve while they age out of the 24h
+  // window; nothing needs a migration pass to stay readable.
+  const runs = [...(prev?.runs ?? [])];
+  const runIndex = (iso) => {
+    const i = runs.indexOf(iso);
+    return i === -1 ? runs.push(iso) - 1 : i;
+  };
+  const runAt = (v) => (typeof v === "number" ? runs[v] : v);
+
   const latest = {};
+  // Previous autocomplete state now lives beside the collector rather than in
+  // the served file; prev.hints is the fallback for the first run after the
+  // move, when scripts/hints.json does not exist yet.
+  const prevHints = await readJson(hintsFile, prev?.hints ?? {});
   const hints = {};
   for (const cc of Object.keys(markets)) {
     const list = kwFor(cc);
@@ -281,11 +299,13 @@ async function merge(partials) {
         rawPop.failed && prevKw?.pop > measured.pop
           ? { pop: prevKw.pop, ...(prevKw.prefix && { prefix: prevKw.prefix, pos: prevKw.pos }) }
           : measured;
-      // `recent` keeps the last 24 hours of [timestamp, rank, pop] samples
-      // for the rolling 24h windows, whatever the run cadence.
+      // `recent` keeps the last 24 hours of [run, rank, pop] samples for the
+      // rolling 24h windows, whatever the run cadence. `run` indexes into the
+      // top-level `runs` table: every keyword in a run shares one timestamp,
+      // so storing the string inline meant ~3,000 copies of eight values.
       const recent = [
-        ...(prevKw?.recent ?? []).filter(([at]) => new Date(at) >= dayAgo),
-        [fetchedAt, rank, pops.pop],
+        ...(prevKw?.recent ?? []).filter(([at]) => new Date(runAt(at)) >= dayAgo),
+        [runIndex(fetchedAt), rank, pops.pop],
       ];
       // Top-5 result lists carry over on failure like everything else.
       // Legacy carried entries ([id, name] pairs) fold into the apps map.
@@ -313,7 +333,7 @@ async function merge(partials) {
     }
     hints[cc] = {};
     for (const p of watchFor(cc)) {
-      hints[cc][p] = part?.watch?.[p] ?? prev?.hints?.[cc]?.[p] ?? [];
+      hints[cc][p] = part?.watch?.[p] ?? prevHints[cc]?.[p] ?? [];
     }
     const ranked = list.filter((kw) => latest[cc][kw].rank != null).length;
     console.log(`${cc}: ranked for ${ranked}/${list.length} keywords${part ? "" : " (partial missing, all carried)"}`);
@@ -338,7 +358,7 @@ async function merge(partials) {
         }
       }
       for (const [prefix, list] of Object.entries(hints[cc])) {
-        const before = new Set(prev.hints?.[cc]?.[prefix] ?? []);
+        const before = new Set(prevHints[cc]?.[prefix] ?? []);
         if (before.size === 0) continue; // first sighting of this prefix: baseline
         for (const term of list) {
           if (!before.has(term)) {
@@ -411,6 +431,22 @@ async function merge(partials) {
   for (const perCc of Object.values(stats))
     for (const id of Object.keys(perCc)) if (!used.has(id)) delete perCc[id];
 
+  // Compact the run table. `recent` only holds 24 hours, so older runs fall out
+  // of reference every day and would otherwise accumulate forever. Rewrites the
+  // surviving samples to the new indices, and normalises any pre-interning ISO
+  // string it finds on the way through.
+  const seen = new Map();
+  const compact = [];
+  for (const kws of Object.values(latest))
+    for (const cur of Object.values(kws))
+      for (const s of cur.recent ?? []) {
+        const iso = runAt(s[0]);
+        if (!seen.has(iso)) { seen.set(iso, compact.length); compact.push(iso); }
+        s[0] = seen.get(iso);
+      }
+  runs.length = 0;
+  runs.push(...compact);
+
   // Competitor growth needs an earlier reading to subtract from, and `stats`
   // is a live snapshot this merge overwrites. Keep a short series of run-level
   // rating counts — counts only, since a score is not a rate. Five entries at
@@ -433,9 +469,10 @@ async function merge(partials) {
     for (const perCc of Object.values(snap.markets))
       for (const id of Object.keys(perCc)) if (!used.has(id)) delete perCc[id];
 
+  await writeFile(hintsFile, JSON.stringify(hints) + "\n");
   await writeFile(
     dataFile,
-    JSON.stringify({ fetchedAt, apps, stats, statsLog, latest, hints, events, history })
+    JSON.stringify({ fetchedAt, runs, apps, stats, statsLog, latest, events, history })
   );
   console.log(`${today}: ${Object.keys(markets).length} markets merged`);
   // The workflow greps this to decide whether to requeue on a bad runner IP.
