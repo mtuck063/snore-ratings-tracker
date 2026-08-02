@@ -63,6 +63,22 @@ document.addEventListener("scroll", hideTooltip, { capture: true, passive: true 
 const flag = (cc) =>
     String.fromCodePoint(...[...cc.toUpperCase()].map((ch) => 0x1f1a5 + ch.charCodeAt(0)));
 
+// Keyword events live in one shard per month under data/kw-events/, listed by
+// index.json. Returns the newest `want` events plus the total across all
+// shards, fetching only as many months as it takes to reach `want`.
+async function loadRecentKwEvents(want) {
+    const grab = (p) =>
+        fetch(`data/kw-events/${p}`, { cache: "no-cache" }).then((r) => r.json());
+    const idx = await grab("index.json").catch(() => null);
+    if (!idx?.months?.length) return { events: [], total: 0 };
+    const out = [];
+    for (const m of [...idx.months].reverse()) {
+        out.unshift(...(await grab(`${m}.json`).catch(() => [])));
+        if (out.length >= want) break;
+    }
+    return { events: out, total: idx.total ?? out.length };
+}
+
 const fmt = (n) => n.toLocaleString("en-US");
 
 // "2012-10-26" -> "Oct 2012". Parsed as UTC so the day never shifts backwards
@@ -711,7 +727,7 @@ function renderEvents(history, events) {
 
 // Keyword rankings: one table, tab per market. Rank sparklines plot -rank so
 // an improving keyword trends upward like every other chart on the page.
-function renderKeywords(kw) {
+async function renderKeywords(kw) {
     if (!kw?.latest || !Object.keys(kw.latest).length) return;
     document.getElementById("keywords-section").hidden = false;
     if (kw.fetchedAt) {
@@ -1201,15 +1217,19 @@ function renderKeywords(kw) {
     render(marketCcs[0]);
 
     // Movement log: notable rank moves and newly appearing suggestions. Only
-    // the newest 30 here — keyword-log.html carries the full history.
-    const allKwEvents = kw.events ?? [];
-    const kwEvents = allKwEvents.slice(-30).reverse();
-    if (allKwEvents.length > kwEvents.length) {
+    // the newest 30 here — keyword-log.html carries the full history. Events
+    // are sharded by month, so this walks back from the newest shard and stops
+    // as soon as it has enough, which is one fetch except in a month's first
+    // days. The index carries the full total so the link can name it without
+    // loading anything else.
+    const { events: recentKwEvents, total: kwEventTotal } = await loadRecentKwEvents(30);
+    const kwEvents = recentKwEvents.slice(-30).reverse();
+    if (kwEventTotal > kwEvents.length) {
         const link = document.getElementById("kw-log-link");
         if (link) {
             link.hidden = false;
             link.querySelector("a").textContent =
-                `See all ${allKwEvents.length.toLocaleString()} changes →`;
+                `See all ${kwEventTotal.toLocaleString()} changes →`;
         }
     }
     if (kwEvents.length) {
@@ -1355,7 +1375,11 @@ async function main() {
     }
 
     renderRecent(events);
-    renderKeywords(kwData);
+    // Not awaited: the table paints synchronously and only the movement strip
+    // waits on its shard, so blocking the rest of the page on that fetch would
+    // buy nothing. Caught so a missing shard cannot surface as an unhandled
+    // rejection and take the reviews below it down with it.
+    renderKeywords(kwData).catch((err) => console.warn("keyword section:", err));
     renderWeekReviews(reviews);
     renderReviews(reviews);
     renderEvents(history, events);

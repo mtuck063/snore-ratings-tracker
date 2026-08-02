@@ -24,7 +24,7 @@
 // a fetch that still fails carries the previous value at merge time, so an
 // outage can't fake a rank drop.
 
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -35,6 +35,10 @@ const dataFile = path.join(servedDataDir, "keywords.json");
 // the repo but out of docs/, because every visitor was downloading it and no
 // page has ever read it.
 const hintsFile = path.join(repoRoot, "scripts", "hints.json");
+// Movement log, one shard per month plus an index. The merge only ever appends
+// and both pages want the newest slice, so a single growing array made every
+// visitor download every event ever recorded — 2.6MB gzipped at a year's rate.
+const kwEventsDir = path.join(servedDataDir, "kw-events");
 const partialsDir = path.join(repoRoot, "partials");
 
 const configFile = path.join(repoRoot, "scripts", "keywords.json");
@@ -347,7 +351,27 @@ async function merge(partials) {
     return Math.abs(from - to) >= 3 || crosses(3) || crosses(10);
   }
 
-  const events = prev?.events ?? [];
+  // Events go into the shard for the month they happened in. Only this month's
+  // is loaded: the merge appends and never reads back, so older shards stay
+  // untouched on disk.
+  const month = fetchedAt.slice(0, 7);
+  await mkdir(kwEventsDir, { recursive: true });
+  // One-time fold, for the first run after the split: an older keywords.json
+  // still carries the whole array. Once it is written without `events` this
+  // branch stops firing.
+  if (prev?.events?.length) {
+    const byMonth = {};
+    for (const e of prev.events) (byMonth[e.at.slice(0, 7)] ??= []).push(e);
+    for (const [m, list] of Object.entries(byMonth)) {
+      const existing = await readJson(path.join(kwEventsDir, `${m}.json`), []);
+      const seen = new Set(existing.map((e) => JSON.stringify(e)));
+      const merged = [...existing, ...list.filter((e) => !seen.has(JSON.stringify(e)))];
+      merged.sort((a, b) => a.at.localeCompare(b.at));
+      await writeFile(path.join(kwEventsDir, `${m}.json`), JSON.stringify(merged));
+    }
+    console.log(`folded ${prev.events.length} events into ${Object.keys(byMonth).length} month shard(s)`);
+  }
+  const events = await readJson(path.join(kwEventsDir, `${month}.json`), []);
   const discovered = {}; // cc -> new suggestion terms this run
   if (prev) {
     for (const [cc, kws] of Object.entries(latest)) {
@@ -470,9 +494,24 @@ async function merge(partials) {
       for (const id of Object.keys(perCc)) if (!used.has(id)) delete perCc[id];
 
   await writeFile(hintsFile, JSON.stringify(hints) + "\n");
+  await writeFile(path.join(kwEventsDir, `${month}.json`), JSON.stringify(events));
+  // Index so a page can find the shards without probing for filenames, and can
+  // report the full total while holding only one month in memory.
+  const shards = (await readdir(kwEventsDir))
+    .filter((f) => /^\d{4}-\d{2}\.json$/.test(f))
+    .map((f) => f.slice(0, 7))
+    .sort();
+  const counts = {};
+  for (const m of shards) {
+    counts[m] = m === month ? events.length : (await readJson(path.join(kwEventsDir, `${m}.json`), [])).length;
+  }
+  await writeFile(
+    path.join(kwEventsDir, "index.json"),
+    JSON.stringify({ months: shards, counts, total: Object.values(counts).reduce((a, b) => a + b, 0) })
+  );
   await writeFile(
     dataFile,
-    JSON.stringify({ fetchedAt, runs, apps, stats, statsLog, latest, events, history })
+    JSON.stringify({ fetchedAt, runs, apps, stats, statsLog, latest, history })
   );
   console.log(`${today}: ${Object.keys(markets).length} markets merged`);
   // The workflow greps this to decide whether to requeue on a bad runner IP.

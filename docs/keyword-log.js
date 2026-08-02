@@ -125,20 +125,57 @@ function buildFilters() {
     });
 }
 
+// Events are stored one shard per month. A month is the unit the reader thinks
+// in anyway, and loading only the one on screen keeps this page a fixed cost
+// however many years accumulate.
+const grab = (p) => fetch(`data/kw-events/${p}`, { cache: "no-cache" }).then((r) => r.json());
+
+const monthLabel = (m) =>
+    new Date(`${m}-01T00:00:00Z`).toLocaleDateString(undefined, {
+        month: "long", year: "numeric", timeZone: "UTC",
+    });
+
+async function loadMonth(m, index) {
+    const meta = document.getElementById("meta");
+    events = (await grab(`${m}.json`).catch(() => [])).slice().reverse(); // newest first
+    // A market filter set on one month may name a market absent from another,
+    // which would leave the list empty with no chip showing why. Filters carry
+    // over where they still apply and reset where they do not.
+    if (state.market !== "all" && !events.some((e) => e.cc === state.market)) state.market = "all";
+    if (state.type !== "all" && !events.some((e) => (e.type ?? "rank") === state.type)) state.type = "all";
+    const n = events.length;
+    meta.textContent = n
+        ? `${monthLabel(m)} · ${n.toLocaleString()} of ${index.total.toLocaleString()} entries · `
+          + `${new Set(events.map((e) => e.cc)).size} markets`
+        : `No keyword events recorded in ${monthLabel(m)}.`;
+    // Market and type counts are per-month, so they rebuild with the shard.
+    buildFilters();
+    render();
+}
+
+function buildMonths(index, current, onPick) {
+    const row = document.getElementById("log-months");
+    const paint = () => {
+        row.replaceChildren();
+        for (const m of [...index.months].reverse()) {
+            row.appendChild(chip(`${monthLabel(m)} ${index.counts[m] ?? 0}`, m === current, () => {
+                current = m;
+                paint();
+                onPick(m);
+            }));
+        }
+    };
+    paint();
+}
+
 async function main() {
     const meta = document.getElementById("meta");
     try {
-        const kw = await fetch("data/keywords.json", { cache: "no-cache" }).then((r) => r.json());
-        events = (kw.events ?? []).slice().reverse();   // newest first
-        if (!events.length) { meta.textContent = "No keyword events recorded yet."; return; }
-        const newest = new Date(events[0].at);
-        const oldest = new Date(events[events.length - 1].at);
-        const fmt = (d) => d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-        meta.textContent =
-            `${events.length.toLocaleString()} entries · ${fmt(oldest)} to ${fmt(newest)} · `
-            + `${new Set(events.map((e) => e.cc)).size} markets`;
-        buildFilters();
-        render();
+        const index = await grab("index.json");
+        if (!index?.months?.length) { meta.textContent = "No keyword events recorded yet."; return; }
+        const newest = index.months[index.months.length - 1];
+        buildMonths(index, newest, (m) => loadMonth(m, index));
+        await loadMonth(newest, index);
     } catch (err) {
         meta.textContent = `Could not load the keyword log: ${err.message}`;
     }
