@@ -146,13 +146,18 @@ function sparkline(points, label, fmtVal = fmt, minSpan = 0) {
             ? SPARK_H / 2
             : SPARK_H - pad - ((v - min) / (max - min)) * (SPARK_H - pad * 2);
 
-    // Per-segment coloring: only the stretch that actually moved carries a
-    // color (>=1 whole unit; sub-unit drift stays neutral). Rank charts plot
-    // -rank, so "up" is better for both chart kinds. Consecutive same-
-    // direction days merge into one subpath.
+    // Per-segment coloring: any real move carries a color. Rank charts plot
+    // -rank, so "up" is better for both chart kinds.
+    //
+    // This used to demand a whole unit, which hid genuine movement whenever it
+    // arrived in pieces: #11 → #10.8 → #10 is a full place gained, but neither
+    // step cleared the bar on its own, so a rising line read as flat. Legacy
+    // rows hold a running average and are the only source of fractional
+    // closes; every row written since stores an integer, so the bar only ever
+    // cost accuracy. The epsilon absorbs float noise, nothing more.
     const segDir = (i) => {
         const d = counts[i] - counts[i - 1];
-        return d >= 1 ? " up" : d <= -1 ? " down" : "";
+        return d > 0.05 ? " up" : d < -0.05 ? " down" : "";
     };
     for (let i = 1; i < points.length; i++) {
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
