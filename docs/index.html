@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0F1419">
     <title>Snore Timeline · Ratings Tracker</title>
-    <link rel="stylesheet" href="styles.css?v=43">
+    <link rel="stylesheet" href="styles.css?v=44">
 </head>
 <body>
     <main>
@@ -27,10 +27,10 @@
                     <tr>
                         <th>Country</th>
                         <th class="col-num">Total</th>
-                        <th class="col-num" title="New ratings in the rolling last 24 hours">Δ 24h</th>
+                        <th class="col-num" data-tip="New ratings in the rolling last 24 hours">Δ 24h</th>
                         <th class="col-num">Avg</th>
-                        <th class="col-num" title="How many ratings at each star; stars with none are omitted">Stars</th>
-                        <th class="col-num" title="New 5-star ratings needed for the displayed average to reach 5.0">5★ to 5.0</th>
+                        <th class="col-num" data-tip="How many ratings at each star; stars with none are omitted">Stars</th>
+                        <th class="col-num" data-tip="New 5-star ratings needed for the displayed average to reach 5.0">5★ to 5.0</th>
                         <th class="col-spark">30 days</th>
                     </tr>
                 </thead>
@@ -48,11 +48,11 @@
                     <thead>
                         <tr>
                             <th>Keyword</th>
-                            <th class="col-num" data-sort="pop" title="Search demand, 5–100: how early and how high the phrase surfaces in App Store autocomplete">Pop<span class="sort-arrow"></span></th>
+                            <th class="col-num" data-sort="pop" data-tip="Search demand, 5–100: how early and how high the phrase surfaces in App Store autocomplete">Pop<span class="sort-arrow"></span></th>
                             <th class="col-num" data-sort="rank">Rank<span class="sort-arrow"></span></th>
-                            <th class="col-num" title="Today's average rank vs yesterday's — always matches the sparkline's last segment">Δ</th>
-                            <th class="col-num" title="Rank range over the last 24 hours of runs">24h</th>
-                            <th class="col-num" title="Rank range over the last 7 days">7d</th>
+                            <th class="col-num" data-tip="Today's average rank vs yesterday's — always matches the sparkline's last segment">Δ</th>
+                            <th class="col-num" data-tip="Rank range over the last 24 hours of runs">24h</th>
+                            <th class="col-num" data-tip="Rank range over the last 7 days">7d</th>
                             <th class="col-num">Best</th>
                             <th class="col-spark">30 days</th>
                         </tr>
@@ -80,6 +80,6 @@
 
     </main>
     <div id="tooltip" hidden></div>
-    <script src="app.js?v=74"></script>
+    <script src="app.js?v=75"></script>
 </body>
 </html>

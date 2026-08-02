@@ -256,6 +256,16 @@ svg.spark { display: block; margin-left: auto; touch-action: none; }
 .kw-tab.active { color: var(--text); border-color: var(--accent); }
 #keywords th[data-sort] { cursor: pointer; user-select: none; }
 #keywords th[data-sort]:hover { color: var(--text); }
+/* Dotted rule marks a column that has an explanation, so it reads as
+   available rather than needing to be discovered by resting the cursor.
+   Sortable headers show the same tip on hover but keep their tap to sort,
+   hence the pointer cursor there and help elsewhere. */
+th[data-tip] {
+    text-decoration: underline dotted var(--border);
+    text-underline-offset: 4px;
+}
+th[data-tip]:not([data-sort]) { cursor: help; }
+th[data-tip]:hover { color: var(--text); }
 .sort-arrow { font-size: 0.6rem; margin-left: 3px; }
 .star-bar-wrap { display: inline-flex; align-items: center; gap: 5px; }
 .star-bar {
@@ -494,6 +504,9 @@ li.log-day {
     font-size: 0.74rem;
     margin-top: 3px;
 }
+/* A header tip is the whole tooltip rather than a note under a value, so it
+   carries no leading gap and reads at full contrast. */
+#tooltip .tip-text:only-child { margin-top: 0; color: var(--text); }
 .tip-change {
     display: block;
     white-space: normal;

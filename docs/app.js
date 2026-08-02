@@ -26,8 +26,36 @@ const hideTooltip = () => {
     document.querySelectorAll(".spark-hover").forEach((h) => h.setAttribute("visibility", "hidden"));
 };
 document.addEventListener("pointerdown", (e) => {
-    if (!e.target.closest(".spark, .star-bar")) hideTooltip();
+    if (!e.target.closest(".spark, .star-bar, th[data-tip]")) hideTooltip();
 });
+
+// Column headers explain themselves through the same tooltip as the charts
+// and star bars. The title attribute they replace needed a second of hover
+// and never appeared on touch at all, so on a phone the explanation may as
+// well not have existed.
+function wireHeaderTips(root = document) {
+    for (const th of root.querySelectorAll("th[data-tip]")) {
+        const show = (e) => {
+            tooltip.innerHTML = "";
+            const line = document.createElement("div");
+            line.className = "tip-text";
+            line.textContent = th.dataset.tip;
+            tooltip.appendChild(line);
+            placeTooltip(e);
+        };
+        th.addEventListener("pointermove", (e) => {
+            if (e.pointerType !== "touch") show(e);
+        });
+        th.addEventListener("pointerleave", (e) => {
+            if (e.pointerType !== "touch") hideTooltip();
+        });
+        // A sortable header keeps its tap for sorting; reading what a column
+        // means must not cost the user their sort order. Those stay
+        // hover-only, which is the desktop-shaped half of the interaction.
+        if (!th.hasAttribute("data-sort")) th.addEventListener("click", show);
+    }
+}
+wireHeaderTips();
 // The tooltip is position:fixed, so scrolling moves the page out from under
 // it; any scroll (page or a sideways table pan - hence capture) dismisses.
 document.addEventListener("scroll", hideTooltip, { capture: true, passive: true });
