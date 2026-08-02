@@ -276,16 +276,17 @@ const ratingsChanged = !prevLatest || JSON.stringify(prevLatest.countries) !== J
 // rather than overwritten so the keywords collector's entry survives.
 //
 // Refreshed at most every few hours rather than hourly. This runs hourly but
-// the watchdog only asks four times a day against a six-hour bound, so a
+// the watchdog only asks four times a day against a twelve-hour bound, so a
 // per-run refresh would commit twenty-four times a day to answer a question
 // asked four times. When the data changed the commit is happening regardless,
 // so the heartbeat rides along free; otherwise it waits until stale enough to
-// matter. Worst case at check time is ~3h plus cron drift, well inside the
-// bound. (The keywords collector needs no such throttle: keywords.json changes
-// every run, so its heartbeat never costs an extra commit.)
+// matter. Six hours leaves the worst case at check time around 7h against the
+// 12h bound — see LIMITS in check-freshness.mjs, and keep the two in step if
+// either moves. (The keywords collector needs no such throttle: keywords.json
+// changes every run, so its heartbeat never costs an extra commit.)
 const statusFile = path.join(servedDataDir, "status.json");
 const status = await readJson(statusFile, {});
-const HEARTBEAT_MAX_AGE_MS = 3 * 3600e3;
+const HEARTBEAT_MAX_AGE_MS = 6 * 3600e3;
 const lastBeat = status.ratings?.at ? new Date(status.ratings.at).getTime() : 0;
 const anythingChanged = ratingsChanged || newReviews.length > 0 || needHist.length > 0 || pageHistChanged;
 if (anythingChanged || Date.now() - lastBeat >= HEARTBEAT_MAX_AGE_MS) {

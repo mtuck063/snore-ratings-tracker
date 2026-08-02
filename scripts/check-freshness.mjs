@@ -9,7 +9,10 @@
 //
 // Thresholds are generous on purpose. GitHub lands scheduled runs 1.5-3.5h
 // late in practice, and observed keyword gaps reach 8h, so a tight bound would
-// only teach us to ignore the alert.
+// only teach us to ignore the alert. Ratings allows 12h against an hourly
+// cron: the heartbeat itself only refreshes every 6h (see collect.mjs), so the
+// bound has to clear that plus drift, and anything under half a day of silence
+// is not worth waking up for.
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -18,7 +21,7 @@ const repoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const statusFile = path.join(repoRoot, "docs", "data", "status.json");
 
 const LIMITS = {
-  ratings: { hours: 6, cadence: "hourly" },
+  ratings: { hours: 12, cadence: "hourly" },
   keywords: { hours: 16, cadence: "every 6 hours" },
 };
 
