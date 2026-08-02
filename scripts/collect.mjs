@@ -269,21 +269,34 @@ const pageHistChanged = Object.entries(pageCounts).some(([cc, counts]) => {
 
 const ratingsChanged = !prevLatest || JSON.stringify(prevLatest.countries) !== JSON.stringify(countries);
 
-// Heartbeat, written every run whether or not anything changed — and before
-// the early exit below, because the quiet path is exactly when it matters.
-// latest.json only moves when a rating moves, so a frozen timestamp there is
-// indistinguishable from a collector that has been dead since Tuesday. This
-// separates "checked at" from "changed at". Merged rather than overwritten so
-// the keywords collector's entry survives.
+// Heartbeat, written before the early exit below because the quiet path is
+// exactly when it matters: latest.json only moves when a rating moves, so a
+// frozen timestamp there is indistinguishable from a collector that has been
+// dead since Tuesday. This separates "checked at" from "changed at". Merged
+// rather than overwritten so the keywords collector's entry survives.
+//
+// Refreshed at most every few hours rather than hourly. This runs hourly but
+// the watchdog only asks four times a day against a six-hour bound, so a
+// per-run refresh would commit twenty-four times a day to answer a question
+// asked four times. When the data changed the commit is happening regardless,
+// so the heartbeat rides along free; otherwise it waits until stale enough to
+// matter. Worst case at check time is ~3h plus cron drift, well inside the
+// bound. (The keywords collector needs no such throttle: keywords.json changes
+// every run, so its heartbeat never costs an extra commit.)
 const statusFile = path.join(servedDataDir, "status.json");
 const status = await readJson(statusFile, {});
-status.ratings = {
-  at: fetchedAt,
-  storefronts: COUNTRIES.length,
-  failed: fetchFailures,
-  changed: ratingsChanged,
-};
-await writeFile(statusFile, JSON.stringify(status));
+const HEARTBEAT_MAX_AGE_MS = 3 * 3600e3;
+const lastBeat = status.ratings?.at ? new Date(status.ratings.at).getTime() : 0;
+const anythingChanged = ratingsChanged || newReviews.length > 0 || needHist.length > 0 || pageHistChanged;
+if (anythingChanged || Date.now() - lastBeat >= HEARTBEAT_MAX_AGE_MS) {
+  status.ratings = {
+    at: fetchedAt,
+    storefronts: COUNTRIES.length,
+    failed: fetchFailures,
+    changed: ratingsChanged,
+  };
+  await writeFile(statusFile, JSON.stringify(status));
+}
 
 // Also before the early exit: a run where most fetches failed carries every
 // value forward, which leaves ratingsChanged false and would slip out through
@@ -298,7 +311,7 @@ if (fetchFailures > COUNTRIES.length * FAIL_RATIO) {
   process.exit(1);
 }
 
-if (!ratingsChanged && newReviews.length === 0 && needHist.length === 0 && !pageHistChanged) {
+if (!anythingChanged) {
   console.log("No rating or review changes since last fetch; nothing written.");
   process.exit(0);
 }
