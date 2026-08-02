@@ -729,7 +729,12 @@ function renderEvents(history, events) {
 
 // Keyword rankings: one table, tab per market. Rank sparklines plot -rank so
 // an improving keyword trends upward like every other chart on the page.
-async function renderKeywords(kw) {
+//
+// `glossary` maps a foreign term to its English meaning. It ships as a file
+// rather than calling a translation service because the page is static and a
+// key cannot be kept secret in it — and because a fixed gloss stays put, where
+// machine translation would quietly reword the same term between visits.
+async function renderKeywords(kw, glossary = {}) {
     if (!kw?.latest || !Object.keys(kw.latest).length) return;
     document.getElementById("keywords-section").hidden = false;
     if (kw.fetchedAt) {
@@ -786,9 +791,18 @@ async function renderKeywords(kw) {
     // Default: rank, best first (unranked keywords sink to the bottom).
     const sort = { key: "rank", dir: 1 };
     let currentCc = marketCcs[0];
+    // Sticky across market switches: someone who cannot read the CN column
+    // cannot read the JP one either, so asking twice would be busywork.
+    let showEnglish = false;
+    // Only worth offering where it would change something. An English market
+    // has no glossed terms, so the button would sit there doing nothing.
+    const translatable = (cc) => Object.keys(kw.latest[cc] ?? {}).some((t) => glossary[t]);
 
     const render = (cc) => {
         currentCc = cc;
+        translate.hidden = !translatable(cc);
+        translate.textContent = showEnglish ? "Show original" : "Show English";
+        translate.classList.toggle("active", showEnglish);
         tbody.replaceChildren();
         const val = ([, e]) => (sort.key === "rank" ? (e.rank ?? Infinity) : e.pop);
         const entries = Object.entries(kw.latest[cc]).sort(
@@ -803,7 +817,17 @@ async function renderKeywords(kw) {
             const tr = document.createElement("tr");
 
             const tdKw = document.createElement("td");
-            tdKw.textContent = term;
+            // Translated view leads with the meaning and keeps the original
+            // alongside it: the term is still what Apple ranks and what you
+            // would paste into the store, so it cannot be hidden outright.
+            const gloss = showEnglish ? glossary[term] : null;
+            tdKw.textContent = gloss ?? term;
+            if (gloss) {
+                const orig = document.createElement("span");
+                orig.className = "kw-original";
+                orig.textContent = term;
+                tdKw.appendChild(orig);
+            }
             if (cur.prefix) tdKw.title = `Suggested at “${cur.prefix}”, position ${cur.pos}`;
             // Newly tracked terms have no history yet, so their delta columns
             // and sparkline read as blank rather than as "no movement". The
@@ -1232,6 +1256,14 @@ async function renderKeywords(kw) {
     }
     tabs.firstChild.classList.add("active");
 
+    const translate = document.createElement("button");
+    translate.className = "kw-tab kw-translate";
+    translate.addEventListener("click", () => {
+        showEnglish = !showEnglish;
+        render(currentCc);
+    });
+    tabs.appendChild(translate);
+
     const sortHeaders = document.querySelectorAll("#keywords th[data-sort]");
     const updateArrows = () => {
         for (const th of sortHeaders) {
@@ -1295,17 +1327,20 @@ async function renderKeywords(kw) {
 
 async function main() {
     const meta = document.getElementById("meta");
-    let latest, history, events, reviews, kwData, hist;
+    let latest, history, events, reviews, kwData, hist, glossary;
     try {
         // no-cache: revalidate every load so the data files can't come from
         // differently-aged browser caches and contradict each other.
-        [latest, history, events, reviews, kwData, hist] = await Promise.all([
+        [latest, history, events, reviews, kwData, hist, glossary] = await Promise.all([
             fetch("data/latest.json", { cache: "no-cache" }).then((r) => r.json()),
             fetch("data/history.json", { cache: "no-cache" }).then((r) => r.json()),
             fetch("data/events.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => []),
             fetch("data/reviews.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => []),
             fetch("data/keywords.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => null),
             fetch("data/histograms.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => null),
+            // Hand-written and rarely edited, so it can come from cache; an
+            // absent file just means the table stays in its original language.
+            fetch("data/glossary.json").then((r) => r.json()).catch(() => ({})),
         ]);
     } catch {
         meta.textContent = "No data yet. Run the collect workflow once to seed data/.";
@@ -1414,7 +1449,7 @@ async function main() {
     // waits on its shard, so blocking the rest of the page on that fetch would
     // buy nothing. Caught so a missing shard cannot surface as an unhandled
     // rejection and take the reviews below it down with it.
-    renderKeywords(kwData).catch((err) => console.warn("keyword section:", err));
+    renderKeywords(kwData, glossary).catch((err) => console.warn("keyword section:", err));
     renderWeekReviews(reviews);
     renderReviews(reviews);
     renderEvents(history, events);

@@ -262,6 +262,19 @@ svg.spark { display: block; margin-left: auto; touch-action: none; }
     cursor: pointer;
 }
 .kw-tab.active { color: var(--text); border-color: var(--accent); }
+/* Pushed to the far end: it acts on the whole table, not on one market. */
+.kw-translate { margin-left: auto; }
+.kw-translate[hidden] { display: none; }
+/* The term Apple actually ranks, kept beside its meaning rather than replaced.
+   Wraps under the gloss on a narrow screen instead of widening the column. */
+.kw-original {
+    color: var(--text-secondary);
+    font-size: 0.85em;
+    margin-left: 6px;
+    overflow-wrap: anywhere;
+}
+.kw-original::before { content: "("; }
+.kw-original::after { content: ")"; }
 #keywords th[data-sort] { cursor: pointer; user-select: none; }
 #keywords th[data-sort]:hover { color: var(--text); }
 /* Dotted rule marks a column that has an explanation, so it reads as
