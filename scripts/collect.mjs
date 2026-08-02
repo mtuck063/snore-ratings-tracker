@@ -286,16 +286,22 @@ const ratingsChanged = !prevLatest || JSON.stringify(prevLatest.countries) !== J
 // slots, and only the runs that change data would have committed anyway, so
 // this is roughly a dozen extra commits a day on a repo whose entire design is
 // bot commits.
-const statusFile = path.join(servedDataDir, "status.json");
-const status = await readJson(statusFile, {});
+// One heartbeat file per collector, each with a single writer. They shared one
+// status.json until both pushed within a minute of each other and git could
+// not rebase two edits to the same line of compact JSON — the keyword run lost
+// its whole merge to the conflict. This is now the only category of file the
+// two collectors do not share, and it should stay that way.
+const statusFile = path.join(servedDataDir, "status-ratings.json");
 const anythingChanged = ratingsChanged || newReviews.length > 0 || needHist.length > 0 || pageHistChanged;
-status.ratings = {
-  at: fetchedAt,
-  storefronts: COUNTRIES.length,
-  failed: fetchFailures,
-  changed: ratingsChanged,
-};
-await writeFile(statusFile, JSON.stringify(status));
+await writeFile(
+  statusFile,
+  JSON.stringify({
+    at: fetchedAt,
+    storefronts: COUNTRIES.length,
+    failed: fetchFailures,
+    changed: ratingsChanged,
+  })
+);
 
 // Also before the early exit: a run where most fetches failed carries every
 // value forward, which leaves ratingsChanged false and would slip out through
@@ -310,8 +316,26 @@ if (fetchFailures > COUNTRIES.length * FAIL_RATIO) {
   process.exit(1);
 }
 
+// One row per day, every day, whether or not a rating moved — and before the
+// early exit, because a day with no new ratings is precisely the day that used
+// to record nothing. The sparklines plot rows by position, not by date, so a
+// missing day does not draw a flat segment: it closes the gap and silently
+// shortens the axis. A day of no change is still a measurement.
+//
+// Upserted, so the hourly reruns within a day replace today's row rather than
+// appending. When nothing changed the rewritten row is byte-identical, so git
+// sees no diff and there is no commit; a new day costs exactly one.
+const historyFile = path.join(servedDataDir, "history.json");
+const history = await readJson(historyFile, []);
+const row = { date: today, countries };
+const existingRow = history.findIndex((r) => r.date === today);
+if (existingRow >= 0) history[existingRow] = row;
+else history.push(row);
+history.sort((a, b) => a.date.localeCompare(b.date));
+await writeFile(historyFile, JSON.stringify(history));
+
 if (!anythingChanged) {
-  console.log("No rating or review changes since last fetch; nothing written.");
+  console.log("No rating or review changes since last fetch; only the heartbeat and today's history row were touched.");
   process.exit(0);
 }
 
@@ -397,18 +421,10 @@ if (histUpdated) await writeFile(histFile, JSON.stringify(histograms));
 
 await writeFile(path.join(servedDataDir, "events.json"), JSON.stringify(events));
 
+// latest.json only when a rating actually moved, so its fetchedAt keeps
+// meaning "last change". History is written above, unconditionally.
 if (ratingsChanged) {
   await writeFile(path.join(servedDataDir, "latest.json"), JSON.stringify({ fetchedAt, countries }, null, 2));
-
-  // History: one row per day, upserted so a rerun replaces today's row.
-  const historyFile = path.join(servedDataDir, "history.json");
-  const history = await readJson(historyFile, []);
-  const row = { date: today, countries };
-  const existing = history.findIndex((r) => r.date === today);
-  if (existing >= 0) history[existing] = row;
-  else history.push(row);
-  history.sort((a, b) => a.date.localeCompare(b.date));
-  await writeFile(historyFile, JSON.stringify(history));
 }
 
 const total = Object.values(countries).reduce((sum, c) => sum + (c?.count ?? 0), 0);
