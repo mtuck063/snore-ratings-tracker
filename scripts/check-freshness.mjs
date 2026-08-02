@@ -7,12 +7,12 @@
 // from the data. status.json exists to separate the two, and this asserts it
 // is actually advancing.
 //
-// Thresholds are generous on purpose. GitHub lands scheduled runs 1.5-3.5h
-// late in practice, and observed keyword gaps reach 8h, so a tight bound would
-// only teach us to ignore the alert. Ratings allows 12h against an hourly
-// cron: the heartbeat itself only refreshes every 6h (see collect.mjs), so the
-// bound has to clear that plus drift, and anything under half a day of silence
-// is not worth waking up for.
+// Thresholds are generous on purpose. The hourly ratings cron only actually
+// fires about 13 of its 24 slots — GitHub drops scheduled runs under load, and
+// observed gaps between real runs reach 4.4h. Keyword gaps reach 8h. A bound
+// close to that jitter would only teach us to ignore the alert, so ratings
+// allows 12h and keywords 16h: comfortably past normal lateness, comfortably
+// short of a day of genuine silence.
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
