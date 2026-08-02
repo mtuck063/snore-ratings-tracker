@@ -28,8 +28,15 @@ const KNOWN = new Set(Object.keys(kw.apps));
 
 // Anchored so it cannot fire on Reverse/Restaurant/Forest the way a bare
 // "reve"/"rest" fragment does.
-const NAMEY = /(^|[^a-z])(snor|ronfl|ronqu|sommeil|sueñ|insomni|bruxis|despertador|réveil)/i;
-const FREEDIVE = /freediv|freedive|apnea trainer|apnée trainer|stamina|buceo|plong|static apnea/i;
+const NAMEY = /(^|[^a-z])(snor|ronfl|ronqu|sommeil|sueñ|insomni|bruxis|despertador|réveil|schnarch|schlaf|schlum)/i;
+// Kana and han need no such guard: none of these glyphs appear inside an
+// unrelated word the way "rest" hides "rest". They carry the German stems'
+// job for JP and CN, where the Latin regex above matches nothing at all.
+const NAMEY_CJK = /いびき|睡眠|寝言|無呼吸|快眠|熟睡|不眠|目覚まし|鼾|呼噜|梦话|助眠|失眠|闹钟/;
+// Breath-hold training hijacks "apnoe"/"apnea" in DE as thoroughly as it does
+// in FR/ES, and 憋气/自由潜水 do the same to the CN breathing terms.
+const FREEDIVE = /freediv|freedive|apnea trainer|apnoe trainer|apnée trainer|stamina|buceo|plong|static apnea|フリーダイビング|素潜り|自由潜水|憋气|闭气/i;
+const isNamey = (n) => (NAMEY.test(n) || NAMEY_CJK.test(n)) && !FREEDIVE.test(n);
 
 // Take every Nth item rather than a contiguous slice, so each runner gets a mix
 // of high- and low-demand terms. If one runner draws a throttled IP we lose a
@@ -67,7 +74,7 @@ for (const c of mine) {
     out.push({
       term: c.term, demand: c.demand, via: c.via,
       known: top10.filter((a) => KNOWN.has(String(a.trackId))).length,
-      namey: top10.filter((a) => NAMEY.test(a.trackName ?? "") && !FREEDIVE.test(a.trackName ?? "")).length,
+      namey: top10.filter((a) => isNamey(a.trackName ?? "")).length,
       dive: top10.filter((a) => FREEDIVE.test(a.trackName ?? "")).length,
       results: r.length,
       myRank: mineIdx === -1 ? null : mineIdx + 1,
