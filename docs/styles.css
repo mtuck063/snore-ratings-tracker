@@ -343,6 +343,16 @@ tr.kw-detail td {
    scrolls — the heading and note sit outside .kw-comp-scroll so they do not
    slide out of view with it. */
 #kw-competitors { margin-top: 16px; }
+/* Reads as a subtitle to the heading, not a second heading: the panel is still
+   "who owns these keywords", the market is which storefront it is answering
+   for. Not uppercased with the label, so the country name stays legible. */
+.kw-comp-market {
+    margin-left: 8px;
+    color: var(--text-secondary);
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 400;
+}
 .kw-comp-note {
     color: var(--text-secondary);
     font-size: 0.78rem;
