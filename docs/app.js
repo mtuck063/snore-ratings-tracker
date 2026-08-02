@@ -630,10 +630,12 @@ function renderRecent(events) {
         const timeText = isOld
             ? when.toLocaleDateString(undefined, { month: "short", day: "numeric" })
             : ago(ev.at);
-        const item = document.createElement("a");
+        // A div, not a link. These read as a summary, and jumping the page to
+        // the events section on a stray tap was surprising rather than useful —
+        // the row already says everything the target would have shown.
+        const item = document.createElement("div");
         item.className = isOld ? "recent-row old" : "recent-row";
         item.title = when.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
-        item.href = ev.type === "review" ? "#reviews-section" : "#events-section";
         const name = `${flag(ev.cc)} ${regionNames.of(ev.cc.toUpperCase())}`;
         const d = (ev.to ?? 0) - (ev.from ?? 0);
         // Single rating -> " ★5"; several in one run -> from starsMix, with
