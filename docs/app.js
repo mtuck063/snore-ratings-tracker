@@ -1121,7 +1121,7 @@ async function renderKeywords(kw) {
                 if (label === "App") {
                     const where = document.createElement("span");
                     where.className = "kw-comp-market";
-                    where.textContent = `${flag(cc)} ${regionNames.of(cc.toUpperCase()) ?? cc.toUpperCase()}`;
+                    where.textContent = `(${flag(cc)} ${regionNames.of(cc.toUpperCase()) ?? cc.toUpperCase()})`;
                     th.appendChild(where);
                 }
                 hrow.appendChild(th);
