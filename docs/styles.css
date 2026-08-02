@@ -32,6 +32,9 @@ main {
 h1 { font-size: 1.35rem; margin-bottom: 4px; }
 
 #meta { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 20px; }
+/* Only rendered when a collector is stalled or erroring, so it is allowed to
+   be loud — the rest of the time the meta line says nothing about health. */
+.meta-warn { color: var(--bad); font-weight: 600; cursor: help; }
 .meta-item + .meta-item::before { content: " · "; }
 @media (max-width: 600px) {
     .meta-item { display: block; line-height: 1.6; }

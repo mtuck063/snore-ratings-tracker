@@ -1397,6 +1397,37 @@ async function main() {
     addMeta(`Ratings in ${rated.length} of ${entries.filter((e) => e.cur).length} storefronts`);
     addMeta(`Last change ${ago(latest.fetchedAt)}`, stamp(latest.fetchedAt));
 
+    // Collector health, in the one place anyone actually looks. Alerting only
+    // fires on failure, which means a healthy system is invisible and you
+    // cannot tell "fine" from "nobody has checked". These bounds mirror
+    // scripts/check-freshness.mjs; if one moves, move the other.
+    const HEALTH = { ratings: 12, keywords: 16 };
+    const health = await fetch("data/status.json", { cache: "no-cache" })
+        .then((r) => r.json())
+        .catch(() => null);
+    if (health) {
+        const stale = [];
+        for (const [key, hours] of Object.entries(HEALTH)) {
+            const at = health[key]?.at;
+            if (!at) { stale.push(`${key}: never reported`); continue; }
+            const age = (Date.now() - new Date(at)) / 3600e3;
+            if (age > hours) stale.push(`${key}: ${age.toFixed(0)}h ago`);
+        }
+        const failing = Object.entries(health)
+            .filter(([, v]) => (v?.failed ?? v?.rankFailures ?? 0) > 0)
+            .map(([k, v]) => `${k}: ${v.failed ?? v.rankFailures} fetch failures`);
+        if (health.ratings?.at) {
+            addMeta(`Checked ${ago(health.ratings.at)}`, stamp(health.ratings.at));
+        }
+        if (stale.length || failing.length) {
+            const warn = document.createElement("span");
+            warn.className = "meta-item meta-warn";
+            warn.textContent = stale.length ? "Collector stalled" : "Collector erroring";
+            warn.title = [...stale, ...failing].join("\n");
+            meta.appendChild(warn);
+        }
+    }
+
     // Live recheck: query Apple directly from the browser for the 20 biggest
     // storefronts. Display-only; the hourly workflow records changes officially.
     const checkRow = document.createElement("div");
@@ -1546,17 +1577,10 @@ async function main() {
         }, 5000);
     });
 
-    // "Last checked" comes from the public Actions API, since a run that finds
-    // no changes commits nothing. Best-effort: rate limits just hide the note.
-    try {
-        const res = await fetch(
-            "https://api.github.com/repos/mtuck063/snore-ratings-tracker/actions/workflows/collect.yml/runs?status=success&per_page=1"
-        );
-        const run = (await res.json()).workflow_runs?.[0];
-        if (run) addMeta(`Checked ${ago(run.updated_at)}`, stamp(run.updated_at));
-    } catch {
-        /* leave the meta line as is */
-    }
+    // "Checked" used to come from the public Actions API here, because a run
+    // that finds no changes commits nothing. status.json answers the same
+    // question from our own origin, so it needs no cross-origin request and
+    // cannot be hidden by GitHub's 60-per-hour unauthenticated rate limit.
 }
 
 main();
