@@ -1,6 +1,6 @@
 // Full keyword movement log. The main page shows the last 30 entries; this
 // shows every one, with filters, because the log now runs to hundreds of rows
-// across seven markets and a single scroll of the newest 30 hid most of it.
+// across ten markets and a single scroll of the newest 30 hid most of it.
 //
 // Row markup deliberately matches the main page's #kw-events list so the shared
 // CSS applies unchanged — only the filter bar and day headings are new here.

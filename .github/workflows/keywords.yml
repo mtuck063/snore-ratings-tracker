@@ -30,7 +30,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        market: [us, ca, gb, au, fr, es, mx]
+        market: [us, ca, gb, au, fr, es, mx, de, jp, cn]
     steps:
       - uses: actions/checkout@v4
 

@@ -55,6 +55,10 @@ const seedFor = (cc) => markets[cc].seedTokens ?? config.seedTokens ?? [];
 // Accent-insensitive comparison, so "apnée" and "apnee" count as one keyword.
 const fold = (s) => s.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
 
+// Length measured in meaning rather than characters: kana and han glyphs pack
+// far more per character than letters do. Used by the auto-discovery cap.
+const weigh = (s) => [...s].reduce((n, ch) => n + (/[぀-ヿ一-鿿]/.test(ch) ? 2.5 : 1), 0);
+
 const MIN_PREFIX = 2;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -406,7 +410,20 @@ async function merge(partials) {
     let added = 0;
     for (const term of terms) {
       if (added >= MAX_AUTOTRACK) break;
-      if (term.length > 30 || /[:&™|]/.test(term)) continue;
+      // A title announces itself with separator punctuation. The set has to
+      // include the fullwidth colon, pipe and middle dot the CJK stores use,
+      // or the JP/CN lists fill up with competitor names on the first run.
+      // The spaced hyphen is how a Latin title separates its tagline, which
+      // is what let "soundsleep – snoring sounds" in; a hyphen touching a
+      // glyph does the same job in a CJK title, where nothing is spaced.
+      if (/[:：&＆™|｜·・–—，、（）【】]| - /.test(term)) continue;
+      if (/[぀-ヿ一-鿿]-|-[぀-ヿ一-鿿]/.test(term)) continue;
+      // One CJK glyph carries about as much as a short Latin word, so a flat
+      // character cap cannot serve both scripts: 30 is fair for German and
+      // waves through an entire Chinese title. Weighting a glyph at 2.5 keeps
+      // a single budget honest for "schlaftracker apple watch" and 打呼噜检测免费
+      // alike, while still passing a mixed query like "apple watch 睡眠".
+      if (weigh(term) > 30) continue;
       if (!seedFor(cc).some((tok) => fold(term).includes(fold(tok)))) continue;
       if (target.some((k) => fold(k) === fold(term))) continue;
       target.push(term);
