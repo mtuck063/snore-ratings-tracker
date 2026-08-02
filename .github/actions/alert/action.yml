@@ -14,6 +14,13 @@ inputs:
   token:
     description: Token with issues:write.
     required: true
+  assignee:
+    description: >
+      Who to assign. Assignment notifies whatever the repo's watch settings
+      are, which matters because an alert nobody is told about is decoration.
+      Defaults to the repo owner so a fork alerts its own owner.
+    required: false
+    default: ${{ github.repository_owner }}
 
 runs:
   using: composite
@@ -23,6 +30,7 @@ runs:
         GH_TOKEN: ${{ inputs.token }}
         TITLE: ${{ inputs.title }}
         BODY: ${{ inputs.body }}
+        ASSIGNEE: ${{ inputs.assignee }}
       run: |
         set -euo pipefail
         # One open issue per failure kind. A collector that has been broken for
@@ -37,6 +45,14 @@ runs:
         else
           # Closing the issue is how you acknowledge it; the next failure after
           # that opens a fresh one rather than resurrecting old context.
-          printf 'First seen %s.\n\n%s\n' "$stamp" "$BODY" | gh issue create --title "$TITLE" --body-file -
-          echo "opened a new issue"
+          #
+          # Assigned rather than left unowned: watch settings are per-account
+          # and easy to have never set, whereas assignment notifies on its own.
+          # Falls back to an unassigned issue if the login cannot be assigned,
+          # since failing to raise the alarm would be worse than raising it
+          # quietly.
+          printf 'First seen %s.\n\n%s\n' "$stamp" "$BODY" > /tmp/alert-body.md
+          gh issue create --title "$TITLE" --body-file /tmp/alert-body.md --assignee "$ASSIGNEE" \
+            || gh issue create --title "$TITLE" --body-file /tmp/alert-body.md
+          echo "opened a new issue, assigned to $ASSIGNEE"
         fi
