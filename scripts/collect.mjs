@@ -111,10 +111,16 @@ async function fetchReviews(cc) {
 
 // Star histograms live in the storefront web page ([5★..1★] embedded in its
 // server-rendered data). Pages are ~500KB, so fetches go through a gate.
+//
+// Four at a time, not eight: Apple returned 429 to 49 of 51 storefronts inside
+// a single 100ms window, which is a burst limit being tripped rather than
+// gradual throttling. A narrower gate takes longer but is far less likely to
+// trip it.
+const PAGE_CONCURRENCY = 4;
 let pageActive = 0;
 const pageQueue = [];
 async function pageGate(fn) {
-  if (pageActive >= 8) await new Promise((r) => pageQueue.push(r));
+  if (pageActive >= PAGE_CONCURRENCY) await new Promise((r) => pageQueue.push(r));
   pageActive++;
   try {
     return await fn();
@@ -135,7 +141,10 @@ async function fetchHistogram(cc, attempt = 1) {
     const m = html.match(/"ratingCounts":\[([0-9,]+)\]/);
     return m ? m[1].split(",").map(Number) : null;
   } catch (err) {
-    if (attempt === 1) {
+    // A 429 is an IP-level throttle, not a blip: retrying ten seconds later
+    // failed for all 49 storefronts that hit it, so go straight to the lookup
+    // fallback rather than spending the wait to fail again.
+    if (attempt === 1 && !err.message.includes("429")) {
       await sleep(RETRY_BACKOFF_MS);
       return fetchHistogram(cc, 2);
     }
@@ -146,9 +155,19 @@ async function fetchHistogram(cc, attempt = 1) {
 
 // Primary source for rated storefronts: count and exact average derived from
 // the histogram itself, so ratings data and star breakdown can never disagree.
+//
+// When the page is unavailable the lookup API still answers — it is a different
+// host and was untouched while apps.apple.com was returning 429 to nearly every
+// storefront. Falling back to it costs the star breakdown for that run but
+// keeps the count and average current, which turns a rate-limit into a partial
+// update instead of a failed one.
+let histogramFallbacks = 0;
 async function fetchCountryFromPage(cc) {
   const counts = await fetchHistogram(cc);
-  if (!counts) return "error"; // carry previous; delistings are caught elsewhere
+  if (!counts) {
+    histogramFallbacks++;
+    return fetchCountry(cc); // {count, avg} | null | "error"
+  }
   const count = counts.reduce((a, b) => a + b, 0);
   const stars = counts.reduce((s, c, i) => s + c * (5 - i), 0);
   return {
@@ -191,9 +210,16 @@ async function ratingsPass() {
       countries[cc] = r;
     }
   });
+  // `failed` counts only storefronts where both sources gave up. A page that
+  // 429s but whose lookup answered is a stale star breakdown, not lost data,
+  // and must not push the run toward the failure threshold.
   const failed = results.filter((r) => r === "error").length;
-  console.log(`ratings done${failed ? ` (${failed} failed, values carried over)` : ""}`);
-  return { countries, pageCounts, failed };
+  const notes = [
+    failed ? `${failed} failed, values carried over` : "",
+    histogramFallbacks ? `${histogramFallbacks} fell back to the lookup API (star breakdown held)` : "",
+  ].filter(Boolean);
+  console.log(`ratings done${notes.length ? ` (${notes.join("; ")})` : ""}`);
+  return { countries, pageCounts, failed, histogramFallbacks };
 }
 
 async function reviewsPass() {
@@ -202,10 +228,8 @@ async function reviewsPass() {
   return perStorefront.flat();
 }
 
-const [{ countries, pageCounts, failed: fetchFailures }, fetchedReviews] = await Promise.all([
-  ratingsPass(),
-  reviewsPass(),
-]);
+const [{ countries, pageCounts, failed: fetchFailures, histogramFallbacks: histFallbacks }, fetchedReviews] =
+  await Promise.all([ratingsPass(), reviewsPass()]);
 
 // Fold newly fetched reviews into the stored set.
 const reviewsFile = path.join(servedDataDir, "reviews.json");
@@ -299,6 +323,9 @@ await writeFile(
     at: fetchedAt,
     storefronts: COUNTRIES.length,
     failed: fetchFailures,
+    // Surfaced separately: a page throttle degrades the star breakdown without
+    // costing the counts, so it should be visible without reading as an outage.
+    histogramFallbacks: histFallbacks,
     changed: ratingsChanged,
   })
 );
