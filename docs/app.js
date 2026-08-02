@@ -1088,13 +1088,24 @@ function renderKeywords(kw) {
                 tdName.className = "kw-comp-name";
                 tdName.appendChild(appLabel(meta));
 
+                // Share alongside the count, because the denominator moves with
+                // the market: 51/82 and 51/65 are not the same performance, and
+                // comparing markets by the raw count quietly misleads.
+                const share = (n) => {
+                    const s = document.createElement("span");
+                    s.className = "kw-comp-pct";
+                    s.textContent = `${Math.round((n / measured) * 100)}%`;
+                    return s;
+                };
+
                 const tdSlots = document.createElement("td");
                 tdSlots.className = "col-num";
-                tdSlots.textContent = `${e.top5}/${measured}`;
+                tdSlots.append(`${e.top5}/${measured}`, share(e.top5));
 
                 const tdSlots10 = document.createElement("td");
                 tdSlots10.className = "col-num muted";
-                tdSlots10.textContent = deep ? `${e.top10}/${measured}` : "—";
+                if (deep) tdSlots10.append(`${e.top10}/${measured}`, share(e.top10));
+                else tdSlots10.textContent = "—";
 
                 const tdFirst = document.createElement("td");
                 tdFirst.className = "col-num muted";

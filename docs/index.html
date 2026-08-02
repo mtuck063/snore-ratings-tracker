@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0F1419">
     <title>Snore Timeline · Ratings Tracker</title>
-    <link rel="stylesheet" href="styles.css?v=45">
+    <link rel="stylesheet" href="styles.css?v=46">
 </head>
 <body>
     <main>
@@ -26,12 +26,12 @@
                 <thead>
                     <tr>
                         <th>Country</th>
-                        <th class="col-num">Total</th>
+                        <th class="col-num" data-tip="Lifetime ratings Apple reports for this storefront">Total</th>
                         <th class="col-num" data-tip="New ratings in the rolling last 24 hours">Δ 24h</th>
-                        <th class="col-num">Avg</th>
+                        <th class="col-num" data-tip="Average star rating for this storefront, to one decimal">Avg</th>
                         <th class="col-num" data-tip="How many ratings at each star; stars with none are omitted">Stars</th>
                         <th class="col-num" data-tip="New 5-star ratings needed for the displayed average to reach 5.0">5★ to 5.0</th>
-                        <th class="col-spark">30 days</th>
+                        <th class="col-spark" data-tip="Lifetime rating count at the end of each of the last 30 days">30 days</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -49,12 +49,12 @@
                         <tr>
                             <th>Keyword</th>
                             <th class="col-num" data-sort="pop" data-tip="Search demand, 5–100: how early and how high the phrase surfaces in App Store autocomplete">Pop<span class="sort-arrow"></span></th>
-                            <th class="col-num" data-sort="rank">Rank<span class="sort-arrow"></span></th>
+                            <th class="col-num" data-sort="rank" data-tip="Current position in App Store search results for this phrase, out of the top 200 checked">Rank<span class="sort-arrow"></span></th>
                             <th class="col-num" data-tip="Today's average rank vs yesterday's — always matches the sparkline's last segment">Δ</th>
                             <th class="col-num" data-tip="Rank range over the last 24 hours of runs">24h</th>
                             <th class="col-num" data-tip="Rank range over the last 7 days">7d</th>
-                            <th class="col-num">Best</th>
-                            <th class="col-spark">30 days</th>
+                            <th class="col-num" data-tip="Best rank measured on any day since tracking began">Best</th>
+                            <th class="col-spark" data-tip="Daily average rank over the last 30 days. The line rises as the rank improves.">30 days</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -80,6 +80,6 @@
 
     </main>
     <div id="tooltip" hidden></div>
-    <script src="app.js?v=76"></script>
+    <script src="app.js?v=77"></script>
 </body>
 </html>
