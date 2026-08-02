@@ -1014,13 +1014,19 @@ function renderKeywords(kw) {
         comp.replaceChildren();
         const slots = new Map();
         let measured = 0;
+        // Rows collected before the top-ten change carry only five ids, and a
+        // top-10 count derived from those would just restate the top-5 one.
+        // The column shows "—" until a run has filled the deeper data in.
+        let deep = false;
         for (const cur of Object.values(kw.latest[cc])) {
             if (!cur.top?.length) continue;
             measured++;
+            if (cur.top.length > 5) deep = true;
             cur.top.forEach((raw, i) => {
                 const { id } = appEntry(raw);
-                const e = slots.get(id) ?? { slots: 0, firsts: 0 };
-                e.slots++;
+                const e = slots.get(id) ?? { top5: 0, top10: 0, firsts: 0 };
+                if (i < 5) e.top5++;
+                e.top10++;
                 if (i === 0) e.firsts++;
                 slots.set(id, e);
             });
@@ -1038,20 +1044,25 @@ function renderKeywords(kw) {
                 "for this storefront only, so they change as you switch markets.";
             comp.appendChild(note);
 
-            const top = [...slots.entries()].sort((a, b) => b[1].slots - a[1].slots).slice(0, 8);
+            // Ranked by top-five ownership, with top-ten breaking ties: the
+            // five is still the column that says who is actually winning.
+            const top = [...slots.entries()]
+                .sort((a, b) => b[1].top5 - a[1].top5 || b[1].top10 - a[1].top10)
+                .slice(0, 8);
             // Your own share always shows, even from outside the top 8.
             if (!top.some(([id]) => id === "6751759381")) {
-                top.push(["6751759381", slots.get("6751759381") ?? { slots: 0, firsts: 0 }]);
+                top.push(["6751759381", slots.get("6751759381") ?? { top5: 0, top10: 0, firsts: 0 }]);
             }
 
             const table = document.createElement("table");
             table.className = "kw-comp-table";
             const thead = document.createElement("thead");
             const hrow = document.createElement("tr");
-            for (const [label, cls] of [
+            for (const [label, cls, tip] of [
                 ["App", ""],
-                ["Top-5", "col-num"],
-                ["#1", "col-num"],
+                ["Top-5", "col-num", "Tracked keywords where this app is one of the first five results"],
+                ["Top-10", "col-num", "Tracked keywords where this app is anywhere on page one, the first ten results"],
+                ["#1", "col-num", "Tracked keywords where this app is the very first result"],
                 ["Released", "col-num"],
                 ["Age", "col-num"],
                 ["Ratings", "col-num"],
@@ -1060,6 +1071,7 @@ function renderKeywords(kw) {
                 const th = document.createElement("th");
                 th.textContent = label;
                 if (cls) th.className = cls;
+                if (tip) th.dataset.tip = tip;
                 hrow.appendChild(th);
             }
             thead.appendChild(hrow);
@@ -1078,7 +1090,11 @@ function renderKeywords(kw) {
 
                 const tdSlots = document.createElement("td");
                 tdSlots.className = "col-num";
-                tdSlots.textContent = `${e.slots}/${measured}`;
+                tdSlots.textContent = `${e.top5}/${measured}`;
+
+                const tdSlots10 = document.createElement("td");
+                tdSlots10.className = "col-num muted";
+                tdSlots10.textContent = deep ? `${e.top10}/${measured}` : "—";
 
                 const tdFirst = document.createElement("td");
                 tdFirst.className = "col-num muted";
@@ -1101,10 +1117,13 @@ function renderKeywords(kw) {
                 tdScore.className = "col-num muted";
                 tdScore.textContent = score ? score.toFixed(2) : "—";
 
-                row.append(tdName, tdSlots, tdFirst, tdRel, tdAge, tdRatings, tdScore);
+                row.append(tdName, tdSlots, tdSlots10, tdFirst, tdRel, tdAge, tdRatings, tdScore);
                 tb.appendChild(row);
             }
             table.appendChild(tb);
+            // This table is rebuilt on every market switch, so its headers need
+            // wiring each time; the page-level pass only sees the static ones.
+            wireHeaderTips(table);
             // Only the table pans sideways; the heading and note stay put.
             const scroller = document.createElement("div");
             scroller.className = "kw-comp-scroll";

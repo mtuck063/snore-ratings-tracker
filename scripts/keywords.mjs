@@ -79,9 +79,13 @@ async function readJson(file, fallback) {
 
 // --- Rank: iTunes Search API -----------------------------------------------
 
-// Resolves to { rank (1-based | null if outside top 200), top (the top five
+// Resolves to { rank (1-based | null if outside top 200), top (the top ten
 // [appId, name] results — competitor context that comes free with the same
 // request) } or "error".
+// Ten rather than five because page one of App Store search is ten results:
+// an app sitting at 6-10 is still visible to a searcher, and counting only
+// the top five hid every competitor in that band.
+const TOP_DEPTH = 10;
 async function fetchRank(kw, cc, attempt = 1) {
   const url = `https://itunes.apple.com/search?term=${encodeURIComponent(kw)}&country=${cc}&entity=software&limit=200`;
   try {
@@ -93,7 +97,7 @@ async function fetchRank(kw, cc, attempt = 1) {
     const idx = results.findIndex((r) => String(r.trackId) === appId);
     return {
       rank: idx === -1 ? null : idx + 1,
-      top: results.slice(0, 5).map((r) => ({
+      top: results.slice(0, TOP_DEPTH).map((r) => ({
         id: String(r.trackId),
         name: (r.trackName ?? "").slice(0, 42),
         icon: r.artworkUrl60 ?? null,
