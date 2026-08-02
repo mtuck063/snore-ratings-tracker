@@ -411,9 +411,31 @@ async function merge(partials) {
   for (const perCc of Object.values(stats))
     for (const id of Object.keys(perCc)) if (!used.has(id)) delete perCc[id];
 
+  // Competitor growth needs an earlier reading to subtract from, and `stats`
+  // is a live snapshot this merge overwrites. Keep a short series of run-level
+  // rating counts — counts only, since a score is not a rate. Five entries at
+  // four runs a day always leaves one at least twenty hours back, which is
+  // what a day's-growth number needs, without carrying a full history.
+  const STATS_LOG_MAX = 5;
+  const statsLog = (prev?.statsLog ?? []).slice(-(STATS_LOG_MAX - 1));
+  statsLog.push({
+    at: fetchedAt,
+    markets: Object.fromEntries(
+      Object.entries(stats).map(([cc, m]) => [
+        cc,
+        Object.fromEntries(Object.entries(m).map(([id, v]) => [id, v[0]])),
+      ])
+    ),
+  });
+  // Older snapshots keep entries for apps that have since dropped out of every
+  // top list; they would otherwise accumulate forever behind the same prune.
+  for (const snap of statsLog)
+    for (const perCc of Object.values(snap.markets))
+      for (const id of Object.keys(perCc)) if (!used.has(id)) delete perCc[id];
+
   await writeFile(
     dataFile,
-    JSON.stringify({ fetchedAt, apps, stats, latest, hints, events, history })
+    JSON.stringify({ fetchedAt, apps, stats, statsLog, latest, hints, events, history })
   );
   console.log(`${today}: ${Object.keys(markets).length} markets merged`);
   // The workflow greps this to decide whether to requeue on a bad runner IP.

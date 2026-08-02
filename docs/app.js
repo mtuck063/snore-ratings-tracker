@@ -1065,7 +1065,8 @@ function renderKeywords(kw) {
                 ["#1", "col-num", "Tracked keywords where this app is the very first result"],
                 ["Released", "col-num"],
                 ["Age", "col-num"],
-                ["Ratings", "col-num"],
+                ["Ratings", "col-num", "Lifetime ratings in this storefront"],
+                ["Δ 1d", "col-num", "Ratings gained in this storefront since the last reading at least a day old. Blank where there is no earlier reading yet."],
                 ["Score", "col-num"],
             ]) {
                 const th = document.createElement("th");
@@ -1079,6 +1080,14 @@ function renderKeywords(kw) {
 
             const tb = document.createElement("tbody");
             const perCc = kw.stats?.[cc] ?? {};
+            // Growth baseline: the newest logged snapshot at least twenty hours
+            // back, so the figure reads as a day's gain rather than whatever
+            // happened since the last run a few hours ago. Runs are four a day,
+            // so there is normally one sitting between 20 and 30 hours old.
+            const baseline = (kw.statsLog ?? [])
+                .filter((s) => Date.now() - new Date(s.at) >= 20 * 3600e3)
+                .pop();
+            const basePerCc = baseline?.markets?.[cc] ?? {};
             for (const [id, e] of top) {
                 const row = document.createElement("tr");
                 if (id === "6751759381") row.className = "you";
@@ -1124,11 +1133,27 @@ function renderKeywords(kw) {
                 tdRatings.className = "col-num muted";
                 tdRatings.textContent = ratings == null ? "—" : ratings.toLocaleString();
 
+                // How fast they are gaining. Blank until a snapshot old enough
+                // to measure against exists, which is the first day after this
+                // shipped, and blank for an app that was not in the top lists
+                // back then so has no earlier reading.
+                const wasRatings = basePerCc[id];
+                const tdGrowth = document.createElement("td");
+                tdGrowth.className = "col-num";
+                if (ratings == null || wasRatings == null) {
+                    tdGrowth.textContent = "—";
+                    tdGrowth.classList.add("muted");
+                } else {
+                    const d = ratings - wasRatings;
+                    tdGrowth.textContent = d > 0 ? `+${fmt(d)}` : d < 0 ? fmt(d) : "0";
+                    tdGrowth.classList.add("kw-comp-growth", d > 0 ? "up" : d < 0 ? "down" : "flat");
+                }
+
                 const tdScore = document.createElement("td");
                 tdScore.className = "col-num muted";
                 tdScore.textContent = score ? score.toFixed(2) : "—";
 
-                row.append(tdName, tdSlots, tdSlots10, tdFirst, tdRel, tdAge, tdRatings, tdScore);
+                row.append(tdName, tdSlots, tdSlots10, tdFirst, tdRel, tdAge, tdRatings, tdGrowth, tdScore);
                 tb.appendChild(row);
             }
             table.appendChild(tb);
