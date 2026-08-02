@@ -154,6 +154,10 @@ tr.changed td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
 
 .muted { color: var(--text-secondary); }
 .at-five { color: var(--good); }
+/* Sits beside the best-ever rank as the distance from it. Muted because the
+   headline number is the best itself; the gap is the footnote. */
+.best-gap { margin-left: 5px; font-size: 0.75rem; }
+.best-gap.at-best { color: var(--good); }
 
 svg.spark { display: block; margin-left: auto; touch-action: none; }
 .spark-line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }

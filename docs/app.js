@@ -1003,9 +1003,28 @@ async function renderKeywords(kw) {
             td7d.textContent = rangeText(week);
             td7d.title = "Rank range over the last 7 days";
 
+            // Best ever, and how far the current rank sits from it. The gap is
+            // never positive — best is a running minimum, so today can only
+            // match it or trail it — which is why sitting at your best shows a
+            // tick rather than a "0" that reads like a measurement.
             const tdBest = document.createElement("td");
             tdBest.className = "col-num muted";
-            tdBest.textContent = rankText(bestRank[cc]?.[term]);
+            const best = bestRank[cc]?.[term];
+            tdBest.textContent = rankText(best);
+            if (best != null && cur.rank != null) {
+                const gap = cur.rank - best;
+                const off = document.createElement("span");
+                off.className = "best-gap";
+                if (gap === 0) {
+                    off.textContent = "✓";
+                    off.classList.add("at-best");
+                    off.title = "Currently at its best rank";
+                } else {
+                    off.textContent = `−${gap}`;
+                    off.title = `${gap} behind its best of #${best}`;
+                }
+                tdBest.appendChild(off);
+            }
 
             const tdSpark = document.createElement("td");
             tdSpark.className = "col-spark";
