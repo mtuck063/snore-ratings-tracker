@@ -18,26 +18,26 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
-const statusFile = path.join(repoRoot, "docs", "data", "status.json");
+const dataDir = path.join(repoRoot, "docs", "data");
 
+// One file per collector, each with a single writer. They shared one before,
+// and two writers on one line of compact JSON is a rebase conflict waiting for
+// the two workflows to overlap.
 const LIMITS = {
-  ratings: { hours: 12, cadence: "hourly" },
-  keywords: { hours: 16, cadence: "every 6 hours" },
+  ratings: { hours: 12, cadence: "hourly", file: "status-ratings.json" },
+  keywords: { hours: 16, cadence: "every 6 hours", file: "status-keywords.json" },
 };
-
-let status;
-try {
-  status = JSON.parse(await readFile(statusFile, "utf8"));
-} catch {
-  console.error("STALE: docs/data/status.json is missing or unreadable.");
-  console.error("No collector has written a heartbeat since monitoring was added.");
-  process.exit(1);
-}
 
 const now = Date.now();
 const problems = [];
-for (const [key, { hours, cadence }] of Object.entries(LIMITS)) {
-  const at = status[key]?.at;
+for (const [key, { hours, cadence, file }] of Object.entries(LIMITS)) {
+  let at = null;
+  try {
+    at = JSON.parse(await readFile(path.join(dataDir, file), "utf8")).at;
+  } catch {
+    problems.push(`${key}: ${file} is missing or unreadable (expected ${cadence}).`);
+    continue;
+  }
   if (!at) {
     problems.push(`${key}: no heartbeat recorded at all (expected ${cadence}).`);
     continue;

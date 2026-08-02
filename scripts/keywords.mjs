@@ -513,19 +513,21 @@ async function merge(partials) {
     dataFile,
     JSON.stringify({ fetchedAt, runs, apps, stats, statsLog, latest, history })
   );
-  // Heartbeat, shared with the ratings collector. Written every run so the
-  // dashboard can say when data was last *checked*, not only when it last
-  // *changed* — the two look identical from the data alone.
-  const statusFile = path.join(servedDataDir, "status.json");
-  const status = await readJson(statusFile, {});
+  // Heartbeat, so the dashboard can say when data was last *checked*, not only
+  // when it last *changed* — the two look identical from the data alone. Its
+  // own file: sharing one status.json with the ratings collector meant two
+  // writers on one line of compact JSON, and a rebase that could not resolve.
+  const statusFile = path.join(servedDataDir, "status-keywords.json");
   const tracked = Object.keys(markets).reduce((n, cc) => n + kwFor(cc).length, 0);
-  status.keywords = {
-    at: fetchedAt,
-    markets: Object.keys(markets).length,
-    tracked,
-    rankFailures,
-  };
-  await writeFile(statusFile, JSON.stringify(status));
+  await writeFile(
+    statusFile,
+    JSON.stringify({
+      at: fetchedAt,
+      markets: Object.keys(markets).length,
+      tracked,
+      rankFailures,
+    })
+  );
 
   console.log(`${today}: ${Object.keys(markets).length} markets merged`);
   // The workflow greps this to decide whether to requeue on a bad runner IP,

@@ -1401,31 +1401,38 @@ async function main() {
     // fires on failure, which means a healthy system is invisible and you
     // cannot tell "fine" from "nobody has checked". These bounds mirror
     // scripts/check-freshness.mjs; if one moves, move the other.
+    // One heartbeat file per collector: they shared one until two writers on a
+    // single line of compact JSON gave the collectors a rebase conflict.
     const HEALTH = { ratings: 12, keywords: 16 };
-    const health = await fetch("data/status.json", { cache: "no-cache" })
-        .then((r) => r.json())
-        .catch(() => null);
-    if (health) {
-        const stale = [];
-        for (const [key, hours] of Object.entries(HEALTH)) {
-            const at = health[key]?.at;
-            if (!at) { stale.push(`${key}: never reported`); continue; }
-            const age = (Date.now() - new Date(at)) / 3600e3;
-            if (age > hours) stale.push(`${key}: ${age.toFixed(0)}h ago`);
-        }
-        const failing = Object.entries(health)
-            .filter(([, v]) => (v?.failed ?? v?.rankFailures ?? 0) > 0)
-            .map(([k, v]) => `${k}: ${v.failed ?? v.rankFailures} fetch failures`);
-        if (health.ratings?.at) {
-            addMeta(`Checked ${ago(health.ratings.at)}`, stamp(health.ratings.at));
-        }
-        if (stale.length || failing.length) {
-            const warn = document.createElement("span");
-            warn.className = "meta-item meta-warn";
-            warn.textContent = stale.length ? "Collector stalled" : "Collector erroring";
-            warn.title = [...stale, ...failing].join("\n");
-            meta.appendChild(warn);
-        }
+    const health = Object.fromEntries(
+        await Promise.all(
+            Object.keys(HEALTH).map(async (key) => [
+                key,
+                await fetch(`data/status-${key}.json`, { cache: "no-cache" })
+                    .then((r) => r.json())
+                    .catch(() => null),
+            ])
+        )
+    );
+    const stale = [];
+    for (const [key, hours] of Object.entries(HEALTH)) {
+        const at = health[key]?.at;
+        if (!at) { stale.push(`${key}: never reported`); continue; }
+        const age = (Date.now() - new Date(at)) / 3600e3;
+        if (age > hours) stale.push(`${key}: ${age.toFixed(0)}h ago`);
+    }
+    const failing = Object.entries(health)
+        .filter(([, v]) => (v?.failed ?? v?.rankFailures ?? 0) > 0)
+        .map(([k, v]) => `${k}: ${v.failed ?? v.rankFailures} fetch failures`);
+    if (health.ratings?.at) {
+        addMeta(`Checked ${ago(health.ratings.at)}`, stamp(health.ratings.at));
+    }
+    if (stale.length || failing.length) {
+        const warn = document.createElement("span");
+        warn.className = "meta-item meta-warn";
+        warn.textContent = stale.length ? "Collector stalled" : "Collector erroring";
+        warn.title = [...stale, ...failing].join("\n");
+        meta.appendChild(warn);
     }
 
     // Live recheck: query Apple directly from the browser for the 20 biggest
