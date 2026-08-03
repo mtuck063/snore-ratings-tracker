@@ -55,7 +55,50 @@ h1 { font-size: 1.35rem; margin-bottom: 4px; }
     text-align: left;
 }
 .check-now:disabled { color: var(--text-secondary); cursor: default; }
+/* A drop is rare, usually Apple's error, and reads as a rise if it is left to
+   a minus sign among flags — so it gets the colour and the word. */
+.check-now .drop { color: var(--bad); font-weight: 600; }
 #check-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+/* Progress for a dispatched update. Only on screen while one is running, so
+   it can take the space: three rows that answer "which stage, how far in". */
+#run-panel {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 0.82rem;
+}
+.run-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
+    color: var(--text-secondary);
+    text-decoration: none;
+}
+.run-row + .run-row { border-top: 1px solid var(--border); }
+a.run-row:hover { background: var(--bg-raised); }
+.run-name { color: var(--text); min-width: 72px; }
+.run-detail { flex: 1; min-width: 0; }
+.run-time { font-variant-numeric: tabular-nums; }
+.run-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex: none;
+    background: var(--border);
+}
+.run-row.run .run-dot { background: var(--accent); animation: run-pulse 1.4s ease-in-out infinite; }
+.run-row.done .run-dot { background: var(--good); }
+.run-row.fail .run-dot { background: var(--bad); }
+.run-row.fail .run-detail { color: var(--bad); }
+@keyframes run-pulse { 50% { opacity: 0.25; } }
+@media (prefers-reduced-motion: reduce) {
+    .run-row.run .run-dot { animation: none; }
+}
+@media (max-width: 600px) {
+    .run-name { min-width: 62px; }
+}
 
 #recent { margin-bottom: 18px; }
 .recent-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 2px; }

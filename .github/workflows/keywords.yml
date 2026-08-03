@@ -48,6 +48,9 @@ jobs:
   # is what lost two ranks to HTTP 403.
   collect:
     needs: plan
+    # Named, because a generated matrix would otherwise label the job with
+    # every value in the entry: "collect (us, 1/2, us-1)".
+    name: collect ${{ matrix.id }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

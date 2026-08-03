@@ -1569,6 +1569,184 @@ async function main() {
     recordBtn.textContent = "Full update (~3 min)";
     recordBtn.title = "Runs the ratings + keywords collectors on GitHub and saves the results (owner token required)";
     checkRow.appendChild(recordBtn);
+
+    // Live progress for a dispatched update. The old flow said "queued" and
+    // then nothing for three minutes, so the only question worth asking — is
+    // it working or is it stuck? — had to be answered in the Actions tab.
+    // This polls the same API that tab does and reports each stage in its own
+    // units: the ratings run's current step, how many keyword shards have
+    // landed, and whether the deploy that publishes them has run.
+    const runPanel = document.createElement("div");
+    runPanel.id = "run-panel";
+    runPanel.hidden = true;
+    checkRow.insertAdjacentElement("afterend", runPanel);
+
+    const REPO = "mtuck063/snore-ratings-tracker";
+    const POLL_MS = 5000;
+    const nap = (ms) => new Promise((r) => setTimeout(r, ms));
+    const ghGet = async (path, token) => {
+        const res = await fetch(`https://api.github.com/repos/${REPO}${path}`, {
+            headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json" },
+            cache: "no-store",
+        });
+        // A token that expires mid-run has to surface as itself, not as a
+        // stage that mysteriously stops advancing.
+        if (res.status === 401 || res.status === 403) throw Object.assign(new Error("token"), { auth: true });
+        if (!res.ok) throw new Error(`GitHub ${res.status}`);
+        return res.json();
+    };
+
+    const STAGES = [
+        { key: "ratings", label: "Ratings", wf: "collect.yml" },
+        { key: "keywords", label: "Keywords", wf: "keywords.yml" },
+        { key: "pages", label: "Publish" },
+    ];
+
+    const since = (iso) => {
+        const s = Math.max(0, Math.round((Date.now() - new Date(iso)) / 1000));
+        return s < 60 ? `${s}s` : `${Math.floor(s / 60)}m ${String(s % 60).padStart(2, "0")}s`;
+    };
+
+    const renderRunPanel = (state) => {
+        runPanel.hidden = false;
+        runPanel.textContent = "";
+        for (const { key, label } of STAGES) {
+            const st = state[key];
+            // Linked to its run when there is one, so "why did that fail" is
+            // one tap away rather than a hunt through the Actions tab.
+            const row = document.createElement(st.url ? "a" : "div");
+            row.className = `run-row ${st.state}`;
+            if (st.url) {
+                row.href = st.url;
+                row.target = "_blank";
+                row.rel = "noopener";
+            }
+            const dot = document.createElement("span");
+            dot.className = "run-dot";
+            const name = document.createElement("span");
+            name.className = "run-name";
+            name.textContent = label;
+            const detail = document.createElement("span");
+            detail.className = "run-detail";
+            detail.textContent = st.detail;
+            const time = document.createElement("span");
+            time.className = "run-time";
+            time.textContent = st.at ? since(st.at) : "";
+            row.append(dot, name, detail, time);
+            runPanel.appendChild(row);
+        }
+    };
+
+    // The ratings run is a single job, so its steps are the progress bar:
+    // "Fetch ratings" is the long one and "Commit data" means the numbers
+    // are already in the repo.
+    const ratingsStage = (run, jobs) => {
+        if (!run) return { state: "wait", detail: "queuing…" };
+        const base = { at: run.run_started_at ?? run.created_at, url: run.html_url };
+        if (run.status === "completed")
+            return { ...base, state: run.conclusion === "success" ? "done" : "fail",
+                detail: run.conclusion === "success" ? "collected 175 storefronts" : `run ${run.conclusion}` };
+        const steps = jobs[0]?.steps ?? [];
+        if (!steps.length) return { ...base, state: "wait", detail: "waiting for a runner" };
+        const active = steps.find((s) => s.status === "in_progress");
+        const done = steps.filter((s) => s.status === "completed").length;
+        return { ...base, state: "run",
+            detail: `${active ? active.name : "step"} · ${Math.min(done + 1, steps.length)} of ${steps.length}` };
+    };
+
+    // The keyword run fans out one job per market shard, which is exactly the
+    // unit worth counting: "9 of 16" answers how far along it is, where a
+    // percentage of nothing in particular would not.
+    const keywordsStage = (run, jobs) => {
+        if (!run) return { state: "wait", detail: "queuing…" };
+        const base = { at: run.run_started_at ?? run.created_at, url: run.html_url };
+        if (run.status === "completed")
+            return { ...base, state: run.conclusion === "success" ? "done" : "fail",
+                detail: run.conclusion === "success" ? "merged and pushed" : `run ${run.conclusion}` };
+        const shards = jobs.filter((j) => j.name.startsWith("collect"));
+        const merge = jobs.find((j) => j.name === "merge");
+        if (merge?.status === "in_progress") return { ...base, state: "run", detail: "merging the partials" };
+        if (shards.length) {
+            const done = shards.filter((j) => j.status === "completed").length;
+            const running = shards.filter((j) => j.status === "in_progress").length;
+            const tail = running ? `, ${running} collecting` : done === shards.length ? ", merge queued" : "";
+            return { ...base, state: "run", detail: `${done}/${shards.length} market shards${tail}` };
+        }
+        if (jobs.some((j) => j.name === "plan")) return { ...base, state: "run", detail: "planning the job list" };
+        return { ...base, state: "wait", detail: "waiting for a runner" };
+    };
+
+    // Publishing is a separate workflow that only exists once a collector has
+    // pushed, so it can only be found after the fact — and a run that changed
+    // nothing pushes nothing, which is a finished update, not a stuck one.
+    const pagesStage = (run, settledFor) => {
+        if (!run)
+            return settledFor > 45
+                ? { state: "done", detail: "nothing changed, nothing to publish" }
+                : { state: "wait", detail: "waits for the collectors to push" };
+        const base = { at: run.run_started_at ?? run.created_at, url: run.html_url };
+        if (run.status !== "completed") return { ...base, state: "run", detail: "deploying the site" };
+        return { ...base, state: run.conclusion === "success" ? "done" : "fail",
+            detail: run.conclusion === "success" ? "published" : `deploy ${run.conclusion}` };
+    };
+
+    // Polls until every stage has settled, then reloads: the whole point of
+    // the button is the data on this page, and the page is showing the copy
+    // that was current before the run.
+    async function trackUpdate(token, dispatchedAt) {
+        const state = {
+            ratings: { state: "wait", detail: "queuing…" },
+            keywords: { state: "wait", detail: "queuing…" },
+            pages: { state: "wait", detail: "waits for the collectors to push" },
+        };
+        const runs = { ratings: null, keywords: null, pages: null };
+        renderRunPanel(state);
+        // Separate from the poll: elapsed times should tick like a clock, not
+        // jump five seconds at a time.
+        const ticker = setInterval(() => renderRunPanel(state), 1000);
+        const deadline = Date.now() + 12 * 60e3;
+        let bothDoneAt = null;
+        try {
+            while (Date.now() < deadline) {
+                for (const { key, wf } of STAGES.filter((s) => s.wf)) {
+                    if (!runs[key]) {
+                        const list = await ghGet(
+                            `/actions/workflows/${wf}/runs?event=workflow_dispatch&per_page=5`, token);
+                        runs[key] = (list.workflow_runs ?? [])
+                            .find((r) => new Date(r.created_at) >= dispatchedAt) ?? null;
+                    } else if (runs[key].status !== "completed") {
+                        runs[key] = await ghGet(`/actions/runs/${runs[key].id}`, token);
+                    }
+                    const jobs = runs[key]
+                        ? ((await ghGet(`/actions/runs/${runs[key].id}/jobs?per_page=100`, token)).jobs ?? [])
+                        : [];
+                    state[key] = key === "ratings"
+                        ? ratingsStage(runs[key], jobs)
+                        : keywordsStage(runs[key], jobs);
+                }
+                const collectorsDone = ["ratings", "keywords"]
+                    .every((k) => runs[k]?.status === "completed");
+                if (collectorsDone && !bothDoneAt) bothDoneAt = Date.now();
+                if (!runs.pages || runs.pages.status !== "completed") {
+                    const list = await ghGet(`/actions/runs?per_page=20`, token);
+                    runs.pages = (list.workflow_runs ?? []).find(
+                        (r) => r.name === "pages build and deployment" && new Date(r.created_at) >= dispatchedAt
+                    ) ?? runs.pages;
+                }
+                state.pages = pagesStage(runs.pages, bothDoneAt ? (Date.now() - bothDoneAt) / 1000 : 0);
+                renderRunPanel(state);
+
+                if (Object.values(state).some((s) => s.state === "fail")) return "failed";
+                if (Object.values(state).every((s) => s.state === "done")) return "done";
+                await nap(POLL_MS);
+            }
+            return "timeout";
+        } finally {
+            clearInterval(ticker);
+            renderRunPanel(state);
+        }
+    }
+
     recordBtn.addEventListener("click", async () => {
         let token = localStorage.getItem("ghDispatchToken");
         if (!token) {
@@ -1578,6 +1756,9 @@ async function main() {
         }
         recordBtn.disabled = true;
         recordBtn.textContent = "Queuing runs…";
+        // Slack for clock skew between this browser and GitHub: a run created
+        // a second "before" the click is still our run.
+        const dispatchedAt = new Date(Date.now() - 45000);
         try {
             // Ratings and keywords both; they share a concurrency group, so
             // the runs queue politely rather than fighting over the push.
@@ -1595,15 +1776,31 @@ async function main() {
             );
             const ok = results.filter((r) => r.status === 204).length;
             if (ok === results.length) {
-                recordBtn.textContent = "Ratings + keywords queued — data lands in ~3 min, then reload";
+                recordBtn.textContent = "Update running…";
+                const outcome = await trackUpdate(token, dispatchedAt);
+                if (outcome === "done") {
+                    recordBtn.textContent = "Updated — reloading…";
+                    setTimeout(() => location.reload(), 1500);
+                    return;
+                }
+                recordBtn.textContent = outcome === "failed"
+                    ? "A stage failed — tap a row for the log"
+                    : "Still running after 12 min — tap a row for the log";
             } else if (results.some((r) => r.status === 401 || r.status === 403)) {
                 localStorage.removeItem("ghDispatchToken");
                 recordBtn.textContent = "Token rejected — tap to enter a new one";
             } else {
                 recordBtn.textContent = `${ok}/2 queued (GitHub said ${results.map((r) => r.status).join("/")}) — tap to retry`;
             }
-        } catch {
-            recordBtn.textContent = "Network error — tap to retry";
+        } catch (err) {
+            // The dispatch itself reports auth failure by status code; the
+            // tracker, which runs long enough to outlive a token, throws.
+            if (err?.auth) {
+                localStorage.removeItem("ghDispatchToken");
+                recordBtn.textContent = "Token expired mid-run — the runs carry on regardless";
+            } else {
+                recordBtn.textContent = "Network error — tap to retry";
+            }
         }
         setTimeout(() => {
             recordBtn.disabled = false;
@@ -1663,7 +1860,7 @@ async function main() {
                         const liveCount = app.userRatingCount ?? 0;
                         if (liveCount !== cur.count) {
                             const d = liveCount - cur.count;
-                            changes.push(`${flag(cc)} ${d > 0 ? "+" : ""}${d}`);
+                            changes.push({ cc, d });
                             const tr = rowByCc.get(cc);
                             if (tr) {
                                 tr.children[1].textContent = fmt(liveCount);
@@ -1686,12 +1883,34 @@ async function main() {
             const row = document.getElementById("week-row");
             for (const r of newReviews) row.prepend(reviewCard(r, true));
         }
-        let summary = changes.length
-            ? `Live: ${changes.join(" · ")} — recorded officially next hourly run`
-            : `No changes right now (${top.length} storefronts checked)`;
-        if (newReviews.length) summary += ` · ${newReviews.length} new review${newReviews.length === 1 ? "" : "s"} below`;
-        if (failed) summary += ` · ${failed} didn't answer, tap again in a minute`;
-        checkBtn.textContent = summary;
+        // Rises and drops are different news and used to read identically: a
+        // row of flags where "+1" and "-1" differ by one glyph, next to a
+        // promise to record it that only holds for a rise. A drop waits 48
+        // hours for confirmation (collect.mjs), and most of them are Apple's
+        // CDN serving a stale count rather than a rating anyone lost, so it is
+        // spelled out in words and coloured instead of being left to a sign.
+        const rises = changes.filter((c) => c.d > 0);
+        const drops = changes.filter((c) => c.d < 0);
+        const named = (c) => `${flag(c.cc)} ${regionNames.of(c.cc.toUpperCase()) ?? c.cc.toUpperCase()}`;
+        checkBtn.textContent = "";
+        const say = (text, cls) => {
+            const span = document.createElement("span");
+            if (cls) span.className = cls;
+            span.textContent = text;
+            checkBtn.appendChild(span);
+        };
+        if (rises.length) {
+            say(`Live: ${rises.map((c) => `${flag(c.cc)} +${c.d}`).join(" · ")} — recorded officially next hourly run`);
+        }
+        if (drops.length) {
+            const list = drops.map((c) => `${named(c)} −${Math.abs(c.d)}`).join(" · ");
+            say(rises.length ? " · " : "");
+            say(`Lost a rating: ${list}`, "drop");
+            say(" — held 48 h before it counts, Apple often reports these in error");
+        }
+        if (!changes.length) say(`No changes right now (${top.length} storefronts checked)`);
+        if (newReviews.length) say(` · ${newReviews.length} new review${newReviews.length === 1 ? "" : "s"} below`);
+        if (failed) say(` · ${failed} didn't answer, tap again in a minute`);
         setTimeout(() => {
             checkBtn.disabled = false;
             if (!changes.length && !failed && !newReviews.length) checkBtn.textContent = "Quick check (live view)";
