@@ -41,7 +41,12 @@ try {
   const res = await fetch(`${SITE}/api/v0/stats/total?start=${start}&end=${end}`, {
     headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) {
+    // GoatCounter's error bodies say why (bad token, wrong site, bad params),
+    // which the status alone doesn't.
+    const detail = (await res.text().catch(() => "")).slice(0, 200);
+    throw new Error(`HTTP ${res.status}${detail ? ` ${detail}` : ""}`);
+  }
   const body = await res.json();
   // Existing keys are updated in place and new days append at the end, so a
   // run where nothing moved rewrites the file byte-identically and git sees
