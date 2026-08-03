@@ -1136,6 +1136,8 @@ async function renderKeywords(kw, glossary = {}) {
                 ["Age", "col-num"],
                 ["Ratings", "col-num", "Lifetime ratings in this storefront"],
                 ["Δ 1d", "col-num", "Ratings gained in this storefront since the last reading at least a day old. Blank where there is no earlier reading yet."],
+                ["Users", "col-num", "Estimated lifetime users in this storefront: ratings × 75, the rule of thumb for how many users it takes to produce one rating"],
+                ["Share", "col-num", "This app's estimated users as a share of every tracked app's estimated users in this storefront — not just the rows shown here"],
                 ["Score", "col-num"],
             ]) {
                 const th = document.createElement("th");
@@ -1184,6 +1186,28 @@ async function renderKeywords(kw, glossary = {}) {
                 })
                 .pop();
             const basePerCc = baseline?.markets?.[cc] ?? {};
+
+            // Market sizing on the ~75-users-per-rating rule of thumb. The
+            // denominator is every tracked app with stats in this storefront,
+            // not just the rows shown, so Share reads as share-of-market
+            // rather than share-of-this-table.
+            const USERS_PER_RATING = 75;
+            const fmtUsers = (n) =>
+                n >= 1e6 ? `${(n / 1e6).toFixed(1)}M`
+                : n >= 1e4 ? `${Math.round(n / 1e3)}k`
+                : n >= 1e3 ? `${(n / 1e3).toFixed(1)}k`
+                : `${Math.round(n)}`;
+            const marketRatings = Object.values(perCc).reduce((s, [r]) => s + (r ?? 0), 0);
+            let marketNewRatings = 0;
+            let baselineSeen = false;
+            for (const [id, [r]] of Object.entries(perCc)) {
+                const was = basePerCc[id];
+                if (r != null && was != null) {
+                    baselineSeen = true;
+                    marketNewRatings += r - was;
+                }
+            }
+
             for (const [id, e] of top) {
                 const row = document.createElement("tr");
                 if (id === "6751759381") row.className = "you";
@@ -1243,13 +1267,31 @@ async function renderKeywords(kw, glossary = {}) {
                     const d = ratings - wasRatings;
                     tdGrowth.textContent = d > 0 ? `+${fmt(d)}` : d < 0 ? fmt(d) : "0";
                     tdGrowth.classList.add("kw-comp-growth", d > 0 ? "up" : d < 0 ? "down" : "flat");
+                    if (d) tdGrowth.title = `≈ ${d > 0 ? "+" : "−"}${fmt(Math.abs(d) * USERS_PER_RATING)} users/day`;
+                }
+
+                const tdUsers = document.createElement("td");
+                tdUsers.className = "col-num muted";
+                tdUsers.textContent = ratings == null ? "—" : `~${fmtUsers(ratings * USERS_PER_RATING)}`;
+
+                const tdShare = document.createElement("td");
+                tdShare.className = "col-num";
+                if (ratings == null || !marketRatings) {
+                    tdShare.textContent = "—";
+                    tdShare.classList.add("muted");
+                } else {
+                    // One significant digit below 1%, so a small app reads as
+                    // the honest "0.002%" rather than a defeatist "0.0%".
+                    const pct = (ratings / marketRatings) * 100;
+                    tdShare.textContent =
+                        pct >= 10 ? `${Math.round(pct)}%` : pct >= 1 ? `${pct.toFixed(1)}%` : `${pct.toPrecision(1)}%`;
                 }
 
                 const tdScore = document.createElement("td");
                 tdScore.className = "col-num muted";
                 tdScore.textContent = score ? score.toFixed(2) : "—";
 
-                row.append(tdName, tdSlots, tdSlots10, tdFirst, tdRel, tdAge, tdRatings, tdGrowth, tdScore);
+                row.append(tdName, tdSlots, tdSlots10, tdFirst, tdRel, tdAge, tdRatings, tdGrowth, tdUsers, tdShare, tdScore);
                 tb.appendChild(row);
             }
             table.appendChild(tb);
@@ -1261,6 +1303,22 @@ async function renderKeywords(kw, glossary = {}) {
             scroller.className = "kw-comp-scroll";
             scroller.appendChild(table);
             comp.appendChild(scroller);
+
+            // The headline number the columns build up to: how big this
+            // storefront's tracked market is and how fast it is growing, on
+            // the same ~75-users-per-rating assumption the columns use.
+            if (marketRatings) {
+                const sizing = document.createElement("p");
+                sizing.className = "kw-comp-note";
+                const apps = Object.values(perCc).filter(([r]) => r != null).length;
+                sizing.textContent =
+                    `Market size, estimated at ~75 users per rating: ~${fmtUsers(marketRatings * USERS_PER_RATING)} ` +
+                    `lifetime users across ${apps} tracked apps in this storefront` +
+                    (baselineSeen && marketNewRatings > 0
+                        ? `, currently gaining ~${fmtUsers(marketNewRatings * USERS_PER_RATING)} new users a day.`
+                        : ".");
+                comp.appendChild(sizing);
+            }
         }
     };
 
