@@ -291,7 +291,27 @@ const pageHistChanged = Object.entries(pageCounts).some(([cc, counts]) => {
   return sumOf(counts) === countries[cc]?.count && (!h || h.counts.join() !== counts.join());
 });
 
-const ratingsChanged = !prevLatest || JSON.stringify(prevLatest.countries) !== JSON.stringify(countries);
+// A "change" must be something a rating could actually cause. Apple's two
+// sources disagree in the fifth decimal of the average (histogram-derived vs
+// lookup), and under byte comparison that jitter re-stamped latest.json, so
+// the dashboard showed "Last change Nm ago" with no event behind it. With
+// counts equal, the smallest real movement — one rating edited — shifts the
+// average by 1/count, i.e. |Δavg|·count ≥ ~1; an order of magnitude below
+// that is source noise. Suppressed noise also stays unwritten, so it can't
+// ratchet: the same comparison happens against the same stored value next run.
+function meaningfulChange(prev, cur) {
+  for (const cc of new Set([...Object.keys(prev), ...Object.keys(cur)])) {
+    const p = prev[cc];
+    const c = cur[cc];
+    if (!p !== !c) return true; // listed or delisted
+    if (!p) continue;
+    if (p.count !== c.count) return true;
+    if ((p.avg == null) !== (c.avg == null)) return true;
+    if (p.avg != null && Math.abs(p.avg - c.avg) * Math.max(c.count, 1) > 0.1) return true;
+  }
+  return false;
+}
+const ratingsChanged = !prevLatest || meaningfulChange(prevLatest.countries, countries);
 
 // Heartbeat, written before the early exit below because the quiet path is
 // exactly when it matters: latest.json only moves when a rating moves, so a
