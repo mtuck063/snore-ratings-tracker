@@ -546,8 +546,16 @@ async function merge(partials) {
   // figure on the dashboard went blank: nothing left was old enough to
   // subtract from. One snapshot per six-hour bucket holds the span open
   // however often runs fire, and keeps about as many entries as the cap did.
+  //
+  // The retention window has to clear the twenty-hour baseline floor by more
+  // than one run's spacing. At thirty hours it did not: the moment a snapshot
+  // aged past thirty and was dropped, the next one down was twenty-four hours
+  // old with perfect cadence — and a single skipped scheduled run put it at
+  // eighteen, under the floor, blanking the column until it aged in. Forty-
+  // eight leaves the oldest survivor at least twenty hours old through three
+  // consecutive missed runs. Costs four more snapshots, about 85KB.
   const BUCKET_MS = 6 * 3600e3;
-  const RETAIN_MS = 30 * 3600e3; // one clear day, plus room for the 20h baseline to age in
+  const RETAIN_MS = 48 * 3600e3;
   const snapshot = {
     at: fetchedAt,
     markets: Object.fromEntries(
