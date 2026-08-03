@@ -13,10 +13,14 @@
 //
 // Apple throttles the search API hard for GitHub-runner IPs (it's an IP
 // lottery: some runners lose half their calls). The workflow therefore runs
-// one job per market — each job gets its own runner IP making only ~20-60
+// one job per market, and splits a market that has grown past SHARD_MAX
+// keywords across several jobs, so no runner IP makes more than that many
 // search calls — then a merge job combines the partials:
 //
-//   node keywords.mjs --collect <cc>   fetch one market -> partials/<cc>.json
+//   node keywords.mjs --matrix         the job list for the workflow, as JSON
+//   node keywords.mjs --collect <cc> [i/n]
+//                                      fetch one market (or its i-th shard)
+//                                      -> partials/<cc>.json | <cc>-<i>.json
 //   node keywords.mjs --merge          partials + prev state -> data files
 //   node keywords.mjs                  all markets in-process (local use)
 //
@@ -51,6 +55,34 @@ const kwFor = (cc) =>
   markets[cc].keywords ?? [...new Set([...keywords, ...(markets[cc].extraKeywords ?? [])])];
 const watchFor = (cc) => markets[cc].watchPrefixes ?? watchPrefixes;
 const seedFor = (cc) => markets[cc].seedTokens ?? config.seedTokens ?? [];
+
+// Search calls one runner IP may make before Apple starts answering 403. The
+// number is empirical: markets in the 50-70 range have run clean for months,
+// and the first losses came from an 81-keyword US leg. Auto-discovery keeps
+// growing these lists, so the workflow matrix is generated from this rather
+// than written out — a market crossing the line splits itself.
+const SHARD_MAX = 50;
+const shardsFor = (cc) => Math.ceil(kwFor(cc).length / SHARD_MAX);
+
+// "2/3" -> the middle third. A single-shard spec means the market is small
+// enough to stay on one runner, which is the same thing as no shard at all.
+const parseShard = (spec) => {
+  if (!spec) return null;
+  const [i, of] = spec.split("/").map(Number);
+  if (!(i >= 1 && of >= 1 && i <= of)) throw new Error(`bad shard "${spec}"`);
+  return of === 1 ? null : { idx: i - 1, of };
+};
+
+// Sorted before slicing, so keywords sharing a stem land on the same runner:
+// the popularity pass probes every prefix of every keyword, and neighbours in
+// sort order share almost all of theirs. Splitting them would make both
+// runners walk "s", "sn", "sno"… separately.
+const shardOf = (list, shard) => {
+  if (!shard) return list;
+  const sorted = [...list].sort();
+  const size = Math.ceil(sorted.length / shard.of);
+  return sorted.slice(shard.idx * size, (shard.idx + 1) * size);
+};
 
 // Accent-insensitive comparison, so "apnée" and "apnee" count as one keyword.
 const fold = (s) => s.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
@@ -200,14 +232,18 @@ async function popularityPassRaw(storefront, list) {
   return out;
 }
 
-async function collectMarket(cc) {
+async function collectMarket(cc, shard = null) {
   const { storefront } = markets[cc];
-  const list = kwFor(cc);
+  const list = shardOf(kwFor(cc), shard);
+  // Watch prefixes belong to the market, not to any keyword, so only the first
+  // shard fetches them. Splitting a market must not multiply that work, and a
+  // second copy of the same list would tell the merge nothing new.
+  const watchList = shard && shard.idx > 0 ? [] : watchFor(cc);
   const [rankResults, pops, watchLists] = await Promise.all([
     Promise.all(list.map((kw) => fetchRank(kw, cc))),
     popularityPassRaw(storefront, list),
     Promise.all(
-      watchFor(cc).map((p) =>
+      watchList.map((p) =>
         fetchHints(p, storefront).catch((err) => {
           console.warn(`watch "${p}": ${err.message}, will carry previous list`);
           return null;
@@ -234,9 +270,10 @@ async function collectMarket(cc) {
       }
     }
   });
-  const watch = Object.fromEntries(watchFor(cc).map((p, i) => [p, watchLists[i]]));
+  const watch = Object.fromEntries(watchList.map((p, i) => [p, watchLists[i]]));
   const errors = rankResults.filter((r) => r === "error").length;
-  console.log(`${cc}: collected (${errors} rank fetches failed)`);
+  const label = shard ? `${cc} shard ${shard.idx + 1}/${shard.of}` : cc;
+  console.log(`${label}: collected ${list.length} keywords (${errors} rank fetches failed)`);
   return { cc, ranks, pops, watch, tops, apps, stats };
 }
 
@@ -565,17 +602,52 @@ async function merge(partials) {
 
 // --- CLI --------------------------------------------------------------------
 
-const [mode, arg] = process.argv.slice(2);
-if (mode === "--collect") {
+// Shards of one market cover disjoint keywords, so a key-wise union rebuilds
+// exactly the partial an unsharded run would have written. A shard whose job
+// died is simply absent: its keywords go missing from `ranks`, which the merge
+// already reads as "carry the previous value" rather than as a rank drop.
+const joinShards = (a, b) => ({
+  cc: a.cc,
+  ranks: { ...a.ranks, ...b.ranks },
+  pops: { ...a.pops, ...b.pops },
+  watch: { ...a.watch, ...b.watch },
+  tops: { ...a.tops, ...b.tops },
+  apps: { ...a.apps, ...b.apps },
+  stats: { ...a.stats, ...b.stats },
+});
+
+const [mode, arg, shardArg] = process.argv.slice(2);
+if (mode === "--matrix") {
+  // One entry per job. `id` names the artifact and the partial file, because
+  // "1/2" cannot appear in either; `shard` is what the collector parses.
+  const include = Object.keys(markets).flatMap((market) => {
+    const of = shardsFor(market);
+    return Array.from({ length: of }, (_, i) => ({
+      market,
+      shard: `${i + 1}/${of}`,
+      id: of === 1 ? market : `${market}-${i + 1}`,
+    }));
+  });
+  console.log(JSON.stringify({ include }));
+} else if (mode === "--collect") {
   if (!markets[arg]) throw new Error(`unknown market "${arg}"`);
-  const partial = await collectMarket(arg);
+  const shard = parseShard(shardArg);
+  const partial = await collectMarket(arg, shard);
   await mkdir(partialsDir, { recursive: true });
-  await writeFile(path.join(partialsDir, `${arg}.json`), JSON.stringify(partial));
+  const file = shard ? `${arg}-${shard.idx + 1}.json` : `${arg}.json`;
+  await writeFile(path.join(partialsDir, file), JSON.stringify(partial));
 } else if (mode === "--merge") {
-  const partials = await Promise.all(
-    Object.keys(markets).map((cc) => readJson(path.join(partialsDir, `${cc}.json`), null))
-  );
-  await merge(partials);
+  // Read whatever arrived rather than probing for known filenames: the number
+  // of shards per market is a property of the run, not of this script.
+  const files = (await readdir(partialsDir).catch(() => [])).filter((f) => f.endsWith(".json"));
+  const byMarket = new Map();
+  for (const f of files) {
+    const part = await readJson(path.join(partialsDir, f), null);
+    if (!part?.cc) continue;
+    const seen = byMarket.get(part.cc);
+    byMarket.set(part.cc, seen ? joinShards(seen, part) : part);
+  }
+  await merge(Object.keys(markets).map((cc) => byMarket.get(cc) ?? null));
 } else {
-  await merge(await Promise.all(Object.keys(markets).map(collectMarket)));
+  await merge(await Promise.all(Object.keys(markets).map((cc) => collectMarket(cc))));
 }

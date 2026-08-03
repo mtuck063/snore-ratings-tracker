@@ -22,15 +22,14 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # One job per market: Apple throttles the search API per IP and runner IPs
-  # are a lottery, so each market gets its own runner making only ~20-60
-  # search calls. Keep the list in sync with markets in scripts/keywords.json.
-  collect:
+  # The job list is derived from scripts/keywords.json rather than written out
+  # here, because auto-discovery keeps adding keywords: a market that grows
+  # past the per-runner budget splits across runners on its own, with no edit
+  # to this file. Same reasoning as the discovery workflow's setup job.
+  plan:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        market: [us, ca, gb, au, fr, es, mx, de, jp, cn]
+    outputs:
+      matrix: ${{ steps.gen.outputs.matrix }}
     steps:
       - uses: actions/checkout@v4
 
@@ -38,13 +37,35 @@ jobs:
         with:
           node-version: 22
 
-      - name: Collect ${{ matrix.market }}
-        run: node scripts/keywords.mjs --collect ${{ matrix.market }}
+      - id: gen
+        run: echo "matrix=$(node scripts/keywords.mjs --matrix)" >> "$GITHUB_OUTPUT"
+
+      - run: echo "${{ steps.gen.outputs.matrix }}"
+
+  # One job per market, or per shard of a market: Apple throttles the search
+  # API per IP and runner IPs are a lottery, so no single runner is allowed to
+  # make more than SHARD_MAX search calls. An 81-keyword US leg on one runner
+  # is what lost two ranks to HTTP 403.
+  collect:
+    needs: plan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Collect ${{ matrix.id }}
+        run: node scripts/keywords.mjs --collect ${{ matrix.market }} ${{ matrix.shard }}
 
       - uses: actions/upload-artifact@v4
         with:
-          name: partial-${{ matrix.market }}
-          path: partials/${{ matrix.market }}.json
+          name: partial-${{ matrix.id }}
+          path: partials/${{ matrix.id }}.json
 
   merge:
     needs: collect
@@ -84,6 +105,9 @@ jobs:
       # Some runner IPs are throttled or blocked by Apple; carried-over values
       # keep the data sane, but a fresh runner usually draws a clean IP. One
       # requeue max, guarded by the attempt input.
+      # The threshold tracks SHARD_MAX: a wholly blocked runner now costs at
+      # most one shard, so the old 40 (set when a market leg was up to 81
+      # keywords) would have let a dead shard through unnoticed.
       - name: Requeue on bad runner IPs
         if: github.event.inputs.attempt == '' || github.event.inputs.attempt == '1'
         env:
@@ -91,7 +115,7 @@ jobs:
         run: |
           fails=$(grep -o "RANK_FAILURES=[0-9]*" run.log | cut -d= -f2)
           echo "rank failures this run: ${fails:-unknown}"
-          if [ -n "$fails" ] && [ "$fails" -gt 40 ]; then
+          if [ -n "$fails" ] && [ "$fails" -gt 20 ]; then
             echo "requeueing once for fresh runners"
             gh workflow run keywords.yml -f attempt=2 --repo ${{ github.repository }}
           fi
@@ -104,7 +128,7 @@ jobs:
         run: |
           fails=$(grep -o "RANK_FAILURES=[0-9]*" run.log | cut -d= -f2)
           echo "rank failures on retry: ${fails:-unknown}"
-          if [ -n "$fails" ] && [ "$fails" -gt 40 ]; then
+          if [ -n "$fails" ] && [ "$fails" -gt 20 ]; then
             echo "::error::retry still failing ($fails rank fetches); ranks are carried forward, not updated"
             exit 1
           fi
@@ -113,7 +137,7 @@ jobs:
   # alarm too, and `merge` runs with if:always() so a step there would never
   # see the matrix failure.
   alert:
-    needs: [collect, merge]
+    needs: [plan, collect, merge]
     if: failure()
     runs-on: ubuntu-latest
     steps:
