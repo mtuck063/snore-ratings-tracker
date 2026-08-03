@@ -1332,11 +1332,11 @@ async function renderKeywords(kw, glossary = {}) {
 
 async function main() {
     const meta = document.getElementById("meta");
-    let latest, history, events, reviews, kwData, hist, glossary;
+    let latest, history, events, reviews, kwData, hist, glossary, pageviews;
     try {
         // no-cache: revalidate every load so the data files can't come from
         // differently-aged browser caches and contradict each other.
-        [latest, history, events, reviews, kwData, hist, glossary] = await Promise.all([
+        [latest, history, events, reviews, kwData, hist, glossary, pageviews] = await Promise.all([
             fetch("data/latest.json", { cache: "no-cache" }).then((r) => r.json()),
             fetch("data/history.json", { cache: "no-cache" }).then((r) => r.json()),
             fetch("data/events.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => []),
@@ -1346,10 +1346,49 @@ async function main() {
             // Hand-written and rarely edited, so it can come from cache; an
             // absent file just means the table stays in its original language.
             fetch("data/glossary.json").then((r) => r.json()).catch(() => ({})),
+            fetch("data/pageviews.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => null),
         ]);
     } catch {
         meta.textContent = "No data yet. Run the collect workflow once to seed data/.";
         return;
+    }
+
+    // Website traffic: daily visitors from GoatCounter, collected by
+    // scripts/pageviews.mjs on the same hourly run as ratings. The section
+    // stays hidden until the first day of data exists, so the dashboard looks
+    // unchanged if the token is missing or the counter is ever removed.
+    if (pageviews?.days && Object.keys(pageviews.days).length) {
+        const days = Object.entries(pageviews.days)
+            .map(([date, count]) => ({ date, count }))
+            .sort((a, b) => a.date.localeCompare(b.date));
+        const byDate = Object.fromEntries(days.map((d) => [d.date, d.count]));
+        const today = new Date().toISOString().slice(0, 10);
+        const yesterday = new Date(Date.now() - 864e5).toISOString().slice(0, 10);
+        const sum = (n) => days.slice(-n).reduce((s, d) => s + d.count, 0);
+        const tile = (num, label) => {
+            const div = document.createElement("div");
+            div.className = "traffic-tile";
+            const val = document.createElement("div");
+            val.className = "traffic-num";
+            val.textContent = fmt(num);
+            const lab = document.createElement("div");
+            lab.className = "traffic-label";
+            lab.textContent = label;
+            div.append(val, lab);
+            return div;
+        };
+        const trafficRow = document.getElementById("traffic-row");
+        trafficRow.append(
+            tile(byDate[today] ?? 0, "today so far"),
+            tile(byDate[yesterday] ?? 0, "yesterday"),
+            tile(sum(7), "last 7 days"),
+            tile(sum(30), "last 30 days")
+        );
+        const sparkWrap = document.createElement("div");
+        sparkWrap.className = "traffic-spark";
+        sparkWrap.appendChild(sparkline(days.slice(-30), "Daily website visitors, last 30 days"));
+        trafficRow.appendChild(sparkWrap);
+        document.getElementById("traffic-section").hidden = false;
     }
 
     const tbody = document.querySelector("#ratings tbody");

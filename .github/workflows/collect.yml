@@ -29,6 +29,14 @@ jobs:
       - name: Fetch ratings
         run: node scripts/collect.mjs
 
+      # Never fails the job: the script exits 0 on any error (including the
+      # secret not being set), so ratings collection can't be taken down by
+      # the pageview ride-along.
+      - name: Fetch website pageviews
+        env:
+          GOATCOUNTER_TOKEN: ${{ secrets.GOATCOUNTER_TOKEN }}
+        run: node scripts/pageviews.mjs
+
       - name: Commit data
         run: |
           git config user.name "ratings-bot"
