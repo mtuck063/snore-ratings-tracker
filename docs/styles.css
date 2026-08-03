@@ -12,6 +12,10 @@
     --star3: #D97706;
     --star2: #FCA5A5;
     --star1: #DC2626;
+    /* Row hover wash, mixed against each of the two row backgrounds so the
+       pinned first cell and the total row land on the same tint. */
+    --row-hover: color-mix(in srgb, var(--accent) 10%, var(--bg));
+    --row-hover-raised: color-mix(in srgb, var(--accent) 10%, var(--bg-raised));
 }
 
 * { box-sizing: border-box; margin: 0; }
@@ -185,6 +189,21 @@ th.col-spark, td.col-spark { text-align: right; width: 110px; }
 
 tr.total-row td { font-weight: 600; background: var(--bg-raised); }
 tr.changed td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+
+/* Seven columns of small numbers are easy to lose your line in, so the row
+   under the cursor lights up. Only where hover is real: on touch the state
+   sticks to the last-tapped row. The pinned first cell paints its own opaque
+   background to cover the scrolling columns, so it needs the tint spelled out
+   again at a specificity that clears the #id rule above. Expanded keyword
+   detail rows keep their panel background — they are not a row to track. */
+@media (hover: hover) {
+    tbody tr:hover td { background: var(--row-hover); }
+    tbody tr.total-row:hover td { background: var(--row-hover-raised); }
+    tbody tr.kw-detail:hover td { background: var(--bg-raised); }
+    #ratings tbody tr:hover td:first-child,
+    #keywords tbody tr:hover td:first-child { background: var(--row-hover); }
+    #ratings tbody tr.total-row:hover td:first-child { background: var(--row-hover-raised); }
+}
 
 .country-name { color: var(--text-secondary); font-size: 0.8rem; margin-left: 6px; }
 @media (max-width: 480px) { .country-name { display: none; } }
