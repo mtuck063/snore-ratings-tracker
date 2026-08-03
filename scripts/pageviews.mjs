@@ -35,7 +35,10 @@ try {
 const now = new Date();
 const fmt = (d) => d.toISOString().slice(0, 10);
 const start = fmt(new Date(now.getTime() - WINDOW_DAYS * 864e5));
-const end = fmt(now);
+// A bare date rounds to midnight at the START of that day, so end=today would
+// exclude today entirely. Asking through tomorrow includes the partial day.
+const end = fmt(new Date(now.getTime() + 864e5));
+const today = fmt(now);
 
 try {
   const res = await fetch(`${SITE}/api/v0/stats/total?start=${start}&end=${end}`, {
@@ -56,7 +59,7 @@ try {
   }
   await writeFile(file, JSON.stringify(stored));
   console.log(
-    `pageviews: today so far ${stored.days[end] ?? 0}, ${Object.keys(stored.days).length} day(s) stored`
+    `pageviews: today so far ${stored.days[today] ?? 0}, ${Object.keys(stored.days).length} day(s) stored`
   );
 } catch (err) {
   console.warn(`pageviews: ${err.message}; keeping stored values.`);
