@@ -1162,10 +1162,16 @@ async function renderKeywords(kw, glossary = {}) {
             const perCc = kw.stats?.[cc] ?? {};
             // Growth baseline: the newest logged snapshot at least twenty hours
             // back, so the figure reads as a day's gain rather than whatever
-            // happened since the last run a few hours ago. Runs are four a day,
-            // so there is normally one sitting between 20 and 30 hours old.
+            // happened since the last run a few hours ago. The collector keeps
+            // one snapshot per six hours across thirty, so there is normally
+            // one sitting in the window. Capped at 36 hours as well: if the
+            // collector ever stalls, blanking the column is honest where
+            // labelling three days of growth "Δ 1D" is not.
             const baseline = (kw.statsLog ?? [])
-                .filter((s) => Date.now() - new Date(s.at) >= 20 * 3600e3)
+                .filter((s) => {
+                    const age = Date.now() - new Date(s.at);
+                    return age >= 20 * 3600e3 && age <= 36 * 3600e3;
+                })
                 .pop();
             const basePerCc = baseline?.markets?.[cc] ?? {};
             for (const [id, e] of top) {

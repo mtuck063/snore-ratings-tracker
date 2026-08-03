@@ -538,12 +538,17 @@ async function merge(partials) {
 
   // Competitor growth needs an earlier reading to subtract from, and `stats`
   // is a live snapshot this merge overwrites. Keep a short series of run-level
-  // rating counts — counts only, since a score is not a rate. Five entries at
-  // four runs a day always leaves one at least twenty hours back, which is
-  // what a day's-growth number needs, without carrying a full history.
-  const STATS_LOG_MAX = 5;
-  const statsLog = (prev?.statsLog ?? []).slice(-(STATS_LOG_MAX - 1));
-  statsLog.push({
+  // rating counts — counts only, since a score is not a rate.
+  //
+  // Retained by age rather than by count. A five-entry cap spanned a day at
+  // four scheduled runs and nothing else, so the morning three updates were
+  // dispatched by hand the window collapsed to eleven hours and every growth
+  // figure on the dashboard went blank: nothing left was old enough to
+  // subtract from. One snapshot per six-hour bucket holds the span open
+  // however often runs fire, and keeps about as many entries as the cap did.
+  const BUCKET_MS = 6 * 3600e3;
+  const RETAIN_MS = 30 * 3600e3; // one clear day, plus room for the 20h baseline to age in
+  const snapshot = {
     at: fetchedAt,
     markets: Object.fromEntries(
       Object.entries(stats).map(([cc, m]) => [
@@ -551,7 +556,13 @@ async function merge(partials) {
         Object.fromEntries(Object.entries(m).map(([id, v]) => [id, v[0]])),
       ])
     ),
-  });
+  };
+  const byBucket = new Map();
+  for (const s of [...(prev?.statsLog ?? []), snapshot]) {
+    if (Date.now() - new Date(s.at) > RETAIN_MS) continue;
+    byBucket.set(Math.floor(new Date(s.at).getTime() / BUCKET_MS), s); // newest wins its bucket
+  }
+  const statsLog = [...byBucket.values()].sort((a, b) => (a.at < b.at ? -1 : 1));
   // Older snapshots keep entries for apps that have since dropped out of every
   // top list; they would otherwise accumulate forever behind the same prune.
   for (const snap of statsLog)
