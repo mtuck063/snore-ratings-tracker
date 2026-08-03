@@ -408,6 +408,16 @@ tr.kw-detail td {
     text-transform: none;
     letter-spacing: 0;
     font-weight: 400;
+    /* A <select> since it switches the market from down here; dressed close to
+       the quiet label it replaced, with just enough control styling to invite
+       a tap. */
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 2px 6px;
+    font-family: inherit;
+    font-size: 0.78rem;
+    cursor: pointer;
 }
 .kw-comp-note {
     color: var(--text-secondary);

@@ -1146,11 +1146,21 @@ async function renderKeywords(kw, glossary = {}) {
                 // table is per-storefront, and the panel sits far enough below
                 // the tabs that on a phone you cannot see which one is selected
                 // while reading it. On the header it stays visible because that
-                // column is sticky while the numbers pan sideways.
+                // column is sticky while the numbers pan sideways. It is a
+                // dropdown, not a label, so the storefront can be switched from
+                // down here without scrolling back up to the tabs.
                 if (label === "App") {
-                    const where = document.createElement("span");
+                    const where = document.createElement("select");
                     where.className = "kw-comp-market";
-                    where.textContent = `(${flag(cc)} ${regionNames.of(cc.toUpperCase()) ?? cc.toUpperCase()})`;
+                    where.setAttribute("aria-label", "Storefront for this table");
+                    for (const mcc of marketCcs) {
+                        const opt = document.createElement("option");
+                        opt.value = mcc;
+                        opt.textContent = `${flag(mcc)} ${regionNames.of(mcc.toUpperCase()) ?? mcc.toUpperCase()}`;
+                        opt.selected = mcc === cc;
+                        where.appendChild(opt);
+                    }
+                    where.addEventListener("change", () => setMarket(where.value));
                     th.appendChild(where);
                 }
                 hrow.appendChild(th);
@@ -1254,15 +1264,21 @@ async function renderKeywords(kw, glossary = {}) {
         }
     };
 
+    // One entry point for both switchers (tabs here, the dropdown on the
+    // competitor table's App header), so the active tab can never disagree
+    // with what the tables show. The translate button carries no data-cc and
+    // loses its active class in the sweep; render() restores it right after.
+    const setMarket = (cc) => {
+        tabs.querySelectorAll(".kw-tab").forEach((b) => b.classList.toggle("active", b.dataset.cc === cc));
+        render(cc);
+    };
+
     for (const cc of marketCcs) {
         const btn = document.createElement("button");
         btn.className = "kw-tab";
+        btn.dataset.cc = cc;
         btn.textContent = `${flag(cc)} ${cc.toUpperCase()}`;
-        btn.addEventListener("click", () => {
-            tabs.querySelectorAll(".kw-tab").forEach((b) => b.classList.remove("active"));
-            btn.classList.add("active");
-            render(cc);
-        });
+        btn.addEventListener("click", () => setMarket(cc));
         tabs.appendChild(btn);
     }
     tabs.firstChild.classList.add("active");
