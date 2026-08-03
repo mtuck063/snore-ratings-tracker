@@ -1168,20 +1168,24 @@ async function renderKeywords(kw, glossary = {}) {
                 .pop();
             const basePerCc = baseline?.markets?.[cc] ?? {};
 
-            // Market sizing on the ~75-users-per-rating rule of thumb. The
-            // denominator is every tracked app with stats in this storefront,
-            // not just the rows shown, so Share reads as share-of-market
-            // rather than share-of-this-table.
+            // Market sizing on the ~75-users-per-rating rule of thumb, summed
+            // over the apps in this table only — the actual keyword-owning
+            // competitors. The full tracked set (~150 apps) includes giants
+            // like Calm that brush against broad sleep keywords without
+            // competing here; Calm alone gains more users a day than this
+            // whole niche, so including them buried the addressable number.
             const USERS_PER_RATING = 75;
             const fmtUsers = (n) =>
                 n >= 1e6 ? `${(n / 1e6).toFixed(1)}M`
                 : n >= 1e4 ? `${Math.round(n / 1e3)}k`
                 : n >= 1e3 ? `${(n / 1e3).toFixed(1)}k`
                 : `${Math.round(n)}`;
-            const marketRatings = Object.values(perCc).reduce((s, [r]) => s + (r ?? 0), 0);
+            const tableIds = top.map(([id]) => id);
+            const marketRatings = tableIds.reduce((s, id) => s + (perCc[id]?.[0] ?? 0), 0);
             let marketNewRatings = 0;
             let baselineSeen = false;
-            for (const [id, [r]] of Object.entries(perCc)) {
+            for (const id of tableIds) {
+                const r = perCc[id]?.[0];
                 const was = basePerCc[id];
                 if (r != null && was != null) {
                     baselineSeen = true;
@@ -1286,10 +1290,10 @@ async function renderKeywords(kw, glossary = {}) {
             if (marketRatings) {
                 const sizing = document.createElement("p");
                 sizing.className = "kw-comp-note";
-                const apps = Object.values(perCc).filter(([r]) => r != null).length;
+                const apps = tableIds.filter((id) => perCc[id]?.[0] != null).length;
                 sizing.textContent =
                     `Market size, estimated at ~75 users per rating: ~${fmtUsers(marketRatings * USERS_PER_RATING)} ` +
-                    `lifetime users across ${apps} tracked apps in this storefront` +
+                    `lifetime users across the ${apps} apps above` +
                     (baselineSeen && marketNewRatings > 0
                         ? `, currently gaining ~${fmtUsers(marketNewRatings * USERS_PER_RATING)} new users a day.`
                         : ".");
