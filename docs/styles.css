@@ -398,27 +398,9 @@ tr.kw-detail td {
 /* Seven columns do not fit a phone, so the table pans sideways. Only the table
    scrolls — the heading and note sit outside .kw-comp-scroll so they do not
    slide out of view with it. */
-#kw-competitors { margin-top: 16px; }
-/* Sits on the App header as the storefront every figure in the row belongs to.
-   Not uppercased with the header, so the country name stays legible, and
-   normal weight so it reads as context rather than a second column name. */
-.kw-comp-market {
-    margin-left: 7px;
-    color: var(--text-secondary);
-    text-transform: none;
-    letter-spacing: 0;
-    font-weight: 400;
-    /* A <select> since it switches the market from down here; dressed close to
-       the quiet label it replaced, with just enough control styling to invite
-       a tap. */
-    background: var(--bg-raised);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 2px 6px;
-    font-family: inherit;
-    font-size: 0.78rem;
-    cursor: pointer;
-}
+/* Sits between the market tabs and the keyword table, so the bottom margin
+   keeps the two tables from reading as one. */
+#kw-competitors { margin-top: 16px; margin-bottom: 24px; }
 .kw-comp-note {
     color: var(--text-secondary);
     font-size: 0.78rem;
@@ -431,13 +413,14 @@ tr.kw-detail td {
    grows to fit its content and max-width is ignored, so the name column got
    wide enough to sit under the number columns. Fixed layout honours the widths
    below, which also keeps thead and tbody in step. */
-.kw-comp-table { min-width: 768px; table-layout: fixed; }
+.kw-comp-table { min-width: 892px; table-layout: fixed; }
 .kw-comp-table td { font-size: 0.85rem; }
 .kw-comp-table tbody tr:last-child td { border-bottom: none; }
 
-/* App, Top-5, Top-10, #1, Released, Age, Ratings, Score. These are positional,
-   so inserting a column means renumbering every rule after it and updating the
-   min-width above to their sum. */
+/* App, Top-5, Top-10, #1, Released, Age, Ratings, Δ 1d, Users, Score. These
+   are positional, so inserting a column means renumbering every rule after it
+   and updating the min-width above to their sum. Δ 1d is the widest number
+   column because it carries the bracketed user equivalent inline. */
 .kw-comp-table th:nth-child(1), .kw-comp-table td:nth-child(1) { width: 200px; }
 .kw-comp-table th:nth-child(2), .kw-comp-table td:nth-child(2) { width: 88px; }
 .kw-comp-table th:nth-child(3), .kw-comp-table td:nth-child(3) { width: 92px; }
@@ -445,8 +428,9 @@ tr.kw-detail td {
 .kw-comp-table th:nth-child(5), .kw-comp-table td:nth-child(5) { width: 82px; }
 .kw-comp-table th:nth-child(6), .kw-comp-table td:nth-child(6) { width: 54px; }
 .kw-comp-table th:nth-child(7), .kw-comp-table td:nth-child(7) { width: 84px; }
-.kw-comp-table th:nth-child(8), .kw-comp-table td:nth-child(8) { width: 62px; }
-.kw-comp-table th:nth-child(9), .kw-comp-table td:nth-child(9) { width: 60px; }
+.kw-comp-table th:nth-child(8), .kw-comp-table td:nth-child(8) { width: 112px; }
+.kw-comp-table th:nth-child(9), .kw-comp-table td:nth-child(9) { width: 74px; }
+.kw-comp-table th:nth-child(10), .kw-comp-table td:nth-child(10) { width: 60px; }
 
 /* The name column pins while the numbers pan under it. The header cell has to
    be sticky too or it drifts away from the body column. z-index is required:
@@ -465,6 +449,9 @@ tr.kw-detail td {
 .kw-comp-pct { color: var(--text-secondary); font-size: 0.75rem; margin-left: 6px; }
 /* Growth reads as a rate, so it is coloured like the ratings table's delta
    rather than sitting muted with the descriptive columns. */
+/* One line: the bracketed user equivalent stays beside the delta; the column
+   width above provides the room. */
+.kw-comp-growth { white-space: nowrap; }
 .kw-comp-growth.up { color: var(--good); }
 .kw-comp-growth.down { color: var(--bad); }
 .kw-comp-growth.flat { color: var(--text-secondary); }

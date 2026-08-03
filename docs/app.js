@@ -1137,34 +1137,15 @@ async function renderKeywords(kw, glossary = {}) {
                 ["Ratings", "col-num", "Lifetime ratings in this storefront"],
                 ["Δ 1d", "col-num", "Ratings gained in this storefront since the last reading at least a day old, with the equivalent in users at ~75 per rating. Blank where there is no earlier reading yet."],
                 ["Users", "col-num", "Estimated lifetime users in this storefront: ratings × 75, the rule of thumb for how many users it takes to produce one rating"],
-                ["Share", "col-num", "This app's estimated users as a share of every tracked app's estimated users in this storefront — not just the rows shown here"],
                 ["Score", "col-num"],
             ]) {
                 const th = document.createElement("th");
                 th.textContent = label;
                 if (cls) th.className = cls;
                 if (tip) th.dataset.tip = tip;
-                // The market rides on the App header. Every figure in this
-                // table is per-storefront, and the panel sits far enough below
-                // the tabs that on a phone you cannot see which one is selected
-                // while reading it. On the header it stays visible because that
-                // column is sticky while the numbers pan sideways. It is a
-                // dropdown, not a label, so the storefront can be switched from
-                // down here without scrolling back up to the tabs.
-                if (label === "App") {
-                    const where = document.createElement("select");
-                    where.className = "kw-comp-market";
-                    where.setAttribute("aria-label", "Storefront for this table");
-                    for (const mcc of marketCcs) {
-                        const opt = document.createElement("option");
-                        opt.value = mcc;
-                        opt.textContent = `${flag(mcc)} ${regionNames.of(mcc.toUpperCase()) ?? mcc.toUpperCase()}`;
-                        opt.selected = mcc === cc;
-                        where.appendChild(opt);
-                    }
-                    where.addEventListener("change", () => setMarket(where.value));
-                    th.appendChild(where);
-                }
+                // No storefront label or switcher here: the panel sits directly
+                // under the market tabs now, so the selected tab is in view
+                // while reading it and a second selector would just compete.
                 hrow.appendChild(th);
             }
             thead.appendChild(hrow);
@@ -1272,7 +1253,7 @@ async function renderKeywords(kw, glossary = {}) {
                         // the ratings movement actually stands for.
                         const users = document.createElement("span");
                         users.className = "kw-comp-pct";
-                        users.textContent = `${d > 0 ? "+" : "−"}${fmtUsers(Math.abs(d) * USERS_PER_RATING)}`;
+                        users.textContent = `(${d > 0 ? "+" : "−"}${fmtUsers(Math.abs(d) * USERS_PER_RATING)})`;
                         tdGrowth.appendChild(users);
                         tdGrowth.title = `≈ ${d > 0 ? "+" : "−"}${fmt(Math.abs(d) * USERS_PER_RATING)} users/day`;
                     }
@@ -1282,24 +1263,11 @@ async function renderKeywords(kw, glossary = {}) {
                 tdUsers.className = "col-num muted";
                 tdUsers.textContent = ratings == null ? "—" : `~${fmtUsers(ratings * USERS_PER_RATING)}`;
 
-                const tdShare = document.createElement("td");
-                tdShare.className = "col-num";
-                if (ratings == null || !marketRatings) {
-                    tdShare.textContent = "—";
-                    tdShare.classList.add("muted");
-                } else {
-                    // One significant digit below 1%, so a small app reads as
-                    // the honest "0.002%" rather than a defeatist "0.0%".
-                    const pct = (ratings / marketRatings) * 100;
-                    tdShare.textContent =
-                        pct >= 10 ? `${Math.round(pct)}%` : pct >= 1 ? `${pct.toFixed(1)}%` : `${pct.toPrecision(1)}%`;
-                }
-
                 const tdScore = document.createElement("td");
                 tdScore.className = "col-num muted";
                 tdScore.textContent = score ? score.toFixed(2) : "—";
 
-                row.append(tdName, tdSlots, tdSlots10, tdFirst, tdRel, tdAge, tdRatings, tdGrowth, tdUsers, tdShare, tdScore);
+                row.append(tdName, tdSlots, tdSlots10, tdFirst, tdRel, tdAge, tdRatings, tdGrowth, tdUsers, tdScore);
                 tb.appendChild(row);
             }
             table.appendChild(tb);
