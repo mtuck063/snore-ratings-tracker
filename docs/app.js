@@ -1135,7 +1135,7 @@ async function renderKeywords(kw, glossary = {}) {
                 ["Released", "col-num"],
                 ["Age", "col-num"],
                 ["Ratings", "col-num", "Lifetime ratings in this storefront"],
-                ["Δ 1d", "col-num", "Ratings gained in this storefront since the last reading at least a day old. Blank where there is no earlier reading yet."],
+                ["Δ 1d", "col-num", "Ratings gained in this storefront since the last reading at least a day old, with the equivalent in users at ~75 per rating. Blank where there is no earlier reading yet."],
                 ["Users", "col-num", "Estimated lifetime users in this storefront: ratings × 75, the rule of thumb for how many users it takes to produce one rating"],
                 ["Share", "col-num", "This app's estimated users as a share of every tracked app's estimated users in this storefront — not just the rows shown here"],
                 ["Score", "col-num"],
@@ -1267,7 +1267,15 @@ async function renderKeywords(kw, glossary = {}) {
                     const d = ratings - wasRatings;
                     tdGrowth.textContent = d > 0 ? `+${fmt(d)}` : d < 0 ? fmt(d) : "0";
                     tdGrowth.classList.add("kw-comp-growth", d > 0 ? "up" : d < 0 ? "down" : "flat");
-                    if (d) tdGrowth.title = `≈ ${d > 0 ? "+" : "−"}${fmt(Math.abs(d) * USERS_PER_RATING)} users/day`;
+                    if (d) {
+                        // The same delta in users, inline: this is the number
+                        // the ratings movement actually stands for.
+                        const users = document.createElement("span");
+                        users.className = "kw-comp-pct";
+                        users.textContent = `${d > 0 ? "+" : "−"}${fmtUsers(Math.abs(d) * USERS_PER_RATING)}`;
+                        tdGrowth.appendChild(users);
+                        tdGrowth.title = `≈ ${d > 0 ? "+" : "−"}${fmt(Math.abs(d) * USERS_PER_RATING)} users/day`;
+                    }
                 }
 
                 const tdUsers = document.createElement("td");
