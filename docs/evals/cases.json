@@ -1,0 +1,25 @@
+{
+  "cases": [
+    {
+      "id": "ca-keyword-field",
+      "description": "Marketer asks for App Store listing keywords for Canada — expects a copy-ready keyword field",
+      "prompt": "which key words work best, i neeed it for my app store listing for canada",
+      "checks": [
+        { "type": "first-line-max-chars", "value": 100 },
+        { "type": "first-line-min-commas", "value": 3 },
+        { "type": "must-not-include", "value": ["snore timeline"] },
+        { "type": "items-from-tracked", "cc": "ca", "min": 0.7 }
+      ]
+    },
+    {
+      "id": "most-ratings-country",
+      "description": "Basic data lookup — which country has the most ratings",
+      "prompt": "Which country has the most ratings and what is our average there?",
+      "checks": [
+        { "type": "must-include", "value": ["US"] },
+        { "type": "must-match", "value": "4\\.(8|9)" },
+        { "type": "max-answer-chars", "value": 600 }
+      ]
+    }
+  ]
+}

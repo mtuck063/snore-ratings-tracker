@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistant evals · Snore Timeline</title>
+    <style>
+        :root {
+            --bg: #0F1419; --bg-raised: #1A1F2E; --text: #E8EAED;
+            --text-secondary: #9AA0A6; --border: #2D3748; --accent: #5B7FFF;
+            --good: #4ADE80; --bad: #F87171;
+        }
+        * { box-sizing: border-box; margin: 0; }
+        body {
+            background: var(--bg); color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 24px 16px 64px; max-width: 900px; margin: 0 auto;
+        }
+        h1 { font-size: 1.3rem; margin-bottom: 4px; }
+        .sub { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 20px; }
+        .controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+        select, button.primary {
+            background: var(--bg-raised); color: var(--text); border: 1px solid var(--border);
+            border-radius: 8px; padding: 8px 12px; font-size: 0.9rem; cursor: pointer;
+        }
+        button.primary { background: var(--accent); color: #fff; border: 0; font-weight: 600; }
+        button:disabled { opacity: 0.4; cursor: default; }
+        #status { color: var(--text-secondary); font-size: 0.8rem; min-height: 1.2em; margin-bottom: 16px; }
+        .case {
+            background: var(--bg-raised); border: 1px solid var(--border);
+            border-radius: 10px; padding: 14px; margin-bottom: 12px;
+        }
+        .case h3 { font-size: 0.95rem; display: flex; align-items: center; gap: 8px; }
+        .case .desc { color: var(--text-secondary); font-size: 0.78rem; margin: 2px 0 8px; }
+        .chip {
+            font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+        }
+        .pass { background: rgba(74, 222, 128, 0.15); color: var(--good); }
+        .fail { background: rgba(248, 113, 113, 0.15); color: var(--bad); }
+        .pending { background: rgba(154, 160, 166, 0.15); color: var(--text-secondary); }
+        .checks { list-style: none; padding: 0; font-size: 0.8rem; }
+        .checks li { padding: 2px 0; color: var(--text-secondary); }
+        .checks .ok::before { content: "✓ "; color: var(--good); }
+        .checks .bad::before { content: "✗ "; color: var(--bad); }
+        details { margin-top: 8px; font-size: 0.8rem; }
+        details summary { cursor: pointer; color: var(--text-secondary); }
+        details pre {
+            white-space: pre-wrap; word-break: break-word; background: var(--bg);
+            border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-top: 6px;
+            font-size: 0.75rem; color: var(--text);
+        }
+        #summary { font-size: 1rem; font-weight: 600; margin: 16px 0; }
+        a { color: var(--accent); }
+    </style>
+</head>
+<body>
+    <h1>Assistant evals</h1>
+    <p class="sub">
+        Runs each case in <a href="evals/cases.json">evals/cases.json</a> against the
+        <em>exact</em> production system prompt and data digest (shared via assistant-core.js),
+        then grades the answers with deterministic checks. Models run in this browser via WebGPU.
+    </p>
+    <div class="controls">
+        <label for="tier">Model:</label>
+        <select id="tier">
+            <option value="0.6b">Qwen3 0.6B (instant tier)</option>
+            <option value="4b">Qwen3 4B</option>
+            <option value="8b">Qwen3 8B</option>
+        </select>
+        <label for="reps">Reps:</label>
+        <select id="reps">
+            <option value="1">1</option>
+            <option value="3">3</option>
+        </select>
+        <button class="primary" id="run">Run evals</button>
+        <button id="download" disabled>Download results JSON</button>
+    </div>
+    <p id="status">Uses the same model cache as the dashboard assistant.</p>
+    <div id="summary"></div>
+    <div id="cases"></div>
+    <script type="module" src="evals.js"></script>
+</body>
+</html>
