@@ -794,6 +794,16 @@ const INTENT_TIP = {
     offtarget: "Not what this app does. Scored zero, so it never reaches the chase list.",
     mine: "Your own app's name.",
 };
+// Short forms for the score breakdown, where a full sentence would not fit.
+const FIT_SHORT = {
+    symptom: "problem-aware searcher, converts well here",
+    category: "shopping for an app like yours",
+    feature: "wants one capability",
+    adjacent: "a neighbouring need",
+    brand: "somebody else's app name",
+    offtarget: "not this app's category",
+    mine: "your own app name",
+};
 const INTENT_HELP = {
     symptom:
         "Someone describing the problem in their own words. They have not decided an app is the answer yet, so they respond to a listing that names the problem back at them.",
@@ -872,7 +882,7 @@ function renderPlan(host, cc, plan, onRefresh) {
     card.appendChild(
         line(
             "",
-            "Demand, weighted by how much rank is left to win, whether this app converts that searcher, and whether your listing carries the words." +
+            "Pop — the 5–100 demand score from Apple's autocomplete — weighted by how much rank is left to win, whether this app converts that searcher, and whether your listing carries the words." +
                 (rescored ? " Scored against the field you pasted above." : ""),
             "muted"
         )
@@ -922,11 +932,15 @@ function renderPlan(host, cc, plan, onRefresh) {
                         : c.rank <= 50
                           ? "close enough that a change shows"
                           : "far back, so slower to move";
+            const step = (n) => Math.round(n * 100) / 100;
+            const x = (n) => n.toFixed(2).replace(/\.?0+$/, "");
+            const afterReach = step(c.pop * f.reach);
+            const afterFit = step(afterReach * f.fit);
             score.dataset.tip =
-                `${c.score} = demand ${c.pop} of 100\n` +
-                `× ${f.reach} rank headroom (${reachWhy})\n` +
-                `× ${f.fit} searcher fit (${INTENT_TIP[c.intent] ?? c.intent})\n` +
-                `× ${lever} coverage (${leverWhy})`;
+                `${c.pop} pop\n` +
+                `× ${x(f.reach)} rank headroom (${reachWhy}) = ${afterReach}\n` +
+                `× ${x(f.fit)} searcher fit (${FIT_SHORT[c.intent] ?? c.intent}) = ${afterFit}\n` +
+                `× ${x(lever)} coverage (${leverWhy}) = ${c.score}`;
         }
         const kwEl = document.createElement("strong");
         kwEl.textContent = c.kw;
@@ -946,7 +960,7 @@ function renderPlan(host, cc, plan, onRefresh) {
                   : c.rank <= 50
                     ? "close enough that a change shows"
                     : "far back, but the demand justifies the attempt";
-        why.textContent = `${c.pop} demand${c.rank == null ? ", unranked" : `, currently #${c.rank}`} — ${room}.`;
+        why.textContent = `${c.pop} pop${c.rank == null ? ", unranked" : `, currently #${c.rank}`} — ${room}.`;
 
         const term = m.terms[c.kw];
         const bt = byKw.get(c.kw);
@@ -982,23 +996,6 @@ function renderPlan(host, cc, plan, onRefresh) {
     }
     card.appendChild(ol);
 
-    const copy = document.createElement("button");
-    copy.className = "plan-copy";
-    copy.textContent = "Copy as TSV";
-    copy.addEventListener("click", async () => {
-        const rows = [
-            ["keyword", "score", "pop", "rank", "intent", "why"].join("\t"),
-            ...chase.map((c) => [c.kw, c.score, c.pop, c.rank ?? "", c.intent, c.why].join("\t")),
-        ].join("\n");
-        try {
-            await navigator.clipboard.writeText(rows);
-            copy.textContent = "Copied";
-        } catch {
-            copy.textContent = "Copy failed";
-        }
-        setTimeout(() => (copy.textContent = "Copy as TSV"), 1500);
-    });
-    card.appendChild(copy);
     host.appendChild(card);
 }
 
@@ -1875,32 +1872,28 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
             localStorage.setItem(storeKey, input.value);
             savedRaw = input.value;
             dirty = false;
+            // draw() rebuilds the numbers below and leaves this box alone, so
+            // it is safe mid-sentence. onFieldSaved re-renders the whole
+            // keyword section including this textarea, which took the caret
+            // with it about a second into typing — that waits for blur.
             draw();
-            onFieldSaved?.();
-        }, 400);
+            // Long enough to sit through a pause mid-phrase. At 400ms the
+            // numbers below flickered between keystrokes while a field was
+            // still half-typed.
+        }, 1200);
     });
 
     act("Reset to recommended", () => {
         picked = new Set(recommended);
         draw();
     });
-    act("Load my field", () => {
+    act("Load my keywords", () => {
         picked = new Set(parseField(tidy(input.value)));
         draw();
     });
     act("Clear", () => {
         picked = new Set();
         draw();
-    });
-    act("Copy field", async (e) => {
-        const btn = e.currentTarget;
-        try {
-            await navigator.clipboard.writeText([...picked].map(show).join(","));
-            btn.textContent = "Copied";
-        } catch {
-            btn.textContent = "Copy failed";
-        }
-        setTimeout(() => (btn.textContent = "Copy field"), 1500);
     });
 
     const chipHint = document.createElement("p");
