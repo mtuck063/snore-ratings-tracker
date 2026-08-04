@@ -781,14 +781,32 @@ function renderEvents(history, events) {
 // Why a term is grouped where it is. Shown on the chip rather than in a
 // legend, because a legend is a thing you read once and a tooltip is a thing
 // you read when you are actually wondering.
+// Two registers on purpose. The tooltip is the short reminder you get while
+// reading a table; the legend is where someone meets the word for the first
+// time, and there it needs a plain sentence and a real example rather than a
+// definition written for someone who already knows.
 const INTENT_TIP = {
-    symptom: "Names the problem, not a tool. Still choosing a category, and converts on a listing that names the problem back.",
-    category: "Names a tool. Already knows apps like this exist and is picking between them.",
-    feature: "Names one capability. Worth having if the app leads with that feature.",
+    symptom: "Someone describing the problem, not shopping for an app yet.",
+    category: "Someone looking for an app like yours.",
+    feature: "Someone after one specific capability.",
     adjacent: "A neighbouring need this app partly serves.",
-    brand: "Somebody else's app name. Real demand, but not demand a keyword can buy.",
-    offtarget: "Not this app's category. Scored zero so it stays out of the chase list.",
-    mine: "This app's own name. Ranking first here is expected, not an opportunity.",
+    brand: "Someone searching for a particular app by name.",
+    offtarget: "Not what this app does. Scored zero, so it never reaches the chase list.",
+    mine: "Your own app's name.",
+};
+const INTENT_HELP = {
+    symptom:
+        "Someone describing the problem in their own words. They have not decided an app is the answer yet, so they respond to a listing that names the problem back at them.",
+    category:
+        "Someone who already knows apps like yours exist and is choosing between them. The most competitive kind, and the closest to installing.",
+    feature:
+        "Someone after one specific capability. Worth chasing when your app genuinely leads with it, and misleading when it does not.",
+    adjacent: "A neighbouring need your app partly serves.",
+    brand:
+        "Someone searching for a particular app by name. Real demand, but no keyword in your field will win it.",
+    offtarget:
+        "Not what your app does. Scored zero so it stays out of the chase list, and out of the field recommendation.",
+    mine: "Your own app's name. Ranking first here is expected rather than an opportunity.",
 };
 
 // The chase list: which phrases are worth the next move. Kept separate from
@@ -1011,7 +1029,7 @@ function renderLegend(host, cc, plan, filter, onChange, counts) {
     // Intents are mutually exclusive, so selecting several means "any of
     // these"; "words missing" asks a different question about the same row, so
     // it narrows whatever is selected rather than joining it.
-    const row = (cls, label, tip, on, toggle) => {
+    const row = (cls, label, tip, on, toggle, egs = []) => {
         const li = document.createElement("li");
         li.className = "kw-legend-row" + (on ? " on" : "");
         const btn = document.createElement("button");
@@ -1022,6 +1040,12 @@ function renderLegend(host, cc, plan, filter, onChange, counts) {
         chip.textContent = label;
         const text = document.createElement("span");
         text.textContent = tip;
+        if (egs.length) {
+            const eg = document.createElement("span");
+            eg.className = "kw-legend-eg";
+            eg.textContent = ` e.g. ${egs.map((x) => `“${x}”`).join(", ")}`;
+            text.appendChild(eg);
+        }
         btn.append(chip, text);
         btn.addEventListener("click", () => {
             toggle();
@@ -1031,13 +1055,29 @@ function renderLegend(host, cc, plan, filter, onChange, counts) {
         return li;
     };
 
-    for (const [intent, tip] of Object.entries(INTENT_TIP)) {
+    // Two real phrases per tag, the highest-demand ones this market tracks. A
+    // definition tells you what the word means; an example tells you what it
+    // looks like, and one of those is faster to read.
+    const examples = {};
+    for (const [kw, t] of Object.entries(terms)) {
+        (examples[t.intent] ??= []).push({ kw, pop: t.pop ?? 0 });
+    }
+    for (const list of Object.values(examples)) list.sort((a, b) => b.pop - a.pop);
+
+    for (const [intent, help] of Object.entries(INTENT_HELP)) {
         if (!present.has(intent)) continue;
         ul.appendChild(
-            row(`kw-intent intent-${intent}`, intent, tip, filter.intents.has(intent), () => {
-                if (filter.intents.has(intent)) filter.intents.delete(intent);
-                else filter.intents.add(intent);
-            })
+            row(
+                `kw-intent intent-${intent}`,
+                intent,
+                help,
+                filter.intents.has(intent),
+                () => {
+                    if (filter.intents.has(intent)) filter.intents.delete(intent);
+                    else filter.intents.add(intent);
+                },
+                (examples[intent] ?? []).slice(0, 2).map((e) => e.kw)
+            )
         );
     }
     if (anyGap) {
@@ -1045,7 +1085,7 @@ function renderLegend(host, cc, plan, filter, onChange, counts) {
             row(
                 "kw-gap",
                 "words missing",
-                "None of your text carries every word in this phrase. You can still rank \u2014 Apple matches word forms, ignores \"app\", and uses signals beyond your text, and most phrases flagged here do rank \u2014 but a phrase whose words you carry is one you can influence directly. Tap a row to see which words are missing.",
+                "Your title, subtitle and keyword field between them do not contain every word in this phrase. You can still rank for it, and most phrases flagged here do, because Apple matches word forms and weighs signals beyond your text. But a phrase whose words you carry is one you can influence directly. Tap a row to see what is missing.",
                 filter.gapOnly,
                 () => {
                     filter.gapOnly = !filter.gapOnly;
