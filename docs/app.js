@@ -1192,10 +1192,25 @@ function renderBuilder(host, cc, plan) {
         const coveredPop = covered.reduce((n, t) => n + t.pop, 0);
         const chars = charsOf(picked);
 
+        // What the title and subtitle carry on their own. The totals are for
+        // all three fields pooled, so clearing the keyword field leaves 16 of
+        // 73 standing and the tile looked stuck. Splitting out this field's own
+        // contribution says which part of the number the words below bought.
+        const free = b.terms.filter((t) => holdsIn(t, new Set()));
+        const freePop = free.reduce((n, t) => n + t.pop, 0);
+
         stats.replaceChildren(
             tile(`${chars}/${FIELD_MAX}`, "characters", chars > FIELD_MAX ? "over" : ""),
-            tile(`${covered.length}/${b.terms.length}`, "phrases covered"),
-            tile(coveredPop.toLocaleString("en-US"), `pop covered of ${popTotal.toLocaleString("en-US")}`),
+            tile(
+                `${covered.length}/${b.terms.length}`,
+                `phrases covered \u00b7 ${covered.length - free.length} from this field`,
+                "",
+                `Title and subtitle cover ${free.length} on their own, whatever the keyword field says.`
+            ),
+            tile(
+                coveredPop.toLocaleString("en-US"),
+                `pop of ${popTotal.toLocaleString("en-US")} \u00b7 ${(coveredPop - freePop).toLocaleString("en-US")} from this field`
+            ),
             yourPop == null
                 ? tile("\u2014", "vs your field", "", "Paste your field above to compare")
                 : tile(
