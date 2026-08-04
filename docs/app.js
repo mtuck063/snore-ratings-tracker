@@ -877,12 +877,12 @@ function renderPlan(host, cc, plan, onRefresh) {
     const card = document.createElement("div");
     card.className = "plan-card";
     const h = document.createElement("h3");
-    h.textContent = "Worth chasing";
+    h.textContent = "Where to push next";
     card.appendChild(h);
     card.appendChild(
         line(
             "",
-            "Pop — the 5–100 demand score from Apple's autocomplete — weighted by how much rank is left to win, whether this app converts that searcher, and whether your listing carries the words." +
+            "Ranked by what climbing is worth, so most of these are phrases you already rank for — page one is the top ten, and the top three take most of the taps. Pop is the 5–100 demand score from Apple's autocomplete, weighted by how far you have left to climb, whether this app converts that searcher, and whether your listing carries the words." +
                 (rescored ? " Scored against the field you pasted above." : ""),
             "muted"
         )
@@ -952,15 +952,20 @@ function renderPlan(host, cc, plan, onRefresh) {
         // Why it is worth chasing, in the terms the score is made of.
         const why = document.createElement("span");
         why.className = "plan-why";
-        const room =
+        // Where you stand, in the only unit that matters: how far from the
+        // part of the results people actually look at. "Currently #18" reads
+        // as an achievement until you know page one ends at ten.
+        const standing =
             c.rank == null
-                ? "nothing to lose by trying"
-                : c.rank <= 10
-                  ? "already page one"
-                  : c.rank <= 50
-                    ? "close enough that a change shows"
-                    : "far back, but the demand justifies the attempt";
-        why.textContent = `${c.pop} pop${c.rank == null ? ", unranked" : `, currently #${c.rank}`} — ${room}.`;
+                ? "not in the top 200 yet, so this would be starting from nothing"
+                : c.rank <= 3
+                  ? `you are #${c.rank} — most of the taps for this phrase are already yours`
+                  : c.rank <= 10
+                    ? `you are #${c.rank}, on page one, ${c.rank - 3} place${c.rank - 3 === 1 ? "" : "s"} off the top three that take most of the taps`
+                    : c.rank <= 50
+                      ? `you already rank #${c.rank}, ${c.rank - 10} place${c.rank - 10 === 1 ? "" : "s"} below page one`
+                      : `you rank #${c.rank}, well outside page one, but the demand justifies a push`;
+        why.textContent = `${c.pop} pop — ${standing}.`;
 
         const term = m.terms[c.kw];
         const bt = byKw.get(c.kw);
