@@ -72,7 +72,12 @@ jobs:
 
   merge:
     needs: collect
-    if: always()
+    # Runs even when a market leg failed, so the partials that did arrive still
+    # merge and only the missing market carries forward. Not on cancellation
+    # though: `always()` covers that case too, so cancelling a run still let its
+    # merge push, and a second run pinned to the older sha could not rebase onto
+    # it — four compact JSON files conflicting on their single line.
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
