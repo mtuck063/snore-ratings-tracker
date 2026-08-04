@@ -547,6 +547,16 @@ function reviewCard(r, compact) {
 
 const reviewTime = (r) => new Date(r.date ?? r.firstSeen).getTime() || 0;
 
+// One side of a starsMix: the levels it left (sign −1) or the levels it landed
+// on (sign +1), highest star first. Counts are shown only above one, since a
+// single move reads better as "★5 → ★4" than "★5×1 → ★4×1".
+const starSide = (mix, sign) =>
+    Object.entries(mix ?? {})
+        .filter(([, n]) => (sign < 0 ? n < 0 : n > 0))
+        .sort((a, b) => b[0] - a[0])
+        .map(([s, n]) => (Math.abs(n) > 1 ? `★${s}×${Math.abs(n)}` : `★${s}`))
+        .join(" ");
+
 // Reviews written in the last 7 days, in a swipeable row at the top.
 function renderWeekReviews(reviews) {
     const fresh = reviews
@@ -661,8 +671,13 @@ function renderRecent(events) {
                 ? `★${ev.rating} review`
                 : ev.type === "tracked"
                   ? "now tracked"
-                  : (d > 0 ? `+${fmt(d)}` : `−${fmt(Math.abs(d))}`) + starText;
-        item.innerHTML = `<span class="recent-name">${name}</span> <strong${d < 0 && ev.type !== "review" ? ' class="down"' : ""}>${change}</strong> <span class="recent-time">${timeText}</span>`;
+                  : ev.type === "edit"
+                    ? `${starSide(ev.starsMix, -1)} → ${starSide(ev.starsMix, 1)}`
+                    : (d > 0 ? `+${fmt(d)}` : `−${fmt(Math.abs(d))}`) + starText;
+        // An edit is neither a gain nor a loss — the count never moved — so it
+        // takes neither the green nor the red the other rows use.
+        const tone = ev.type === "edit" ? ' class="flat"' : d < 0 && ev.type !== "review" ? ' class="down"' : "";
+        item.innerHTML = `<span class="recent-name">${name}</span> <strong${tone}>${change}</strong> <span class="recent-time">${timeText}</span>`;
         list.appendChild(item);
     }
     box.appendChild(list);
@@ -696,6 +711,13 @@ function renderEvents(history, events) {
         } else if (ev.type === "tracked") {
             li.className = "tracked";
             li.innerHTML = `${time}${name} added to tracking<span class="badge new">NEW</span><span class="event-note">${fmt(ev.to)} existing rating${ev.to === 1 ? "" : "s"}</span>`;
+        } else if (ev.type === "edit") {
+            const n = Object.values(ev.starsMix ?? {}).reduce((s, v) => s + Math.max(0, v), 0);
+            li.className = "edit";
+            li.innerHTML =
+                `${time}${name} ${fmt(n)} rating${n === 1 ? "" : "s"} changed star value` +
+                `<span class="badge edit">${starSide(ev.starsMix, -1)} → ${starSide(ev.starsMix, 1)}</span>` +
+                `<span class="event-note">total unchanged</span>`;
         } else if (ev.type === "review") {
             li.innerHTML = `${time}${name} new written review<span class="badge review">★${Number(ev.rating) || "?"}</span>`;
             if (ev.title) {

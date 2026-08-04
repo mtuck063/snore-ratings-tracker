@@ -138,6 +138,7 @@ a.run-row:hover { background: var(--bg-raised); }
 }
 .recent-row strong { color: var(--good); font-weight: 600; }
 .recent-row strong.down { color: var(--bad); }
+.recent-row strong.flat { color: var(--text-secondary); }
 .recent-row .recent-time { margin-left: auto; color: var(--text-secondary); font-size: 0.78rem; }
 
 .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -582,6 +583,10 @@ li.log-day {
 #events .badge.first { color: var(--good); background: rgba(74, 222, 128, 0.12); }
 #events .badge.new { color: var(--accent); background: rgba(91, 127, 255, 0.14); }
 #events li.empty { border-left: none; color: var(--text-secondary); }
+/* A star edit moved no count, so it stays neutral rather than borrowing the
+   green of a gain or the red of a loss. */
+#events li.edit { border-left-color: var(--text-secondary); }
+#events .badge.edit { color: var(--text-secondary); background: rgba(154, 160, 166, 0.14); }
 
 #tooltip {
     position: fixed;

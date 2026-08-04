@@ -448,6 +448,20 @@ function applyHistogram(cc, counts) {
     if (ev && changed.length) {
       if (changed.length === 1 && Math.abs(changed[0][1]) === 1) ev.stars = changed[0][0];
       else ev.starsMix = Object.fromEntries(changed);
+    } else if (changed.length && changed.reduce((s, [, d]) => s + d, 0) === 0) {
+      // Someone changed the star value of a rating they had already left. The
+      // total holds, so there is no delta event to hang the stars on, and the
+      // shift used to land nowhere but this file — invisible on the dashboard
+      // and recoverable only by diffing commits.
+      //
+      // A removal plus a same-run arrival at a different star reads
+      // identically from counts alone, and is logged the same way. Both are
+      // "the mix moved without the total moving", which is what the row says.
+      //
+      // Deliberately carries no from/to: snoretimeline.com counts any event
+      // with a numeric from/to pair toward its "new ratings this week"
+      // figure, and an edit is not a new rating.
+      events.push({ at: fetchedAt, cc, type: "edit", starsMix: Object.fromEntries(changed) });
     }
     if (!changed.length) return;
   }
