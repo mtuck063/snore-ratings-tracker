@@ -1118,6 +1118,8 @@ function renderBuilder(host, cc, plan) {
     mix.className = "fb-mix";
     const swap = document.createElement("ul");
     swap.className = "plan-gaps fb-swap";
+    const chipHead = document.createElement("p");
+    chipHead.className = "fb-label";
     const chipRow = document.createElement("div");
     chipRow.className = "fb-chips";
     const suggest = document.createElement("div");
@@ -1181,7 +1183,7 @@ function renderBuilder(host, cc, plan) {
         if (yourCovers != null) {
             const swapHead = document.createElement("p");
             swapHead.className = "fb-label";
-            swapHead.textContent = "The field above, against the one in App Store Connect";
+            swapHead.textContent = "The field you are building, against the one in App Store Connect";
             swap.appendChild(swapHead);
             const wins = b.terms.filter((t) => !holdsIn(t, yourKeys) && holdsIn(t, picked)).map((t) => t.kw);
             const loses = b.terms.filter((t) => holdsIn(t, yourKeys) && !holdsIn(t, picked)).map((t) => t.kw);
@@ -1233,6 +1235,19 @@ function renderBuilder(host, cc, plan) {
             legend.appendChild(key);
         }
         mix.append(bar, legend);
+
+        // The chips are the field being built. Unlabelled they read as a tag
+        // cloud, and the two things you need to know are that they are your
+        // draft field and that clicking one removes it.
+        const sameAs = (other) =>
+            other.size === picked.size && [...picked].every((u) => other.has(u));
+        const origin = sameAs(new Set(recommended))
+            ? "the recommendation"
+            : yourCovers != null && sameAs(yourKeys)
+              ? "your App Store Connect field"
+              : "edited by you";
+        chipHead.textContent =
+            `The field you are building \u00b7 ${origin} \u00b7 click a word to drop it`;
 
         chipRow.replaceChildren();
         const useful = new Set(covered.flatMap((t) => t.alts.find((a) => a.every((u) => sat(u))) ?? []));
@@ -1376,7 +1391,7 @@ function renderBuilder(host, cc, plan) {
         setTimeout(() => (btn.textContent = "Copy field"), 1500);
     });
 
-    host.append(h, context, yours, stats, swap, mix, chipRow, suggest, missing, buttons);
+    host.append(h, context, yours, stats, swap, mix, chipHead, chipRow, suggest, missing, buttons);
     draw();
 }
 
