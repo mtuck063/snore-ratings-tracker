@@ -1026,7 +1026,14 @@ function renderBuilder(host, cc, plan) {
     const popTotal = b.terms.reduce((n, t) => n + t.pop, 0);
 
     const h = document.createElement("h3");
-    h.textContent = "Keyword field";
+    h.textContent = "Keyword field builder";
+    // What the card is for, in the order you would do it. Everything here was
+    // legible on its own and added up to no instruction: a reader could tell
+    // what each number meant and still not know what they were meant to do.
+    const how = document.createElement("p");
+    how.className = "plan-line muted";
+    how.textContent =
+        "Apple gives you 100 characters. Paste what you have now, try changes against it, and copy the result back when it wins more than it gives up.";
 
     // Listing context: the two fields Apple pools with the keyword field, which
     // you cannot edit here but which decide what the field still has to carry.
@@ -1050,7 +1057,7 @@ function renderBuilder(host, cc, plan) {
     yours.className = "fb-yours";
     const yoursLabel = document.createElement("label");
     yoursLabel.className = "fb-label";
-    yoursLabel.textContent = "Your field in App Store Connect";
+    yoursLabel.textContent = "1 \u00b7 Your field in App Store Connect";
     yoursLabel.htmlFor = `fb-input-${cc}`;
     // A textarea, not a single line: a 100-character field scrolled sideways in
     // an input is a field you cannot read to check.
@@ -1118,8 +1125,17 @@ function renderBuilder(host, cc, plan) {
     mix.className = "fb-mix";
     const swap = document.createElement("ul");
     swap.className = "plan-gaps fb-swap";
+    // The draft field gets the same shape as the box above it: a label, the
+    // field as one monospace string, a character count. Two boxes that look
+    // alike read as two versions of the same thing, which a row of loose chips
+    // never did — it read as a tag cloud, or as the recommendation, which it
+    // stops being the moment you change a word.
+    const draft = document.createElement("div");
+    draft.className = "fb-draft";
     const chipHead = document.createElement("p");
     chipHead.className = "fb-label";
+    const preview = document.createElement("div");
+    preview.className = "fb-preview";
     const chipRow = document.createElement("div");
     chipRow.className = "fb-chips";
     const suggest = document.createElement("div");
@@ -1246,8 +1262,15 @@ function renderBuilder(host, cc, plan) {
             : yourCovers != null && sameAs(yourKeys)
               ? "your App Store Connect field"
               : "edited by you";
-        chipHead.textContent =
-            `The field you are building \u00b7 ${origin} \u00b7 click a word to drop it`;
+        chipHead.textContent = `2 \u00b7 The field you are building \u2014 ${origin}`;
+        const built = [...picked].map(show).join(",");
+        preview.replaceChildren();
+        const code = document.createElement("code");
+        code.textContent = built || "empty";
+        const count = document.createElement("span");
+        count.className = "fb-preview-count" + (built.length > FIELD_MAX ? " over" : "");
+        count.textContent = `${built.length}/${FIELD_MAX}`;
+        preview.append(code, count);
 
         chipRow.replaceChildren();
         const useful = new Set(covered.flatMap((t) => t.alts.find((a) => a.every((u) => sat(u))) ?? []));
@@ -1288,7 +1311,7 @@ function renderBuilder(host, cc, plan) {
         suggest.replaceChildren();
         const sLabel = document.createElement("p");
         sLabel.className = "fb-label";
-        sLabel.textContent = "Add one word, unlock these";
+        sLabel.textContent = "3 \u00b7 Add one word, unlock these";
         suggest.appendChild(sLabel);
         const ranked = [...gain.entries()].sort((a, c) => c[1].pop - a[1].pop).slice(0, 8);
         if (!ranked.length) {
@@ -1391,7 +1414,12 @@ function renderBuilder(host, cc, plan) {
         setTimeout(() => (btn.textContent = "Copy field"), 1500);
     });
 
-    host.append(h, context, yours, stats, swap, mix, chipHead, chipRow, suggest, missing, buttons);
+    const chipHint = document.createElement("p");
+    chipHint.className = "fb-hint";
+    chipHint.textContent =
+        "Click a word to drop it, or add one from the list below. When it covers more than your current field, copy it into App Store Connect.";
+    draft.append(chipHead, preview, chipRow, chipHint, buttons);
+    host.append(h, how, context, yours, draft, stats, swap, mix, suggest, missing);
     draw();
 }
 

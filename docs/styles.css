@@ -1020,3 +1020,46 @@ li.log-day {
 .fb-yours-waste:empty { display: none; }
 .fb-swap .fb-label { margin-bottom: 4px; }
 .fb-chips { margin-top: 4px; }
+
+/* The draft field mirrors the App Store Connect box, so the two read as two
+   versions of one thing rather than a field and a tag cloud. */
+.fb-draft {
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    background: var(--bg);
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--border));
+    border-radius: 8px;
+}
+.fb-draft .fb-label {
+    display: block;
+    margin: 0 0 6px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.fb-preview {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 10px;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+}
+.fb-preview code {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--text);
+    overflow-wrap: anywhere;
+}
+.fb-preview-count {
+    flex: none;
+    font-size: 0.74rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-secondary);
+}
+.fb-preview-count.over { color: var(--bad); }
+.fb-hint { margin: 2px 0 0; font-size: 0.72rem; color: var(--text-secondary); }
+.fb-draft .fb-actions { margin-top: 10px; }
