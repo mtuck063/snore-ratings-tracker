@@ -175,6 +175,21 @@ a.run-row:hover { background: var(--bg-raised); }
         overflow: hidden;
         text-overflow: ellipsis;
     }
+    /* A tag clipped to "CATEG…" is worse than no tag: it costs the width and
+       says nothing. The keyword column wraps instead, and the tags sit on
+       their own line under the phrase. */
+    #keywords td:first-child {
+        max-width: 52vw;
+        overflow: visible;
+        text-overflow: clip;
+        white-space: normal;
+    }
+    #keywords td:first-child .badge {
+        display: inline-block;
+        margin: 4px 6px 0 0;
+        white-space: nowrap;
+    }
+    #keywords td:first-child .kw-original { display: block; margin-left: 0; }
 }
 
 table {
