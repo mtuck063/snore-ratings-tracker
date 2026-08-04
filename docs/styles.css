@@ -1068,3 +1068,8 @@ li.log-day {
     font-family: inherit;
     font-size: 0.78rem;
 }
+/* In the uncovered list: what you already carry, and what is missing. Scoped
+   past `.plan-gaps span`, which is one class more specific than a bare
+   `.kw-need` and was painting both halves the same grey. */
+.plan-gaps code .kw-have { color: var(--text-secondary); }
+.plan-gaps code .kw-need { color: var(--accent); font-weight: 600; }

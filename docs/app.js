@@ -1227,27 +1227,32 @@ function renderBuilder(host, cc, plan) {
         if (yourCovers != null) {
             const swapHead = document.createElement("p");
             swapHead.className = "fb-label";
-            swapHead.textContent = "The field you are building, against the one in App Store Connect";
+            // Phrased as a consequence, not as advice. "Wins 8 phrases by
+            // adding rem, my, auto" read as a recommendation to add them, when
+            // it is only ever describing the difference between the draft above
+            // and your saved field — which is your own edit as soon as you make
+            // one.
+            swapHead.textContent = "If you replaced your App Store Connect field with this draft";
             swap.appendChild(swapHead);
             const wins = b.terms.filter((t) => !holdsIn(t, yourKeys) && holdsIn(t, picked)).map((t) => t.kw);
             const loses = b.terms.filter((t) => holdsIn(t, yourKeys) && !holdsIn(t, picked)).map((t) => t.kw);
-            if (wins.length) {
-                const w = document.createElement("span");
-                w.className = "swap-win";
-                w.textContent = `Wins ${wins.length} phrase${wins.length === 1 ? "" : "s"}`;
-                const by = document.createElement("span");
-                const added = [...picked].filter((u) => !yourKeys.has(u)).map(show);
-                by.textContent = added.length ? `by adding ${added.join(", ")}` : "";
-                swap.appendChild(expandable([w, by], wins));
+            const added = [...picked].filter((u) => !yourKeys.has(u)).map(show);
+            const dropped = [...yourKeys].filter((u) => !picked.has(u)).map(show);
+            if (added.length || wins.length) {
+                const what = document.createElement("span");
+                what.textContent = added.length ? `Adds ${added.join(", ")}` : "Adds nothing";
+                const effect = document.createElement("span");
+                effect.className = "swap-win";
+                effect.textContent = `\u2192 wins ${wins.length} phrase${wins.length === 1 ? "" : "s"}`;
+                swap.appendChild(expandable([what, effect], wins));
             }
-            if (loses.length) {
-                const lo = document.createElement("span");
-                lo.className = "swap-lose";
-                lo.textContent = `Loses ${loses.length} phrase${loses.length === 1 ? "" : "s"}`;
-                const by = document.createElement("span");
-                const dropped = [...yourKeys].filter((u) => !picked.has(u)).map(show);
-                by.textContent = dropped.length ? `by dropping ${dropped.join(", ")}` : "";
-                swap.appendChild(expandable([lo, by], loses));
+            if (dropped.length || loses.length) {
+                const what = document.createElement("span");
+                what.textContent = dropped.length ? `Removes ${dropped.join(", ")}` : "Removes nothing";
+                const effect = document.createElement("span");
+                effect.className = "swap-lose";
+                effect.textContent = `\u2192 loses ${loses.length} phrase${loses.length === 1 ? "" : "s"}`;
+                swap.appendChild(expandable([what, effect], loses));
             }
             if (!wins.length && !loses.length) {
                 swap.appendChild(expandable([document.createTextNode("Same phrases as your field")], []));
@@ -1376,6 +1381,9 @@ function renderBuilder(host, cc, plan) {
         mLabel.className = "fb-label";
         mLabel.textContent = "Still uncovered";
         missing.appendChild(mLabel);
+        missing.appendChild(
+            line("", "A phrase needs every one of its words. Dimmed words you already have; highlighted ones are what is missing.", "muted")
+        );
         const ul = document.createElement("ul");
         ul.className = "plan-gaps";
         const uncovered = b.terms.filter((t) => !covered.includes(t)).sort((a, c) => c.pop - a.pop);
@@ -1383,9 +1391,28 @@ function renderBuilder(host, cc, plan) {
             const li = document.createElement("li");
             const rowBtn = document.createElement("button");
             rowBtn.className = "gap-head";
-            const name = document.createElement("code");
-            name.textContent = t.kw;
             const need = t.alts.map((a) => a.filter((u) => !sat(u))).sort((a, c) => a.length - c.length)[0] ?? [];
+            // Paint the phrase by what is actually missing. "sleep breathing"
+            // rendered whole read as though neither word was there, when
+            // "sleep" is sitting in the title and only "breathing" is absent.
+            const name = document.createElement("code");
+            const needSet = new Set(need);
+            const parts = t.kw.split(/(\s+)/);
+            if (parts.length > 1 && !/[\u3040-\u30ff\u4e00-\u9fff]/.test(t.kw)) {
+                for (const part of parts) {
+                    if (!part.trim()) {
+                        name.appendChild(document.createTextNode(part));
+                        continue;
+                    }
+                    const key = wordKeys[part.toLowerCase()] ?? keyOf.get(part.toLowerCase()) ?? part.toLowerCase();
+                    const span = document.createElement("span");
+                    span.className = needSet.has(key) ? "kw-need" : "kw-have";
+                    span.textContent = part;
+                    name.appendChild(span);
+                }
+            } else {
+                name.textContent = t.kw;
+            }
             const what = document.createElement("span");
             what.textContent = `${t.pop} pop \u00b7 needs ${need.map(show).join(", ")}`;
             rowBtn.append(name, what);
