@@ -1160,12 +1160,19 @@ async function renderKeywords(kw, glossary = {}) {
             // back, so the figure reads as a day's gain rather than whatever
             // happened since the last run a few hours ago. The collector keeps
             // one snapshot per six hours across thirty, so there is normally
-            // one sitting in the window. Capped at 36 hours as well: if the
-            // collector ever stalls, blanking the column is honest where
-            // labelling three days of growth "Δ 1D" is not.
+            // one sitting in the window, and the 36-hour cap keeps the span
+            // near the day the column claims.
+            //
+            // Measured against the reading it is subtracted from, not against
+            // the wall clock: `perCc` is frozen at kw.fetchedAt, so aging the
+            // window on Date.now() slid it forward while the current values
+            // stood still, and the span quietly shrank by however long ago the
+            // last run was. A page opened six hours after a run was labelling
+            // eighteen hours of growth "Δ 1D".
+            const readingAt = new Date(kw.fetchedAt).getTime();
             const baseline = (kw.statsLog ?? [])
                 .filter((s) => {
-                    const age = Date.now() - new Date(s.at);
+                    const age = readingAt - new Date(s.at);
                     return age >= 20 * 3600e3 && age <= 36 * 3600e3;
                 })
                 .pop();
