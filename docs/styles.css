@@ -907,3 +907,64 @@ li.log-day {
     padding: 2px 0;
 }
 .kw-legend-list .badge { flex: none; margin-left: 0; }
+.kw-detail-gap {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    padding: 2px 0 8px;
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+    margin-bottom: 8px;
+}
+.kw-detail-gap code { color: var(--bad); }
+
+/* Legend rows double as filters, so they have to look pressable. */
+.kw-legend-toggle {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    width: 100%;
+    padding: 3px 6px;
+    margin-left: -6px;
+    font: inherit;
+    font-size: 0.76rem;
+    text-align: left;
+    color: var(--text-secondary);
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.kw-legend-toggle:hover { border-color: var(--border); }
+.kw-legend-row.on .kw-legend-toggle {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    color: var(--text);
+}
+.kw-legend-list li { display: block; padding: 1px 0; }
+
+/* Competitor rows expand to the keywords behind their counts. */
+.kw-comp-open { cursor: pointer; }
+.kw-comp-detail td { padding: 8px 10px 12px; }
+.kw-comp-detail-head {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    margin: 6px 0 4px;
+}
+.kw-comp-kws {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 2px 16px;
+}
+.kw-comp-kws li {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 0.76rem;
+    padding: 1px 0;
+}
+.kw-comp-kws code { color: var(--text); }
+.kw-comp-kws span { color: var(--text-secondary); font-variant-numeric: tabular-nums; }

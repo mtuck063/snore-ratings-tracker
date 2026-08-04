@@ -1024,7 +1024,7 @@ function renderPlan(host, cc, plan) {
 // which is a fine place for detail and a bad place for the definition of a word
 // the reader has never seen: "CATEGORY" explains nothing until someone tells
 // you it is about the searcher, not about the app.
-function renderLegend(host, cc, plan) {
+function renderLegend(host, cc, plan, filter, onChange, counts) {
     host.replaceChildren();
     const terms = plan?.markets?.[cc]?.terms;
     if (!terms) {
@@ -1034,36 +1034,76 @@ function renderLegend(host, cc, plan) {
     host.hidden = false;
     const intro = document.createElement("p");
     intro.className = "plan-line muted";
-    intro.textContent = "Each keyword is tagged by who is searching it:";
+    intro.textContent = "Each keyword is tagged by who is searching it. Tap a tag to show only those rows:";
     host.appendChild(intro);
 
     const ul = document.createElement("ul");
     ul.className = "kw-legend-list";
     const present = new Set(Object.values(terms).map((t) => t.intent));
     const anyGap = Object.values(terms).some((t) => t.covered === false);
-    for (const [intent, tip] of Object.entries(INTENT_TIP)) {
-        if (!present.has(intent)) continue;
+
+    // Each tag is its own toggle. Intents are mutually exclusive, so selecting
+    // several means "any of these"; "no words" is a different question about
+    // the same row, so it narrows whatever is selected rather than joining it.
+    const row = (cls, label, tip, on, toggle) => {
         const li = document.createElement("li");
+        li.className = "kw-legend-row" + (on ? " on" : "");
+        const btn = document.createElement("button");
+        btn.className = "kw-legend-toggle";
+        btn.setAttribute("aria-pressed", String(on));
         const chip = document.createElement("span");
-        chip.className = `badge kw-intent intent-${intent}`;
-        chip.textContent = intent;
+        chip.className = `badge ${cls}`;
+        chip.textContent = label;
         const text = document.createElement("span");
         text.textContent = tip;
-        li.append(chip, text);
-        ul.appendChild(li);
+        btn.append(chip, text);
+        btn.addEventListener("click", () => {
+            toggle();
+            onChange();
+        });
+        li.appendChild(btn);
+        return li;
+    };
+
+    for (const [intent, tip] of Object.entries(INTENT_TIP)) {
+        if (!present.has(intent)) continue;
+        ul.appendChild(
+            row(`kw-intent intent-${intent}`, intent, tip, filter.intents.has(intent), () => {
+                if (filter.intents.has(intent)) filter.intents.delete(intent);
+                else filter.intents.add(intent);
+            })
+        );
     }
     if (anyGap) {
-        const li = document.createElement("li");
-        const chip = document.createElement("span");
-        chip.className = "badge kw-gap";
-        chip.textContent = "no words";
-        const text = document.createElement("span");
-        text.textContent =
-            "Your title, subtitle and keyword field between them do not contain all the words in this phrase, so Apple cannot rank you for it at any position. Tap the row to see which words are missing.";
-        li.append(chip, text);
-        ul.appendChild(li);
+        ul.appendChild(
+            row(
+                "kw-gap",
+                "no words",
+                "Your title, subtitle and keyword field between them do not contain all the words in this phrase, so Apple cannot rank you for it at any position. Tap a row to see which words are missing.",
+                filter.gapOnly,
+                () => {
+                    filter.gapOnly = !filter.gapOnly;
+                }
+            )
+        );
     }
     host.appendChild(ul);
+
+    if (filter.intents.size || filter.gapOnly) {
+        const count = document.createElement("p");
+        count.className = "plan-line muted";
+        count.textContent = `Showing ${counts.shown} of ${counts.total} keywords.`;
+        host.appendChild(count);
+        const clear = document.createElement("button");
+        clear.className = "plan-copy";
+        clear.textContent = "Show all keywords";
+        clear.addEventListener("click", () => {
+            filter.intents.clear();
+            filter.gapOnly = false;
+            onChange();
+        });
+        host.appendChild(clear);
+    }
 }
 
 // The field builder. Add and drop words, watch what it costs.
@@ -1372,6 +1412,9 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
     // Sticky across market switches: someone who cannot read the CN column
     // cannot read the JP one either, so asking twice would be busywork.
     let showEnglish = false;
+    // Which tags the table is limited to. Intents are OR'd with each other;
+    // gapOnly narrows whatever that leaves.
+    const filter = { intents: new Set(), gapOnly: false };
     // Only worth offering where it would change something. An English market
     // has no glossed terms, so the button would sit there doing nothing.
     const translatable = (cc) => Object.keys(kw.latest[cc] ?? {}).some((t) => glossary[t]);
@@ -1383,14 +1426,23 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
         translate.classList.toggle("active", showEnglish);
         renderPlan(document.getElementById("kw-plan"), cc, plan);
         renderBuilder(document.getElementById("kw-builder"), cc, plan);
-        renderLegend(document.getElementById("kw-legend"), cc, plan);
         tbody.replaceChildren();
         const aso = plan?.markets?.[cc]?.terms ?? {};
         const val = ([term, e]) =>
             sort.key === "rank" ? (e.rank ?? Infinity) : sort.key === "score" ? (aso[term]?.score ?? 0) : e.pop;
-        const entries = Object.entries(kw.latest[cc]).sort(
-            (a, b) => (val(a) - val(b)) * sort.dir || (a[1].rank ?? 999) - (b[1].rank ?? 999)
-        );
+        const entries = Object.entries(kw.latest[cc])
+            .filter(([term]) => {
+                if (!filter.intents.size && !filter.gapOnly) return true;
+                const t = aso[term];
+                if (filter.intents.size && !filter.intents.has(t?.intent)) return false;
+                if (filter.gapOnly && t?.covered !== false) return false;
+                return true;
+            })
+            .sort((a, b) => (val(a) - val(b)) * sort.dir || (a[1].rank ?? 999) - (b[1].rank ?? 999));
+        renderLegend(document.getElementById("kw-legend"), cc, plan, filter, () => render(currentCc), {
+            shown: entries.length,
+            total: Object.keys(kw.latest[cc]).length,
+        });
         // Yesterday's row: the stable comparison baseline. Runs minutes apart
         // all diff against the same anchor, so manual runs can't wobble Δ.
         const curDate = (kw.fetchedAt ?? "").slice(0, 10);
@@ -1454,6 +1506,29 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
                     det.className = "kw-detail";
                     const td = document.createElement("td");
                     td.colSpan = 9;
+                    // The missing words lead, above the competitor list. The
+                    // legend told people to tap the row for them and the row
+                    // only ever opened the top ten, which made the instruction
+                    // wrong rather than merely incomplete.
+                    if (asoTerm?.covered === false) {
+                        const gap = document.createElement("div");
+                        gap.className = "kw-detail-gap";
+                        const lead = document.createElement("span");
+                        lead.textContent = "Your listing never says ";
+                        gap.appendChild(lead);
+                        (asoTerm.missing ?? []).forEach((w, i) => {
+                            if (i) gap.appendChild(document.createTextNode(", "));
+                            const code = document.createElement("code");
+                            code.textContent = w;
+                            gap.appendChild(code);
+                        });
+                        const tail = document.createElement("span");
+                        tail.textContent = asoTerm.partial
+                            ? " — judged on title and subtitle alone, since this market's keyword field is not recorded."
+                            : " — so Apple cannot rank this phrase at any position until one of the three fields carries every word.";
+                        gap.appendChild(tail);
+                        td.appendChild(gap);
+                    }
                     const ol = document.createElement("ol");
                     cur.top.forEach((e) => {
                         const entry = appEntry(e);
@@ -1697,16 +1772,20 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
         // top-10 count derived from those would just restate the top-5 one.
         // The column shows "—" until a run has filled the deeper data in.
         let deep = false;
-        for (const cur of Object.values(kw.latest[cc])) {
+        for (const [term, cur] of Object.entries(kw.latest[cc])) {
             if (!cur.top?.length) continue;
             measured++;
             if (cur.top.length > 5) deep = true;
             cur.top.forEach((raw, i) => {
                 const { id } = appEntry(raw);
-                const e = slots.get(id) ?? { top5: 0, top10: 0, firsts: 0 };
+                const e = slots.get(id) ?? { top5: 0, top10: 0, firsts: 0, at: [] };
                 if (i < 5) e.top5++;
                 e.top10++;
                 if (i === 0) e.firsts++;
+                // Which keywords, not just how many. The counts say a rival owns
+                // 27 of your phrases; the list says which 27, which is the part
+                // you can act on.
+                e.at.push({ kw: term, place: i + 1, pop: cur.pop ?? 0 });
                 slots.set(id, e);
             });
         }
@@ -1730,7 +1809,7 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
                 .slice(0, 8);
             // Your own share always shows, even from outside the top 8.
             if (!top.some(([id]) => id === "6751759381")) {
-                top.push(["6751759381", slots.get("6751759381") ?? { top5: 0, top10: 0, firsts: 0 }]);
+                top.push(["6751759381", slots.get("6751759381") ?? { top5: 0, top10: 0, firsts: 0, at: [] }]);
             }
 
             const table = document.createElement("table");
@@ -1814,6 +1893,48 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
                 const row = document.createElement("tr");
                 if (id === "6751759381") row.className = "you";
                 const meta = appEntry(id);
+
+                // Tap the row for the keywords behind the counts, best placing
+                // first. Building it on demand keeps the table itself cheap.
+                if (e.at?.length) {
+                    row.classList.add("kw-comp-open");
+                    row.addEventListener("click", () => {
+                        const next = row.nextElementSibling;
+                        if (next?.classList.contains("kw-comp-detail")) {
+                            next.remove();
+                            return;
+                        }
+                        tb.querySelectorAll(".kw-comp-detail").forEach((d) => d.remove());
+                        const det = document.createElement("tr");
+                        det.className = "kw-comp-detail";
+                        const td = document.createElement("td");
+                        td.colSpan = 10;
+                        const firsts = e.at.filter((a) => a.place === 1);
+                        const rest = e.at.filter((a) => a.place > 1);
+                        const group = (label, list) => {
+                            if (!list.length) return;
+                            const h = document.createElement("div");
+                            h.className = "kw-comp-detail-head";
+                            h.textContent = label;
+                            const ul = document.createElement("ul");
+                            ul.className = "kw-comp-kws";
+                            for (const a of [...list].sort((x, y) => y.pop - x.pop)) {
+                                const li = document.createElement("li");
+                                const name = document.createElement("code");
+                                name.textContent = a.kw;
+                                const at = document.createElement("span");
+                                at.textContent = `#${a.place} · ${a.pop} pop`;
+                                li.append(name, at);
+                                ul.appendChild(li);
+                            }
+                            td.append(h, ul);
+                        };
+                        group(`#1 for ${firsts.length} keyword${firsts.length === 1 ? "" : "s"}`, firsts);
+                        group(`Also on page one for ${rest.length}`, rest);
+                        det.appendChild(td);
+                        row.after(det);
+                    });
+                }
 
                 const tdName = document.createElement("td");
                 tdName.className = "kw-comp-name";
