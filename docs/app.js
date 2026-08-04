@@ -800,13 +800,25 @@ function renderEvents(history, events) {
 // definition written for someone who already knows.
 const INTENT_TIP = {
     symptom: "Someone describing the problem, not shopping for an app yet.",
-    category: "Someone looking for an app like yours.",
+    category: "Someone shopping for an app like yours, and close to installing one.",
     feature: "Someone after one specific capability.",
     adjacent: "A neighbouring need this app partly serves.",
     brand: "Someone searching for a particular app by name.",
     offtarget: "Not what this app does. Scored zero, so it never reaches the chase list.",
     mine: "Your own app's name.",
 };
+// What each intent is called on screen, where that differs from what it is
+// called in the data. "Category" is the App Store's word for Health & Fitness,
+// so on a phrase like "cpap sleep tracker" it reads as which shelf the app sits
+// on rather than as a fact about the person searching. "Shopping" says the
+// thing the tag actually means, and pairs with the symptom copy, which already
+// describes its searcher as not shopping for an app yet.
+//
+// The key stays "category" in the regex that assigns it, the fit table, the CSS
+// and all 327 tagged terms. Renaming those would be a data migration to change
+// a word on a chip.
+const INTENT_LABEL = { category: "shopping" };
+const intentLabel = (intent) => INTENT_LABEL[intent] ?? intent;
 // The chip says CATEGORY, which reads as a fact about the keyword until you
 // know it is a fact about the person typing it. The title supplies the missing
 // half. Applied through a helper because four places draw these chips and a
@@ -1060,7 +1072,7 @@ function renderPlan(host, cc, plan, onRefresh) {
         kwEl.textContent = c.kw;
         const chip = document.createElement("span");
         chip.className = `badge kw-intent intent-${c.intent}`;
-        chip.textContent = c.intent;
+        chip.textContent = intentLabel(c.intent);
         tagIntent(chip, c.intent);
 
         // Why it is worth chasing, in the terms the score is made of.
@@ -1370,7 +1382,7 @@ function renderLegend(host, cc, plan, filter, onChange, counts) {
         ul.appendChild(
             row(
                 `kw-intent intent-${intent}`,
-                intent,
+                intentLabel(intent),
                 help,
                 filter.intents.has(intent),
                 () => {
@@ -1780,7 +1792,7 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
                     // sixty symptom ones.
                     const chip = document.createElement("span");
                     chip.className = `badge kw-intent intent-${t.intent}`;
-                    chip.textContent = t.intent;
+                    chip.textContent = intentLabel(t.intent);
                     tagIntent(chip, t.intent);
                     name.appendChild(chip);
                     if (t.note) {
@@ -1834,13 +1846,13 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
             const seg = document.createElement("span");
             seg.className = `fb-seg intent-${intent}`;
             seg.style.width = `${(pop / mixTotal) * 100}%`;
-            seg.dataset.tip = `${intent}: ${pop} popularity`;
+            seg.dataset.tip = `${intentLabel(intent)}: ${pop} popularity`;
             bar.appendChild(seg);
             const key = document.createElement("span");
             key.className = "fb-key";
             const dot = document.createElement("span");
             dot.className = `fb-dot intent-${intent}`;
-            key.append(dot, document.createTextNode(`${intent} ${Math.round((pop / mixTotal) * 100)}%`));
+            key.append(dot, document.createTextNode(`${intentLabel(intent)} ${Math.round((pop / mixTotal) * 100)}%`));
             tagIntent(key, intent);
             legend.appendChild(key);
         }
@@ -2146,7 +2158,7 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
             if (asoTerm) {
                 const chip = document.createElement("span");
                 chip.className = `badge kw-intent intent-${asoTerm.intent}`;
-                chip.textContent = asoTerm.intent;
+                chip.textContent = intentLabel(asoTerm.intent);
                 tagIntent(chip, asoTerm.intent);
                 tdKw.appendChild(chip);
                 if (asoTerm.covered === false) {
