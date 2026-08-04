@@ -35,10 +35,5 @@
     "sleep better",
     "better sleep",
     "cpap supplies"
-  ],
-  "_vetoNote": "Words the keyword field will never carry, whatever demand sits behind them. Kept here so the shopping list and the field packer stop re-proposing a decision already made. Both current entries squat on names that are not ours.",
-  "vetoWords": [
-    "lab",
-    "nhs"
   ]
 }

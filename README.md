@@ -182,8 +182,8 @@ category by looking at what a real search for it returns:
   Every niche has one of these collisions. Find yours before it fills the list.
 
 `scripts/intents.json` needs the same treatment in miniature. Its `offtarget`
-list and `vetoWords` encode decisions about one niche and one app, and carrying
-somebody else's over means grouping your terms by their category boundaries.
+list encodes decisions about one niche and one app, and carrying somebody
+else's over means grouping your terms by their category boundaries.
 
 `scripts/kw-harvest.mjs` carries a `HARVEST` block per non-English market:
 category stems, plus the modifiers buyers append ("kostenlos", "無料"). Seed
@@ -271,10 +271,10 @@ paste it into `scripts/metadata.json` whenever you change it. A market whose
 field is not recorded is reported as judged on title and subtitle alone rather
 than silently graded as if the field were empty.
 
-Two lists in `scripts/intents.json` keep it from re-proposing decisions you
-have already made: `offtarget` for whole neighbourhoods the app does not serve,
-and `vetoWords` for words the field will never carry whatever the demand behind
-them.
+`scripts/intents.json` also carries an `offtarget` list: whole neighbourhoods
+the app does not serve, scored to zero so they stay out of the chase list and
+out of the field recommendation. It is what keeps white noise and insomnia
+phrases from being recommended to a snoring app.
 
 ## Working on it locally
 
@@ -318,7 +318,7 @@ constraint there. Working state that no page reads lives in `scripts/` instead.
 | `scripts/hints.json` | last autocomplete state, diffed for new suggestions |
 | `scripts/kw-candidates.json` | harvested phrases awaiting a relevance test |
 | `scripts/metadata.json` | what the listing claims; title and subtitle fetched, keyword field by hand |
-| `scripts/intents.json` | intent corrections, off-target neighbourhoods, vetoed words |
+| `scripts/intents.json` | intent corrections and off-target neighbourhoods |
 
 ## Limits worth knowing
 

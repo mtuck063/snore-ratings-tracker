@@ -963,8 +963,7 @@ function rescoreFor(cc, plan) {
     );
     const sat = (u) => keys.has(u) || (/[\u3040-\u30ff\u4e00-\u9fff]/.test(u) && [...keys].some((p) => p.includes(u)));
 
-    const levers = plan.levers ?? { covered: 1, cheap: 1.25, dear: 0.85, vetoed: 0.4 };
-    const vetoed = new Set(plan.vetoed ?? []);
+    const levers = plan.levers ?? { covered: 1, cheap: 1.25, dear: 0.85 };
     const out = new Map();
     for (const t of b.terms) {
         const term = m.terms[t.kw];
@@ -975,20 +974,12 @@ function rescoreFor(cc, plan) {
             ? []
             : (t.alts.map((a) => a.filter((u) => !sat(u))).sort((a, c) => a.length - c.length)[0] ?? []);
         const missing = missingKeys.map(show);
-        const lever = covered
-            ? levers.covered
-            : missingKeys.every((u) => vetoed.has(u))
-              ? levers.vetoed
-              : missingKeys.length <= 2
-                ? levers.cheap
-                : levers.dear;
+        const lever = covered ? levers.covered : missingKeys.length <= 2 ? levers.cheap : levers.dear;
         const where = t.rank == null ? "unranked" : `#${t.rank}`;
         // Same sentences as scripts/aso.mjs, because the same facts deserve the
         // same words wherever they are computed.
         const why = !covered
-            ? missingKeys.every((u) => vetoed.has(u))
-                ? `${t.pop} pop, ${where}, only reachable by adding ${missing.map((x) => `"${x}"`).join(", ")}, which you have ruled out`
-                : `${t.pop} pop, ${where}, listing has no ${missing.map((x) => `"${x}"`).join(", ")}`
+            ? `${t.pop} pop, ${where}, listing has no ${missing.map((x) => `"${x}"`).join(", ")}`
             : t.rank == null
               ? `${t.pop} pop, unranked, words are all in the listing`
               : t.rank <= 10
@@ -1183,22 +1174,22 @@ function renderBuilder(host, cc, plan, onFieldSaved) {
     // Why the builder's denominator is smaller than the table's. The table and
     // the competitor panel count every tracked keyword; this field can only win
     // the ones a keyword is allowed to buy, so competitor names, your own name,
-    // off-category phrases and anything reachable only through a vetoed word
-    // are out. Unexplained, two numbers for the same market look like a bug.
+    // and off-category phrases are out. Unexplained, two numbers for the same
+    // market look like a bug.
     const tracked = Object.keys(m.terms ?? {});
     const inBuilder = new Set(b.terms.map((t) => t.kw));
     const excluded = {};
     for (const kw of tracked) {
         if (inBuilder.has(kw)) continue;
         const intent = m.terms[kw].intent;
-        const bucket = ["brand", "mine", "offtarget"].includes(intent) ? intent : "vetoed";
+        const bucket = ["brand", "mine", "offtarget"].includes(intent) ? intent : "unbuyable";
         excluded[bucket] = (excluded[bucket] ?? 0) + 1;
     }
     const excludedWords = {
         brand: (n) => `${n} competitor name${n === 1 ? "" : "s"}`,
         mine: () => "your own app name",
         offtarget: (n) => `${n} outside this app's category`,
-        vetoed: (n) => `${n} reachable only through a word you have vetoed`,
+        unbuyable: (n) => `${n} no keyword field can express`,
     };
     const denominatorTip =
         `${b.terms.length} of the ${tracked.length} keywords tracked for this market are winnable with a keyword field. ` +
@@ -1404,15 +1395,12 @@ function renderBuilder(host, cc, plan, onFieldSaved) {
             tile(`${chars}/${FIELD_MAX}`, "characters", chars > FIELD_MAX ? "over" : ""),
             tile(
                 `${covered.length}/${b.terms.length}`,
-                `phrases covered \u00b7 ${covered.length - free.length} from this field`,
+                "phrases covered",
                 "",
-                `${denominatorTip} Of those, title and subtitle cover ${free.length} on their own, whatever the keyword field says.`,
+                `${denominatorTip} Of those, title and subtitle cover ${free.length} on their own, so these hundred characters are winning the other ${covered.length - free.length}.`,
                 { key: "phrases" }
             ),
-            tile(
-                coveredPop.toLocaleString("en-US"),
-                `pop of ${popTotal.toLocaleString("en-US")} \u00b7 ${(coveredPop - freePop).toLocaleString("en-US")} from this field`
-            ),
+            tile(coveredPop.toLocaleString("en-US"), `pop of ${popTotal.toLocaleString("en-US")}`),
             yourPop == null
                 ? tile("\u2014", "vs your field", "", "Paste your field above to compare")
                 : tile(
@@ -1482,10 +1470,9 @@ function renderBuilder(host, cc, plan, onFieldSaved) {
                     kw,
                     pop: m.terms[kw].pop ?? 0,
                     intent: m.terms[kw].intent,
-                    note:
-                        m.terms[kw].intent === "brand" || m.terms[kw].intent === "mine" || m.terms[kw].intent === "offtarget"
-                            ? null
-                            : `needs ${(m.terms[kw].missing ?? []).join(", ")}, vetoed`,
+                    note: ["brand", "mine", "offtarget"].includes(m.terms[kw].intent)
+                        ? null
+                        : "no keyword field can express this phrase",
                 }));
             panel.append(
                 column("Covered", covered, "covered"),

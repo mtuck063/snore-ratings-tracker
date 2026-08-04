@@ -275,10 +275,6 @@ function lever(cov) {
   // well be sitting in the field already. Neither reward nor punish a guess.
   if (cov.partial) return 1;
   if (cov.covered) return 1;
-  // Every word standing between you and this phrase is one you have already
-  // refused to buy. It is not a cheap fix, it is a closed door, and ranking it
-  // as a one-word win puts "add ai" back on the list every single run.
-  if (cov.missing.every((w) => vetoed.has(fold(w)))) return 0.4;
   return cov.missing.length <= 2 ? 1.25 : 0.85;
 }
 
@@ -293,15 +289,12 @@ function scoreOf({ pop, rank, intent, cov }) {
 }
 
 // The coverage multipliers by name, so the page applies these same numbers.
-const LEVERS = { covered: 1, unknown: 1, cheap: 1.25, dear: 0.85, vetoed: 0.4 };
+const LEVERS = { covered: 1, unknown: 1, cheap: 1.25, dear: 0.85 };
 
 function reasonFor({ pop, rank, cov, intent }) {
   const where = rank == null ? "unranked" : `#${rank}`;
   if (cov && !cov.covered) {
     const list = cov.missing.map((m) => `"${m}"`).join(", ");
-    if (!cov.partial && cov.missing.every((w) => vetoed.has(fold(w)))) {
-      return `${pop} pop, ${where}, only reachable by adding ${list}, which you have ruled out`;
-    }
     const where2 = cov.partial ? "title and subtitle have no" : "listing has no";
     return `${pop} pop, ${where}, ${where2} ${list}`;
   }
@@ -317,11 +310,6 @@ const CHASE_MAX = 12;
 // Intents a keyword-field change can actually buy. Brand and off-target demand
 // is real demand, and neither is purchasable with a word in your own listing.
 const CHASEABLE = new Set(["symptom", "category", "feature", "adjacent"]);
-
-// Words you have decided never to buy, whatever the demand behind them.
-// Without this the shopping list re-proposes the same rejected word every run,
-// and a recommendation you have already said no to teaches you to skim.
-const vetoed = new Set((overrides.vetoWords ?? []).map(fold));
 
 // Not worthless: "do i snore" is a real query and the CA field pays for both
 // words deliberately. Flagged rather than dropped, so a one-character word
@@ -366,7 +354,6 @@ function analyseMarket(cc) {
   for (const [kw, t] of Object.entries(terms)) {
     if (!t.missing || !CHASEABLE.has(t.intent)) continue;
     for (const w of t.missing) {
-      if (vetoed.has(w)) continue;
       (blocked[w] ??= { word: w, terms: [], demand: 0, ...(STOPWORD.test(w) && { weak: true }) });
       blocked[w].terms.push(kw);
       blocked[w].demand += t.pop;
@@ -516,7 +503,6 @@ async function writeData() {
     JSON.stringify({
       generatedAt: new Date().toISOString(),
       levers: LEVERS,
-      vetoed: [...vetoed],
       markets: all,
     })
   );
@@ -712,7 +698,6 @@ function altsFor(terms, meta) {
       }
       alts = [[...new Set(need)]];
     }
-    alts = alts.filter((a) => !a.some((u) => vetoed.has(fold(u))));
     if (!alts.length) continue;
 
     const seen = new Set();
