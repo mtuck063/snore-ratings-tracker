@@ -1108,6 +1108,9 @@ li.log-day {
     letter-spacing: 0.05em;
     color: var(--text-secondary);
 }
+/* `display: grid` outranks the hidden attribute's `display: none`, so the
+   closed panel kept rendering as an empty box. */
+.fb-panel[hidden] { display: none; }
 .fb-panel {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
