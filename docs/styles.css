@@ -1143,3 +1143,17 @@ li.log-day {
 .kw-legend-eg { color: var(--accent); opacity: 0.85; }
 .fb-panel-list li.outofscope .fb-panel-text { color: var(--text-secondary); opacity: 0.75; }
 .fb-panel-note { color: var(--text-secondary); font-size: 0.7rem; }
+
+/* Chase rows carry a diagnosis and a next step, so they need more room than a
+   single line and a clear break between the two. */
+.plan-chase li { padding: 8px 0; }
+.plan-chase .badge { margin-left: 6px; vertical-align: 1px; }
+.plan-action {
+    display: block;
+    margin-left: 30px;
+    margin-top: 3px;
+    font-size: 0.76rem;
+    color: var(--text);
+    opacity: 0.85;
+}
+.plan-try { margin: 6px 0 0 30px; }

@@ -788,6 +788,12 @@ function recommendField(cc, terms, meta, model) {
 // there is the satisfies() rule above, which is set arithmetic over these keys.
 function builderFor(model, meta) {
   return {
+    // Where a word already lives, because the three fields do not carry equal
+    // weight: a phrase whose words sit only in the keyword field has a wording
+    // lever left (promote one into the subtitle), and a phrase already spelled
+    // out in the title has none — its rank moves on conversion and ratings.
+    titleKeys: [...new Set(words(meta?.title ?? ""))],
+    subtitleKeys: [...new Set(words(meta?.subtitle ?? ""))],
     units: model.units,
     labels: Object.fromEntries(model.units.map((u) => [u, model.label.get(u)])),
     wordKeys: model.wordKeys,

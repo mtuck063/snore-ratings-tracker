@@ -812,7 +812,38 @@ const INTENT_HELP = {
 // The chase list: which phrases are worth the next move. Kept separate from
 // the field card because it answers a different question — what to aim at,
 // rather than what to write.
-function renderPlan(host, cc, plan) {
+// What to actually do about a phrase. The list was a ranking with a fact
+// beside each row, and "covered — this is a ranking gap" is a diagnosis with no
+// next step: eight of the twelve rows said it, and none of them said what to
+// try. Apple does not weigh the three fields equally, so where a word sits is
+// itself a lever, and when there is no lever left that is worth saying too.
+function actionFor(t, alt, b, keys) {
+    const title = new Set(b.titleKeys ?? []);
+    const sub = new Set(b.subtitleKeys ?? []);
+    const label = (u) => b.labels?.[u] ?? u;
+
+    if (t.covered === false && t.missing?.length) {
+        return {
+            text: `Add ${t.missing.map((w) => `“${w}”`).join(" and ")} to your keyword field. Apple cannot rank this phrase until every word is somewhere in your listing.`,
+            add: alt.filter((u) => !keys.has(u)),
+        };
+    }
+    if (t.rank != null && t.rank <= 10) {
+        return { text: "Already on page one. Defend it rather than spend characters on it." };
+    }
+    // Which of its words are carried only by the weakest of the three fields.
+    const weak = (alt ?? []).filter((u) => !title.has(u) && !sub.has(u));
+    if (weak.length) {
+        return {
+            text: `Every word is present, but ${weak.map((u) => `“${label(u)}”`).join(", ")} ${weak.length === 1 ? "sits" : "sit"} only in the keyword field, which Apple weighs below the title and subtitle. Promoting one into the subtitle is the wording lever left here.`,
+        };
+    }
+    return {
+        text: "Your title and subtitle already spell this out, so there is no wording change left. Rank here moves on installs, ratings and how well the screenshots convert — not on the keyword field.",
+    };
+}
+
+function renderPlan(host, cc, plan, onRefresh) {
     host.replaceChildren();
     const m = plan?.markets?.[cc];
     if (!m?.chase?.length) {
@@ -849,6 +880,20 @@ function renderPlan(host, cc, plan) {
 
     const ol = document.createElement("ol");
     ol.className = "plan-chase";
+    const b = m.builder;
+    const byKw = new Map((b?.terms ?? []).map((t) => [t.kw, t]));
+    const parse = (text) =>
+        (text ?? "")
+            .split(/[,\u3001\uff0c\n\s]+/)
+            .map((w) => w.trim().toLowerCase())
+            .filter(Boolean)
+            .map((w) => b?.wordKeys?.[w] ?? w);
+    const fieldKeys = new Set(parse(storedField(cc) ?? b?.current));
+    // What the builder is holding right now, so the button offers only words it
+    // would actually change. The draft starts from the recommendation, which
+    // already carries most of what your saved field is missing.
+    const draftKeys = new Set(draftByCc.get(cc) ?? parse(m.recommended?.field));
+
     for (const c of chase) {
         const li = document.createElement("li");
         const score = document.createElement("span");
@@ -856,10 +901,53 @@ function renderPlan(host, cc, plan) {
         score.textContent = c.score;
         const kwEl = document.createElement("strong");
         kwEl.textContent = c.kw;
+        const chip = document.createElement("span");
+        chip.className = `badge kw-intent intent-${c.intent}`;
+        chip.textContent = c.intent;
+        chip.dataset.tip = INTENT_TIP[c.intent] ?? "";
+
+        // Why it is worth chasing, in the terms the score is made of.
         const why = document.createElement("span");
         why.className = "plan-why";
-        why.textContent = c.why;
-        li.append(score, kwEl, why);
+        const room =
+            c.rank == null
+                ? "nothing to lose by trying"
+                : c.rank <= 10
+                  ? "already page one"
+                  : c.rank <= 50
+                    ? "close enough that a change shows"
+                    : "far back, but the demand justifies the attempt";
+        why.textContent = `${c.pop} demand${c.rank == null ? ", unranked" : `, currently #${c.rank}`} — ${room}.`;
+
+        const term = m.terms[c.kw];
+        const bt = byKw.get(c.kw);
+        const alt = bt?.alts?.[0] ?? [];
+        const action = actionFor(term ?? {}, alt, b ?? {}, fieldKeys);
+        const act = document.createElement("span");
+        act.className = "plan-action";
+        act.textContent = action.text;
+        // Words the draft is already carrying need no button, and saying so is
+        // more useful than a button that appears to do nothing when clicked.
+        const toAdd = (action.add ?? []).filter((u) => !draftKeys.has(u));
+        if (action.add?.length && !toAdd.length) {
+            act.textContent += " The draft above already adds them — copy it into App Store Connect.";
+        }
+
+        li.append(score, kwEl, chip, why, act);
+
+        // One click to try it, since the field it belongs in is on this page.
+        if (toAdd.length) {
+            const btn = document.createElement("button");
+            btn.className = "plan-copy plan-try";
+            btn.textContent = `Add ${toAdd.map((u) => b.labels?.[u] ?? u).join(", ")} to the draft`;
+            btn.addEventListener("click", () => {
+                const draft = new Set(draftKeys);
+                for (const u of toAdd) draft.add(u);
+                draftByCc.set(cc, [...draft]);
+                onRefresh?.();
+            });
+            li.appendChild(btn);
+        }
         ol.appendChild(li);
     }
     card.appendChild(ol);
@@ -1118,7 +1206,7 @@ function renderLegend(host, cc, plan, filter, onChange, counts) {
 // so this only asks whether one of those sets is satisfied by what is picked.
 const FIELD_MAX = 100;
 
-function renderBuilder(host, cc, plan, onFieldSaved) {
+function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
     host.replaceChildren();
     const m = plan?.markets?.[cc];
     const b = m?.builder;
@@ -1730,6 +1818,10 @@ function renderBuilder(host, cc, plan, onFieldSaved) {
         if (!uncovered.length) missing.appendChild(line("", "Every chaseable phrase in this market is covered.", "muted"));
         missing.appendChild(ul);
         refreshNote();
+        // The chase card's advice depends on what the draft holds, so it has to
+        // follow the draft. Without this its buttons offered words the draft
+        // already had, and went silent about words it no longer did.
+        onDraftChange?.();
     }
 
     const normalise = () => {
@@ -1862,8 +1954,10 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
         translate.hidden = !translatable(cc);
         translate.textContent = showEnglish ? "Show original" : "Show English";
         translate.classList.toggle("active", showEnglish);
-        renderPlan(document.getElementById("kw-plan"), cc, plan);
-        renderBuilder(document.getElementById("kw-builder"), cc, plan, () => render(currentCc));
+        const refreshPlan = () =>
+            renderPlan(document.getElementById("kw-plan"), cc, plan, () => render(currentCc));
+        refreshPlan();
+        renderBuilder(document.getElementById("kw-builder"), cc, plan, () => render(currentCc), refreshPlan);
         tbody.replaceChildren();
         const rescored = rescoreFor(cc, plan);
         const shipped = plan?.markets?.[cc]?.terms ?? {};
