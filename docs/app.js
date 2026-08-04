@@ -877,7 +877,18 @@ function expandable(head, items) {
     list.hidden = true;
     for (const t of items) {
         const ti = document.createElement("li");
-        ti.textContent = t;
+        if (typeof t === "string") ti.textContent = t;
+        else {
+            // A phrase and what it is worth, so a list of eight wins is not
+            // eight equal-looking lines when one of them carries half the demand.
+            const name = document.createElement("span");
+            name.textContent = t.text;
+            const val = document.createElement("span");
+            val.className = "gap-term-val";
+            val.textContent = t.meta;
+            ti.className = "gap-term-row";
+            ti.append(name, val);
+        }
         list.appendChild(ti);
     }
     btn.addEventListener("click", () => {
@@ -1253,26 +1264,58 @@ function renderBuilder(host, cc, plan) {
             // one.
             swapHead.textContent = "If you replaced your App Store Connect field with this draft";
             swap.appendChild(swapHead);
-            const wins = b.terms.filter((t) => !holdsIn(t, yourKeys) && holdsIn(t, picked)).map((t) => t.kw);
-            const loses = b.terms.filter((t) => holdsIn(t, yourKeys) && !holdsIn(t, picked)).map((t) => t.kw);
+            const wins = b.terms.filter((t) => !holdsIn(t, yourKeys) && holdsIn(t, picked));
+            const loses = b.terms.filter((t) => holdsIn(t, yourKeys) && !holdsIn(t, picked));
+            const winPop = wins.reduce((n, t) => n + t.pop, 0);
+            const losePop = loses.reduce((n, t) => n + t.pop, 0);
+            const rows = (list) =>
+                [...list]
+                    .sort((a, c) => c.pop - a.pop)
+                    .map((t) => ({ text: t.kw, meta: `${t.pop} pop` }));
             const added = [...picked].filter((u) => !yourKeys.has(u)).map(show);
-            const dropped = [...yourKeys].filter((u) => !picked.has(u)).map(show);
+            // A word the title or subtitle already carries costs nothing to
+            // remove from the keyword field: Apple still matches it. Listing it
+            // beside the words that do cost coverage makes the trade look worse
+            // than it is — four words dropped, two of them free.
+            const droppedKeys = [...yourKeys].filter((u) => !picked.has(u));
+            const dropped = droppedKeys.filter((u) => !claimedKeys.has(u)).map(show);
+            const droppedFree = droppedKeys.filter((u) => claimedKeys.has(u)).map(show);
             if (added.length || wins.length) {
                 const what = document.createElement("span");
                 what.textContent = added.length ? `Adds ${added.join(", ")}` : "Adds nothing";
                 const effect = document.createElement("span");
                 effect.className = "swap-win";
-                effect.textContent = `\u2192 wins ${wins.length} phrase${wins.length === 1 ? "" : "s"}`;
-                swap.appendChild(expandable([what, effect], wins));
+                effect.textContent =
+                    `\u2192 wins ${wins.length} phrase${wins.length === 1 ? "" : "s"}, +${winPop.toLocaleString("en-US")} pop`;
+                swap.appendChild(expandable([what, effect], rows(wins)));
             }
-            if (dropped.length || loses.length) {
+            if (droppedKeys.length || loses.length) {
                 const what = document.createElement("span");
-                what.textContent = dropped.length ? `Removes ${dropped.join(", ")}` : "Removes nothing";
+                what.textContent = dropped.length ? `Removes ${dropped.join(", ")}` : "Removes nothing that was working";
                 const effect = document.createElement("span");
                 effect.className = "swap-lose";
-                effect.textContent = `\u2192 loses ${loses.length} phrase${loses.length === 1 ? "" : "s"}`;
-                swap.appendChild(expandable([what, effect], loses));
+                effect.textContent =
+                    `\u2192 loses ${loses.length} phrase${loses.length === 1 ? "" : "s"}, \u2212${losePop.toLocaleString("en-US")} pop`;
+                const head = [what, effect];
+                if (droppedFree.length) {
+                    const free = document.createElement("span");
+                    free.className = "swap-free";
+                    free.textContent = `(also drops ${droppedFree.join(", ")}, free \u2014 your title or subtitle carries ${droppedFree.length === 1 ? "it" : "them"})`;
+                    head.push(free);
+                }
+                swap.appendChild(expandable(head, rows(loses)));
             }
+
+            // The bottom line, which the two rows above only imply.
+            const net = document.createElement("li");
+            net.className = "swap-net";
+            const netPhrases = wins.length - loses.length;
+            const netPop = winPop - losePop;
+            net.textContent =
+                `Net ${netPhrases >= 0 ? "+" : "\u2212"}${Math.abs(netPhrases)} phrase${Math.abs(netPhrases) === 1 ? "" : "s"}` +
+                ` and ${netPop >= 0 ? "+" : "\u2212"}${Math.abs(netPop).toLocaleString("en-US")} pop`;
+            net.classList.add(netPop >= 0 ? "good" : "bad");
+            swap.appendChild(net);
             if (!wins.length && !loses.length) {
                 swap.appendChild(expandable([document.createTextNode("Same phrases as your field")], []));
             }

@@ -1073,3 +1073,16 @@ li.log-day {
    `.kw-need` and was painting both halves the same grey. */
 .plan-gaps code .kw-have { color: var(--text-secondary); }
 .plan-gaps code .kw-need { color: var(--accent); font-weight: 600; }
+.plan-gaps .swap-free { color: var(--text-secondary); font-size: 0.74rem; }
+
+/* Wins and loses carry their demand, and the row underneath carries the sum. */
+.gap-term-row { display: flex; justify-content: space-between; gap: 12px; }
+.gap-term-val { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.swap-net {
+    padding-top: 6px !important;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border-bottom: 0 !important;
+}
+.swap-net.good { color: var(--good); }
+.swap-net.bad { color: var(--bad); }
