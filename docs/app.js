@@ -1086,7 +1086,9 @@ function renderPlan(host, cc, plan, onRefresh) {
     }
 
     host.appendChild(card);
-    makeCollapsible(h, "push", true);
+    makeCollapsible(h, "push", true)(
+        `${chase.length} worth a change${olElse.children.length ? `, ${olElse.children.length} already done` : ""}`
+    );
 }
 
 // Shared by both panels.
@@ -1153,6 +1155,11 @@ function makeCollapsible(headEl, key, defaultOpen = true) {
     const caret = document.createElement("span");
     caret.className = "sec-caret";
     headEl.prepend(caret);
+    // A closed section still has room to say what is inside it, which beats a
+    // bare strip you have to open to find out whether you wanted it.
+    const summary = document.createElement("span");
+    summary.className = "sec-sum";
+    headEl.appendChild(summary);
     const apply = () => {
         body.classList.toggle("sec-collapsed", !open);
         caret.textContent = open ? "\u25be" : "\u25b8";
@@ -1171,6 +1178,7 @@ function makeCollapsible(headEl, key, defaultOpen = true) {
             toggle();
         }
     });
+    return (text) => (summary.textContent = text);
 }
 
 // Your pasted field, per market, as the page stored it.
@@ -1345,7 +1353,12 @@ function renderLegend(host, cc, plan, filter, onChange, counts) {
     }
     // Open when a filter is on, or the rows would be hidden with no visible
     // reason for the table being short.
-    makeCollapsible(head, "legend", filter.intents.size > 0 || filter.gapOnly);
+    const legendSummary = makeCollapsible(head, "legend", filter.intents.size > 0 || filter.gapOnly);
+    legendSummary(
+        filter.intents.size || filter.gapOnly
+            ? `filtered to ${counts.shown} of ${counts.total}`
+            : `${present.size} tags`
+    );
 }
 
 // The field card: everything about the 100 characters you control, in one
@@ -1413,6 +1426,7 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
         set.has(u) || (/[\u3040-\u30ff\u4e00-\u9fff]/.test(u) && [...set].some((p) => p.includes(u)));
     const holdsIn = (t, set) => t.alts.some((a) => a.every((u) => sat(u, set)));
 
+    let setSummary = null;
     const charsOf = (set) => [...set].map(show).join(",").length;
     const popTotal = b.terms.reduce((n, t) => n + t.pop, 0);
 
@@ -1880,6 +1894,9 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
         }
         suggest.appendChild(sUl);
 
+        setSummary?.(
+            `${covered.length} of ${b.terms.length} phrases covered \u00b7 ${chars}/${FIELD_MAX} characters`
+        );
         refreshNote();
         // The chase card's advice depends on what the draft holds, so it has to
         // follow the draft. Without this its buttons offered words the draft
@@ -1938,8 +1955,8 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
         "Click a word to drop it, or add one from the list below. When these cover more than your own keywords, copy them into App Store Connect.";
     draft.append(chipHead, preview, chipRow, chipHint, buttons);
     host.append(h, context, how, yours, draft, stats, panel, suggest);
+    setSummary = makeCollapsible(h, "builder", false);
     draw();
-    makeCollapsible(h, "builder", false);
 }
 
 async function renderKeywords(kw, glossary = {}, plan = null) {
@@ -2427,7 +2444,11 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
             head.className = "recent-label";
             head.textContent = "Who owns these keywords";
             comp.appendChild(head);
-            queueMicrotask(() => makeCollapsible(head, "competitors", false));
+            queueMicrotask(() =>
+                // Open by default: it is context you read alongside the table
+                // rather than a task you go looking for.
+                makeCollapsible(head, "competitors", true)(`${top.length} apps in this market`)
+            );
             const note = document.createElement("p");
             note.className = "kw-comp-note";
             note.textContent =
