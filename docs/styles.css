@@ -695,6 +695,48 @@ li.log-day {
     font-size: 0.82rem;
     margin-right: 6px;
 }
+/* Each gap row opens to show the phrases the word would unlock. */
+.gap-head {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    width: 100%;
+    padding: 0;
+    font: inherit;
+    font-size: 0.8rem;
+    text-align: left;
+    color: inherit;
+    background: none;
+    border: 0;
+    cursor: pointer;
+}
+.gap-head:hover code { text-decoration: underline; }
+.gap-caret {
+    color: var(--text-secondary);
+    font-size: 0.65rem;
+    width: 9px;
+    flex: none;
+}
+.gap-terms {
+    margin: 4px 0 2px 15px;
+    padding: 0;
+    list-style: none;
+}
+.gap-terms li {
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+    padding: 1px 0;
+    border: 0;
+}
+/* The recommended field is the one thing in the card meant to be read as a
+   value to copy, so it gets the monospace treatment and room to wrap. */
+.plan-rec { display: flex; gap: 4px; }
+.plan-rec code {
+    color: var(--text);
+    font-size: 0.78rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
 .plan-gaps code.weak { color: var(--text-secondary); }
 .plan-gaps span, .plan-why { color: var(--text-secondary); }
 .plan-score {

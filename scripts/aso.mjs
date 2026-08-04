@@ -263,14 +263,14 @@ function reasonFor({ pop, rank, cov, intent }) {
   if (cov && !cov.covered) {
     const list = cov.missing.map((m) => `"${m}"`).join(", ");
     if (!cov.partial && cov.missing.every((w) => vetoed.has(fold(w)))) {
-      return `${pop} demand, ${where}, only reachable by adding ${list}, which you have ruled out`;
+      return `${pop} pop, ${where}, only reachable by adding ${list}, which you have ruled out`;
     }
     const where2 = cov.partial ? "title and subtitle have no" : "listing has no";
-    return `${pop} demand, ${where}, ${where2} ${list}`;
+    return `${pop} pop, ${where}, ${where2} ${list}`;
   }
-  if (rank == null) return `${pop} demand, ${where}, words are all in the listing`;
-  if (rank <= 10) return `${pop} demand, ${where}, page one already`;
-  return `${pop} demand, ${where}, covered — this is a ranking gap, not a wording one`;
+  if (rank == null) return `${pop} pop, ${where}, words are all in the listing`;
+  if (rank <= 10) return `${pop} pop, ${where}, page one already`;
+  return `${pop} pop, ${where}, covered — this is a ranking gap, not a wording one`;
 }
 
 // --- assembly ----------------------------------------------------------------
@@ -379,6 +379,10 @@ function analyseMarket(cc) {
         }
       : null,
     coverage: gradable ? { covered, of: gradable, partial } : null,
+    // Always present, including where the current field is unknown. What the
+    // field should say does not depend on anyone having written down what it
+    // says now.
+    recommended: recommendField(cc, terms, meta),
     byIntent,
     shoppingList: shoppingList.slice(0, 12),
     unusedFieldWords: unused,
@@ -537,52 +541,110 @@ function csv(only) {
   }
 }
 
-// Greedy pack: the words that unblock the most demand per character, minus
-// anything the title or subtitle already carries. Apple pools the three
-// fields, so a word repeated from the subtitle spends characters on nothing.
+// What the keyword field SHOULD say, worked out from the tracked terms rather
+// than from whatever it says today. Always computed, including for the markets
+// whose current field nobody has written down: "not recorded" is a fact about
+// bookkeeping, and the useful answer is the recommendation.
+//
+// This is set cover, not a ranking of words. A word only pays off when every
+// other word of its phrase is present too, so "auto" is worth nothing until
+// "sleep" and "tracker" are there, and value has to be measured against what
+// has already been picked. Scoring each word independently and taking the top
+// hundred characters is what produced a field full of half-covered phrases.
+//
+// Candidate units differ by script for the same reason coverage does. A Latin
+// field is built from words. A Japanese or Chinese one has no spaces to split
+// on, so the candidates are the character runs the terms actually share, and
+// 睡眠 earns its place by appearing across five phrases rather than by being a
+// word in any dictionary sense.
+const FIELD_LIMIT = 100;
+
+function recommendField(cc, terms, meta) {
+  const claimed = poolOf({ title: meta?.title, subtitle: meta?.subtitle });
+  const wanted = Object.entries(terms).filter(([, t]) => CHASEABLE.has(t.intent));
+
+  const candidates = new Map(); // unit -> cost in characters
+  const shared = new Map(); // CJK run -> how many distinct terms contain it
+  for (const [kw] of wanted) {
+    if (!hasCJK(kw)) {
+      for (const w of tokens(kw)) if (!claimed?.set.has(fold(w))) candidates.set(w, w.length);
+      continue;
+    }
+    for (const part of fold(kw).split(/\s+/).filter(Boolean)) {
+      if (!hasCJK(part)) {
+        if (!claimed?.set.has(part)) candidates.set(part, part.length);
+        continue;
+      }
+      // A whole phrase is always a legitimate thing to put in the field.
+      candidates.set(part, part.length);
+      const seen = new Set();
+      for (let len = 2; len <= Math.min(6, part.length); len++)
+        for (let i = 0; i + len <= part.length; i++) seen.add(part.slice(i, i + len));
+      for (const run of seen) shared.set(run, (shared.get(run) ?? 0) + 1);
+    }
+  }
+  // A character run only becomes a candidate once more than one phrase uses it.
+  // Any run of any phrase is a substring, so without this the cover happily
+  // recommends チェ — two characters sliced out of いびきチェッカー, which is
+  // not a word, not a query, and not something to paste into a keyword field.
+  for (const [run, count] of shared) if (count >= 2) candidates.set(run, run.length);
+  for (const w of vetoed) candidates.delete(w);
+
+  // A term is satisfied once title, subtitle and the picks so far can build it.
+  const satisfiedBy = (kw, picks) => {
+    const pool = {
+      set: new Set([...(claimed?.set ?? []), ...picks.map(fold)]),
+      segments: [...(claimed?.segments ?? []), ...picks.map(fold)],
+      complete: true,
+    };
+    return coverageOf(kw, pool).covered;
+  };
+
+  const picks = [];
+  let chars = 0;
+  while (true) {
+    const unmet = wanted.filter(([kw]) => !satisfiedBy(kw, picks));
+    if (!unmet.length) break;
+    let best = null;
+    for (const [unit, len] of candidates) {
+      if (picks.includes(unit)) continue;
+      const cost = picks.length ? len + 1 : len;
+      if (chars + cost > FIELD_LIMIT) continue;
+      const next = [...picks, unit];
+      let gain = 0;
+      for (const [kw, t] of unmet) if (satisfiedBy(kw, next)) gain += t.pop * FIT[t.intent];
+      if (gain > 0 && (!best || gain / cost > best.gain / best.cost)) best = { unit, gain, cost };
+    }
+    if (!best) break;
+    picks.push(best.unit);
+    chars += best.cost;
+  }
+
+  const field = picks.join(",");
+  const current = meta?.keywordField ? new Set(words(meta.keywordField)) : null;
+  return {
+    field,
+    chars: field.length,
+    covers: wanted.filter(([kw]) => satisfiedBy(kw, picks)).length,
+    of: wanted.length,
+    ...(current && {
+      adds: picks.filter((p) => !current.has(fold(p))),
+      drops: [...current].filter((w) => !picks.some((p) => fold(p) === w) && !claimed?.set.has(w)),
+    }),
+  };
+}
+
 function fieldFor(cc) {
   const m = analyseMarket(cc);
   if (!m.listing) return console.log(`${cc}: no listing recorded; run --fetch first`);
-  const claimed = new Set([...words(m.listing.title ?? ""), ...words(m.listing.subtitle ?? "")]);
-  const current = new Set(words(m.listing.keywordField ?? ""));
-  const value = new Map();
-
-  // Value a word by the demand of every tracked term that needs it, whether or
-  // not the listing has it: dropping a word already in the field has to cost
-  // as much as adding it would gain, or the packer would churn the field.
-  for (const [kw, t] of Object.entries(m.terms)) {
-    if (!CHASEABLE.has(t.intent)) continue;
-    for (const w of tokens(kw)) {
-      if (claimed.has(fold(w)) || vetoed.has(fold(w))) continue;
-      // Stopwords are worth a fraction of a noun carrying the same demand:
-      // they only ever unlock the one phrase they appear in. Words already in
-      // the field carry a small premium, because dropping one gives up a rank
-      // that exists for a gain that is still a guess, and without it the
-      // packer rewrites the whole field every time demand shifts a point.
-      const weight = (STOPWORD.test(w) ? 0.3 : 1) * (current.has(fold(w)) ? 1.15 : 1);
-      value.set(w, (value.get(w) ?? 0) + t.pop * FIT[t.intent] * weight);
-    }
-  }
-  const ranked = [...value.entries()]
-    .map(([word, demand]) => ({ word, demand, cost: word.length + 1 }))
-    .sort((a, b) => b.demand / b.cost - a.demand / a.cost);
-
-  const picked = [];
-  let chars = 0;
-  for (const r of ranked) {
-    const cost = picked.length ? r.word.length + 1 : r.word.length;
-    if (chars + cost > 100) continue;
-    picked.push(r.word);
-    chars += cost;
-  }
-  const field = picked.join(",");
-  console.log(`${cc}: proposed field (${field.length}/100)\n\n${field}\n`);
-  const added = picked.filter((w) => !current.has(w));
-  const dropped = [...current].filter((w) => !picked.includes(w) && !claimed.has(w));
-  console.log(`adds:  ${added.join(", ") || "nothing"}`);
-  console.log(`drops: ${dropped.join(", ") || "nothing"}`);
+  const r = m.recommended;
+  console.log(`${cc}: recommended field (${r.chars}/${FIELD_LIMIT})\n\n${r.field}\n`);
+  console.log(`covers ${r.covers}/${r.of} chaseable terms`);
+  if (r.adds) console.log(`adds:  ${r.adds.join(", ") || "nothing"}`);
+  if (r.drops) console.log(`drops: ${r.drops.join(", ") || "nothing"}`);
   console.log(`\nProposal only. Check it against the shopping list in --report before shipping it.`);
 }
+
 
 // --- CLI ---------------------------------------------------------------------
 

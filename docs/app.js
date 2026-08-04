@@ -801,10 +801,15 @@ function renderPlan(host, cc, plan) {
     const line = (label, value, cls) => {
         const p = document.createElement("p");
         p.className = "plan-line" + (cls ? ` ${cls}` : "");
-        const b = document.createElement("span");
-        b.className = "plan-label";
-        b.textContent = label;
-        p.append(b, document.createTextNode(value));
+        // An empty label must not reserve the label column, or every note in
+        // the card hangs indented under nothing.
+        if (label) {
+            const b = document.createElement("span");
+            b.className = "plan-label";
+            b.textContent = label;
+            p.appendChild(b);
+        }
+        p.appendChild(document.createTextNode(value));
         return p;
     };
 
@@ -822,11 +827,52 @@ function renderPlan(host, cc, plan) {
                 ? line("Subtitle", `${l.subtitle}  (${l.subtitleChars}/30)`)
                 : line("Subtitle", "none set — Apple fills the slot with your category, and 30 indexed characters go unspent", "warn")
         );
-        listing.appendChild(
-            l.keywordField
-                ? line("Keywords", `${l.keywordField}  (${l.fieldChars}/100)`)
-                : line("Keywords", "not recorded — the field is private to App Store Connect, so it is kept by hand in scripts/metadata.json", "muted")
-        );
+        // The recommendation, not the current field. What the field should say
+        // is worked out from the tracked terms, so it exists whether or not
+        // anyone has written down what it says today — and "not recorded" in
+        // this slot was a fact about bookkeeping where an answer belongs.
+        const r = m.recommended;
+        if (r) {
+            const rec = document.createElement("p");
+            rec.className = "plan-line plan-rec";
+            const label = document.createElement("span");
+            label.className = "plan-label";
+            label.textContent = "Keywords";
+            const field = document.createElement("code");
+            field.textContent = r.field;
+            rec.append(label, field);
+            listing.appendChild(rec);
+
+            const note = line(
+                "",
+                `Recommended: ${r.chars}/100 characters, covering ${r.covers} of ${r.of} chaseable terms. Words already in the title or subtitle are left out, because Apple pools all three.`,
+                "muted"
+            );
+            listing.appendChild(note);
+
+            if (r.adds?.length || r.drops?.length) {
+                if (r.adds?.length) listing.appendChild(line("Adds", r.adds.join(", "), "muted"));
+                if (r.drops?.length) listing.appendChild(line("Drops", r.drops.join(", "), "muted"));
+            } else if (!l.keywordField) {
+                listing.appendChild(
+                    line("", "Your current field is not recorded, so there is nothing to compare against. Paste it into scripts/metadata.json to see what this would change.", "muted")
+                );
+            }
+
+            const copy = document.createElement("button");
+            copy.className = "plan-copy";
+            copy.textContent = "Copy field";
+            copy.addEventListener("click", async () => {
+                try {
+                    await navigator.clipboard.writeText(r.field);
+                    copy.textContent = "Copied";
+                } catch {
+                    copy.textContent = "Copy failed";
+                }
+                setTimeout(() => (copy.textContent = "Copy field"), 1500);
+            });
+            listing.appendChild(copy);
+        }
         if (m.repeatedInSubtitle?.length) {
             listing.appendChild(line("Repeated", `${m.repeatedInSubtitle.join(", ")} — already in the subtitle, so the field copy buys nothing`, "warn"));
         }
@@ -847,6 +893,9 @@ function renderPlan(host, cc, plan) {
 
     // The shopping list. One word per row, and what that word would unblock.
     const gaps = card("Add one word, unlock these");
+    gaps.appendChild(
+        line("", "Words missing from your listing, ranked by the phrases they would make rankable. Pop is the 5–100 autocomplete demand score, summed across those phrases; it ranks the words, it does not count searches.", "muted")
+    );
     if (!m.shoppingList?.length) {
         gaps.appendChild(line("", "Nothing missing: every chaseable term already has its words in the listing."));
     } else {
@@ -854,13 +903,41 @@ function renderPlan(host, cc, plan) {
         ul.className = "plan-gaps";
         for (const g of m.shoppingList.slice(0, 8)) {
             const li = document.createElement("li");
+            // Expandable rather than a tooltip: which phrases a word unlocks is
+            // the reason to buy it, and a reason you have to hover to read is a
+            // reason most people never read.
+            const head = document.createElement("button");
+            head.className = "gap-head";
+            head.setAttribute("aria-expanded", "false");
+            const caret = document.createElement("span");
+            caret.className = "gap-caret";
+            caret.textContent = "▸";
             const word = document.createElement("code");
             word.textContent = g.word;
             if (g.weak) word.className = "weak";
             const rest = document.createElement("span");
-            rest.textContent = ` ${g.demand} demand across ${g.terms.length} term${g.terms.length === 1 ? "" : "s"}`;
-            rest.title = g.terms.join(", ");
-            li.append(word, rest);
+            // "368 demand" read as a quantity of something. It is the sum of
+            // the Pop scores of the phrases the word blocks, and Pop is an
+            // ordinal 5-100 score, not a count of searches — so the phrase
+            // count leads and the sum is named for what it is.
+            rest.textContent =
+                `${g.terms.length} term${g.terms.length === 1 ? "" : "s"} · ${g.demand} pop`;
+            head.append(caret, word, rest);
+
+            const terms = document.createElement("ul");
+            terms.className = "gap-terms";
+            terms.hidden = true;
+            for (const t of g.terms) {
+                const ti = document.createElement("li");
+                ti.textContent = t;
+                terms.appendChild(ti);
+            }
+            head.addEventListener("click", () => {
+                terms.hidden = !terms.hidden;
+                caret.textContent = terms.hidden ? "▸" : "▾";
+                head.setAttribute("aria-expanded", String(!terms.hidden));
+            });
+            li.append(head, terms);
             ul.appendChild(li);
         }
         gaps.appendChild(ul);
