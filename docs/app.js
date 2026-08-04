@@ -965,21 +965,38 @@ function renderBuilder(host, cc, plan) {
     yoursLabel.className = "fb-label";
     yoursLabel.textContent = "Your field in App Store Connect";
     yoursLabel.htmlFor = `fb-input-${cc}`;
-    const input = document.createElement("input");
+    // A textarea, not a single line: a 100-character field scrolled sideways in
+    // an input is a field you cannot read to check.
+    const input = document.createElement("textarea");
     input.id = `fb-input-${cc}`;
     input.className = "fb-input";
+    input.rows = 2;
     input.value = currentRaw;
-    input.placeholder = "paste the 100-character field for this market";
+    input.placeholder = "paste it straight from App Store Connect: recorder,monitor,cpap,\u2026";
     input.spellcheck = false;
+
+    // What Apple counts: the entries joined by commas. Pasted text arrives with
+    // spaces after commas, quotes round the whole thing and stray newlines, and
+    // none of those are in the field itself.
+    const tidy = (text) =>
+        (text ?? "")
+            .replace(/^[\s"']+|[\s"']+$/g, "")
+            .split(/[,\u3001\uff0c\n]+/)
+            .map((w) => w.trim())
+            .filter(Boolean)
+            .filter((w, i, all) => all.indexOf(w) === i)
+            .join(",");
     const yoursNote = document.createElement("span");
     yoursNote.className = "fb-yours-note";
     const refreshNote = () => {
-        const keys = new Set(parseField(input.value));
+        const clean = tidy(input.value);
+        const keys = new Set(parseField(clean));
         const n = b.terms.filter((t) => holdsIn(t, keys)).length;
-        const chars = input.value.trim().length;
-        yoursNote.textContent = input.value.trim()
-            ? `${chars}/100 characters, covering ${n} of ${b.terms.length} phrases` +
-              (savedRaw ? " \u00b7 saved in this browser" : " \u00b7 not saved yet")
+        yoursNote.classList.toggle("over", clean.length > FIELD_MAX);
+        yoursNote.textContent = clean
+            ? `${clean.length}/${FIELD_MAX} characters, covering ${n} of ${b.terms.length} phrases` +
+              (clean.length > FIELD_MAX ? " \u00b7 over the limit" : "") +
+              (savedRaw ? " \u00b7 saved in this browser" : " \u00b7 saving\u2026")
             : "Nothing recorded. Until you paste it, comparisons use the seed in scripts/metadata.json.";
     };
     refreshNote();
@@ -989,6 +1006,8 @@ function renderBuilder(host, cc, plan) {
     stats.className = "fb-stats";
     const mix = document.createElement("div");
     mix.className = "fb-mix";
+    const swap = document.createElement("ul");
+    swap.className = "plan-gaps fb-swap";
     const chipRow = document.createElement("div");
     chipRow.className = "fb-chips";
     const suggest = document.createElement("div");
@@ -1044,6 +1063,36 @@ function renderBuilder(host, cc, plan) {
                       coveredPop >= yourPop ? "good" : "bad"
                   )
         );
+
+        // The swap against your real field, both directions and live. It sat in
+        // the listing card as a static comparison against the saved seed, which
+        // stopped being true the moment you edited a word here.
+        swap.replaceChildren();
+        if (yourCovers != null) {
+            const wins = b.terms.filter((t) => !holdsIn(t, yourKeys) && holdsIn(t, picked)).map((t) => t.kw);
+            const loses = b.terms.filter((t) => holdsIn(t, yourKeys) && !holdsIn(t, picked)).map((t) => t.kw);
+            if (wins.length) {
+                const w = document.createElement("span");
+                w.className = "swap-win";
+                w.textContent = `Wins ${wins.length} phrase${wins.length === 1 ? "" : "s"}`;
+                const by = document.createElement("span");
+                const added = [...picked].filter((u) => !yourKeys.has(u)).map(show);
+                by.textContent = added.length ? `by adding ${added.join(", ")}` : "";
+                swap.appendChild(expandable([w, by], wins));
+            }
+            if (loses.length) {
+                const lo = document.createElement("span");
+                lo.className = "swap-lose";
+                lo.textContent = `Loses ${loses.length} phrase${loses.length === 1 ? "" : "s"}`;
+                const by = document.createElement("span");
+                const dropped = [...yourKeys].filter((u) => !picked.has(u)).map(show);
+                by.textContent = dropped.length ? `by dropping ${dropped.join(", ")}` : "";
+                swap.appendChild(expandable([lo, by], loses));
+            }
+            if (!wins.length && !loses.length) {
+                swap.appendChild(expandable([document.createTextNode("Same phrases as your field")], []));
+            }
+        }
 
         // Which kind of searcher the field is aimed at. Two fields can cover the
         // same count of phrases and reach different people.
@@ -1166,6 +1215,16 @@ function renderBuilder(host, cc, plan) {
         refreshNote();
     }
 
+    const normalise = () => {
+        const clean = tidy(input.value);
+        if (clean !== input.value) input.value = clean;
+        localStorage.setItem(storeKey, clean);
+        savedRaw = clean;
+        draw();
+    };
+    input.addEventListener("blur", normalise);
+    input.addEventListener("paste", () => setTimeout(normalise, 0));
+
     let saveTimer = null;
     input.addEventListener("input", () => {
         clearTimeout(saveTimer);
@@ -1181,7 +1240,7 @@ function renderBuilder(host, cc, plan) {
         draw();
     });
     act("Load my field", () => {
-        picked = new Set(parseField(input.value));
+        picked = new Set(parseField(tidy(input.value)));
         draw();
     });
     act("Clear", () => {
@@ -1199,7 +1258,7 @@ function renderBuilder(host, cc, plan) {
         setTimeout(() => (btn.textContent = "Copy field"), 1500);
     });
 
-    host.append(h, context, yours, stats, mix, chipRow, suggest, missing, buttons);
+    host.append(h, context, yours, stats, swap, mix, chipRow, suggest, missing, buttons);
     draw();
 }
 

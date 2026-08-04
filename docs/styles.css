@@ -1000,3 +1000,6 @@ li.log-day {
 .fb-suggest { display: block; }
 .fb-suggest .fb-add { margin-right: 6px; }
 #kw-plan { grid-template-columns: 1fr; }
+.fb-input { resize: vertical; line-height: 1.5; }
+.fb-yours-note.over { color: var(--bad); }
+.fb-swap { margin: 8px 0 12px; }
