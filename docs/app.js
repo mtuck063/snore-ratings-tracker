@@ -934,7 +934,7 @@ function renderPlan(host, cc, plan, onRefresh) {
     card.appendChild(
         line(
             "",
-            "Ranked by what climbing is worth, so most of these are phrases you already rank for — page one is the top ten, and the top three take most of the taps. Pop is the 5–100 demand score from Apple's autocomplete, weighted by how far you have left to climb, whether this app converts that searcher, and whether your listing carries the words." +
+            "Ranked by what climbing is worth, so most of these are phrases you already rank for — page one is the top ten, and the top three take most of the taps. Popularity is the 5–100 demand score from Apple's autocomplete, weighted by how far you have left to climb, whether this app converts that searcher, and whether your listing carries the words." +
                 (rescored ? " Scored against the field you pasted above." : ""),
             "muted"
         )
@@ -991,7 +991,7 @@ function renderPlan(host, cc, plan, onRefresh) {
             const afterReach = step(c.pop * f.reach);
             const afterFit = step(afterReach * f.fit);
             score.dataset.tip =
-                `${c.pop} pop\n` +
+                `${c.pop} popularity\n` +
                 `× ${x(f.reach)} rank headroom (${reachWhy}) = ${afterReach}\n` +
                 `× ${x(f.fit)} searcher fit (${FIT_SHORT[c.intent] ?? c.intent}) = ${afterFit}\n` +
                 `× ${x(lever)} coverage (${leverWhy}) = ${c.score}`;
@@ -1019,7 +1019,7 @@ function renderPlan(host, cc, plan, onRefresh) {
                     : c.rank <= 50
                       ? `you already rank #${c.rank}, ${c.rank - 10} place${c.rank - 10 === 1 ? "" : "s"} below page one`
                       : `you rank #${c.rank}, well outside page one, but the demand justifies a push`;
-        why.textContent = `${c.pop} pop — ${standing}.`;
+        why.textContent = `${c.pop} popularity — ${standing}.`;
 
         const term = m.terms[c.kw];
         const bt = byKw.get(c.kw);
@@ -1605,25 +1605,28 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
                 `${denominatorTip} Of those, title and subtitle cover ${free.length} on their own, so these hundred characters are winning the other ${covered.length - free.length}.`,
                 { key: "phrases" }
             ),
-            tile(coveredPop.toLocaleString("en-US"), `pop of ${popTotal.toLocaleString("en-US")}`),
+            tile(coveredPop.toLocaleString("en-US"), `popularity of ${popTotal.toLocaleString("en-US")}`),
             yourPop == null
-                ? tile("\u2014", "vs your field", "", "Paste your field above to compare")
+                ? tile("\u2014", "vs your keywords", "", "Paste your keywords above to compare")
                 : // Which way round, spelled out. "+426 pop vs your field" was
                   // read as your field being ahead by 426, when it is the draft
                   // that is ahead — a sign convention is not an explanation.
                   tile(
                       (coveredPop - yourPop >= 0 ? "+" : "\u2212") +
                           Math.abs(coveredPop - yourPop).toLocaleString("en-US"),
+                      // Names both sides. "+426 more popularity than your
+                      // keywords" left it to the reader to guess what the 426
+                      // belonged to.
                       coveredPop === yourPop
-                          ? `the draft ties your field, which covers ${yourCovers}`
+                          ? `the draft keywords tie yours (yours cover ${yourCovers})`
                           : coveredPop > yourPop
-                            ? `more pop than your field, which covers ${yourCovers}`
-                            : `less pop than your field, which covers ${yourCovers}`,
+                            ? `more popularity in the draft keywords than in yours (yours cover ${yourCovers})`
+                            : `less popularity in the draft keywords than in yours (yours cover ${yourCovers})`,
                       coveredPop >= yourPop ? "good" : "bad",
                       coveredPop > yourPop
-                          ? "The draft above is ahead. Copying it into App Store Connect is the gain."
+                          ? "The draft keywords above are ahead. Copying them into App Store Connect is the gain."
                           : coveredPop < yourPop
-                            ? "Your saved field is ahead of the draft. Keep what you have, or edit the draft until it wins."
+                            ? "Your saved keywords are ahead of the draft keywords. Keep what you have, or edit the draft until it wins."
                             : "Both cover the same demand."
                   )
         );
@@ -1673,7 +1676,7 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
                     }
                     const val = document.createElement("span");
                     val.className = "gap-term-val";
-                    val.textContent = `${t.pop} pop`;
+                    val.textContent = `${t.pop} popularity`;
                     li.className = cls;
                     li.append(name, val);
                     ul.appendChild(li);
@@ -1716,7 +1719,7 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
             const seg = document.createElement("span");
             seg.className = `fb-seg intent-${intent}`;
             seg.style.width = `${(pop / mixTotal) * 100}%`;
-            seg.dataset.tip = `${intent}: ${pop} pop`;
+            seg.dataset.tip = `${intent}: ${pop} popularity`;
             bar.appendChild(seg);
             const key = document.createElement("span");
             key.className = "fb-key";
@@ -1831,7 +1834,7 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
             });
             const n = document.createElement("span");
             n.className = "fb-add-gain";
-            n.textContent = `${g.terms.length} phrase${g.terms.length === 1 ? "" : "s"} \u00b7 ${g.pop} pop`;
+            n.textContent = `${g.terms.length} phrase${g.terms.length === 1 ? "" : "s"} \u00b7 ${g.pop} popularity`;
             sUl.appendChild(expandable([add, n], g.terms));
         }
         suggest.appendChild(sUl);
@@ -2109,9 +2112,9 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
             const band =
                 cur.pop >= 70 ? "High demand." : cur.pop <= 5 ? "No measurable demand." : "";
             tdPop.dataset.tip = cur.prefix
-                ? `${band} Pop ${cur.pop} of 100: Apple suggests “${term}” once you have typed “${cur.prefix}”, ` +
+                ? `${band} Popularity ${cur.pop} of 100: Apple suggests “${term}” once you have typed “${cur.prefix}”, ` +
                   `and it sits at position ${cur.pos} in that list. Earlier and higher means more people search it.`
-                : `${band || "Pop 5 of 100."} Apple's autocomplete never suggests this phrase, so there is no demand signal for it.`;
+                : `${band || "Popularity 5 of 100."} Apple's autocomplete never suggests this phrase, so there is no demand signal for it.`;
             if (cur.pop <= 5) tdPop.classList.add("muted");
             else if (cur.pop >= 70) tdPop.classList.add("pop-hot");
             const prevDayVals = prevDayRow?.markets?.[cc]?.[term];
