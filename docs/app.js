@@ -1140,6 +1140,30 @@ function renderBuilder(host, cc, plan, onFieldSaved) {
     const charsOf = (set) => [...set].map(show).join(",").length;
     const popTotal = b.terms.reduce((n, t) => n + t.pop, 0);
 
+    // Why the builder's denominator is smaller than the table's. The table and
+    // the competitor panel count every tracked keyword; this field can only win
+    // the ones a keyword is allowed to buy, so competitor names, your own name,
+    // off-category phrases and anything reachable only through a vetoed word
+    // are out. Unexplained, two numbers for the same market look like a bug.
+    const tracked = Object.keys(m.terms ?? {});
+    const inBuilder = new Set(b.terms.map((t) => t.kw));
+    const excluded = {};
+    for (const kw of tracked) {
+        if (inBuilder.has(kw)) continue;
+        const intent = m.terms[kw].intent;
+        const bucket = ["brand", "mine", "offtarget"].includes(intent) ? intent : "vetoed";
+        excluded[bucket] = (excluded[bucket] ?? 0) + 1;
+    }
+    const excludedWords = {
+        brand: (n) => `${n} competitor name${n === 1 ? "" : "s"}`,
+        mine: () => "your own app name",
+        offtarget: (n) => `${n} outside this app's category`,
+        vetoed: (n) => `${n} reachable only through a word you have vetoed`,
+    };
+    const denominatorTip =
+        `${b.terms.length} of the ${tracked.length} keywords tracked for this market are winnable with a keyword field. ` +
+        `The rest: ${Object.entries(excluded).map(([k, n]) => excludedWords[k](n)).join(", ")}.`;
+
     const h = document.createElement("h3");
     h.textContent = "Keyword field builder";
     // What the card is for, in the order you would do it. Everything here was
@@ -1342,7 +1366,7 @@ function renderBuilder(host, cc, plan, onFieldSaved) {
                 `${covered.length}/${b.terms.length}`,
                 `phrases covered \u00b7 ${covered.length - free.length} from this field`,
                 "",
-                `Title and subtitle cover ${free.length} on their own, whatever the keyword field says.`,
+                `${denominatorTip} Of those, title and subtitle cover ${free.length} on their own, whatever the keyword field says.`,
                 { key: "phrases" }
             ),
             tile(
