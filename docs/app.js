@@ -1047,8 +1047,21 @@ function renderBuilder(host, cc, plan) {
                 ? line("Subtitle", `${l.subtitle}  (${l.subtitleChars}/30)`)
                 : line("Subtitle", "none set \u2014 Apple fills the slot with your category, and 30 indexed characters go unspent", "warn")
         );
+        // How much the other two fields already do. "16 of 73 covered" with an
+        // empty keyword field looks broken until you know the title and
+        // subtitle are indexed too and are carrying those phrases on their own.
+        const freeCovers = b.terms.filter((t) => holdsIn(t, new Set())).length;
+        // Listed as written, not as the stems they match on: "snor, timelin"
+        // is the internal form and reads as a typo.
+        const freeWords = [
+            ...new Set(`${l.title ?? ""} ${l.subtitle ?? ""}`.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean)),
+        ];
         context.appendChild(
-            line("", "Words in the title and subtitle are already indexed and cost no characters here, because Apple pools all three fields.", "muted")
+            line(
+                "",
+                `Apple pools all three fields, so words here cost no keyword characters. On their own they already cover ${freeCovers} of ${b.terms.length} phrases — everything buildable from ${freeWords.join(", ")}.`,
+                "muted"
+            )
         );
     }
 
@@ -1057,7 +1070,7 @@ function renderBuilder(host, cc, plan) {
     yours.className = "fb-yours";
     const yoursLabel = document.createElement("label");
     yoursLabel.className = "fb-label";
-    yoursLabel.textContent = "1 \u00b7 Your field in App Store Connect";
+    yoursLabel.textContent = "Your field in App Store Connect";
     yoursLabel.htmlFor = `fb-input-${cc}`;
     // A textarea, not a single line: a 100-character field scrolled sideways in
     // an input is a field you cannot read to check.
@@ -1262,11 +1275,18 @@ function renderBuilder(host, cc, plan) {
             : yourCovers != null && sameAs(yourKeys)
               ? "your App Store Connect field"
               : "edited by you";
-        chipHead.textContent = `2 \u00b7 The field you are building \u2014 ${origin}`;
+        chipHead.textContent = `The field you are building \u2014 ${origin}`;
         const built = [...picked].map(show).join(",");
         preview.replaceChildren();
+        // An empty draft needs an empty state, not the word "empty" sitting
+        // where the field's contents go — it read as a field containing that.
         const code = document.createElement("code");
-        code.textContent = built || "empty";
+        if (built) code.textContent = built;
+        else {
+            code.className = "fb-preview-blank";
+            code.textContent =
+                "No words yet. Add one below, or reset to the recommendation. Your title and subtitle still cover some phrases on their own.";
+        }
         const count = document.createElement("span");
         count.className = "fb-preview-count" + (built.length > FIELD_MAX ? " over" : "");
         count.textContent = `${built.length}/${FIELD_MAX}`;
@@ -1311,7 +1331,7 @@ function renderBuilder(host, cc, plan) {
         suggest.replaceChildren();
         const sLabel = document.createElement("p");
         sLabel.className = "fb-label";
-        sLabel.textContent = "3 \u00b7 Add one word, unlock these";
+        sLabel.textContent = "Add one word, unlock these";
         suggest.appendChild(sLabel);
         const ranked = [...gain.entries()].sort((a, c) => c[1].pop - a[1].pop).slice(0, 8);
         if (!ranked.length) {

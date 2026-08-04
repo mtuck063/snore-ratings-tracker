@@ -1063,3 +1063,8 @@ li.log-day {
 .fb-preview-count.over { color: var(--bad); }
 .fb-hint { margin: 2px 0 0; font-size: 0.72rem; color: var(--text-secondary); }
 .fb-draft .fb-actions { margin-top: 10px; }
+.fb-preview-blank {
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 0.78rem;
+}
