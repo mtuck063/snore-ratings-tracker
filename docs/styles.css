@@ -642,6 +642,20 @@ li.log-day {
 /* A header tip is the whole tooltip rather than a note under a value, so it
    carries no leading gap and reads at full contrast. */
 #tooltip .tip-text:only-child { margin-top: 0; color: var(--text); }
+/* Names the kind of thing a chip is, above the sentence explaining this one.
+   Sized and tracked like the chips themselves so the tooltip reads as their
+   caption rather than as another line of prose. */
+.tip-title {
+    display: block;
+    max-width: 250px;
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+/* With a title above it the sentence is the payload, not a footnote. */
+#tooltip .tip-title + .tip-text { margin-top: 2px; color: var(--text); }
 .tip-change {
     display: block;
     white-space: normal;

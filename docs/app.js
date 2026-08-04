@@ -39,6 +39,15 @@ document.addEventListener("pointerdown", (e) => {
 // happen.
 function showTip(el, e) {
     tooltip.innerHTML = "";
+    // An optional kicker, for chips whose own word names the answer without
+    // naming the question. "CATEGORY" reads as a topic the keyword belongs to
+    // until something says it describes the searcher instead.
+    if (el.dataset.tipTitle) {
+        const head = document.createElement("div");
+        head.className = "tip-title";
+        head.textContent = el.dataset.tipTitle;
+        tooltip.appendChild(head);
+    }
     const line = document.createElement("div");
     line.className = "tip-text";
     line.textContent = el.dataset.tip;
@@ -798,6 +807,14 @@ const INTENT_TIP = {
     offtarget: "Not what this app does. Scored zero, so it never reaches the chase list.",
     mine: "Your own app's name.",
 };
+// The chip says CATEGORY, which reads as a fact about the keyword until you
+// know it is a fact about the person typing it. The title supplies the missing
+// half. Applied through a helper because four places draw these chips and a
+// fifth will eventually.
+function tagIntent(el, intent) {
+    el.dataset.tipTitle = "Searcher intent";
+    el.dataset.tip = INTENT_TIP[intent] ?? "";
+}
 // Short forms for the score breakdown, where a full sentence would not fit.
 // Each says what the multiplier cost rather than only who is searching: symptom
 // and category both score a full 1 and between them take most of the chase
@@ -1044,7 +1061,7 @@ function renderPlan(host, cc, plan, onRefresh) {
         const chip = document.createElement("span");
         chip.className = `badge kw-intent intent-${c.intent}`;
         chip.textContent = c.intent;
-        chip.dataset.tip = INTENT_TIP[c.intent] ?? "";
+        tagIntent(chip, c.intent);
 
         // Why it is worth chasing, in the terms the score is made of.
         const why = document.createElement("span");
@@ -1764,7 +1781,7 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
                     const chip = document.createElement("span");
                     chip.className = `badge kw-intent intent-${t.intent}`;
                     chip.textContent = t.intent;
-                    chip.dataset.tip = INTENT_TIP[t.intent] ?? "";
+                    tagIntent(chip, t.intent);
                     name.appendChild(chip);
                     if (t.note) {
                         const note = document.createElement("span");
@@ -1824,7 +1841,7 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
             const dot = document.createElement("span");
             dot.className = `fb-dot intent-${intent}`;
             key.append(dot, document.createTextNode(`${intent} ${Math.round((pop / mixTotal) * 100)}%`));
-            key.dataset.tip = INTENT_TIP[intent] ?? "";
+            tagIntent(key, intent);
             legend.appendChild(key);
         }
         mix.append(bar, legend);
@@ -2082,6 +2099,11 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
         const rescored = rescoreFor(cc, plan);
         const shipped = plan?.markets?.[cc]?.terms ?? {};
         const aso = rescored ? { ...shipped, ...Object.fromEntries(rescored) } : shipped;
+        // Whether the whole listing is on the record. Without a pasted field
+        // the seed holds only title and subtitle, so a word absent from both
+        // may be sitting in the keyword field and must not be reported as
+        // missing from it.
+        const fieldKnown = rescored != null || !plan?.markets?.[cc]?.coverage?.partial;
         const val = ([term, e]) =>
             sort.key === "rank" ? (e.rank ?? Infinity) : sort.key === "score" ? (aso[term]?.score ?? 0) : e.pop;
         const entries = Object.entries(kw.latest[cc])
@@ -2125,13 +2147,20 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
                 const chip = document.createElement("span");
                 chip.className = `badge kw-intent intent-${asoTerm.intent}`;
                 chip.textContent = asoTerm.intent;
-                chip.dataset.tip = INTENT_TIP[asoTerm.intent] ?? "";
+                tagIntent(chip, asoTerm.intent);
                 tdKw.appendChild(chip);
                 if (asoTerm.covered === false) {
                     const gap = document.createElement("span");
                     gap.className = "badge kw-gap";
                     gap.textContent = "words missing";
-                    gap.dataset.tip = `Your listing never says: ${(asoTerm.missing ?? []).join(", ")}`;
+                    const gone = (asoTerm.missing ?? []).join(", ");
+                    gap.dataset.tipTitle = "Listing coverage";
+                    // Name the fields, because "your listing" is the thing the
+                    // reader has to go and edit and it is three separate boxes
+                    // in App Store Connect.
+                    gap.dataset.tip = fieldKnown
+                        ? `Missing from your title, subtitle and keyword field: ${gone}`
+                        : `Missing from your title and subtitle: ${gone}. This market's keyword field is not recorded, so it may already be there.`;
                     tdKw.appendChild(gap);
                 }
             }
@@ -2167,7 +2196,9 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
                         const gap = document.createElement("div");
                         gap.className = "kw-detail-gap";
                         const lead = document.createElement("span");
-                        lead.textContent = "Your listing never says ";
+                        lead.textContent = fieldKnown
+                            ? "Your title, subtitle and keyword field never say "
+                            : "Your title and subtitle never say ";
                         gap.appendChild(lead);
                         (asoTerm.missing ?? []).forEach((w, i) => {
                             if (i) gap.appendChild(document.createTextNode(", "));
@@ -2176,7 +2207,11 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
                             gap.appendChild(code);
                         });
                         const tail = document.createElement("span");
-                        tail.textContent = asoTerm.partial
+                        // Was asoTerm.partial, which scoring never writes onto
+                        // a term, so this read undefined and every market
+                        // without a recorded keyword field got told its gap was
+                        // the first thing to fix.
+                        tail.textContent = !fieldKnown
                             ? " — judged on title and subtitle alone, since this market's keyword field is not recorded."
                             : cur.rank != null
                               ? ` — yet it ranks #${cur.rank}, which means Apple is matching on something other than your text. That ranking is not one you control.`
