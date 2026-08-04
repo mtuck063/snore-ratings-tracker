@@ -1501,12 +1501,17 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
             ? "saving\u2026"
             : savedRaw != null
               ? "saved in this browser"
-              : "seeded from scripts/metadata.json \u2014 paste yours to replace it";
+              // Named for what it is rather than where it is stored. Nobody
+              // standing in App Store Connect needs a path in this repo.
+              : "a placeholder, not read from App Store Connect \u2014 paste yours to replace it";
         yoursNote.textContent = clean
             ? `${clean.length}/${FIELD_MAX} characters, covering ${n} of ${b.terms.length} phrases` +
               (clean.length > FIELD_MAX ? " \u00b7 over the limit" : "") +
               ` \u00b7 ${state}`
-            : "Nothing recorded. Until you paste it, comparisons use the seed in scripts/metadata.json.";
+            // No file paths and no half-truths: with the box empty the builder
+            // has nothing to compare against, and saying which file the
+            // fallback came from helps nobody standing in App Store Connect.
+            : "Paste your field to compare it against the draft below.";
     };
     refreshNote();
     yours.append(yoursLabel, input, yoursNote, yoursWaste);
@@ -1607,10 +1612,23 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
             tile(coveredPop.toLocaleString("en-US"), `pop of ${popTotal.toLocaleString("en-US")}`),
             yourPop == null
                 ? tile("\u2014", "vs your field", "", "Paste your field above to compare")
-                : tile(
-                      (coveredPop - yourPop >= 0 ? "+" : "") + (coveredPop - yourPop).toLocaleString("en-US"),
-                      `pop vs your field (${yourCovers} phrases)`,
-                      coveredPop >= yourPop ? "good" : "bad"
+                : // Which way round, spelled out. "+426 pop vs your field" was
+                  // read as your field being ahead by 426, when it is the draft
+                  // that is ahead — a sign convention is not an explanation.
+                  tile(
+                      (coveredPop - yourPop >= 0 ? "+" : "\u2212") +
+                          Math.abs(coveredPop - yourPop).toLocaleString("en-US"),
+                      coveredPop === yourPop
+                          ? `the draft ties your field, which covers ${yourCovers}`
+                          : coveredPop > yourPop
+                            ? `more pop than your field, which covers ${yourCovers}`
+                            : `less pop than your field, which covers ${yourCovers}`,
+                      coveredPop >= yourPop ? "good" : "bad",
+                      coveredPop > yourPop
+                          ? "The draft above is ahead. Copying it into App Store Connect is the gain."
+                          : coveredPop < yourPop
+                            ? "Your saved field is ahead of the draft. Keep what you have, or edit the draft until it wins."
+                            : "Both cover the same demand."
                   )
         );
 
