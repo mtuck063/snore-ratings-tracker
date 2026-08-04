@@ -26,33 +26,47 @@ const hideTooltip = () => {
     document.querySelectorAll(".spark-hover").forEach((h) => h.setAttribute("visibility", "hidden"));
 };
 document.addEventListener("pointerdown", (e) => {
-    if (!e.target.closest(".spark, .star-bar, th[data-tip]")) hideTooltip();
+    if (!e.target.closest(".spark, .star-bar, [data-tip]")) hideTooltip();
 });
 
 // Column headers explain themselves through the same tooltip as the charts
 // and star bars. The title attribute they replace needed a second of hover
 // and never appeared on touch at all, so on a phone the explanation may as
 // well not have existed.
+// Anything carrying data-tip explains itself instantly, wherever it is. Bound
+// by delegation rather than per element, because most of these are redrawn on
+// every edit in the field builder and re-wiring each time is a leak waiting to
+// happen.
+function showTip(el, e) {
+    tooltip.innerHTML = "";
+    const line = document.createElement("div");
+    line.className = "tip-text";
+    line.textContent = el.dataset.tip;
+    tooltip.appendChild(line);
+    placeTooltip(e);
+}
+document.addEventListener("pointerover", (e) => {
+    if (e.pointerType === "touch") return;
+    const el = e.target.closest("[data-tip]");
+    if (el) showTip(el, e);
+});
+document.addEventListener("pointerout", (e) => {
+    if (e.pointerType === "touch") return;
+    if (e.target.closest("[data-tip]")) hideTooltip();
+});
+// Reposition only while over a tip source, so this never steals the tooltip
+// from the sparklines and star bars, which set it themselves.
+document.addEventListener("pointermove", (e) => {
+    if (e.pointerType === "touch") return;
+    if (e.target.closest("[data-tip]") && !tooltip.hidden) placeTooltip(e);
+});
+
 function wireHeaderTips(root = document) {
     for (const th of root.querySelectorAll("th[data-tip]")) {
-        const show = (e) => {
-            tooltip.innerHTML = "";
-            const line = document.createElement("div");
-            line.className = "tip-text";
-            line.textContent = th.dataset.tip;
-            tooltip.appendChild(line);
-            placeTooltip(e);
-        };
-        th.addEventListener("pointermove", (e) => {
-            if (e.pointerType !== "touch") show(e);
-        });
-        th.addEventListener("pointerleave", (e) => {
-            if (e.pointerType !== "touch") hideTooltip();
-        });
         // A sortable header keeps its tap for sorting; reading what a column
         // means must not cost the user their sort order. Those stay
         // hover-only, which is the desktop-shaped half of the interaction.
-        if (!th.hasAttribute("data-sort")) th.addEventListener("click", show);
+        if (!th.hasAttribute("data-sort")) th.addEventListener("click", (e) => showTip(th, e));
     }
 }
 wireHeaderTips();
@@ -1032,8 +1046,11 @@ function renderBuilder(host, cc, plan) {
     // what each number meant and still not know what they were meant to do.
     const how = document.createElement("p");
     how.className = "plan-line muted";
+    // Naming the field the hundred belongs to. Sitting directly above a title
+    // and a subtitle capped at thirty each, "Apple gives you 100 characters"
+    // read as a limit on all of it.
     how.textContent =
-        "Apple gives you 100 characters. Paste what you have now, try changes against it, and copy the result back when it wins more than it gives up.";
+        "The keyword field is 100 characters of its own, separate from the title and subtitle below. Paste what you have now, try changes against it, and copy the result back when it wins more than it gives up.";
 
     // Listing context: the two fields Apple pools with the keyword field, which
     // you cannot edit here but which decide what the field still has to carry.
@@ -1041,7 +1058,9 @@ function renderBuilder(host, cc, plan) {
     context.className = "fb-context";
     const l = m.listing;
     if (l) {
-        context.appendChild(line("Title", l.title ?? "\u2014"));
+        context.appendChild(
+            line("Title", l.title ? `${l.title}  (${l.title.length}/30)` : "\u2014")
+        );
         context.appendChild(
             l.subtitle
                 ? line("Subtitle", `${l.subtitle}  (${l.subtitleChars}/30)`)
@@ -1170,7 +1189,7 @@ function renderBuilder(host, cc, plan) {
     const tile = (value, label, cls, tip) => {
         const d = document.createElement("div");
         d.className = "fb-tile" + (cls ? ` ${cls}` : "");
-        if (tip) d.title = tip;
+        if (tip) d.dataset.tip = tip;
         const v = document.createElement("div");
         v.className = "fb-tile-num";
         v.textContent = value;
@@ -1273,14 +1292,14 @@ function renderBuilder(host, cc, plan) {
             const seg = document.createElement("span");
             seg.className = `fb-seg intent-${intent}`;
             seg.style.width = `${(pop / mixTotal) * 100}%`;
-            seg.title = `${intent}: ${pop} pop`;
+            seg.dataset.tip = `${intent}: ${pop} pop`;
             bar.appendChild(seg);
             const key = document.createElement("span");
             key.className = "fb-key";
             const dot = document.createElement("span");
             dot.className = `fb-dot intent-${intent}`;
             key.append(dot, document.createTextNode(`${intent} ${Math.round((pop / mixTotal) * 100)}%`));
-            key.title = INTENT_TIP[intent] ?? "";
+            key.dataset.tip = INTENT_TIP[intent] ?? "";
             legend.appendChild(key);
         }
         mix.append(bar, legend);
@@ -1317,7 +1336,7 @@ function renderBuilder(host, cc, plan) {
         for (const u of [...picked].sort((x, y) => Number(useful.has(x)) - Number(useful.has(y)))) {
             const chip = document.createElement("button");
             chip.className = "fb-chip" + (useful.has(u) ? "" : " idle");
-            chip.title = useful.has(u)
+            chip.dataset.tip = useful.has(u)
                 ? "Carrying at least one covered phrase"
                 : "Not completing any phrase right now \u2014 dead characters unless something else joins it";
             chip.append(document.createTextNode(show(u)));
@@ -1363,7 +1382,7 @@ function renderBuilder(host, cc, plan) {
             const add = document.createElement("button");
             add.className = "fb-add";
             add.textContent = `+ ${show(u)}`;
-            add.title = `${chars + show(u).length + (picked.size ? 1 : 0)}/${FIELD_MAX} characters if added`;
+            add.dataset.tip = `${chars + show(u).length + (picked.size ? 1 : 0)}/${FIELD_MAX} characters if added`;
             add.addEventListener("click", (e) => {
                 e.stopPropagation();
                 picked.add(u);
@@ -1416,7 +1435,7 @@ function renderBuilder(host, cc, plan) {
             const what = document.createElement("span");
             what.textContent = `${t.pop} pop \u00b7 needs ${need.map(show).join(", ")}`;
             rowBtn.append(name, what);
-            rowBtn.title = "Add the missing words";
+            rowBtn.dataset.tip = "Add the missing words";
             rowBtn.addEventListener("click", () => {
                 for (const u of need) picked.add(u);
                 draw();
@@ -1605,13 +1624,13 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
                 const chip = document.createElement("span");
                 chip.className = `badge kw-intent intent-${asoTerm.intent}`;
                 chip.textContent = asoTerm.intent;
-                chip.title = INTENT_TIP[asoTerm.intent] ?? "";
+                chip.dataset.tip = INTENT_TIP[asoTerm.intent] ?? "";
                 tdKw.appendChild(chip);
                 if (asoTerm.covered === false) {
                     const gap = document.createElement("span");
                     gap.className = "badge kw-gap";
                     gap.textContent = "words missing";
-                    gap.title = `Your listing never says: ${(asoTerm.missing ?? []).join(", ")}`;
+                    gap.dataset.tip = `Your listing never says: ${(asoTerm.missing ?? []).join(", ")}`;
                     tdKw.appendChild(gap);
                 }
             }
@@ -1885,7 +1904,7 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
             tdScore.className = "col-num kw-score";
             if (asoTerm) {
                 tdScore.textContent = asoTerm.score;
-                tdScore.title = asoTerm.why;
+                tdScore.dataset.tip = asoTerm.why;
                 if (asoTerm.score === 0) tdScore.classList.add("muted");
                 else if (asoTerm.score >= 70) tdScore.classList.add("score-hot");
             } else {
