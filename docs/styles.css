@@ -1077,7 +1077,7 @@ li.log-day {
 
 /* Wins and loses carry their demand, and the row underneath carries the sum. */
 .gap-term-row { display: flex; justify-content: space-between; gap: 12px; }
-.gap-term-val { color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.gap-term-val { color: var(--text-secondary); font-variant-numeric: tabular-nums; white-space: nowrap; flex: none; }
 .swap-net {
     padding-top: 6px !important;
     font-size: 0.82rem;
@@ -1124,6 +1124,7 @@ li.log-day {
 .fb-panel-list { list-style: none; margin: 0; padding: 0; max-height: 320px; overflow-y: auto; }
 .fb-panel-list li {
     display: flex;
+    align-items: baseline;
     justify-content: space-between;
     gap: 10px;
     font-size: 0.78rem;
@@ -1131,7 +1132,13 @@ li.log-day {
 }
 .fb-panel-list li.covered .fb-panel-text { color: var(--good); }
 .fb-panel-list li.uncovered .fb-panel-text { color: var(--text-secondary); }
-.fb-panel-name { display: inline-flex; align-items: baseline; gap: 6px; min-width: 0; }
+/* Inline, not inline-flex: a flex row cannot wrap between the phrase and its
+   badge, so a long phrase broke mid-name and pushed its own note and pop value
+   into a second column of their own. As inline content it wraps like a
+   sentence, which is what it is. */
+.fb-panel-name { display: inline; min-width: 0; }
+.fb-panel-name .badge { margin-left: 6px; }
+.fb-panel-note { margin-left: 6px; }
 .fb-panel-list .badge { flex: none; margin-left: 0; }
 .kw-legend-eg { color: var(--accent); opacity: 0.85; }
 .fb-panel-list li.outofscope .fb-panel-text { color: var(--text-secondary); opacity: 0.75; }
