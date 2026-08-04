@@ -28,10 +28,23 @@ body {
 }
 
 main {
-    max-width: 960px;
+    /* Wide enough for the keyword table's nine columns and the field builder's
+       three phrase lists to sit side by side without wrapping, and still
+       bounded so prose lines stay readable on a very wide display. */
+    max-width: 1360px;
     margin: 0 auto;
     padding: 24px 16px 48px;
 }
+
+/* Prose keeps a readable measure while tables and grids take the full width:
+   a 1360px line of explanation is harder to read than a 960px one. */
+.section-sub,
+#kw-plan .plan-line,
+#kw-builder .fb-context .plan-line,
+#kw-builder > .plan-line,
+#kw-legend > .plan-line,
+.kw-comp-note,
+.recent-list { max-width: 860px; }
 
 h1 { font-size: 1.35rem; margin-bottom: 4px; }
 
