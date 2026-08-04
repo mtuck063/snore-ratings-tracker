@@ -1086,6 +1086,7 @@ function renderPlan(host, cc, plan, onRefresh) {
     }
 
     host.appendChild(card);
+    makeCollapsible(h, "push", true);
 }
 
 // Shared by both panels.
@@ -1137,6 +1138,39 @@ function expandable(head, items) {
     });
     li.append(btn, list);
     return li;
+}
+
+// Sections fold away and stay that way. The page is thirteen screens tall and
+// most visits care about one part of it; which part differs by person, so the
+// choice is remembered rather than guessed at.
+function makeCollapsible(headEl, key, defaultOpen = true) {
+    const store = `asoOpen:${key}`;
+    const body = headEl.parentElement;
+    let open = (localStorage.getItem(store) ?? (defaultOpen ? "1" : "0")) === "1";
+    headEl.classList.add("sec-toggle");
+    headEl.setAttribute("role", "button");
+    headEl.setAttribute("tabindex", "0");
+    const caret = document.createElement("span");
+    caret.className = "sec-caret";
+    headEl.prepend(caret);
+    const apply = () => {
+        body.classList.toggle("sec-collapsed", !open);
+        caret.textContent = open ? "\u25be" : "\u25b8";
+        headEl.setAttribute("aria-expanded", String(open));
+    };
+    apply();
+    const toggle = () => {
+        open = !open;
+        localStorage.setItem(store, open ? "1" : "0");
+        apply();
+    };
+    headEl.addEventListener("click", toggle);
+    headEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            toggle();
+        }
+    });
 }
 
 // Your pasted field, per market, as the page stored it.
@@ -1211,6 +1245,10 @@ function renderLegend(host, cc, plan, filter, onChange, counts) {
         return;
     }
     host.hidden = false;
+    const head = document.createElement("div");
+    head.className = "recent-label";
+    head.textContent = "What the tags mean, and filtering by them";
+    host.appendChild(head);
     const intro = document.createElement("p");
     intro.className = "plan-line muted";
     intro.textContent = "Each keyword is tagged by who is searching it. Tap a tag to show only those rows:";
@@ -1305,6 +1343,9 @@ function renderLegend(host, cc, plan, filter, onChange, counts) {
         });
         host.appendChild(clear);
     }
+    // Open when a filter is on, or the rows would be hidden with no visible
+    // reason for the table being short.
+    makeCollapsible(head, "legend", filter.intents.size > 0 || filter.gapOnly);
 }
 
 // The field card: everything about the 100 characters you control, in one
@@ -1898,6 +1939,7 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
     draft.append(chipHead, preview, chipRow, chipHint, buttons);
     host.append(h, context, how, yours, draft, stats, panel, suggest);
     draw();
+    makeCollapsible(h, "builder", false);
 }
 
 async function renderKeywords(kw, glossary = {}, plan = null) {
@@ -2322,6 +2364,36 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
             tbody.appendChild(tr);
         }
 
+        // The table is the tallest thing on the page by a wide margin — 82 rows
+        // for one market. It opens at a screenful, the way the ratings table
+        // already hides its unrated storefronts, and the choice sticks.
+        const CAP = 25;
+        const rows = [...tbody.querySelectorAll("tr")];
+        if (rows.length > CAP) {
+            let all = localStorage.getItem("asoAllRows") === "1";
+            const applyCap = () => {
+                rows.forEach((tr, i) => (tr.hidden = !all && i >= CAP));
+                more.textContent = all
+                    ? `Show the top ${CAP} only`
+                    : `Show all ${rows.length} keywords`;
+            };
+            const moreTr = document.createElement("tr");
+            moreTr.className = "kw-more-row";
+            const moreTd = document.createElement("td");
+            moreTd.colSpan = 9;
+            const more = document.createElement("button");
+            more.className = "plan-copy";
+            more.addEventListener("click", () => {
+                all = !all;
+                localStorage.setItem("asoAllRows", all ? "1" : "0");
+                applyCap();
+            });
+            moreTd.appendChild(more);
+            moreTr.appendChild(moreTd);
+            applyCap();
+            tbody.appendChild(moreTr);
+        }
+
         // Aggregate: how many of this market's tracked keywords each app
         // holds a top-5 slot on. Your own share is part of the picture.
         const comp = document.getElementById("kw-competitors");
@@ -2355,6 +2427,7 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
             head.className = "recent-label";
             head.textContent = "Who owns these keywords";
             comp.appendChild(head);
+            queueMicrotask(() => makeCollapsible(head, "competitors", false));
             const note = document.createElement("p");
             note.className = "kw-comp-note";
             note.textContent =
