@@ -338,6 +338,9 @@ function analyseMarket(cc) {
       ...(cov && { covered: cov.covered, ...(cov.missing.length && { missing: cov.missing }) }),
       score: scoreOf({ pop, rank, intent, cov }),
       base: Math.round(baseOf({ pop, rank, intent }) * 1000) / 1000,
+      // The score's factors, kept separate so the page can show its working
+      // rather than asking anyone to trust a bare number.
+      factors: { reach: winnability(rank), fit: FIT[intent] },
       why: reasonFor({ pop, rank, cov, intent }),
     };
   }

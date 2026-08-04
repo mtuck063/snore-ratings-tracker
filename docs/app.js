@@ -899,6 +899,35 @@ function renderPlan(host, cc, plan, onRefresh) {
         const score = document.createElement("span");
         score.className = "plan-score";
         score.textContent = c.score;
+        const termFull = m.terms[c.kw] ?? {};
+        const f = termFull.factors;
+        if (f) {
+            // The arithmetic behind the number, in the order the score applies
+            // it. A ranking anyone is expected to act on should be able to show
+            // where it came from.
+            const lever = termFull.base ? Math.round((c.score / (termFull.base * 100)) * 100) / 100 : 1;
+            const leverWhy =
+                lever === 1
+                    ? "every word already in your listing"
+                    : lever > 1
+                      ? `${(termFull.missing ?? []).length} word${(termFull.missing ?? []).length === 1 ? "" : "s"} missing, which is the cheapest kind of fix`
+                      : "several words missing, so it is a rewrite rather than an edit";
+            const reachWhy =
+                c.rank == null
+                    ? "unranked, so upside without evidence"
+                    : c.rank <= 3
+                      ? "top three already, almost nothing left to win"
+                      : c.rank <= 10
+                        ? "page one, some room left"
+                        : c.rank <= 50
+                          ? "close enough that a change shows"
+                          : "far back, so slower to move";
+            score.dataset.tip =
+                `${c.score} = demand ${c.pop} of 100\n` +
+                `× ${f.reach} rank headroom (${reachWhy})\n` +
+                `× ${f.fit} searcher fit (${INTENT_TIP[c.intent] ?? c.intent})\n` +
+                `× ${lever} coverage (${leverWhy})`;
+        }
         const kwEl = document.createElement("strong");
         kwEl.textContent = c.kw;
         const chip = document.createElement("span");
@@ -930,7 +959,8 @@ function renderPlan(host, cc, plan, onRefresh) {
         // more useful than a button that appears to do nothing when clicked.
         const toAdd = (action.add ?? []).filter((u) => !draftKeys.has(u));
         if (action.add?.length && !toAdd.length) {
-            act.textContent += " The draft above already adds them — copy it into App Store Connect.";
+            act.textContent +=
+                " The draft field above already includes them, so copying that into App Store Connect fixes this.";
         }
 
         li.append(score, kwEl, chip, why, act);

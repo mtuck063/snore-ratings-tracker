@@ -750,6 +750,7 @@ li.log-day {
 .plan-gaps code.weak { color: var(--text-secondary); }
 .plan-gaps span, .plan-why { color: var(--text-secondary); }
 .plan-score {
+    cursor: help;
     display: inline-block;
     min-width: 30px;
     font-variant-numeric: tabular-nums;
@@ -1157,3 +1158,6 @@ li.log-day {
     opacity: 0.85;
 }
 .plan-try { margin: 6px 0 0 30px; }
+
+/* Score tooltips carry their arithmetic on separate lines. */
+.tip-text { white-space: pre-line; }
