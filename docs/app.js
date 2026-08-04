@@ -1410,7 +1410,7 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
     // title and subtitle it split the listing context in half and explained a
     // field the reader had not reached yet.
     how.textContent =
-        "The keyword field is 100 characters of its own, on top of those. Paste what you have now, try changes against it, and copy the result back when it wins more than it gives up.";
+        "Your keywords are a 100-character field of their own, on top of those. Paste what you have now, try changes against it, and copy the result back when it wins more than it gives up.";
 
     // Listing context: the two fields Apple pools with the keyword field, which
     // you cannot edit here but which decide what the field still has to carry.
@@ -1449,7 +1449,7 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
     yours.className = "fb-yours";
     const yoursLabel = document.createElement("label");
     yoursLabel.className = "fb-label";
-    yoursLabel.textContent = "Your field in App Store Connect";
+    yoursLabel.textContent = "Your keywords in App Store Connect";
     yoursLabel.htmlFor = `fb-input-${cc}`;
     // A textarea, not a single line: a 100-character field scrolled sideways in
     // an input is a field you cannot read to check.
@@ -1511,7 +1511,7 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
             // No file paths and no half-truths: with the box empty the builder
             // has nothing to compare against, and saying which file the
             // fallback came from helps nobody standing in App Store Connect.
-            : "Paste your field to compare it against the draft below.";
+            : "Paste your keywords to compare them against the draft below.";
     };
     refreshNote();
     yours.append(yoursLabel, input, yoursNote, yoursWaste);
@@ -1741,7 +1741,7 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
             : yourCovers != null && sameAs(yourKeys)
               ? "your App Store Connect field"
               : "edited by you";
-        chipHead.textContent = `The field you are building \u2014 ${origin}`;
+        chipHead.textContent = `Draft keywords \u2014 ${origin}`;
         const built = [...picked].map(show).join(",");
         preview.replaceChildren();
         // An empty draft needs an empty state, not the word "empty" sitting
@@ -1894,7 +1894,7 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
     const chipHint = document.createElement("p");
     chipHint.className = "fb-hint";
     chipHint.textContent =
-        "Click a word to drop it, or add one from the list below. When it covers more than your current field, copy it into App Store Connect.";
+        "Click a word to drop it, or add one from the list below. When these cover more than your own keywords, copy them into App Store Connect.";
     draft.append(chipHead, preview, chipRow, chipHint, buttons);
     host.append(h, context, how, yours, draft, stats, panel, suggest);
     draw();
