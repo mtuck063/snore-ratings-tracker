@@ -1,0 +1,90 @@
+{
+  "_note": "What the App Store listing claims, per market. title and subtitle are refreshed from the live storefront pages by `node scripts/aso.mjs --fetch`; do not edit them by hand, they will be overwritten. keywordField and screenshots are NOT public anywhere and are maintained here by hand: copy the field out of App Store Connect whenever you change it, and set fieldUpdated to that date. An unrecorded field is not treated as an empty one; coverage simply reports the market as ungraded.",
+  "markets": {
+    "us": {
+      "keywordField": "recorder,monitor,apple watch,cpap,score,diary,night,detector,apnea,quality,sounds,rem,log,talk,free",
+      "fieldUpdated": "2026-07-30",
+      "screenshots": [],
+      "title": "Snore Timeline: Sleep Tracker",
+      "subtitle": "Snoring, Talking & Smart Alarm",
+      "fetchedAt": "2026-08-04T15:01:35.137Z",
+      "subtitleSet": true
+    },
+    "ca": {
+      "keywordField": "recorder,detector,monitor,apple,watch,cpap,apnea,score,alarm,sounds,diary,log,talk,do,i,free,cycle",
+      "fieldUpdated": "2026-07-30",
+      "screenshots": [],
+      "title": "Snore Timeline: Sleep Tracker",
+      "subtitle": "Record Snoring & Sleep Talking",
+      "fetchedAt": "2026-08-04T15:01:35.137Z",
+      "subtitleSet": true
+    },
+    "gb": {
+      "keywordField": "recorder,monitor,cpap,quality,apnea,score,sounds,night,apple,watch,rem,diary,detector,log,talk,free",
+      "fieldUpdated": "2026-07-30",
+      "screenshots": [],
+      "title": "Snore Timeline: Sleep Tracker",
+      "subtitle": "Snoring, Sleep Talking & Alarm",
+      "fetchedAt": "2026-08-04T15:01:35.137Z",
+      "subtitleSet": true
+    },
+    "au": {
+      "keywordField": "recorder,detector,monitor,cpap,apnea,score,sounds,diary,apple,watch,smart,log",
+      "fieldUpdated": "2026-07-30",
+      "screenshots": [],
+      "title": "Snore Timeline: Sleep Tracker",
+      "subtitle": "Snoring, Sleep Talking & Alarm",
+      "fetchedAt": "2026-08-04T15:01:35.137Z",
+      "subtitleSet": true
+    },
+    "fr": {
+      "screenshots": [],
+      "title": "Snore Timeline: Suivi Sommeil",
+      "subtitle": "Parole, Ronflement & Réveil",
+      "fetchedAt": "2026-08-04T15:01:35.137Z",
+      "subtitleSet": true
+    },
+    "es": {
+      "screenshots": [],
+      "title": "Snore Timeline: Monitor Sueño",
+      "subtitle": "Ronquidos, Habla & Alarma",
+      "fetchedAt": "2026-08-04T15:01:35.137Z",
+      "subtitleSet": true
+    },
+    "mx": {
+      "screenshots": [],
+      "title": "Snore Timeline: Monitor Sueño",
+      "subtitle": "Ronquidos, Habla & Alarma",
+      "fetchedAt": "2026-08-04T15:01:35.137Z",
+      "subtitleSet": true
+    },
+    "de": {
+      "screenshots": [],
+      "title": "Snore Timeline: Sleep Tracker",
+      "subtitle": null,
+      "fetchedAt": "2026-08-04T15:01:35.137Z",
+      "subtitleSet": false
+    },
+    "nl": {
+      "screenshots": [],
+      "title": "Snore Timeline: Sleep Tracker",
+      "subtitle": null,
+      "fetchedAt": "2026-08-04T15:01:35.137Z",
+      "subtitleSet": false
+    },
+    "jp": {
+      "screenshots": [],
+      "title": "Snore Timeline: 睡眠トラッカー",
+      "subtitle": "呼吸・いびき・寝言を記録。ウェアラブル・スマートアラーム対応",
+      "fetchedAt": "2026-08-04T15:01:35.137Z",
+      "subtitleSet": true
+    },
+    "cn": {
+      "screenshots": [],
+      "title": "Snore Timeline：鼾声睡眠追踪",
+      "subtitle": "记录呼吸、打鼾、梦话、呼吸暂停。支持穿戴设备和智能闹钟",
+      "fetchedAt": "2026-08-04T15:01:35.137Z",
+      "subtitleSet": true
+    }
+  }
+}

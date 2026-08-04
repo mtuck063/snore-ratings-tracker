@@ -764,7 +764,153 @@ function renderEvents(history, events) {
 // rather than calling a translation service because the page is static and a
 // key cannot be kept secret in it — and because a fixed gloss stays put, where
 // machine translation would quietly reword the same term between visits.
-async function renderKeywords(kw, glossary = {}) {
+// Why a term is grouped where it is. Shown on the chip rather than in a
+// legend, because a legend is a thing you read once and a tooltip is a thing
+// you read when you are actually wondering.
+const INTENT_TIP = {
+    symptom: "Names the problem, not a tool. Still choosing a category, and converts on a listing that names the problem back.",
+    category: "Names a tool. Already knows apps like this exist and is picking between them.",
+    feature: "Names one capability. Worth having if the app leads with that feature.",
+    adjacent: "A neighbouring need this app partly serves.",
+    brand: "Somebody else's app name. Real demand, but not demand a keyword can buy.",
+    offtarget: "Not this app's category. Scored zero so it stays out of the chase list.",
+    mine: "This app's own name. Ranking first here is expected, not an opportunity.",
+};
+
+// The listing panel: what this market claims, what that claim is missing, and
+// the short list worth acting on. Everything here is computed by scripts/
+// aso.mjs; the page only ever displays it, so the rules live in one place
+// rather than being half-implemented in the browser as well.
+function renderPlan(host, cc, plan) {
+    host.replaceChildren();
+    const m = plan?.markets?.[cc];
+    if (!m) {
+        host.hidden = true;
+        return;
+    }
+    host.hidden = false;
+
+    const card = (title) => {
+        const el = document.createElement("div");
+        el.className = "plan-card";
+        const h = document.createElement("h3");
+        h.textContent = title;
+        el.appendChild(h);
+        return el;
+    };
+    const line = (label, value, cls) => {
+        const p = document.createElement("p");
+        p.className = "plan-line" + (cls ? ` ${cls}` : "");
+        const b = document.createElement("span");
+        b.className = "plan-label";
+        b.textContent = label;
+        p.append(b, document.createTextNode(value));
+        return p;
+    };
+
+    // What the store shows. Character counts because both fields are hard
+    // limits, and the unspent half of a subtitle is the cheapest thing on the
+    // board to fix.
+    const listing = card("Listing");
+    const l = m.listing;
+    if (!l) {
+        listing.appendChild(line("", "Nothing recorded for this market yet."));
+    } else {
+        listing.appendChild(line("Title", l.title ?? "—"));
+        listing.appendChild(
+            l.subtitle
+                ? line("Subtitle", `${l.subtitle}  (${l.subtitleChars}/30)`)
+                : line("Subtitle", "none set — Apple fills the slot with your category, and 30 indexed characters go unspent", "warn")
+        );
+        listing.appendChild(
+            l.keywordField
+                ? line("Keywords", `${l.keywordField}  (${l.fieldChars}/100)`)
+                : line("Keywords", "not recorded — the field is private to App Store Connect, so it is kept by hand in scripts/metadata.json", "muted")
+        );
+        if (m.repeatedInSubtitle?.length) {
+            listing.appendChild(line("Repeated", `${m.repeatedInSubtitle.join(", ")} — already in the subtitle, so the field copy buys nothing`, "warn"));
+        }
+        if (m.unusedFieldWords?.length) {
+            listing.appendChild(line("Unused", `${m.unusedFieldWords.join(", ")} — no tracked term needs these`, "muted"));
+        }
+        if (m.coverage) {
+            listing.appendChild(
+                line(
+                    "Coverage",
+                    `${m.coverage.covered} of ${m.coverage.of} tracked terms have every word in the listing` +
+                        (m.coverage.partial ? ", judged on title and subtitle alone" : ""),
+                    m.coverage.partial ? "muted" : ""
+                )
+            );
+        }
+    }
+
+    // The shopping list. One word per row, and what that word would unblock.
+    const gaps = card("Add one word, unlock these");
+    if (!m.shoppingList?.length) {
+        gaps.appendChild(line("", "Nothing missing: every chaseable term already has its words in the listing."));
+    } else {
+        const ul = document.createElement("ul");
+        ul.className = "plan-gaps";
+        for (const g of m.shoppingList.slice(0, 8)) {
+            const li = document.createElement("li");
+            const word = document.createElement("code");
+            word.textContent = g.word;
+            if (g.weak) word.className = "weak";
+            const rest = document.createElement("span");
+            rest.textContent = ` ${g.demand} demand across ${g.terms.length} term${g.terms.length === 1 ? "" : "s"}`;
+            rest.title = g.terms.join(", ");
+            li.append(word, rest);
+            ul.appendChild(li);
+        }
+        gaps.appendChild(ul);
+    }
+
+    // The small list the whole exercise is for.
+    const chase = card("Worth chasing");
+    if (m.chase?.length) {
+        const ol = document.createElement("ol");
+        ol.className = "plan-chase";
+        for (const c of m.chase) {
+            const li = document.createElement("li");
+            const score = document.createElement("span");
+            score.className = "plan-score";
+            score.textContent = c.score;
+            const kwEl = document.createElement("strong");
+            kwEl.textContent = c.kw;
+            const why = document.createElement("span");
+            why.className = "plan-why";
+            why.textContent = c.why;
+            li.append(score, kwEl, why);
+            ol.appendChild(li);
+        }
+        chase.appendChild(ol);
+
+        // Export, because a list you cannot get out of the page is a list you
+        // retype. TSV pastes straight into a spreadsheet.
+        const copy = document.createElement("button");
+        copy.className = "plan-copy";
+        copy.textContent = "Copy as TSV";
+        copy.addEventListener("click", async () => {
+            const rows = [
+                ["keyword", "score", "pop", "rank", "intent", "why"].join("\t"),
+                ...m.chase.map((c) => [c.kw, c.score, c.pop, c.rank ?? "", c.intent, c.why].join("\t")),
+            ].join("\n");
+            try {
+                await navigator.clipboard.writeText(rows);
+                copy.textContent = "Copied";
+            } catch {
+                copy.textContent = "Copy failed";
+            }
+            setTimeout(() => (copy.textContent = "Copy as TSV"), 1500);
+        });
+        chase.appendChild(copy);
+    }
+
+    host.append(listing, gaps, chase);
+}
+
+async function renderKeywords(kw, glossary = {}, plan = null) {
     if (!kw?.latest || !Object.keys(kw.latest).length) return;
     document.getElementById("keywords-section").hidden = false;
     if (kw.fetchedAt) {
@@ -833,8 +979,11 @@ async function renderKeywords(kw, glossary = {}) {
         translate.hidden = !translatable(cc);
         translate.textContent = showEnglish ? "Show original" : "Show English";
         translate.classList.toggle("active", showEnglish);
+        renderPlan(document.getElementById("kw-plan"), cc, plan);
         tbody.replaceChildren();
-        const val = ([, e]) => (sort.key === "rank" ? (e.rank ?? Infinity) : e.pop);
+        const aso = plan?.markets?.[cc]?.terms ?? {};
+        const val = ([term, e]) =>
+            sort.key === "rank" ? (e.rank ?? Infinity) : sort.key === "score" ? (aso[term]?.score ?? 0) : e.pop;
         const entries = Object.entries(kw.latest[cc]).sort(
             (a, b) => (val(a) - val(b)) * sort.dir || (a[1].rank ?? 999) - (b[1].rank ?? 999)
         );
@@ -859,6 +1008,24 @@ async function renderKeywords(kw, glossary = {}) {
                 tdKw.appendChild(orig);
             }
             if (cur.prefix) tdKw.title = `Suggested at “${cur.prefix}”, position ${cur.pos}`;
+            // Intent, and whether the listing can rank for this at all. Both
+            // are the same size chip on purpose: a term you have no words for
+            // is not a worse ranking, it is a different problem.
+            const asoTerm = aso[term];
+            if (asoTerm) {
+                const chip = document.createElement("span");
+                chip.className = `badge kw-intent intent-${asoTerm.intent}`;
+                chip.textContent = asoTerm.intent;
+                chip.title = INTENT_TIP[asoTerm.intent] ?? "";
+                tdKw.appendChild(chip);
+                if (asoTerm.covered === false) {
+                    const gap = document.createElement("span");
+                    gap.className = "badge kw-gap";
+                    gap.textContent = "no words";
+                    gap.title = `Your listing never says: ${(asoTerm.missing ?? []).join(", ")}`;
+                    tdKw.appendChild(gap);
+                }
+            }
             // Newly tracked terms have no history yet, so their delta columns
             // and sparkline read as blank rather than as "no movement". The
             // chip says which blanks are because the keyword is new.
@@ -882,7 +1049,7 @@ async function renderKeywords(kw, glossary = {}) {
                     const det = document.createElement("tr");
                     det.className = "kw-detail";
                     const td = document.createElement("td");
-                    td.colSpan = 8;
+                    td.colSpan = 9;
                     const ol = document.createElement("ol");
                     cur.top.forEach((e) => {
                         const entry = appEntry(e);
@@ -1098,7 +1265,21 @@ async function renderKeywords(kw, glossary = {}) {
                 .filter(Boolean);
             tdSpark.appendChild(sparkline(points, `${term} rank, last 30 days`, (v) => `#${-v}`, 4));
 
-            tr.append(tdKw, tdPop, tdRank, tdDelta, td24, td7d, tdBest, tdSpark);
+            // Priority sits beside demand deliberately: the two disagree
+            // often, and the disagreement is the whole point of the column.
+            const tdScore = document.createElement("td");
+            tdScore.className = "col-num kw-score";
+            if (asoTerm) {
+                tdScore.textContent = asoTerm.score;
+                tdScore.title = asoTerm.why;
+                if (asoTerm.score === 0) tdScore.classList.add("muted");
+                else if (asoTerm.score >= 70) tdScore.classList.add("score-hot");
+            } else {
+                tdScore.textContent = "—";
+                tdScore.classList.add("muted");
+            }
+
+            tr.append(tdKw, tdPop, tdScore, tdRank, tdDelta, td24, td7d, tdBest, tdSpark);
             tbody.appendChild(tr);
         }
 
@@ -1424,11 +1605,11 @@ async function renderKeywords(kw, glossary = {}) {
 
 async function main() {
     const meta = document.getElementById("meta");
-    let latest, history, events, reviews, kwData, hist, glossary, pageviews;
+    let latest, history, events, reviews, kwData, hist, glossary, pageviews, plan;
     try {
         // no-cache: revalidate every load so the data files can't come from
         // differently-aged browser caches and contradict each other.
-        [latest, history, events, reviews, kwData, hist, glossary, pageviews] = await Promise.all([
+        [latest, history, events, reviews, kwData, hist, glossary, pageviews, plan] = await Promise.all([
             fetch("data/latest.json", { cache: "no-cache" }).then((r) => r.json()),
             fetch("data/history.json", { cache: "no-cache" }).then((r) => r.json()),
             fetch("data/events.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => []),
@@ -1439,6 +1620,10 @@ async function main() {
             // absent file just means the table stays in its original language.
             fetch("data/glossary.json").then((r) => r.json()).catch(() => ({})),
             fetch("data/pageviews.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => null),
+            // Intent, coverage and priority, written by scripts/aso.mjs. Absent
+            // on a repo that has never run it, which only costs the extra
+            // column and the panel above the table.
+            fetch("data/aso.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => null),
         ]);
     } catch {
         meta.textContent = "No data yet. Run the collect workflow once to seed data/.";
@@ -1585,7 +1770,7 @@ async function main() {
     // waits on its shard, so blocking the rest of the page on that fetch would
     // buy nothing. Caught so a missing shard cannot surface as an unhandled
     // rejection and take the reviews below it down with it.
-    renderKeywords(kwData, glossary).catch((err) => console.warn("keyword section:", err));
+    renderKeywords(kwData, glossary, plan).catch((err) => console.warn("keyword section:", err));
     renderWeekReviews(reviews);
     renderReviews(reviews);
     renderEvents(history, events);

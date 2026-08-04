@@ -92,11 +92,20 @@ jobs:
           set -o pipefail
           node scripts/keywords.mjs --merge 2>&1 | tee run.log
 
+      # Prioritisation runs on the merged data, and re-reads the live title and
+      # subtitle so coverage is graded against what the listing says today
+      # rather than what it said when someone last wrote it down. Never fails
+      # the run: a page that 429s keeps the stored listing, and stale metadata
+      # is worth far less than a lost keyword merge.
+      - name: Score and group keywords
+        continue-on-error: true
+        run: node scripts/aso.mjs --fetch
+
       - name: Commit data
         run: |
           git config user.name "ratings-bot"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/data scripts/keywords.json scripts/hints.json
+          git add docs/data scripts/keywords.json scripts/hints.json scripts/metadata.json
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else

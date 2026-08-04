@@ -1,0 +1,41 @@
+{
+  "_note": "Hand corrections to the intent rules in aso.mjs. `intents` pins one exact tracked term to one bucket and beats every rule. `offtarget` is a substring list checked against the English form of a term, for whole neighbourhoods this app does not serve. Buckets: symptom (names the problem), category (names a tool), feature (names one capability), adjacent (a neighbouring need the app partly serves), brand (someone else's name), offtarget (not ours), mine (our own name).",
+  "intents": {
+    "snore lab": "brand",
+    "snorescout": "brand",
+    "dream talk recorder": "brand",
+    "mad snoring app": "brand",
+    "snore ai": "brand",
+    "sleep cycle": "brand",
+    "snore timeline": "mine",
+    "do i snore": "symptom",
+    "il ronfle": "symptom",
+    "sleep breathing": "symptom",
+    "sleep apnea": "symptom",
+    "睡眠障害": "symptom",
+    "歯ぎしり": "adjacent",
+    "歯ぎしり録音": "adjacent",
+    "磨牙": "adjacent",
+    "磨牙监测": "adjacent",
+    "白噪音": "offtarget",
+    "助眠": "offtarget",
+    "失眠": "offtarget",
+    "心率监测": "offtarget",
+    "快眠": "offtarget",
+    "よく眠れる": "offtarget",
+    "je vais bien dormir": "offtarget",
+    "mieux dormir": "offtarget"
+  },
+  "offtarget": [
+    "white noise",
+    "insomnia",
+    "heart rate",
+    "meditation",
+    "sleep aid",
+    "sleep better",
+    "better sleep",
+    "cpap supplies"
+  ],
+  "_vetoNote": "Words the keyword field will never carry, whatever demand sits behind them. Kept here so the shopping list and the field packer stop re-proposing a decision already made: lab and nhs squat on names that are not ours, ai was rejected on positioning.",
+  "vetoWords": ["ai", "lab", "nhs"]
+}
