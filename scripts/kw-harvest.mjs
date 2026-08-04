@@ -58,6 +58,15 @@ const HARVEST = {
       "眠り", "寝息", "寝てる間", "歯ぎしり", "スリープトラッカー", "睡眠負債", "よく眠れる"],
     framings: ["無料", "アプリ", "録音", "apple watch", "人気", "計測"],
   },
+  nl: {
+    // Dutch writes the same idea both ways — "slaaptracker" and "slaap tracker"
+    // are separate queries with separate demand — so both registers are seeded.
+    stems: ["snurken", "snurk app", "snurkalarm", "slaap", "slaaptracker", "slaap tracker",
+      "slaapdagboek", "slaapapneu", "slaapgeluiden", "slaap opnemen", "slaaprecorder",
+      "apneu", "cpap", "wekker", "diepe slaap", "praten in slaap", "slapen",
+      "geluid opnemen", "slaapkwaliteit", "tandenknarsen"],
+    framings: ["gratis", "app", "opnemen", "apple watch", "opname", "test"],
+  },
   cn: {
     stems: ["打鼾", "打呼", "打呼噜", "鼾声", "呼噜", "止鼾", "睡眠", "睡眠监测",
       "睡眠记录", "睡眠追踪", "睡眠质量", "睡眠周期", "梦话", "呼吸暂停", "助眠",
