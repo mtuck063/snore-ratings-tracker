@@ -769,6 +769,10 @@ function renderEvents(history, events) {
     baseLi.className = "empty";
     baseLi.textContent = `Tracking started with ${fmt(baselineTotal)} lifetime ratings across ${baselineCountries.length} countries.`;
     list.appendChild(baseLi);
+    // Same reason the table waits: the heading and its subtitle are in the
+    // markup, so an unhidden section is a title with nothing under it until
+    // the fetches land. The baseline lines above mean this always has content.
+    document.getElementById("events-section").hidden = false;
 }
 
 // Keyword rankings: one table, tab per market. Rank sparklines plot -rank so
@@ -2982,6 +2986,12 @@ async function main() {
         tbody.appendChild(toggleTr);
         unrated.forEach((e) => render(e, true));
     }
+
+    // Shown only now it has rows. The markup ships with the header row already
+    // written, so leaving it visible meant a bare strip of column headings sat
+    // at the top of the page for as long as the fetches took, then jumped as
+    // the body filled in underneath it.
+    document.getElementById("ratings-wrap").hidden = false;
 
     renderRecent(events);
     // Not awaited: the table paints synchronously and only the movement strip
