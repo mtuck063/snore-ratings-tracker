@@ -827,12 +827,46 @@ const INTENT_HELP = {
 // next step: eight of the twelve rows said it, and none of them said what to
 // try. Apple does not weigh the three fields equally, so where a word sits is
 // itself a lever, and when there is no lever left that is worth saying too.
+// Words Apple does not allow in the app name or subtitle. Its metadata rules
+// bar prices there, so "promote free into the subtitle" is advice that gets an
+// update rejected. Localised, because the rule is about the meaning and every
+// storefront has its own word for it.
+const NO_PROMOTE = new Set([
+    "free", "gratis", "gratuit", "gratuito", "kostenlos", "無料", "免费", "免費", "무료",
+]);
+
+const YEAR = /^(19|20)\d{2}$/;
+
 function actionFor(t, alt, b, keys) {
     const title = new Set(b.titleKeys ?? []);
     const sub = new Set(b.subtitleKeys ?? []);
     const label = (u) => b.labels?.[u] ?? u;
 
     if (t.covered === false && t.missing?.length) {
+        // A year is one of the few things Apple is happy to see in an app
+        // name, and the name outranks the keyword field, so "Snore Timeline
+        // 2026" is the stronger placement for a phrase ending in a year.
+        const years = t.missing.filter((w) => YEAR.test(w));
+        const rest = t.missing.filter((w) => !YEAR.test(w));
+        if (years.length) {
+            const now = new Date().getFullYear();
+            const stale = years.filter((y) => Number(y) < now);
+            const parts = [
+                `Put ${years.map((y) => `“${y}”`).join(" and ")} in your app name rather than the keyword field — Apple allows a year there, and weighs the name above the field.`,
+            ];
+            if (rest.length) {
+                parts.push(`${rest.map((w) => `“${w}”`).join(" and ")} can go in the keyword field.`);
+            }
+            if (stale.length) {
+                parts.push(
+                    `Worth checking the demand first: ${stale.map((y) => `“${y}”`).join(", ")} ${stale.length === 1 ? "is" : "are"} behind us, and searchers move to ${now} and ${now + 1}.`
+                );
+            }
+            // Only the non-year words go to the draft. Offering to add the year
+            // to the keyword field contradicts the sentence above it.
+            const restKeys = alt.filter((u) => !keys.has(u) && !YEAR.test(b.labels?.[u] ?? u));
+            return { kind: "wording", text: parts.join(" "), ...(restKeys.length && { add: restKeys }) };
+        }
         return {
             kind: "wording",
             text: `Add ${t.missing.map((w) => `“${w}”`).join(" and ")} to your keyword field. Apple cannot rank this phrase until every word is somewhere in your listing.`,
@@ -842,12 +876,27 @@ function actionFor(t, alt, b, keys) {
     if (t.rank != null && t.rank <= 10) {
         return { kind: "elsewhere", text: "Already on page one. Defend it rather than spend characters on it." };
     }
-    // Which of its words are carried only by the weakest of the three fields.
+    // Which of its words are carried only by the weakest of the three fields,
+    // and of those, which are allowed upstairs at all.
     const weak = (alt ?? []).filter((u) => !title.has(u) && !sub.has(u));
-    if (weak.length) {
+    const promotable = weak.filter((u) => !NO_PROMOTE.has(label(u)) && !NO_PROMOTE.has(u));
+    const barred = weak.filter((u) => !promotable.includes(u));
+    if (promotable.length) {
+        const note = barred.length
+            ? ` (${barred.map((u) => `“${label(u)}”`).join(", ")} has to stay in the keyword field — Apple does not allow price words in the name or subtitle.)`
+            : "";
+        const where = promotable.every((u) => YEAR.test(label(u)))
+            ? "Moving it into the app name is the wording lever left here — Apple allows a year there."
+            : "Promoting one into the subtitle is the wording lever left here.";
         return {
             kind: "wording",
-            text: `Every word is present, but ${weak.map((u) => `“${label(u)}”`).join(", ")} ${weak.length === 1 ? "sits" : "sit"} only in the keyword field, which Apple weighs below the title and subtitle. Promoting one into the subtitle is the wording lever left here.`,
+            text: `Every word is present, but ${promotable.map((u) => `“${label(u)}”`).join(", ")} ${promotable.length === 1 ? "sits" : "sit"} only in the keyword field, which Apple weighs below the title and subtitle. ${where}${note}`,
+        };
+    }
+    if (barred.length) {
+        return {
+            kind: "elsewhere",
+            text: `The only word not already in your title or subtitle is ${barred.map((u) => `“${label(u)}”`).join(", ")}, and Apple does not allow price words there. The keyword field is where it has to live, so the wording is as good as it gets — this one climbs on installs, ratings and conversion.`,
         };
     }
     return {
@@ -1573,7 +1622,9 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
         if (openPanel === "phrases") {
             const column = (title, list, cls) => {
                 const col = document.createElement("div");
-                col.className = "fb-panel-col";
+                // The covered list runs four times as long as the others and is
+                // marked so it can take the width and flow into two columns.
+                col.className = "fb-panel-col" + (cls === "covered" ? " fb-panel-col-wide" : "");
                 const h4 = document.createElement("p");
                 h4.className = "fb-label";
                 h4.textContent = `${title} (${list.length})`;
