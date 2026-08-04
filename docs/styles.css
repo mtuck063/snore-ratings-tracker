@@ -679,7 +679,7 @@ li.log-day {
        one mostly empty. */
     align-items: start;
     gap: 12px;
-    margin: 16px 0 20px;
+    margin: 22px 0 20px;
 }
 .plan-card {
     background: var(--bg-raised);
@@ -833,7 +833,9 @@ li.log-day {
     border: 1px solid var(--border);
     border-radius: 10px;
     padding: 14px 16px;
-    margin-bottom: 20px;
+    /* Sits below the movement log now, so it needs its own breathing room
+       above rather than inheriting a gap from whatever preceded it. */
+    margin: 22px 0 20px;
 }
 #kw-builder h3 {
     font-size: 0.72rem;
