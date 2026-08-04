@@ -630,6 +630,11 @@ function altsFor(terms, meta) {
   // stem, but the thing to paste into the field is a real word, and the
   // cheapest real word carrying that stem is the one to suggest.
   const label = new Map();
+  // Every written form of every unit, so a field typed into the page can be
+  // read without shipping the stemmer: "recorder" resolves to the same key as
+  // "record". A word that appears in no tracked phrase resolves to nothing,
+  // which is correct — it cannot affect coverage either.
+  const wordKeys = {};
   const noteLabel = (key, text) => {
     const seen = label.get(key);
     if (!seen || text.length < seen.length) label.set(key, text);
@@ -684,6 +689,7 @@ function altsFor(terms, meta) {
       const need = [];
       for (const w of tokens(kw)) {
         const key = stem(w);
+        wordKeys[w] = key;
         // Implicit words and anything the title or subtitle already carries
         // cost nothing and are never part of what a phrase still needs.
         if (implicit.has(key) || claimed?.set.has(key)) continue;
@@ -712,6 +718,7 @@ function altsFor(terms, meta) {
     rows,
     units,
     label,
+    wordKeys,
     claimedKeys: [...(claimed?.set ?? [])],
     claimed,
   };
@@ -784,8 +791,12 @@ function builderFor(model, meta) {
   return {
     units: model.units,
     labels: Object.fromEntries(model.units.map((u) => [u, model.label.get(u)])),
+    wordKeys: model.wordKeys,
     claimed: model.claimedKeys,
-    current: meta?.keywordField ? [...new Set(words(meta.keywordField))] : null,
+    // Seed only. The page keeps whatever field you type in your own browser,
+    // because this one is a note in the repo and App Store Connect is the
+    // only place the real value lives.
+    current: meta?.keywordField ?? null,
     terms: model.rows,
   };
 }
