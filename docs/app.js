@@ -1401,7 +1401,13 @@ function renderBuilder(host, cc, plan, onFieldSaved) {
                     const li = document.createElement("li");
                     const name = document.createElement("span");
                     name.className = "fb-panel-name";
-                    name.textContent = t.kw;
+                    // The phrase carries the covered/uncovered colour; the chip
+                    // keeps its own. Colouring the wrapper painted the badges
+                    // green too, which threw away the one thing they encode.
+                    const text = document.createElement("span");
+                    text.className = "fb-panel-text";
+                    text.textContent = t.kw;
+                    name.appendChild(text);
                     // Who is searching it, same chip as the table below. A list
                     // of sixty phrases is a funnel, not a pile, and covering
                     // sixty feature phrases is a different listing from covering
