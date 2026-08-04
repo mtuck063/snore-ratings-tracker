@@ -911,7 +911,10 @@ function renderBuilder(host, cc, plan) {
     // containment against whatever the field carries.
     const parseField = (text) =>
         (text ?? "")
-            .split(/[,\u3001\uff0c\n]+/)
+            // Space is a separator too: "apple watch" in the field is two
+            // indexed words, and treating it as one unit made it show up as
+            // both dropped and added in the same comparison.
+            .split(/[,\u3001\uff0c\n\s]+/)
             .map((w) => w.trim().toLowerCase())
             .filter(Boolean)
             .map((w) => wordKeys[w] ?? keyOf.get(w) ?? w);
@@ -922,6 +925,10 @@ function renderBuilder(host, cc, plan) {
     const storeKey = `asoField:${cc}`;
     let savedRaw = localStorage.getItem(storeKey);
     const currentRaw = savedRaw ?? b.current ?? "";
+    // Three states, not two. A box showing the repo seed has nothing to save
+    // and is not mid-save, and calling that "saving…" forever reads as a bug
+    // that never resolves.
+    let dirty = false;
 
     const recommended = parseField(m.recommended?.field);
     let picked = new Set(recommended);
@@ -948,11 +955,6 @@ function renderBuilder(host, cc, plan) {
                 ? line("Subtitle", `${l.subtitle}  (${l.subtitleChars}/30)`)
                 : line("Subtitle", "none set \u2014 Apple fills the slot with your category, and 30 indexed characters go unspent", "warn")
         );
-        if (m.repeatedInSubtitle?.length) {
-            context.appendChild(
-                line("Repeated", `${m.repeatedInSubtitle.join(", ")} \u2014 already in the subtitle, so the field copy buys nothing`, "warn")
-            );
-        }
         context.appendChild(
             line("", "Words in the title and subtitle are already indexed and cost no characters here, because Apple pools all three fields.", "muted")
         );
@@ -988,19 +990,42 @@ function renderBuilder(host, cc, plan) {
             .join(",");
     const yoursNote = document.createElement("span");
     yoursNote.className = "fb-yours-note";
+    // Duplication is a property of the field you typed, so it belongs under the
+    // box you typed it in. Sitting up in the listing context it named a word
+    // without saying which field carried it.
+    const yoursWaste = document.createElement("span");
+    yoursWaste.className = "fb-yours-waste";
+    const claimedKeys = new Set(b.claimed ?? []);
     const refreshNote = () => {
         const clean = tidy(input.value);
         const keys = new Set(parseField(clean));
+
+        // Words the title or subtitle already carries. Apple pools all three
+        // fields, so a second copy ranks for nothing and the characters are
+        // simply gone.
+        const dupes = clean
+            .split(",")
+            .filter(Boolean)
+            .filter((w) => claimedKeys.has(wordKeys[w.toLowerCase()] ?? keyOf.get(w.toLowerCase()) ?? w.toLowerCase()));
+        const wasted = dupes.reduce((n, w) => n + w.length + 1, 0);
+        yoursWaste.textContent = dupes.length
+            ? `${dupes.join(", ")} ${dupes.length === 1 ? "is" : "are"} already in your title or subtitle, so ${wasted} of these characters buy nothing.`
+            : "";
         const n = b.terms.filter((t) => holdsIn(t, keys)).length;
         yoursNote.classList.toggle("over", clean.length > FIELD_MAX);
+        const state = dirty
+            ? "saving\u2026"
+            : savedRaw != null
+              ? "saved in this browser"
+              : "seeded from scripts/metadata.json \u2014 paste yours to replace it";
         yoursNote.textContent = clean
             ? `${clean.length}/${FIELD_MAX} characters, covering ${n} of ${b.terms.length} phrases` +
               (clean.length > FIELD_MAX ? " \u00b7 over the limit" : "") +
-              (savedRaw ? " \u00b7 saved in this browser" : " \u00b7 saving\u2026")
+              ` \u00b7 ${state}`
             : "Nothing recorded. Until you paste it, comparisons use the seed in scripts/metadata.json.";
     };
     refreshNote();
-    yours.append(yoursLabel, input, yoursNote);
+    yours.append(yoursLabel, input, yoursNote, yoursWaste);
 
     const stats = document.createElement("div");
     stats.className = "fb-stats";
@@ -1069,6 +1094,10 @@ function renderBuilder(host, cc, plan) {
         // stopped being true the moment you edited a word here.
         swap.replaceChildren();
         if (yourCovers != null) {
+            const swapHead = document.createElement("p");
+            swapHead.className = "fb-label";
+            swapHead.textContent = "The field above, against the one in App Store Connect";
+            swap.appendChild(swapHead);
             const wins = b.terms.filter((t) => !holdsIn(t, yourKeys) && holdsIn(t, picked)).map((t) => t.kw);
             const loses = b.terms.filter((t) => holdsIn(t, yourKeys) && !holdsIn(t, picked)).map((t) => t.kw);
             if (wins.length) {
@@ -1220,6 +1249,7 @@ function renderBuilder(host, cc, plan) {
         if (clean !== input.value) input.value = clean;
         localStorage.setItem(storeKey, clean);
         savedRaw = clean;
+        dirty = false;
         draw();
     };
     input.addEventListener("blur", normalise);
@@ -1227,10 +1257,13 @@ function renderBuilder(host, cc, plan) {
 
     let saveTimer = null;
     input.addEventListener("input", () => {
+        dirty = true;
+        refreshNote();
         clearTimeout(saveTimer);
         saveTimer = setTimeout(() => {
             localStorage.setItem(storeKey, input.value);
             savedRaw = input.value;
+            dirty = false;
             draw();
         }, 400);
     });

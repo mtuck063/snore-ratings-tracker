@@ -972,34 +972,50 @@ li.log-day {
 /* The field card absorbed the listing and shopping-list panels, so it needs
    room to separate its sections. */
 .fb-context { margin-bottom: 12px; }
+/* The field box gets the full width of the card: a hundred characters wrapping
+   in a half-width column is the thing you are trying to read. */
 .fb-yours {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 12px;
-    margin-bottom: 4px;
+    display: block;
+    padding: 12px 14px;
+    margin-bottom: 12px;
     background: var(--bg);
     border: 1px solid var(--border);
     border-radius: 8px;
 }
+.fb-yours .fb-label {
+    display: block;
+    margin: 0 0 6px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
 .fb-input {
-    flex: 1 1 320px;
-    min-width: 0;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
     font: inherit;
-    font-size: 0.78rem;
+    font-size: 0.82rem;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    line-height: 1.6;
     color: var(--text);
     background: var(--bg-raised);
     border: 1px solid var(--border);
     border-radius: 6px;
-    padding: 6px 8px;
+    padding: 8px 10px;
 }
 .fb-input:focus { outline: none; border-color: var(--accent); }
-.fb-yours-note { flex: 1 1 100%; font-size: 0.72rem; color: var(--text-secondary); }
+.fb-yours-note { display: block; margin-top: 6px; font-size: 0.74rem; color: var(--text-secondary); }
 .fb-suggest { display: block; }
 .fb-suggest .fb-add { margin-right: 6px; }
 #kw-plan { grid-template-columns: 1fr; }
 .fb-input { resize: vertical; line-height: 1.5; }
 .fb-yours-note.over { color: var(--bad); }
 .fb-swap { margin: 8px 0 12px; }
+.fb-yours-waste {
+    display: block;
+    margin-top: 3px;
+    font-size: 0.74rem;
+    color: var(--star4);
+}
+.fb-yours-waste:empty { display: none; }
+.fb-swap .fb-label { margin-bottom: 4px; }
