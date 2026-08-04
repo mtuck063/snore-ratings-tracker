@@ -1457,6 +1457,12 @@ function renderBuilder(host, cc, plan, onFieldSaved) {
                     chip.textContent = t.intent;
                     chip.dataset.tip = INTENT_TIP[t.intent] ?? "";
                     name.appendChild(chip);
+                    if (t.note) {
+                        const note = document.createElement("span");
+                        note.className = "fb-panel-note";
+                        note.textContent = t.note;
+                        name.appendChild(note);
+                    }
                     const val = document.createElement("span");
                     val.className = "gap-term-val";
                     val.textContent = `${t.pop} pop`;
@@ -1467,9 +1473,24 @@ function renderBuilder(host, cc, plan, onFieldSaved) {
                 col.appendChild(ul);
                 return col;
             };
+            // The keywords a field cannot win, listed rather than counted. The
+            // tile said "9 excluded" and named the categories, which is a
+            // summary of a list the reader could reasonably want to check.
+            const outOfScope = tracked
+                .filter((kw) => !inBuilder.has(kw))
+                .map((kw) => ({
+                    kw,
+                    pop: m.terms[kw].pop ?? 0,
+                    intent: m.terms[kw].intent,
+                    note:
+                        m.terms[kw].intent === "brand" || m.terms[kw].intent === "mine" || m.terms[kw].intent === "offtarget"
+                            ? null
+                            : `needs ${(m.terms[kw].missing ?? []).join(", ")}, vetoed`,
+                }));
             panel.append(
                 column("Covered", covered, "covered"),
-                column("Not covered", b.terms.filter((t) => !covered.includes(t)), "uncovered")
+                column("Not covered", b.terms.filter((t) => !covered.includes(t)), "uncovered"),
+                column("Not winnable with a keyword field", outOfScope, "outofscope")
             );
         }
 

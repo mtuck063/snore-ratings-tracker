@@ -1134,3 +1134,5 @@ li.log-day {
 .fb-panel-name { display: inline-flex; align-items: baseline; gap: 6px; min-width: 0; }
 .fb-panel-list .badge { flex: none; margin-left: 0; }
 .kw-legend-eg { color: var(--accent); opacity: 0.85; }
+.fb-panel-list li.outofscope .fb-panel-text { color: var(--text-secondary); opacity: 0.75; }
+.fb-panel-note { color: var(--text-secondary); font-size: 0.7rem; }
