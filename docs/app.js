@@ -616,8 +616,11 @@ function renderRecent(events) {
     list.className = "recent-list";
     // Every event in the 7-day window, so the sums above are verifiable by
     // eye: rows above the divider add up to the 24h figure, all rows to the
-    // 7-day figure.
-    const weekEvents = events.filter((ev) => Date.now() - new Date(ev.at) <= 7 * 864e5).slice(-12).reverse();
+    // 7-day figure. Uncapped for that reason — a row cap silently dropped the
+    // oldest events in the window, which left the sums unreconcilable against
+    // the rows and against the per-country totals elsewhere. The window is the
+    // only limit; a busy week makes a longer strip, which is the point.
+    const weekEvents = events.filter((ev) => Date.now() - new Date(ev.at) <= 7 * 864e5).reverse();
     let pastDayDivider = false;
     for (const ev of weekEvents) {
         const when = new Date(ev.at);
