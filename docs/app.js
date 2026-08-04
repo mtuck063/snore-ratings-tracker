@@ -790,6 +790,35 @@ function renderPlan(host, cc, plan) {
     }
     host.hidden = false;
 
+    // A row that opens to name the phrases behind a number. Used for both the
+    // gap list and the field swap, because in both places the number is the
+    // claim and the phrases are the evidence for it.
+    const expandable = (head, items) => {
+        const li = document.createElement("li");
+        const btn = document.createElement("button");
+        btn.className = "gap-head";
+        btn.setAttribute("aria-expanded", "false");
+        const caret = document.createElement("span");
+        caret.className = "gap-caret";
+        caret.textContent = "▸";
+        btn.append(caret, ...head);
+        const list = document.createElement("ul");
+        list.className = "gap-terms";
+        list.hidden = true;
+        for (const t of items) {
+            const ti = document.createElement("li");
+            ti.textContent = t;
+            list.appendChild(ti);
+        }
+        btn.addEventListener("click", () => {
+            list.hidden = !list.hidden;
+            caret.textContent = list.hidden ? "▸" : "▾";
+            btn.setAttribute("aria-expanded", String(!list.hidden));
+        });
+        li.append(btn, list);
+        return li;
+    };
+
     const card = (title) => {
         const el = document.createElement("div");
         el.className = "plan-card";
@@ -827,52 +856,6 @@ function renderPlan(host, cc, plan) {
                 ? line("Subtitle", `${l.subtitle}  (${l.subtitleChars}/30)`)
                 : line("Subtitle", "none set — Apple fills the slot with your category, and 30 indexed characters go unspent", "warn")
         );
-        // The recommendation, not the current field. What the field should say
-        // is worked out from the tracked terms, so it exists whether or not
-        // anyone has written down what it says today — and "not recorded" in
-        // this slot was a fact about bookkeeping where an answer belongs.
-        const r = m.recommended;
-        if (r) {
-            const rec = document.createElement("p");
-            rec.className = "plan-line plan-rec";
-            const label = document.createElement("span");
-            label.className = "plan-label";
-            label.textContent = "Keywords";
-            const field = document.createElement("code");
-            field.textContent = r.field;
-            rec.append(label, field);
-            listing.appendChild(rec);
-
-            const note = line(
-                "",
-                `Recommended: ${r.chars}/100 characters, covering ${r.covers} of ${r.of} chaseable terms. Words already in the title or subtitle are left out, because Apple pools all three.`,
-                "muted"
-            );
-            listing.appendChild(note);
-
-            if (r.adds?.length || r.drops?.length) {
-                if (r.adds?.length) listing.appendChild(line("Adds", r.adds.join(", "), "muted"));
-                if (r.drops?.length) listing.appendChild(line("Drops", r.drops.join(", "), "muted"));
-            } else if (!l.keywordField) {
-                listing.appendChild(
-                    line("", "Your current field is not recorded, so there is nothing to compare against. Paste it into scripts/metadata.json to see what this would change.", "muted")
-                );
-            }
-
-            const copy = document.createElement("button");
-            copy.className = "plan-copy";
-            copy.textContent = "Copy field";
-            copy.addEventListener("click", async () => {
-                try {
-                    await navigator.clipboard.writeText(r.field);
-                    copy.textContent = "Copied";
-                } catch {
-                    copy.textContent = "Copy failed";
-                }
-                setTimeout(() => (copy.textContent = "Copy field"), 1500);
-            });
-            listing.appendChild(copy);
-        }
         if (m.repeatedInSubtitle?.length) {
             listing.appendChild(line("Repeated", `${m.repeatedInSubtitle.join(", ")} — already in the subtitle, so the field copy buys nothing`, "warn"));
         }
@@ -889,6 +872,82 @@ function renderPlan(host, cc, plan) {
                 )
             );
         }
+
+        // The recommendation, not the current field. What the field should say
+        // is worked out from the tracked terms, so it exists whether or not
+        // anyone has written down what it says today — and "not recorded" in
+        // this slot was a fact about bookkeeping where an answer belongs.
+        const r = m.recommended;
+        if (r) {
+            const rec = document.createElement("p");
+            rec.className = "plan-line plan-rec";
+            const label = document.createElement("span");
+            label.className = "plan-label";
+            label.textContent = "Keywords";
+            const field = document.createElement("code");
+            field.textContent = r.field;
+            // The button belongs to the field, not to the card. Parked at the
+            // bottom it sat between the swap and the coverage line, next to
+            // neither, and read as "copy something on this card".
+            const copy = document.createElement("button");
+            copy.className = "plan-copy plan-copy-inline";
+            copy.textContent = "Copy";
+            copy.addEventListener("click", async () => {
+                try {
+                    await navigator.clipboard.writeText(r.field);
+                    copy.textContent = "Copied";
+                } catch {
+                    copy.textContent = "Failed";
+                }
+                setTimeout(() => (copy.textContent = "Copy"), 1500);
+            });
+            const fieldWrap = document.createElement("span");
+            fieldWrap.className = "plan-rec-body";
+            fieldWrap.append(field, copy);
+            rec.append(label, fieldWrap);
+            listing.appendChild(rec);
+
+            listing.appendChild(
+                line(
+                    "",
+                    `Recommended: ${r.chars}/100 characters, covering ${r.covers} of ${r.of} chaseable phrases` +
+                        (r.currentCovers == null
+                            ? ". Words already in the title or subtitle are left out, because Apple pools all three."
+                            : `, against ${r.currentCovers} for the field you have now. Words already in the title or subtitle are left out, because Apple pools all three.`),
+                    "muted"
+                )
+            );
+
+            // The swap, both directions. 100 characters is a fixed budget, so
+            // anything gained is paid for by something dropped, and a card that
+            // only showed the gain was asking for a decision while hiding half
+            // of what it costs.
+            if (r.wins?.length || r.loses?.length) {
+                const swap = document.createElement("ul");
+                swap.className = "plan-gaps";
+                if (r.wins.length) {
+                    const w = document.createElement("span");
+                    w.className = "swap-win";
+                    w.textContent = `Wins ${r.wins.length} phrase${r.wins.length === 1 ? "" : "s"}`;
+                    const by = document.createElement("span");
+                    by.textContent = `by adding ${r.adds.join(", ")}`;
+                    swap.appendChild(expandable([w, by], r.wins));
+                }
+                if (r.loses.length) {
+                    const lo = document.createElement("span");
+                    lo.className = "swap-lose";
+                    lo.textContent = `Loses ${r.loses.length} phrase${r.loses.length === 1 ? "" : "s"}`;
+                    const by = document.createElement("span");
+                    by.textContent = `by dropping ${r.drops.join(", ")}`;
+                    swap.appendChild(expandable([lo, by], r.loses));
+                }
+                listing.appendChild(swap);
+            } else if (!l.keywordField) {
+                listing.appendChild(
+                    line("", "Your current field is not recorded, so there is nothing to compare against. Paste it into scripts/metadata.json to see what this would change.", "muted")
+                );
+            }
+        }
     }
 
     // The shopping list. One word per row, and what that word would unblock.
@@ -902,43 +961,17 @@ function renderPlan(host, cc, plan) {
         const ul = document.createElement("ul");
         ul.className = "plan-gaps";
         for (const g of m.shoppingList.slice(0, 8)) {
-            const li = document.createElement("li");
-            // Expandable rather than a tooltip: which phrases a word unlocks is
-            // the reason to buy it, and a reason you have to hover to read is a
-            // reason most people never read.
-            const head = document.createElement("button");
-            head.className = "gap-head";
-            head.setAttribute("aria-expanded", "false");
-            const caret = document.createElement("span");
-            caret.className = "gap-caret";
-            caret.textContent = "▸";
             const word = document.createElement("code");
             word.textContent = g.word;
             if (g.weak) word.className = "weak";
             const rest = document.createElement("span");
             // "368 demand" read as a quantity of something. It is the sum of
             // the Pop scores of the phrases the word blocks, and Pop is an
-            // ordinal 5-100 score, not a count of searches — so the phrase
+            // ordinal 5-100 score, not a count of searches - so the phrase
             // count leads and the sum is named for what it is.
             rest.textContent =
-                `${g.terms.length} term${g.terms.length === 1 ? "" : "s"} · ${g.demand} pop`;
-            head.append(caret, word, rest);
-
-            const terms = document.createElement("ul");
-            terms.className = "gap-terms";
-            terms.hidden = true;
-            for (const t of g.terms) {
-                const ti = document.createElement("li");
-                ti.textContent = t;
-                terms.appendChild(ti);
-            }
-            head.addEventListener("click", () => {
-                terms.hidden = !terms.hidden;
-                caret.textContent = terms.hidden ? "▸" : "▾";
-                head.setAttribute("aria-expanded", String(!terms.hidden));
-            });
-            li.append(head, terms);
-            ul.appendChild(li);
+                `${g.terms.length} term${g.terms.length === 1 ? "" : "s"} \u00b7 ${g.demand} pop`;
+            ul.appendChild(expandable([word, rest], g.terms));
         }
         gaps.appendChild(ul);
     }
@@ -985,6 +1018,298 @@ function renderPlan(host, cc, plan) {
     }
 
     host.append(listing, gaps, chase);
+}
+
+// What the tags on each row mean, spelled out on the page. They were tooltips,
+// which is a fine place for detail and a bad place for the definition of a word
+// the reader has never seen: "CATEGORY" explains nothing until someone tells
+// you it is about the searcher, not about the app.
+function renderLegend(host, cc, plan) {
+    host.replaceChildren();
+    const terms = plan?.markets?.[cc]?.terms;
+    if (!terms) {
+        host.hidden = true;
+        return;
+    }
+    host.hidden = false;
+    const intro = document.createElement("p");
+    intro.className = "plan-line muted";
+    intro.textContent = "Each keyword is tagged by who is searching it:";
+    host.appendChild(intro);
+
+    const ul = document.createElement("ul");
+    ul.className = "kw-legend-list";
+    const present = new Set(Object.values(terms).map((t) => t.intent));
+    const anyGap = Object.values(terms).some((t) => t.covered === false);
+    for (const [intent, tip] of Object.entries(INTENT_TIP)) {
+        if (!present.has(intent)) continue;
+        const li = document.createElement("li");
+        const chip = document.createElement("span");
+        chip.className = `badge kw-intent intent-${intent}`;
+        chip.textContent = intent;
+        const text = document.createElement("span");
+        text.textContent = tip;
+        li.append(chip, text);
+        ul.appendChild(li);
+    }
+    if (anyGap) {
+        const li = document.createElement("li");
+        const chip = document.createElement("span");
+        chip.className = "badge kw-gap";
+        chip.textContent = "no words";
+        const text = document.createElement("span");
+        text.textContent =
+            "Your title, subtitle and keyword field between them do not contain all the words in this phrase, so Apple cannot rank you for it at any position. Tap the row to see which words are missing.";
+        li.append(chip, text);
+        ul.appendChild(li);
+    }
+    host.appendChild(ul);
+}
+
+// The field builder. Add and drop words, watch what it costs.
+//
+// Coverage is recomputed here on every keystroke, but none of the language
+// rules are: scripts/aso.mjs ships each phrase with the unit-sets that would
+// satisfy it, so this only ever asks whether one of those sets is a subset of
+// what is picked. Segmentation, folding and tiling stay in one place, and the
+// page cannot drift away from the numbers in the cards above it.
+const FIELD_MAX = 100;
+
+function renderBuilder(host, cc, plan) {
+    host.replaceChildren();
+    const m = plan?.markets?.[cc];
+    const b = m?.builder;
+    if (!b?.terms?.length) {
+        host.hidden = true;
+        return;
+    }
+    host.hidden = false;
+
+    const recommended = (m.recommended?.field ?? "").split(",").filter(Boolean);
+    let picked = new Set(recommended);
+
+    const h = document.createElement("h3");
+    h.textContent = "Keyword field builder";
+    const sub = document.createElement("p");
+    sub.className = "plan-line muted";
+    sub.textContent =
+        "Starts from the recommendation. Drop a word to see what it was holding up, add one to see what it buys. Words in your title and subtitle are already counted and cost no characters.";
+
+    const chipRow = document.createElement("div");
+    chipRow.className = "fb-chips";
+    const stats = document.createElement("div");
+    stats.className = "fb-stats";
+    const mix = document.createElement("div");
+    mix.className = "fb-mix";
+    const suggest = document.createElement("div");
+    suggest.className = "fb-suggest";
+    const missing = document.createElement("div");
+    missing.className = "fb-missing";
+
+    const buttons = document.createElement("div");
+    buttons.className = "fb-actions";
+    const act = (label, fn) => {
+        const btn = document.createElement("button");
+        btn.className = "plan-copy";
+        btn.textContent = label;
+        btn.addEventListener("click", fn);
+        buttons.appendChild(btn);
+        return btn;
+    };
+
+    const charsOf = (set) => [...set].join(",").length;
+    const popTotal = b.terms.reduce((n, t) => n + t.pop, 0);
+    const baseline = (() => {
+        const set = new Set(recommended);
+        const covered = b.terms.filter((t) => t.alts.some((a) => a.every((u) => set.has(u))));
+        return { pop: covered.reduce((n, t) => n + t.pop, 0), count: covered.length };
+    })();
+
+    const tile = (value, label, cls) => {
+        const d = document.createElement("div");
+        d.className = "fb-tile" + (cls ? ` ${cls}` : "");
+        const v = document.createElement("div");
+        v.className = "fb-tile-num";
+        v.textContent = value;
+        const l = document.createElement("div");
+        l.className = "fb-tile-label";
+        l.textContent = label;
+        d.append(v, l);
+        return d;
+    };
+
+    function draw() {
+        const covered = b.terms.filter((t) => t.alts.some((a) => a.every((u) => picked.has(u))));
+        const coveredPop = covered.reduce((n, t) => n + t.pop, 0);
+        const chars = charsOf(picked);
+
+        // Chips, ordered so the words doing nothing are visible rather than
+        // buried: a field is 100 characters and dead weight is the whole game.
+        chipRow.replaceChildren();
+        const useful = new Set(covered.flatMap((t) => t.alts.find((a) => a.every((u) => picked.has(u))) ?? []));
+        for (const u of [...picked].sort((x, y) => Number(useful.has(x)) - Number(useful.has(y)))) {
+            const chip = document.createElement("button");
+            chip.className = "fb-chip" + (useful.has(u) ? "" : " idle");
+            chip.title = useful.has(u)
+                ? "Carrying at least one covered phrase"
+                : "Not completing any phrase right now — dead characters unless something else joins it";
+            chip.append(document.createTextNode(u));
+            const x = document.createElement("span");
+            x.className = "fb-x";
+            x.textContent = "×";
+            chip.appendChild(x);
+            chip.addEventListener("click", () => {
+                picked.delete(u);
+                draw();
+            });
+            chipRow.appendChild(chip);
+        }
+
+        stats.replaceChildren(
+            tile(`${chars}/${FIELD_MAX}`, "characters", chars > FIELD_MAX ? "over" : ""),
+            tile(`${covered.length}/${b.terms.length}`, "phrases covered"),
+            tile(coveredPop.toLocaleString("en-US"), `pop covered of ${popTotal.toLocaleString("en-US")}`),
+            tile(
+                (coveredPop - baseline.pop >= 0 ? "+" : "") + (coveredPop - baseline.pop).toLocaleString("en-US"),
+                "pop vs recommended",
+                coveredPop >= baseline.pop ? "good" : "bad"
+            )
+        );
+
+        // Which kind of searcher the field is aimed at. Trading five feature
+        // phrases for five symptom ones keeps every number above identical and
+        // changes who finds the app.
+        mix.replaceChildren();
+        const byIntent = {};
+        for (const t of covered) byIntent[t.intent] = (byIntent[t.intent] ?? 0) + t.pop;
+        const mixTotal = Object.values(byIntent).reduce((a, c) => a + c, 0) || 1;
+        const bar = document.createElement("div");
+        bar.className = "fb-bar";
+        const legend = document.createElement("div");
+        legend.className = "fb-legend";
+        for (const [intent, pop] of Object.entries(byIntent).sort((a, c) => c[1] - a[1])) {
+            const seg = document.createElement("span");
+            seg.className = `fb-seg intent-${intent}`;
+            seg.style.width = `${(pop / mixTotal) * 100}%`;
+            seg.title = `${intent}: ${pop} pop`;
+            bar.appendChild(seg);
+            const key = document.createElement("span");
+            key.className = "fb-key";
+            const dot = document.createElement("span");
+            dot.className = `fb-dot intent-${intent}`;
+            key.append(dot, document.createTextNode(`${intent} ${Math.round((pop / mixTotal) * 100)}%`));
+            key.title = INTENT_TIP[intent] ?? "";
+            legend.appendChild(key);
+        }
+        mix.append(bar, legend);
+
+        // What one more word would buy, given everything already picked. The
+        // ranking changes as you edit, which is the point: a word is only worth
+        // what it completes alongside the others.
+        const gain = new Map();
+        for (const t of b.terms) {
+            if (covered.includes(t)) continue;
+            for (const alt of t.alts) {
+                const need = alt.filter((u) => !picked.has(u));
+                if (need.length !== 1) continue;
+                const u = need[0];
+                gain.set(u, (gain.get(u) ?? 0) + t.pop);
+            }
+        }
+        suggest.replaceChildren();
+        const sLabel = document.createElement("span");
+        sLabel.className = "fb-label";
+        sLabel.textContent = "Add one more:";
+        suggest.appendChild(sLabel);
+        const ranked = [...gain.entries()].sort((a, c) => c[1] - a[1]).slice(0, 10);
+        if (!ranked.length) {
+            const none = document.createElement("span");
+            none.className = "muted";
+            none.textContent = "no single word completes another phrase from here";
+            suggest.appendChild(none);
+        }
+        for (const [u, g] of ranked) {
+            const btn = document.createElement("button");
+            btn.className = "fb-add";
+            btn.textContent = `+ ${u}`;
+            const n = document.createElement("span");
+            n.className = "fb-add-gain";
+            n.textContent = `${g} pop`;
+            btn.appendChild(n);
+            btn.title = `${chars + u.length + (picked.size ? 1 : 0)}/${FIELD_MAX} characters if added`;
+            btn.addEventListener("click", () => {
+                picked.add(u);
+                draw();
+            });
+            suggest.appendChild(btn);
+        }
+
+        // The phrases still out of reach, biggest demand first, each with the
+        // exact words that would fix it.
+        missing.replaceChildren();
+        const mLabel = document.createElement("p");
+        mLabel.className = "fb-label";
+        mLabel.textContent = "Still uncovered";
+        missing.appendChild(mLabel);
+        const ul = document.createElement("ul");
+        ul.className = "plan-gaps";
+        const uncovered = b.terms.filter((t) => !covered.includes(t)).sort((a, c) => c.pop - a.pop);
+        for (const t of uncovered.slice(0, 8)) {
+            const li = document.createElement("li");
+            const row = document.createElement("button");
+            row.className = "gap-head";
+            const name = document.createElement("code");
+            name.textContent = t.kw;
+            const need = t.alts
+                .map((a) => a.filter((u) => !picked.has(u)))
+                .sort((a, c) => a.length - c.length)[0] ?? [];
+            const what = document.createElement("span");
+            what.textContent = `${t.pop} pop · needs ${need.join(", ")}`;
+            row.append(name, what);
+            row.title = "Add the missing words";
+            row.addEventListener("click", () => {
+                for (const u of need) picked.add(u);
+                draw();
+            });
+            li.appendChild(row);
+            ul.appendChild(li);
+        }
+        if (!uncovered.length) {
+            const done = document.createElement("p");
+            done.className = "plan-line muted";
+            done.textContent = "Every chaseable phrase in this market is covered.";
+            missing.appendChild(done);
+        }
+        missing.appendChild(ul);
+    }
+
+    act("Reset to recommended", () => {
+        picked = new Set(recommended);
+        draw();
+    });
+    if (b.current) {
+        act("Load my current field", () => {
+            picked = new Set(b.current);
+            draw();
+        });
+    }
+    act("Clear", () => {
+        picked = new Set();
+        draw();
+    });
+    act("Copy field", async (e) => {
+        const btn = e.currentTarget;
+        try {
+            await navigator.clipboard.writeText([...picked].join(","));
+            btn.textContent = "Copied";
+        } catch {
+            btn.textContent = "Copy failed";
+        }
+        setTimeout(() => (btn.textContent = "Copy field"), 1500);
+    });
+
+    host.append(h, sub, stats, mix, chipRow, suggest, missing, buttons);
+    draw();
 }
 
 async function renderKeywords(kw, glossary = {}, plan = null) {
@@ -1057,6 +1382,8 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
         translate.textContent = showEnglish ? "Show original" : "Show English";
         translate.classList.toggle("active", showEnglish);
         renderPlan(document.getElementById("kw-plan"), cc, plan);
+        renderBuilder(document.getElementById("kw-builder"), cc, plan);
+        renderLegend(document.getElementById("kw-legend"), cc, plan);
         tbody.replaceChildren();
         const aso = plan?.markets?.[cc]?.terms ?? {};
         const val = ([term, e]) =>

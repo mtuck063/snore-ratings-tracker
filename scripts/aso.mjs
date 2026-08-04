@@ -383,6 +383,7 @@ function analyseMarket(cc) {
     // field should say does not depend on anyone having written down what it
     // says now.
     recommended: recommendField(cc, terms, meta),
+    builder: builderFor(cc, terms, meta),
     byIntent,
     shoppingList: shoppingList.slice(0, 12),
     unusedFieldWords: unused,
@@ -622,15 +623,113 @@ function recommendField(cc, terms, meta) {
 
   const field = picks.join(",");
   const current = meta?.keywordField ? new Set(words(meta.keywordField)) : null;
+  const currentPool = meta?.keywordField ? poolOf(meta) : null;
+  const holds = (kw) => currentPool && coverageOf(kw, currentPool).covered;
+
+  // A swap has two sides and the card only ever showed one. Which phrases the
+  // recommendation would win is the case for it; which it would give up is the
+  // case against, and both have to be counted on the same denominator or there
+  // is no way to tell whether the trade is worth making.
   return {
     field,
     chars: field.length,
     covers: wanted.filter(([kw]) => satisfiedBy(kw, picks)).length,
     of: wanted.length,
-    ...(current && {
+    ...(currentPool && {
+      currentCovers: wanted.filter(([kw]) => holds(kw)).length,
       adds: picks.filter((p) => !current.has(fold(p))),
       drops: [...current].filter((w) => !picks.some((p) => fold(p) === w) && !claimed?.set.has(w)),
+      wins: wanted.filter(([kw]) => !holds(kw) && satisfiedBy(kw, picks)).map(([kw]) => kw),
+      loses: wanted.filter(([kw]) => holds(kw) && !satisfiedBy(kw, picks)).map(([kw]) => kw),
     }),
+  };
+}
+
+// --- data for the interactive builder ----------------------------------------
+//
+// The page lets you add and drop words and watch coverage move, which means
+// coverage has to be recomputable in the browser. Rather than reimplement
+// segmentation, folding and tiling in a second language and let the two drift,
+// every phrase ships with the unit-sets that would satisfy it. The page then
+// only ever asks "is one of these a subset of what I have picked", which is
+// set arithmetic and cannot disagree with the rules here.
+//
+// A Latin phrase has exactly one such set: its words. A Japanese one can have
+// several, because 睡眠記録 is satisfied by 睡眠記録 whole, or by 睡眠 + 記録.
+const MAX_ALTS = 6;
+
+function tilingsOf(part, claimed) {
+  const free = (piece) => Boolean(claimed?.segments.some((seg) => seg.includes(piece)));
+  const out = [];
+  const walk = (i, acc) => {
+    if (out.length >= 400 || acc.length > 5) return;
+    if (i === part.length) {
+      out.push([...acc]);
+      return;
+    }
+    for (let len = Math.min(6, part.length - i); len >= 2; len--) {
+      const piece = part.slice(i, i + len);
+      if (free(piece)) walk(i + len, acc);
+      else walk(i + len, [...acc, piece]);
+    }
+    // The whole remainder, so a phrase with no shared runs is still expressible.
+    if (part.length - i > 6) {
+      const rest = part.slice(i);
+      if (!free(rest)) walk(part.length, [...acc, rest]);
+    }
+  };
+  walk(0, []);
+  return out;
+}
+
+function builderFor(cc, terms, meta) {
+  const claimed = poolOf({ title: meta?.title, subtitle: meta?.subtitle });
+  const rows = [];
+  for (const [kw, t] of Object.entries(terms)) {
+    if (!CHASEABLE.has(t.intent)) continue;
+    let alts;
+    if (hasCJK(kw)) {
+      alts = [[]];
+      for (const part of fold(kw).split(/\s+/).filter(Boolean)) {
+        const partAlts = hasCJK(part)
+          ? tilingsOf(part, claimed)
+          : claimed?.set.has(part)
+            ? [[]]
+            : [[part]];
+        if (!partAlts.length) {
+          alts = [];
+          break;
+        }
+        alts = alts.flatMap((a) => partAlts.map((p) => [...new Set([...a, ...p])])).slice(0, 60);
+      }
+    } else {
+      alts = [tokens(kw).map(fold).filter((w) => !claimed?.set.has(w))];
+    }
+    // Fewest words first: the cheapest way to satisfy a phrase is the one a
+    // reader cares about, and the rest are only there so an unusual field
+    // still scores correctly.
+    // A phrase reachable only through a vetoed word is not reachable. Leaving
+    // it in offered "+ ai" as a suggestion in the builder, which is the exact
+    // decision the veto list exists to stop being re-asked.
+    alts = alts.filter((a) => !a.some((u) => vetoed.has(fold(u))));
+    if (!alts.length) continue;
+    const seen = new Set();
+    const unique = [];
+    for (const a of alts.sort((x, y) => x.length - y.length || x.join().length - y.join().length)) {
+      const key = [...a].sort().join(" ");
+      if (seen.has(key)) continue;
+      seen.add(key);
+      unique.push([...a].sort());
+      if (unique.length >= MAX_ALTS) break;
+    }
+    rows.push({ kw, pop: t.pop, intent: t.intent, rank: t.rank, alts: unique });
+  }
+  const units = [...new Set(rows.flatMap((r) => r.alts.flat()))].sort();
+  return {
+    units,
+    claimed: [...new Set([...(claimed?.set ?? [])])].sort(),
+    current: meta?.keywordField ? [...new Set(words(meta.keywordField))] : null,
+    terms: rows,
   };
 }
 

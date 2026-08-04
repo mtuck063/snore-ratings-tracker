@@ -722,6 +722,8 @@ li.log-day {
     padding: 0;
     list-style: none;
 }
+.swap-win { color: var(--good); }
+.swap-lose { color: var(--star4); }
 .gap-terms li {
     font-size: 0.76rem;
     color: var(--text-secondary);
@@ -731,6 +733,14 @@ li.log-day {
 /* The recommended field is the one thing in the card meant to be read as a
    value to copy, so it gets the monospace treatment and room to wrap. */
 .plan-rec { display: flex; gap: 4px; }
+.plan-rec-body { min-width: 0; }
+.plan-copy-inline {
+    display: inline-block;
+    margin: 4px 0 0 0;
+    padding: 1px 8px;
+    font-size: 0.7rem;
+    vertical-align: 2px;
+}
 .plan-rec code {
     color: var(--text);
     font-size: 0.78rem;
@@ -783,3 +793,117 @@ li.log-day {
 .badge.kw-gap { color: var(--bad); background: rgba(248, 113, 113, 0.13); }
 .kw-score { font-variant-numeric: tabular-nums; }
 .kw-score.score-hot { color: var(--accent); font-weight: 600; }
+
+/* --- Field builder ---------------------------------------------------------
+   The only interactive thing on the page: coverage is recomputed on every
+   click, so the numbers have to move visibly and the words have to be easy
+   to grab. */
+
+#kw-builder {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+}
+#kw-builder h3 {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    margin: 0 0 6px;
+    font-weight: 600;
+}
+.fb-stats { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+.fb-tile {
+    flex: 1 1 120px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+}
+.fb-tile-num { font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+.fb-tile-label { font-size: 0.7rem; color: var(--text-secondary); margin-top: 2px; }
+.fb-tile.good .fb-tile-num { color: var(--good); }
+.fb-tile.bad .fb-tile-num { color: var(--bad); }
+.fb-tile.over .fb-tile-num { color: var(--bad); }
+
+/* Who the field is aimed at, as one bar. The point is that two fields can
+   cover the same number of phrases and reach different people. */
+.fb-bar {
+    display: flex;
+    height: 7px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--bg);
+    margin-bottom: 6px;
+}
+.fb-seg { display: block; height: 100%; background: var(--text-secondary); }
+.fb-seg.intent-symptom { background: var(--star4); }
+.fb-seg.intent-category { background: var(--accent); }
+.fb-seg.intent-feature { background: #7C6BD6; }
+.fb-seg.intent-adjacent { background: var(--text-secondary); }
+.fb-legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.72rem; color: var(--text-secondary); }
+.fb-key { display: inline-flex; align-items: center; gap: 5px; cursor: help; }
+.fb-dot { width: 8px; height: 8px; border-radius: 2px; background: var(--text-secondary); }
+.fb-dot.intent-symptom { background: var(--star4); }
+.fb-dot.intent-category { background: var(--accent); }
+.fb-dot.intent-feature { background: #7C6BD6; }
+
+.fb-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.fb-chip {
+    font: inherit;
+    font-size: 0.78rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    color: var(--text);
+    background: color-mix(in srgb, var(--accent) 16%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+    cursor: pointer;
+}
+/* A word that completes nothing is spending characters for no ranking. */
+.fb-chip.idle {
+    color: var(--text-secondary);
+    background: none;
+    border-style: dashed;
+    border-color: var(--border);
+}
+.fb-chip:hover { border-color: var(--bad); }
+.fb-x { color: var(--text-secondary); font-size: 0.9rem; line-height: 1; }
+.fb-chip:hover .fb-x { color: var(--bad); }
+
+.fb-suggest { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 10px 0 4px; }
+.fb-label { font-size: 0.72rem; color: var(--text-secondary); margin: 0 4px 0 0; }
+.fb-add {
+    font: inherit;
+    font-size: 0.78rem;
+    display: inline-flex;
+    gap: 6px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    color: var(--text);
+    background: none;
+    border: 1px dashed var(--border);
+    cursor: pointer;
+}
+.fb-add:hover { border-color: var(--good); border-style: solid; }
+.fb-add-gain { color: var(--good); font-variant-numeric: tabular-nums; }
+.fb-missing { margin-top: 12px; }
+.fb-missing .plan-gaps li { border-bottom: 1px solid color-mix(in srgb, var(--border) 55%, transparent); }
+.fb-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+
+/* Badge legend above the table. */
+#kw-legend { margin: 4px 0 12px; }
+.kw-legend-list { list-style: none; margin: 6px 0 0; padding: 0; }
+.kw-legend-list li {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+    padding: 2px 0;
+}
+.kw-legend-list .badge { flex: none; margin-left: 0; }

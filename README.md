@@ -250,6 +250,13 @@ carries 睡眠, 記録 and アプリ across any of its fields.
 it by how much rank is left to win (a phrase at #2 has none), whether the
 searcher is one this app converts, and whether the words are there at all.
 
+The dashboard turns this into a field builder: start from the recommendation,
+drop a word to see what it was holding up, add one to see what it buys, and
+watch characters, phrases covered, total Pop and the intent mix move as you
+edit. Coverage is recomputed in the browser, but none of the language rules
+are — each phrase ships with the unit-sets that would satisfy it, so the page
+does set arithmetic and cannot drift from the rules in `aso.mjs`.
+
 ```sh
 node scripts/aso.mjs --fetch        # refresh live listings, rebuild aso.json
 node scripts/aso.mjs --report us    # coverage, gaps and chase list for a market
