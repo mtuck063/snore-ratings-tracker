@@ -1046,11 +1046,11 @@ function renderBuilder(host, cc, plan) {
     // what each number meant and still not know what they were meant to do.
     const how = document.createElement("p");
     how.className = "plan-line muted";
-    // Naming the field the hundred belongs to. Sitting directly above a title
-    // and a subtitle capped at thirty each, "Apple gives you 100 characters"
-    // read as a limit on all of it.
+    // Sits directly above the box it describes. Between the heading and the
+    // title and subtitle it split the listing context in half and explained a
+    // field the reader had not reached yet.
     how.textContent =
-        "The keyword field is 100 characters of its own, separate from the title and subtitle below. Paste what you have now, try changes against it, and copy the result back when it wins more than it gives up.";
+        "The keyword field is 100 characters of its own, on top of those. Paste what you have now, try changes against it, and copy the result back when it wins more than it gives up.";
 
     // Listing context: the two fields Apple pools with the keyword field, which
     // you cannot edit here but which decide what the field still has to carry.
@@ -1500,7 +1500,7 @@ function renderBuilder(host, cc, plan) {
     chipHint.textContent =
         "Click a word to drop it, or add one from the list below. When it covers more than your current field, copy it into App Store Connect.";
     draft.append(chipHead, preview, chipRow, chipHint, buttons);
-    host.append(h, how, context, yours, draft, stats, swap, mix, suggest, missing);
+    host.append(h, context, how, yours, draft, stats, swap, mix, suggest, missing);
     draw();
 }
 
