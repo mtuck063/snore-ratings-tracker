@@ -795,14 +795,18 @@ const INTENT_TIP = {
     mine: "Your own app's name.",
 };
 // Short forms for the score breakdown, where a full sentence would not fit.
+// Each says what the multiplier cost rather than only who is searching: symptom
+// and category both score a full 1 and between them take most of the chase
+// list, so a line that only described the searcher would read as a no-op on
+// nearly every row anyone actually sees. Mirrors FIT in scripts/aso.mjs.
 const FIT_SHORT = {
-    symptom: "problem-aware searcher, converts well here",
-    category: "shopping for an app like yours",
-    feature: "wants one capability",
-    adjacent: "a neighbouring need",
-    brand: "somebody else's app name",
-    offtarget: "not this app's category",
-    mine: "your own app name",
+    symptom: "full weight, a problem-aware searcher converts best here",
+    category: "full weight, they are shopping for an app like yours",
+    feature: "wants one capability, so a small discount",
+    adjacent: "a neighbouring need, so half the demand counts",
+    brand: "somebody else's marketing, so most of the demand is discounted",
+    offtarget: "not this app's category, so none of the demand counts",
+    mine: "your own app name, so there is nothing to win",
 };
 const INTENT_HELP = {
     symptom:
@@ -963,29 +967,64 @@ function renderPlan(host, cc, plan, onRefresh) {
         const score = document.createElement("span");
         score.className = "plan-score";
         score.textContent = c.score;
-        const termFull = m.terms[c.kw] ?? {};
+        // Coverage comes from the rescore when you have pasted a field, so the
+        // multiplier and the words missing describe the same listing the score
+        // was computed against, rather than the seed in the repo.
+        const termFull = rescored?.get(c.kw) ?? m.terms[c.kw] ?? {};
         const f = termFull.factors;
         if (f) {
             // The arithmetic behind the number, in the order the score applies
             // it. A ranking anyone is expected to act on should be able to show
             // where it came from.
-            const lever = termFull.base ? Math.round((c.score / (termFull.base * 100)) * 100) / 100 : 1;
-            const leverWhy =
-                lever === 1
-                    ? "every word already in your listing"
+            //
+            // Look the coverage multiplier up the way scoring does rather than
+            // dividing the score by the base: base ships rounded to three
+            // decimals, so the division returns 0.99 or 1.01 for what is
+            // exactly 1, and the page then prints that drift as if it were a
+            // real factor.
+            const levers = plan.levers ?? { covered: 1, unknown: 1, cheap: 1.25, dear: 0.85 };
+            // Without a pasted field the seed only records title and subtitle,
+            // so a word absent from both may still be in the keyword field.
+            const fieldKnown = rescored != null || !m.coverage?.partial;
+            const missCount = (termFull.missing ?? []).length;
+            const graded = termFull.covered !== undefined;
+            const lever = !graded
+                ? 1
+                : termFull.covered
+                  ? levers.covered
+                  : !fieldKnown
+                    ? (levers.unknown ?? 1)
+                    : missCount <= 2
+                      ? levers.cheap
+                      : levers.dear;
+            // A multiplier of 1 means three different things, and telling
+            // someone every word is already in their listing when the page
+            // never saw their keyword field is the worst of them.
+            const leverWhy = !graded
+                ? "no listing recorded for this market, so coverage is not graded"
+                : termFull.covered
+                  ? "every word already in your listing"
+                  : !fieldKnown
+                    ? `missing ${missCount} word${missCount === 1 ? "" : "s"} from your title and subtitle, but your keyword field is unknown, so this neither helps nor hurts`
                     : lever > 1
-                      ? `${(termFull.missing ?? []).length} word${(termFull.missing ?? []).length === 1 ? "" : "s"} missing, which is the cheapest kind of fix`
+                      ? `${missCount} word${missCount === 1 ? "" : "s"} missing, which is the cheapest kind of fix`
                       : "several words missing, so it is a rewrite rather than an edit";
+            // Bands mirror winnability() in scripts/aso.mjs. Say what the
+            // multiplier cost, not just what the rank is: on a list sorted by
+            // score almost every survivor carries the full 1, so a line that
+            // only describes the rank reads as a no-op to whoever got here.
             const reachWhy =
                 c.rank == null
-                    ? "unranked, so upside without evidence"
+                    ? "unranked, so the demand is real but nothing has proven it can rank"
                     : c.rank <= 3
-                      ? "top three already, almost nothing left to win"
+                      ? `#${c.rank} is top three, so the taps are already yours`
                       : c.rank <= 10
-                        ? "page one, some room left"
+                        ? `#${c.rank} is page one, so most of the win is banked`
                         : c.rank <= 50
-                          ? "close enough that a change shows"
-                          : "far back, so slower to move";
+                          ? `full weight, #${c.rank} is the band where a metadata edit shows`
+                          : c.rank <= 100
+                            ? `#${c.rank} is past page one, so an edit moves it slower`
+                            : `#${c.rank} is far back, so an edit moves it slowly`;
             const step = (n) => Math.round(n * 100) / 100;
             const x = (n) => n.toFixed(2).replace(/\.?0+$/, "");
             const afterReach = step(c.pop * f.reach);
