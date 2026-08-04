@@ -2020,7 +2020,6 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
                 orig.textContent = term;
                 tdKw.appendChild(orig);
             }
-            if (cur.prefix) tdKw.title = `Suggested at “${cur.prefix}”, position ${cur.pos}`;
             // Intent, and whether the listing can rank for this at all. Both
             // are the same size chip on purpose: a term you have no words for
             // is not a worse ranking, it is a different problem.
@@ -2111,11 +2110,18 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
             const tdPop = document.createElement("td");
             tdPop.className = "col-num";
             tdPop.textContent = cur.pop;
+            // Where the number comes from, on the number rather than on the
+            // keyword beside it. Pop is measured by how early a phrase appears
+            // in Apple's autocomplete and how high it sits in that list, so the
+            // prefix and position are the whole derivation.
+            const band =
+                cur.pop >= 70 ? "High demand." : cur.pop <= 5 ? "No measurable demand." : "";
+            tdPop.dataset.tip = cur.prefix
+                ? `${band} Pop ${cur.pop} of 100: Apple suggests “${term}” once you have typed “${cur.prefix}”, ` +
+                  `and it sits at position ${cur.pos} in that list. Earlier and higher means more people search it.`
+                : `${band || "Pop 5 of 100."} Apple's autocomplete never suggests this phrase, so there is no demand signal for it.`;
             if (cur.pop <= 5) tdPop.classList.add("muted");
-            else if (cur.pop >= 70) {
-                tdPop.classList.add("pop-hot");
-                tdPop.title = "High demand (70+)";
-            }
+            else if (cur.pop >= 70) tdPop.classList.add("pop-hot");
             const prevDayVals = prevDayRow?.markets?.[cc]?.[term];
             // Pop baseline: the oldest sample in the rolling 24h window (i.e.
             // the value ~24 hours ago); yesterday's daily value fills in until
