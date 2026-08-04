@@ -1376,7 +1376,17 @@ function renderBuilder(host, cc, plan, onFieldSaved) {
                 for (const t of [...list].sort((a, c) => c.pop - a.pop)) {
                     const li = document.createElement("li");
                     const name = document.createElement("span");
+                    name.className = "fb-panel-name";
                     name.textContent = t.kw;
+                    // Who is searching it, same chip as the table below. A list
+                    // of sixty phrases is a funnel, not a pile, and covering
+                    // sixty feature phrases is a different listing from covering
+                    // sixty symptom ones.
+                    const chip = document.createElement("span");
+                    chip.className = `badge kw-intent intent-${t.intent}`;
+                    chip.textContent = t.intent;
+                    chip.dataset.tip = INTENT_TIP[t.intent] ?? "";
+                    name.appendChild(chip);
                     const val = document.createElement("span");
                     val.className = "gap-term-val";
                     val.textContent = `${t.pop} pop`;
