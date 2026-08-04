@@ -1520,8 +1520,6 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
     stats.className = "fb-stats";
     const mix = document.createElement("div");
     mix.className = "fb-mix";
-    const swap = document.createElement("ul");
-    swap.className = "plan-gaps fb-swap";
     const panel = document.createElement("div");
     panel.className = "fb-panel";
     // The draft field gets the same shape as the box above it: a label, the
@@ -1539,8 +1537,6 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
     chipRow.className = "fb-chips";
     const suggest = document.createElement("div");
     suggest.className = "fb-suggest";
-    const missing = document.createElement("div");
-    missing.className = "fb-missing";
     const buttons = document.createElement("div");
     buttons.className = "fb-actions";
 
@@ -1706,77 +1702,6 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
             );
         }
 
-        // The swap against your real field, both directions and live. It sat in
-        // the listing card as a static comparison against the saved seed, which
-        // stopped being true the moment you edited a word here.
-        swap.replaceChildren();
-        if (yourCovers != null) {
-            const swapHead = document.createElement("p");
-            swapHead.className = "fb-label";
-            // Phrased as a consequence, not as advice. "Wins 8 phrases by
-            // adding rem, my, auto" read as a recommendation to add them, when
-            // it is only ever describing the difference between the draft above
-            // and your saved field — which is your own edit as soon as you make
-            // one.
-            swapHead.textContent = "If you replaced your App Store Connect field with this draft";
-            swap.appendChild(swapHead);
-            const wins = b.terms.filter((t) => !holdsIn(t, yourKeys) && holdsIn(t, picked));
-            const loses = b.terms.filter((t) => holdsIn(t, yourKeys) && !holdsIn(t, picked));
-            const winPop = wins.reduce((n, t) => n + t.pop, 0);
-            const losePop = loses.reduce((n, t) => n + t.pop, 0);
-            const rows = (list) =>
-                [...list]
-                    .sort((a, c) => c.pop - a.pop)
-                    .map((t) => ({ text: t.kw, meta: `${t.pop} pop` }));
-            const added = [...picked].filter((u) => !yourKeys.has(u)).map(show);
-            // A word the title or subtitle already carries costs nothing to
-            // remove from the keyword field: Apple still matches it. Listing it
-            // beside the words that do cost coverage makes the trade look worse
-            // than it is — four words dropped, two of them free.
-            const droppedKeys = [...yourKeys].filter((u) => !picked.has(u));
-            const dropped = droppedKeys.filter((u) => !claimedKeys.has(u)).map(show);
-            const droppedFree = droppedKeys.filter((u) => claimedKeys.has(u)).map(show);
-            if (added.length || wins.length) {
-                const what = document.createElement("span");
-                what.textContent = added.length ? `Adds ${added.join(", ")}` : "Adds nothing";
-                const effect = document.createElement("span");
-                effect.className = "swap-win";
-                effect.textContent =
-                    `\u2192 wins ${wins.length} phrase${wins.length === 1 ? "" : "s"}, +${winPop.toLocaleString("en-US")} pop`;
-                swap.appendChild(expandable([what, effect], rows(wins)));
-            }
-            if (droppedKeys.length || loses.length) {
-                const what = document.createElement("span");
-                what.textContent = dropped.length ? `Removes ${dropped.join(", ")}` : "Removes nothing that was working";
-                const effect = document.createElement("span");
-                effect.className = "swap-lose";
-                effect.textContent =
-                    `\u2192 loses ${loses.length} phrase${loses.length === 1 ? "" : "s"}, \u2212${losePop.toLocaleString("en-US")} pop`;
-                const head = [what, effect];
-                if (droppedFree.length) {
-                    const free = document.createElement("span");
-                    free.className = "swap-free";
-                    free.textContent = `(also drops ${droppedFree.join(", ")}, free \u2014 your title or subtitle carries ${droppedFree.length === 1 ? "it" : "them"})`;
-                    head.push(free);
-                }
-                swap.appendChild(expandable(head, rows(loses)));
-            }
-
-            // The bottom line, which the two rows above only imply.
-            const net = document.createElement("li");
-            net.className = "swap-net";
-            const netPhrases = wins.length - loses.length;
-            const netPop = winPop - losePop;
-            net.textContent =
-                `Net ${netPhrases >= 0 ? "+" : "\u2212"}${Math.abs(netPhrases)} phrase${Math.abs(netPhrases) === 1 ? "" : "s"}` +
-                ` and ${netPop >= 0 ? "+" : "\u2212"}${Math.abs(netPop).toLocaleString("en-US")} pop`;
-            net.classList.add(netPop >= 0 ? "good" : "bad");
-            swap.appendChild(net);
-            if (!wins.length && !loses.length) {
-                swap.appendChild(expandable([document.createTextNode("Same phrases as your field")], []));
-            }
-        }
-
         // Which kind of searcher the field is aimed at. Two fields can cover the
         // same count of phrases and reach different people.
         mix.replaceChildren();
@@ -1864,37 +1789,44 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
         // phrases it would buy. This replaces the separate shopping list, which
         // ranked the same words against the saved listing instead of against
         // the field being edited, and so disagreed the moment you changed one.
+        // Every uncovered phrase, keyed by the cheapest set of words that would
+        // complete it. Keyed by the set rather than by single words, so a
+        // phrase needing two is offered as a pair instead of vanishing — that
+        // gap is what the separate "still uncovered" list existed to cover.
         const gain = new Map();
         for (const t of b.terms) {
             if (covered.includes(t)) continue;
-            for (const alt of t.alts) {
-                const need = alt.filter((u) => !sat(u));
-                if (need.length !== 1) continue;
-                const entry = gain.get(need[0]) ?? { pop: 0, terms: [] };
-                entry.pop += t.pop;
-                entry.terms.push(t.kw);
-                gain.set(need[0], entry);
-            }
+            const need = t.alts
+                .map((a) => a.filter((u) => !sat(u)))
+                .sort((a, c) => a.length - c.length || a.join().length - c.join().length)[0];
+            if (!need?.length) continue;
+            const key = [...need].sort().join("\u0001");
+            const entry = gain.get(key) ?? { pop: 0, terms: [], need };
+            entry.pop += t.pop;
+            entry.terms.push(t.kw);
+            gain.set(key, entry);
         }
         suggest.replaceChildren();
         const sLabel = document.createElement("p");
         sLabel.className = "fb-label";
-        sLabel.textContent = "Add one word, unlock these";
+        sLabel.textContent = "Add these, unlock those";
         suggest.appendChild(sLabel);
-        const ranked = [...gain.entries()].sort((a, c) => c[1].pop - a[1].pop).slice(0, 8);
+        const ranked = [...gain.values()].sort((a, c) => c.pop - a.pop).slice(0, 10);
         if (!ranked.length) {
-            suggest.appendChild(line("", "No single word completes another phrase from here.", "muted"));
+            suggest.appendChild(line("", "Every phrase this field can win is already covered.", "muted"));
         }
         const sUl = document.createElement("ul");
         sUl.className = "plan-gaps";
-        for (const [u, g] of ranked) {
+        for (const g of ranked) {
+            const words = g.need.map(show);
+            const cost = words.join(",").length + (picked.size ? 1 : 0);
             const add = document.createElement("button");
             add.className = "fb-add";
-            add.textContent = `+ ${show(u)}`;
-            add.dataset.tip = `${chars + show(u).length + (picked.size ? 1 : 0)}/${FIELD_MAX} characters if added`;
+            add.textContent = `+ ${words.join(", ")}`;
+            add.dataset.tip = `${chars + cost}/${FIELD_MAX} characters if added`;
             add.addEventListener("click", (e) => {
                 e.stopPropagation();
-                picked.add(u);
+                for (const u of g.need) picked.add(u);
                 draw();
             });
             const n = document.createElement("span");
@@ -1904,56 +1836,6 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
         }
         suggest.appendChild(sUl);
 
-        missing.replaceChildren();
-        const mLabel = document.createElement("p");
-        mLabel.className = "fb-label";
-        mLabel.textContent = "Still uncovered";
-        missing.appendChild(mLabel);
-        missing.appendChild(
-            line("", "A phrase needs every one of its words. Dimmed words you already have; highlighted ones are what is missing.", "muted")
-        );
-        const ul = document.createElement("ul");
-        ul.className = "plan-gaps";
-        const uncovered = b.terms.filter((t) => !covered.includes(t)).sort((a, c) => c.pop - a.pop);
-        for (const t of uncovered.slice(0, 8)) {
-            const li = document.createElement("li");
-            const rowBtn = document.createElement("button");
-            rowBtn.className = "gap-head";
-            const need = t.alts.map((a) => a.filter((u) => !sat(u))).sort((a, c) => a.length - c.length)[0] ?? [];
-            // Paint the phrase by what is actually missing. "sleep breathing"
-            // rendered whole read as though neither word was there, when
-            // "sleep" is sitting in the title and only "breathing" is absent.
-            const name = document.createElement("code");
-            const needSet = new Set(need);
-            const parts = t.kw.split(/(\s+)/);
-            if (parts.length > 1 && !/[\u3040-\u30ff\u4e00-\u9fff]/.test(t.kw)) {
-                for (const part of parts) {
-                    if (!part.trim()) {
-                        name.appendChild(document.createTextNode(part));
-                        continue;
-                    }
-                    const key = wordKeys[part.toLowerCase()] ?? keyOf.get(part.toLowerCase()) ?? part.toLowerCase();
-                    const span = document.createElement("span");
-                    span.className = needSet.has(key) ? "kw-need" : "kw-have";
-                    span.textContent = part;
-                    name.appendChild(span);
-                }
-            } else {
-                name.textContent = t.kw;
-            }
-            const what = document.createElement("span");
-            what.textContent = `${t.pop} pop \u00b7 needs ${need.map(show).join(", ")}`;
-            rowBtn.append(name, what);
-            rowBtn.dataset.tip = "Add the missing words";
-            rowBtn.addEventListener("click", () => {
-                for (const u of need) picked.add(u);
-                draw();
-            });
-            li.appendChild(rowBtn);
-            ul.appendChild(li);
-        }
-        if (!uncovered.length) missing.appendChild(line("", "Every chaseable phrase in this market is covered.", "muted"));
-        missing.appendChild(ul);
         refreshNote();
         // The chase card's advice depends on what the draft holds, so it has to
         // follow the draft. Without this its buttons offered words the draft
@@ -2011,7 +1893,7 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
     chipHint.textContent =
         "Click a word to drop it, or add one from the list below. When it covers more than your current field, copy it into App Store Connect.";
     draft.append(chipHead, preview, chipRow, chipHint, buttons);
-    host.append(h, context, how, yours, draft, stats, panel, swap, suggest, missing);
+    host.append(h, context, how, yours, draft, stats, panel, suggest);
     draw();
 }
 
