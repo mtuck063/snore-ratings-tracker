@@ -282,10 +282,18 @@ function lever(cov) {
   return cov.missing.length <= 2 ? 1.25 : 0.85;
 }
 
+// Split into the part the browser cannot change and the part it can. The page
+// lets you paste your real keyword field, which changes coverage and therefore
+// the score; shipping the whole formula there instead would leave two copies
+// to drift apart.
+const baseOf = ({ pop, rank, intent }) => (pop / 100) * winnability(rank) * FIT[intent];
+
 function scoreOf({ pop, rank, intent, cov }) {
-  const raw = (pop / 100) * winnability(rank) * FIT[intent] * lever(cov);
-  return Math.round(100 * raw);
+  return Math.round(100 * baseOf({ pop, rank, intent }) * lever(cov));
 }
+
+// The coverage multipliers by name, so the page applies these same numbers.
+const LEVERS = { covered: 1, unknown: 1, cheap: 1.25, dear: 0.85, vetoed: 0.4 };
 
 function reasonFor({ pop, rank, cov, intent }) {
   const where = rank == null ? "unranked" : `#${rank}`;
@@ -341,6 +349,7 @@ function analyseMarket(cc) {
       rank,
       ...(cov && { covered: cov.covered, ...(cov.missing.length && { missing: cov.missing }) }),
       score: scoreOf({ pop, rank, intent, cov }),
+      base: Math.round(baseOf({ pop, rank, intent }) * 1000) / 1000,
       why: reasonFor({ pop, rank, cov, intent }),
     };
   }
@@ -504,7 +513,12 @@ async function writeData() {
   const all = analyseAll();
   await writeFile(
     outFile,
-    JSON.stringify({ generatedAt: new Date().toISOString(), markets: all })
+    JSON.stringify({
+      generatedAt: new Date().toISOString(),
+      levers: LEVERS,
+      vetoed: [...vetoed],
+      markets: all,
+    })
   );
   const chased = Object.values(all).reduce((n, m) => n + m.chase.length, 0);
   const graded = Object.values(all).filter((m) => m.coverage).length;

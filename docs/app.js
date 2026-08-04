@@ -803,18 +803,35 @@ function renderPlan(host, cc, plan) {
     }
     host.hidden = false;
 
+    // Ranked against your field when you have pasted one. The shipped list is
+    // scored against the seed in the repo, which is somebody's note about your
+    // listing rather than your listing.
+    const rescored = rescoreFor(cc, plan);
+    const chase = rescored
+        ? [...rescored.entries()]
+              .map(([kw, t]) => ({ kw, score: t.score, pop: t.pop, rank: t.rank, intent: t.intent, why: t.why }))
+              .filter((c) => c.score > 0)
+              .sort((a, b) => b.score - a.score)
+              .slice(0, m.chase.length)
+        : m.chase;
+
     const card = document.createElement("div");
     card.className = "plan-card";
     const h = document.createElement("h3");
     h.textContent = "Worth chasing";
     card.appendChild(h);
     card.appendChild(
-        line("", "Demand, weighted by how much rank is left to win, whether this app converts that searcher, and whether your listing carries the words.", "muted")
+        line(
+            "",
+            "Demand, weighted by how much rank is left to win, whether this app converts that searcher, and whether your listing carries the words." +
+                (rescored ? " Scored against the field you pasted above." : ""),
+            "muted"
+        )
     );
 
     const ol = document.createElement("ol");
     ol.className = "plan-chase";
-    for (const c of m.chase) {
+    for (const c of chase) {
         const li = document.createElement("li");
         const score = document.createElement("span");
         score.className = "plan-score";
@@ -835,7 +852,7 @@ function renderPlan(host, cc, plan) {
     copy.addEventListener("click", async () => {
         const rows = [
             ["keyword", "score", "pop", "rank", "intent", "why"].join("\t"),
-            ...m.chase.map((c) => [c.kw, c.score, c.pop, c.rank ?? "", c.intent, c.why].join("\t")),
+            ...chase.map((c) => [c.kw, c.score, c.pop, c.rank ?? "", c.intent, c.why].join("\t")),
         ].join("\n");
         try {
             await navigator.clipboard.writeText(rows);
@@ -898,6 +915,76 @@ function expandable(head, items) {
     });
     li.append(btn, list);
     return li;
+}
+
+// Your pasted field, per market, as the page stored it.
+const storedField = (cc) => localStorage.getItem(`asoField:${cc}`);
+// The working field per market, kept across re-renders of the builder.
+const draftByCc = new Map();
+
+// Re-score every phrase against the field you actually have, rather than the
+// seed committed to the repo. Only the coverage factor is recomputed here: the
+// rest of the score — demand, rank headroom, who is searching — cannot change
+// with your keyword field, and ships already multiplied together as `base`.
+function rescoreFor(cc, plan) {
+    const m = plan?.markets?.[cc];
+    const b = m?.builder;
+    const raw = storedField(cc);
+    if (!b || raw == null || !raw.trim()) return null;
+
+    const labels = b.labels ?? {};
+    const wordKeys = b.wordKeys ?? {};
+    const keyOf = new Map(Object.entries(labels).map(([k, v]) => [v, k]));
+    const show = (u) => labels[u] ?? u;
+    const keys = new Set(
+        raw
+            .split(/[,\u3001\uff0c\n\s]+/)
+            .map((w) => w.trim().toLowerCase())
+            .filter(Boolean)
+            .map((w) => wordKeys[w] ?? keyOf.get(w) ?? w)
+    );
+    const sat = (u) => keys.has(u) || (/[\u3040-\u30ff\u4e00-\u9fff]/.test(u) && [...keys].some((p) => p.includes(u)));
+
+    const levers = plan.levers ?? { covered: 1, cheap: 1.25, dear: 0.85, vetoed: 0.4 };
+    const vetoed = new Set(plan.vetoed ?? []);
+    const out = new Map();
+    for (const t of b.terms) {
+        const term = m.terms[t.kw];
+        if (!term) continue;
+        const covered = t.alts.some((a) => a.every(sat));
+        // The cheapest way left to satisfy it, which is what to report missing.
+        const missingKeys = covered
+            ? []
+            : (t.alts.map((a) => a.filter((u) => !sat(u))).sort((a, c) => a.length - c.length)[0] ?? []);
+        const missing = missingKeys.map(show);
+        const lever = covered
+            ? levers.covered
+            : missingKeys.every((u) => vetoed.has(u))
+              ? levers.vetoed
+              : missingKeys.length <= 2
+                ? levers.cheap
+                : levers.dear;
+        const where = t.rank == null ? "unranked" : `#${t.rank}`;
+        // Same sentences as scripts/aso.mjs, because the same facts deserve the
+        // same words wherever they are computed.
+        const why = !covered
+            ? missingKeys.every((u) => vetoed.has(u))
+                ? `${t.pop} pop, ${where}, only reachable by adding ${missing.map((x) => `"${x}"`).join(", ")}, which you have ruled out`
+                : `${t.pop} pop, ${where}, listing has no ${missing.map((x) => `"${x}"`).join(", ")}`
+            : t.rank == null
+              ? `${t.pop} pop, unranked, words are all in the listing`
+              : t.rank <= 10
+                ? `${t.pop} pop, ${where}, page one already`
+                : `${t.pop} pop, ${where}, covered — this is a ranking gap, not a wording one`;
+        out.set(t.kw, {
+            ...term,
+            covered,
+            ...(missing.length ? { missing } : {}),
+            score: Math.round(100 * (term.base ?? 0) * lever),
+            why,
+        });
+    }
+    return out;
 }
 
 // What the tags on each row mean, spelled out on the page rather than hidden
@@ -1000,7 +1087,7 @@ function renderLegend(host, cc, plan, filter, onChange, counts) {
 // so this only asks whether one of those sets is satisfied by what is picked.
 const FIELD_MAX = 100;
 
-function renderBuilder(host, cc, plan) {
+function renderBuilder(host, cc, plan, onFieldSaved) {
     host.replaceChildren();
     const m = plan?.markets?.[cc];
     const b = m?.builder;
@@ -1041,7 +1128,10 @@ function renderBuilder(host, cc, plan) {
     let dirty = false;
 
     const recommended = parseField(m.recommended?.field);
-    let picked = new Set(recommended);
+    // Survives the re-render that saving your field triggers; losing a draft
+    // because you corrected a typo in the box above it would be its own bug.
+    let picked = new Set(draftByCc.get(cc) ?? recommended);
+    const remember = () => draftByCc.set(cc, [...picked]);
 
     const sat = (u, set = picked) =>
         set.has(u) || (/[\u3040-\u30ff\u4e00-\u9fff]/.test(u) && [...set].some((p) => p.includes(u)));
@@ -1089,7 +1179,7 @@ function renderBuilder(host, cc, plan) {
         context.appendChild(
             line(
                 "",
-                `Apple pools all three fields, so words here cost no keyword characters. On their own they already cover ${freeCovers} of ${b.terms.length} phrases — everything buildable from ${freeWords.join(", ")}.`,
+                `Apple matches a search against all three together — title, subtitle and keyword field — so a word already in the title or subtitle costs nothing in the keyword field. Those two alone already cover ${freeCovers} of ${b.terms.length} phrases: everything buildable from ${freeWords.join(", ")}.`,
                 "muted"
             )
         );
@@ -1168,6 +1258,8 @@ function renderBuilder(host, cc, plan) {
     mix.className = "fb-mix";
     const swap = document.createElement("ul");
     swap.className = "plan-gaps fb-swap";
+    const panel = document.createElement("div");
+    panel.className = "fb-panel";
     // The draft field gets the same shape as the box above it: a label, the
     // field as one monospace string, a character count. Two boxes that look
     // alike read as two versions of the same thing, which a row of loose chips
@@ -1197,9 +1289,13 @@ function renderBuilder(host, cc, plan) {
         return btn;
     };
 
-    const tile = (value, label, cls, tip) => {
+    // A tile can open to the phrases behind its number. "55 of 73 covered" is
+    // a claim about a specific 55 and a specific 18, and the only way to judge
+    // whether the trade is good is to see which is which.
+    let openPanel = null;
+    const tile = (value, label, cls, tip, panel) => {
         const d = document.createElement("div");
-        d.className = "fb-tile" + (cls ? ` ${cls}` : "");
+        d.className = "fb-tile" + (cls ? ` ${cls}` : "") + (panel ? " openable" : "");
         if (tip) d.dataset.tip = tip;
         const v = document.createElement("div");
         v.className = "fb-tile-num";
@@ -1208,10 +1304,21 @@ function renderBuilder(host, cc, plan) {
         t.className = "fb-tile-label";
         t.textContent = label;
         d.append(v, t);
+        if (panel) {
+            const more = document.createElement("span");
+            more.className = "fb-tile-more";
+            more.textContent = openPanel === panel.key ? "hide" : "show";
+            d.appendChild(more);
+            d.addEventListener("click", () => {
+                openPanel = openPanel === panel.key ? null : panel.key;
+                draw();
+            });
+        }
         return d;
     };
 
     function draw() {
+        remember();
         const yourKeys = new Set(parseField(input.value));
         const yourCovers = input.value.trim() ? b.terms.filter((t) => holdsIn(t, yourKeys)).length : null;
         const yourPop = input.value.trim()
@@ -1235,7 +1342,8 @@ function renderBuilder(host, cc, plan) {
                 `${covered.length}/${b.terms.length}`,
                 `phrases covered \u00b7 ${covered.length - free.length} from this field`,
                 "",
-                `Title and subtitle cover ${free.length} on their own, whatever the keyword field says.`
+                `Title and subtitle cover ${free.length} on their own, whatever the keyword field says.`,
+                { key: "phrases" }
             ),
             tile(
                 coveredPop.toLocaleString("en-US"),
@@ -1249,6 +1357,41 @@ function renderBuilder(host, cc, plan) {
                       coveredPop >= yourPop ? "good" : "bad"
                   )
         );
+
+        // The phrases behind the count, when a tile is open. Covered and
+        // uncovered side by side, each with its demand, because "55 of 73" is a
+        // claim about a particular 55 and a particular 18.
+        panel.replaceChildren();
+        panel.hidden = openPanel !== "phrases";
+        if (openPanel === "phrases") {
+            const column = (title, list, cls) => {
+                const col = document.createElement("div");
+                col.className = "fb-panel-col";
+                const h4 = document.createElement("p");
+                h4.className = "fb-label";
+                h4.textContent = `${title} (${list.length})`;
+                col.appendChild(h4);
+                const ul = document.createElement("ul");
+                ul.className = "fb-panel-list";
+                for (const t of [...list].sort((a, c) => c.pop - a.pop)) {
+                    const li = document.createElement("li");
+                    const name = document.createElement("span");
+                    name.textContent = t.kw;
+                    const val = document.createElement("span");
+                    val.className = "gap-term-val";
+                    val.textContent = `${t.pop} pop`;
+                    li.className = cls;
+                    li.append(name, val);
+                    ul.appendChild(li);
+                }
+                col.appendChild(ul);
+                return col;
+            };
+            panel.append(
+                column("Covered", covered, "covered"),
+                column("Not covered", b.terms.filter((t) => !covered.includes(t)), "uncovered")
+            );
+        }
 
         // The swap against your real field, both directions and live. It sat in
         // the listing card as a static comparison against the saved seed, which
@@ -1376,12 +1519,22 @@ function renderBuilder(host, cc, plan) {
 
         chipRow.replaceChildren();
         const useful = new Set(covered.flatMap((t) => t.alts.find((a) => a.every((u) => sat(u))) ?? []));
-        for (const u of [...picked].sort((x, y) => Number(useful.has(x)) - Number(useful.has(y)))) {
+        // Wasted words first: they are the ones to reclaim characters from.
+        const chipRank = (u) => (claimedKeys.has(u) ? 0 : useful.has(u) ? 2 : 1);
+        for (const u of [...picked].sort((x, y) => chipRank(x) - chipRank(y))) {
+            // Three states, not two. A word your title or subtitle already
+            // carries looks idle here because no phrase needs it *from this
+            // field* — but phrases do use it, and they rank. Calling that "not
+            // completing any phrase" reads as "no phrase wants this word",
+            // which is the opposite of true.
+            const duplicate = claimedKeys.has(u);
             const chip = document.createElement("button");
-            chip.className = "fb-chip" + (useful.has(u) ? "" : " idle");
-            chip.dataset.tip = useful.has(u)
-                ? "Carrying at least one covered phrase"
-                : "Not completing any phrase right now \u2014 dead characters unless something else joins it";
+            chip.className = "fb-chip" + (duplicate ? " dupe" : useful.has(u) ? "" : " idle");
+            chip.dataset.tip = duplicate
+                ? "Already in your title or subtitle. The phrases using it rank either way, so these characters buy nothing here."
+                : useful.has(u)
+                  ? "Carrying at least one covered phrase"
+                  : "Not completing any phrase right now \u2014 dead characters unless something else joins it";
             chip.append(document.createTextNode(show(u)));
             const x = document.createElement("span");
             x.className = "fb-x";
@@ -1498,6 +1651,7 @@ function renderBuilder(host, cc, plan) {
         savedRaw = clean;
         dirty = false;
         draw();
+        onFieldSaved?.();
     };
     input.addEventListener("blur", normalise);
     input.addEventListener("paste", () => setTimeout(normalise, 0));
@@ -1512,6 +1666,7 @@ function renderBuilder(host, cc, plan) {
             savedRaw = input.value;
             dirty = false;
             draw();
+            onFieldSaved?.();
         }, 400);
     });
 
@@ -1543,7 +1698,7 @@ function renderBuilder(host, cc, plan) {
     chipHint.textContent =
         "Click a word to drop it, or add one from the list below. When it covers more than your current field, copy it into App Store Connect.";
     draft.append(chipHead, preview, chipRow, chipHint, buttons);
-    host.append(h, context, how, yours, draft, stats, swap, mix, suggest, missing);
+    host.append(h, context, how, yours, draft, stats, panel, swap, mix, suggest, missing);
     draw();
 }
 
@@ -1620,9 +1775,11 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
         translate.textContent = showEnglish ? "Show original" : "Show English";
         translate.classList.toggle("active", showEnglish);
         renderPlan(document.getElementById("kw-plan"), cc, plan);
-        renderBuilder(document.getElementById("kw-builder"), cc, plan);
+        renderBuilder(document.getElementById("kw-builder"), cc, plan, () => render(currentCc));
         tbody.replaceChildren();
-        const aso = plan?.markets?.[cc]?.terms ?? {};
+        const rescored = rescoreFor(cc, plan);
+        const shipped = plan?.markets?.[cc]?.terms ?? {};
+        const aso = rescored ? { ...shipped, ...Object.fromEntries(rescored) } : shipped;
         const val = ([term, e]) =>
             sort.key === "rank" ? (e.rank ?? Infinity) : sort.key === "score" ? (aso[term]?.score ?? 0) : e.pop;
         const entries = Object.entries(kw.latest[cc])

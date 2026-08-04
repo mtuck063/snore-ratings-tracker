@@ -1086,3 +1086,45 @@ li.log-day {
 }
 .swap-net.good { color: var(--good); }
 .swap-net.bad { color: var(--bad); }
+/* A word the title or subtitle already carries: spending characters on a
+   phrase that ranks without it. Distinct from a word completing nothing. */
+.fb-chip.dupe {
+    color: var(--star4);
+    background: rgba(253, 230, 138, 0.10);
+    border-color: color-mix(in srgb, var(--star4) 45%, transparent);
+    border-style: dashed;
+}
+.fb-chip.dupe .fb-x { color: var(--star4); }
+
+/* A tile that opens to the phrases behind its number. */
+.fb-tile.openable { cursor: pointer; position: relative; }
+.fb-tile.openable:hover { border-color: var(--accent); }
+.fb-tile-more {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+}
+.fb-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+.fb-panel-list { list-style: none; margin: 0; padding: 0; max-height: 320px; overflow-y: auto; }
+.fb-panel-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 0.78rem;
+    padding: 2px 0;
+}
+.fb-panel-list li.covered span:first-child { color: var(--good); }
+.fb-panel-list li.uncovered span:first-child { color: var(--text-secondary); }
