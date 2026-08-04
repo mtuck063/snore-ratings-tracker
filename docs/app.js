@@ -875,6 +875,91 @@ function expandable(head, items) {
     return li;
 }
 
+// What the tags on each row mean, spelled out on the page rather than hidden
+// in a tooltip, and doubling as filters. "CATEGORY" explains nothing until
+// someone tells you it is about the searcher, not about the app.
+function renderLegend(host, cc, plan, filter, onChange, counts) {
+    host.replaceChildren();
+    const terms = plan?.markets?.[cc]?.terms;
+    if (!terms) {
+        host.hidden = true;
+        return;
+    }
+    host.hidden = false;
+    const intro = document.createElement("p");
+    intro.className = "plan-line muted";
+    intro.textContent = "Each keyword is tagged by who is searching it. Tap a tag to show only those rows:";
+    host.appendChild(intro);
+
+    const ul = document.createElement("ul");
+    ul.className = "kw-legend-list";
+    const present = new Set(Object.values(terms).map((t) => t.intent));
+    const anyGap = Object.values(terms).some((t) => t.covered === false);
+
+    // Intents are mutually exclusive, so selecting several means "any of
+    // these"; "words missing" asks a different question about the same row, so
+    // it narrows whatever is selected rather than joining it.
+    const row = (cls, label, tip, on, toggle) => {
+        const li = document.createElement("li");
+        li.className = "kw-legend-row" + (on ? " on" : "");
+        const btn = document.createElement("button");
+        btn.className = "kw-legend-toggle";
+        btn.setAttribute("aria-pressed", String(on));
+        const chip = document.createElement("span");
+        chip.className = `badge ${cls}`;
+        chip.textContent = label;
+        const text = document.createElement("span");
+        text.textContent = tip;
+        btn.append(chip, text);
+        btn.addEventListener("click", () => {
+            toggle();
+            onChange();
+        });
+        li.appendChild(btn);
+        return li;
+    };
+
+    for (const [intent, tip] of Object.entries(INTENT_TIP)) {
+        if (!present.has(intent)) continue;
+        ul.appendChild(
+            row(`kw-intent intent-${intent}`, intent, tip, filter.intents.has(intent), () => {
+                if (filter.intents.has(intent)) filter.intents.delete(intent);
+                else filter.intents.add(intent);
+            })
+        );
+    }
+    if (anyGap) {
+        ul.appendChild(
+            row(
+                "kw-gap",
+                "words missing",
+                "None of your text carries every word in this phrase. You can still rank \u2014 Apple matches word forms, ignores \"app\", and uses signals beyond your text, and most phrases flagged here do rank \u2014 but a phrase whose words you carry is one you can influence directly. Tap a row to see which words are missing.",
+                filter.gapOnly,
+                () => {
+                    filter.gapOnly = !filter.gapOnly;
+                }
+            )
+        );
+    }
+    host.appendChild(ul);
+
+    if (filter.intents.size || filter.gapOnly) {
+        const count = document.createElement("p");
+        count.className = "plan-line muted";
+        count.textContent = `Showing ${counts.shown} of ${counts.total} keywords.`;
+        host.appendChild(count);
+        const clear = document.createElement("button");
+        clear.className = "plan-copy";
+        clear.textContent = "Show all keywords";
+        clear.addEventListener("click", () => {
+            filter.intents.clear();
+            filter.gapOnly = false;
+            onChange();
+        });
+        host.appendChild(clear);
+    }
+}
+
 // The field card: everything about the 100 characters you control, in one
 // place. The listing context, the working field, what it covers, what it is
 // aimed at, and what one more word would buy.
