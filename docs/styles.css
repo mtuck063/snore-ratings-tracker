@@ -1174,3 +1174,23 @@ li.log-day {
 
 /* Score tooltips carry their arithmetic on separate lines. */
 .tip-text { white-space: pre-line; }
+.plan-else-head { margin: 18px 0 2px; border-top: 1px solid var(--border); padding-top: 14px; }
+.badge.kw-done {
+    font-size: 0.62rem;
+    font-weight: 600;
+    border-radius: 5px;
+    padding: 1px 5px;
+    margin-left: 6px;
+    vertical-align: 1px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--good);
+    background: color-mix(in srgb, var(--good) 14%, transparent);
+}
+/* The intent mix summarises the phrase columns, so it spans them. */
+.fb-panel .fb-mix {
+    grid-column: 1 / -1;
+    padding-bottom: 10px;
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
+    margin-bottom: 2px;
+}

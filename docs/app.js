@@ -834,22 +834,25 @@ function actionFor(t, alt, b, keys) {
 
     if (t.covered === false && t.missing?.length) {
         return {
+            kind: "wording",
             text: `Add ${t.missing.map((w) => `“${w}”`).join(" and ")} to your keyword field. Apple cannot rank this phrase until every word is somewhere in your listing.`,
             add: alt.filter((u) => !keys.has(u)),
         };
     }
     if (t.rank != null && t.rank <= 10) {
-        return { text: "Already on page one. Defend it rather than spend characters on it." };
+        return { kind: "elsewhere", text: "Already on page one. Defend it rather than spend characters on it." };
     }
     // Which of its words are carried only by the weakest of the three fields.
     const weak = (alt ?? []).filter((u) => !title.has(u) && !sub.has(u));
     if (weak.length) {
         return {
+            kind: "wording",
             text: `Every word is present, but ${weak.map((u) => `“${label(u)}”`).join(", ")} ${weak.length === 1 ? "sits" : "sit"} only in the keyword field, which Apple weighs below the title and subtitle. Promoting one into the subtitle is the wording lever left here.`,
         };
     }
     return {
-        text: "Your title and subtitle already spell this out, so there is no wording change left. Rank here moves on installs, ratings and how well the screenshots convert — not on the keyword field.",
+        kind: "elsewhere",
+        text: "Your title and subtitle already spell this out, so there is no wording change left. Rank here moves on installs, ratings and how well the screenshots convert.",
     };
 }
 
@@ -890,6 +893,8 @@ function renderPlan(host, cc, plan, onRefresh) {
 
     const ol = document.createElement("ol");
     ol.className = "plan-chase";
+    const olElse = document.createElement("ol");
+    olElse.className = "plan-chase";
     const b = m.builder;
     const byKw = new Map((b?.terms ?? []).map((t) => [t.kw, t]));
     const parse = (text) =>
@@ -982,7 +987,18 @@ function renderPlan(host, cc, plan, onRefresh) {
                 " The draft field above already includes them, so copying that into App Store Connect fixes this.";
         }
 
-        li.append(score, kwEl, chip, why, act);
+        li.append(score, kwEl, chip);
+        // Nothing left to do here in this card, which is a finished state
+        // rather than an omission. Marking it says the wording work landed.
+        if (action.kind === "elsewhere") {
+            const done = document.createElement("span");
+            done.className = "badge kw-done";
+            done.textContent = "wording done";
+            done.dataset.tip =
+                "Every word of this phrase is already in your title or subtitle. No keyword field change can improve it.";
+            li.appendChild(done);
+        }
+        li.append(why, act);
 
         // One click to try it, since the field it belongs in is on this page.
         if (toAdd.length) {
@@ -997,9 +1013,28 @@ function renderPlan(host, cc, plan, onRefresh) {
             });
             li.appendChild(btn);
         }
-        ol.appendChild(li);
+        (action.kind === "elsewhere" ? olElse : ol).appendChild(li);
     }
-    card.appendChild(ol);
+    // Two lists, because they need different decisions. The first is work you
+    // can do in this card. The second is demand you are close to and cannot
+    // reach with a word — worth knowing precisely because the lever is
+    // somewhere else, and burying it at the top of the actionable list made a
+    // keyword change look like the answer.
+    if (ol.children.length) card.appendChild(ol);
+    if (olElse.children.length) {
+        const h4 = document.createElement("p");
+        h4.className = "fb-label plan-else-head";
+        h4.textContent = "Wording done — these now move on ratings and conversion";
+        card.appendChild(h4);
+        card.appendChild(
+            line(
+                "",
+                "Your listing already says everything these phrases need, so there is nothing left to change here. They climb on installs, ratings and how well the screenshots convert.",
+                "muted"
+            )
+        );
+        card.appendChild(olElse);
+    }
 
     host.appendChild(card);
 }
@@ -1595,6 +1630,7 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
                         : "no keyword field can express this phrase",
                 }));
             panel.append(
+                mix,
                 column("Covered", covered, "covered"),
                 column("Not covered", b.terms.filter((t) => !covered.includes(t)), "uncovered"),
                 column("Not winnable with a keyword field", outOfScope, "outofscope")
@@ -1906,7 +1942,7 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
     chipHint.textContent =
         "Click a word to drop it, or add one from the list below. When it covers more than your current field, copy it into App Store Connect.";
     draft.append(chipHead, preview, chipRow, chipHint, buttons);
-    host.append(h, context, how, yours, draft, stats, panel, swap, mix, suggest, missing);
+    host.append(h, context, how, yours, draft, stats, panel, swap, suggest, missing);
     draw();
 }
 
