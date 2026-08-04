@@ -1043,7 +1043,7 @@ function renderLegend(host, cc, plan, filter, onChange, counts) {
     const anyGap = Object.values(terms).some((t) => t.covered === false);
 
     // Each tag is its own toggle. Intents are mutually exclusive, so selecting
-    // several means "any of these"; "no words" is a different question about
+    // several means "any of these"; "words missing" is a different question about
     // the same row, so it narrows whatever is selected rather than joining it.
     const row = (cls, label, tip, on, toggle) => {
         const li = document.createElement("li");
@@ -1078,8 +1078,8 @@ function renderLegend(host, cc, plan, filter, onChange, counts) {
         ul.appendChild(
             row(
                 "kw-gap",
-                "no words",
-                "Your title, subtitle and keyword field between them do not contain all the words in this phrase, so Apple cannot rank you for it at any position. Tap a row to see which words are missing.",
+                "words missing",
+                "None of your text carries every word in this phrase. You can still rank — Apple matches word forms, ignores \"app\", and uses signals beyond your text, and most phrases flagged here do rank — but a phrase whose words you carry is one you can influence directly. Tap a row to see which words are missing.",
                 filter.gapOnly,
                 () => {
                     filter.gapOnly = !filter.gapOnly;
@@ -1125,7 +1125,18 @@ function renderBuilder(host, cc, plan) {
     }
     host.hidden = false;
 
-    const recommended = (m.recommended?.field ?? "").split(",").filter(Boolean);
+    // The page works in keys and renders labels. A key is what coverage
+    // matches on (a stem, or a CJK run); a label is the word you would paste.
+    // Mixing them showed "+ scor" and "+ appl" as suggestions, and counted the
+    // recommended field as covering fewer phrases than it does, because its
+    // words are labels and the phrase requirements are keys.
+    const labels = b.labels ?? {};
+    const keyOf = new Map(Object.entries(labels).map(([k, v]) => [v, k]));
+    const show = (u) => labels[u] ?? u;
+    const recommended = (m.recommended?.field ?? "")
+        .split(",")
+        .filter(Boolean)
+        .map((w) => keyOf.get(w) ?? w);
     let picked = new Set(recommended);
 
     const h = document.createElement("h3");
@@ -1157,11 +1168,14 @@ function renderBuilder(host, cc, plan) {
         return btn;
     };
 
-    const charsOf = (set) => [...set].join(",").length;
+    const charsOf = (set) => [...set].map(show).join(",").length;
     const popTotal = b.terms.reduce((n, t) => n + t.pop, 0);
+    // What the recommendation itself scores, so edits read as a delta against
+    // it rather than against nothing.
     const baseline = (() => {
         const set = new Set(recommended);
-        const covered = b.terms.filter((t) => t.alts.some((a) => a.every((u) => set.has(u))));
+        const ok = (u) => set.has(u) || (/[぀-ヿ一-鿿]/.test(u) && [...set].some((p) => p.includes(u)));
+        const covered = b.terms.filter((t) => t.alts.some((a) => a.every(ok)));
         return { pop: covered.reduce((n, t) => n + t.pop, 0), count: covered.length };
     })();
 
@@ -1178,22 +1192,28 @@ function renderBuilder(host, cc, plan) {
         return d;
     };
 
+    // Same rule the generator uses: a CJK unit is satisfied by any picked unit
+    // containing it, since a listing carrying 睡眠トラッカー ranks for 睡眠.
+    const sat = (u) =>
+        picked.has(u) || (/[぀-ヿ一-鿿]/.test(u) && [...picked].some((p) => p.includes(u)));
+    const holds = (t) => t.alts.some((a) => a.every(sat));
+
     function draw() {
-        const covered = b.terms.filter((t) => t.alts.some((a) => a.every((u) => picked.has(u))));
+        const covered = b.terms.filter(holds);
         const coveredPop = covered.reduce((n, t) => n + t.pop, 0);
         const chars = charsOf(picked);
 
         // Chips, ordered so the words doing nothing are visible rather than
         // buried: a field is 100 characters and dead weight is the whole game.
         chipRow.replaceChildren();
-        const useful = new Set(covered.flatMap((t) => t.alts.find((a) => a.every((u) => picked.has(u))) ?? []));
+        const useful = new Set(covered.flatMap((t) => t.alts.find((a) => a.every(sat)) ?? []));
         for (const u of [...picked].sort((x, y) => Number(useful.has(x)) - Number(useful.has(y)))) {
             const chip = document.createElement("button");
             chip.className = "fb-chip" + (useful.has(u) ? "" : " idle");
             chip.title = useful.has(u)
                 ? "Carrying at least one covered phrase"
                 : "Not completing any phrase right now — dead characters unless something else joins it";
-            chip.append(document.createTextNode(u));
+            chip.append(document.createTextNode(show(u)));
             const x = document.createElement("span");
             x.className = "fb-x";
             x.textContent = "×";
@@ -1250,7 +1270,7 @@ function renderBuilder(host, cc, plan) {
         for (const t of b.terms) {
             if (covered.includes(t)) continue;
             for (const alt of t.alts) {
-                const need = alt.filter((u) => !picked.has(u));
+                const need = alt.filter((u) => !sat(u));
                 if (need.length !== 1) continue;
                 const u = need[0];
                 gain.set(u, (gain.get(u) ?? 0) + t.pop);
@@ -1271,12 +1291,12 @@ function renderBuilder(host, cc, plan) {
         for (const [u, g] of ranked) {
             const btn = document.createElement("button");
             btn.className = "fb-add";
-            btn.textContent = `+ ${u}`;
+            btn.textContent = `+ ${show(u)}`;
             const n = document.createElement("span");
             n.className = "fb-add-gain";
             n.textContent = `${g} pop`;
             btn.appendChild(n);
-            btn.title = `${chars + u.length + (picked.size ? 1 : 0)}/${FIELD_MAX} characters if added`;
+            btn.title = `${chars + show(u).length + (picked.size ? 1 : 0)}/${FIELD_MAX} characters if added`;
             btn.addEventListener("click", () => {
                 picked.add(u);
                 draw();
@@ -1301,10 +1321,10 @@ function renderBuilder(host, cc, plan) {
             const name = document.createElement("code");
             name.textContent = t.kw;
             const need = t.alts
-                .map((a) => a.filter((u) => !picked.has(u)))
+                .map((a) => a.filter((u) => !sat(u)))
                 .sort((a, c) => a.length - c.length)[0] ?? [];
             const what = document.createElement("span");
-            what.textContent = `${t.pop} pop · needs ${need.join(", ")}`;
+            what.textContent = `${t.pop} pop · needs ${need.map(show).join(", ")}`;
             row.append(name, what);
             row.title = "Add the missing words";
             row.addEventListener("click", () => {
@@ -1340,7 +1360,7 @@ function renderBuilder(host, cc, plan) {
     act("Copy field", async (e) => {
         const btn = e.currentTarget;
         try {
-            await navigator.clipboard.writeText([...picked].join(","));
+            await navigator.clipboard.writeText([...picked].map(show).join(","));
             btn.textContent = "Copied";
         } catch {
             btn.textContent = "Copy failed";
@@ -1477,7 +1497,7 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
                 if (asoTerm.covered === false) {
                     const gap = document.createElement("span");
                     gap.className = "badge kw-gap";
-                    gap.textContent = "no words";
+                    gap.textContent = "words missing";
                     gap.title = `Your listing never says: ${(asoTerm.missing ?? []).join(", ")}`;
                     tdKw.appendChild(gap);
                 }
@@ -1525,7 +1545,9 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
                         const tail = document.createElement("span");
                         tail.textContent = asoTerm.partial
                             ? " — judged on title and subtitle alone, since this market's keyword field is not recorded."
-                            : " — so Apple cannot rank this phrase at any position until one of the three fields carries every word.";
+                            : cur.rank != null
+                              ? ` — yet it ranks #${cur.rank}, which means Apple is matching on something other than your text. That ranking is not one you control.`
+                              : " — which is the first thing to fix before expecting a position here.";
                         gap.appendChild(tail);
                         td.appendChild(gap);
                     }

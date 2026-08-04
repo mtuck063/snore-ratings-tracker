@@ -78,7 +78,34 @@ const hasCJK = (s) => /[぀-ヿ一-鿿]/.test(s);
 // "apnee" in the field. Advice has to not: telling someone to add
 // "schlafgerausche" to their German listing is telling them to misspell it.
 const tokens = (s) => s.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
-const words = (s) => tokens(s).map(fold);
+
+// Apple matches word forms, not exact strings, so comparing raw tokens said
+// the listing had no word for "snoring" while carrying "snore", and none for
+// "my sleep talks" while carrying "talk". Both were ranking at the time.
+//
+// Deliberately shallow: plurals, -ing, -ed, -er, and a trailing "e" so snore
+// and snoring meet at "snor". Anything more aggressive starts merging words
+// that are genuinely different, and a false match is worse here than a missed
+// one — it would claim coverage the listing does not have.
+const stem = (w) => {
+  let s = fold(w);
+  if (s.length <= 3) return s;
+  if (/ies$/.test(s)) s = s.slice(0, -3) + "y";
+  else if (/(ches|shes|sses|xes|zes)$/.test(s)) s = s.slice(0, -2);
+  else if (/s$/.test(s) && !/ss$/.test(s)) s = s.slice(0, -1);
+  if (/ing$/.test(s) && s.length > 5) s = s.slice(0, -3);
+  else if (/ed$/.test(s) && s.length > 4) s = s.slice(0, -2);
+  else if (/er$/.test(s) && s.length > 4) s = s.slice(0, -2);
+  if (/e$/.test(s) && s.length > 4) s = s.slice(0, -1);
+  return s;
+};
+const words = (s) => tokens(s).map(stem);
+
+// Words Apple does not make you buy. Every one of the thirty phrases whose
+// only missing word was "app" was ranking, median #13, best #2 — the store
+// sells apps, and the word carries no information. Configurable because that
+// is an English-language fact, not a universal one.
+const implicit = new Set((overrides.implicitWords ?? ["app", "apps"]).map(stem));
 
 // Apple pools the words of the title, subtitle and keyword field and builds
 // phrases by combining them: "night" in the field plus "recorder" in the field
@@ -162,7 +189,9 @@ function coverageOf(term, pool) {
       .flatMap((part) => (pool.set.has(part) ? [] : cjkGaps(part, pool)));
     return { mode: "segment", covered: missing.length === 0, missing, partial };
   }
-  const missing = tokens(term).filter((w) => !pool.set.has(fold(w)));
+  // Compared on stems, since that is what the pool holds, and skipping the
+  // words Apple never makes you buy.
+  const missing = tokens(term).filter((w) => !implicit.has(stem(w)) && !pool.set.has(stem(w)));
   return { mode: "word", covered: missing.length === 0, missing, partial };
 }
 
@@ -344,13 +373,16 @@ function analyseMarket(cc) {
     if (!CHASEABLE.has(t.intent)) continue;
     for (const w of hasCJK(kw) ? [] : words(kw)) needed.add(w);
   }
-  const fieldWords = meta?.keywordField ? words(meta.keywordField) : [];
-  const unused = fieldWords.filter((w) => !needed.has(w));
+  const fieldWords = meta?.keywordField ? tokens(meta.keywordField) : [];
+  const unused = fieldWords.filter((w) => !needed.has(stem(w)) && !implicit.has(stem(w)));
 
   // Subtitle words repeated in the field: Apple pools them, so the second copy
   // buys nothing and the characters could hold another word.
   const subtitleWords = new Set(words(meta?.subtitle ?? ""));
-  const repeated = fieldWords.filter((w) => subtitleWords.has(w));
+  const repeated = fieldWords.filter((w) => subtitleWords.has(stem(w)));
+
+  // One alternatives model, shared by the recommendation and the builder.
+  const model = altsFor(terms, meta);
 
   const chase = Object.entries(terms)
     .filter(([, t]) => t.score > 0)
@@ -382,8 +414,8 @@ function analyseMarket(cc) {
     // Always present, including where the current field is unknown. What the
     // field should say does not depend on anyone having written down what it
     // says now.
-    recommended: recommendField(cc, terms, meta),
-    builder: builderFor(cc, terms, meta),
+    recommended: recommendField(cc, terms, meta, model),
+    builder: builderFor(model, meta),
     byIntent,
     shoppingList: shoppingList.slice(0, 12),
     unusedFieldWords: unused,
@@ -542,123 +574,32 @@ function csv(only) {
   }
 }
 
-// What the keyword field SHOULD say, worked out from the tracked terms rather
-// than from whatever it says today. Always computed, including for the markets
-// whose current field nobody has written down: "not recorded" is a fact about
-// bookkeeping, and the useful answer is the recommendation.
+// What the keyword field SHOULD say, worked out from the tracked phrases
+// rather than from whatever it says today. Always computed, including for the
+// markets whose current field nobody has written down: "not recorded" is a
+// fact about bookkeeping, and the useful answer is the recommendation.
 //
-// This is set cover, not a ranking of words. A word only pays off when every
-// other word of its phrase is present too, so "auto" is worth nothing until
-// "sleep" and "tracker" are there, and value has to be measured against what
-// has already been picked. Scoring each word independently and taking the top
-// hundred characters is what produced a field full of half-covered phrases.
+// One model serves both this and the interactive builder on the page. Each
+// phrase is reduced to the sets of units that would satisfy it, and everything
+// downstream — the greedy pack here, the live coverage in the browser — asks
+// the same question of the same data. They disagreed when they were separate:
+// the Chinese field reported 48 of 48 phrases covered here and 32 of 48 in the
+// builder, for the identical set of words.
 //
-// Candidate units differ by script for the same reason coverage does. A Latin
-// field is built from words. A Japanese or Chinese one has no spaces to split
-// on, so the candidates are the character runs the terms actually share, and
-// 睡眠 earns its place by appearing across five phrases rather than by being a
-// word in any dictionary sense.
+// A Latin phrase has one satisfying set, its stemmed words. A Japanese one can
+// have several, because 睡眠記録 is satisfied by 睡眠記録 whole or by 睡眠 plus
+// 記録, and the field should be free to buy whichever is cheaper.
 const FIELD_LIMIT = 100;
-
-function recommendField(cc, terms, meta) {
-  const claimed = poolOf({ title: meta?.title, subtitle: meta?.subtitle });
-  const wanted = Object.entries(terms).filter(([, t]) => CHASEABLE.has(t.intent));
-
-  const candidates = new Map(); // unit -> cost in characters
-  const shared = new Map(); // CJK run -> how many distinct terms contain it
-  for (const [kw] of wanted) {
-    if (!hasCJK(kw)) {
-      for (const w of tokens(kw)) if (!claimed?.set.has(fold(w))) candidates.set(w, w.length);
-      continue;
-    }
-    for (const part of fold(kw).split(/\s+/).filter(Boolean)) {
-      if (!hasCJK(part)) {
-        if (!claimed?.set.has(part)) candidates.set(part, part.length);
-        continue;
-      }
-      // A whole phrase is always a legitimate thing to put in the field.
-      candidates.set(part, part.length);
-      const seen = new Set();
-      for (let len = 2; len <= Math.min(6, part.length); len++)
-        for (let i = 0; i + len <= part.length; i++) seen.add(part.slice(i, i + len));
-      for (const run of seen) shared.set(run, (shared.get(run) ?? 0) + 1);
-    }
-  }
-  // A character run only becomes a candidate once more than one phrase uses it.
-  // Any run of any phrase is a substring, so without this the cover happily
-  // recommends チェ — two characters sliced out of いびきチェッカー, which is
-  // not a word, not a query, and not something to paste into a keyword field.
-  for (const [run, count] of shared) if (count >= 2) candidates.set(run, run.length);
-  for (const w of vetoed) candidates.delete(w);
-
-  // A term is satisfied once title, subtitle and the picks so far can build it.
-  const satisfiedBy = (kw, picks) => {
-    const pool = {
-      set: new Set([...(claimed?.set ?? []), ...picks.map(fold)]),
-      segments: [...(claimed?.segments ?? []), ...picks.map(fold)],
-      complete: true,
-    };
-    return coverageOf(kw, pool).covered;
-  };
-
-  const picks = [];
-  let chars = 0;
-  while (true) {
-    const unmet = wanted.filter(([kw]) => !satisfiedBy(kw, picks));
-    if (!unmet.length) break;
-    let best = null;
-    for (const [unit, len] of candidates) {
-      if (picks.includes(unit)) continue;
-      const cost = picks.length ? len + 1 : len;
-      if (chars + cost > FIELD_LIMIT) continue;
-      const next = [...picks, unit];
-      let gain = 0;
-      for (const [kw, t] of unmet) if (satisfiedBy(kw, next)) gain += t.pop * FIT[t.intent];
-      if (gain > 0 && (!best || gain / cost > best.gain / best.cost)) best = { unit, gain, cost };
-    }
-    if (!best) break;
-    picks.push(best.unit);
-    chars += best.cost;
-  }
-
-  const field = picks.join(",");
-  const current = meta?.keywordField ? new Set(words(meta.keywordField)) : null;
-  const currentPool = meta?.keywordField ? poolOf(meta) : null;
-  const holds = (kw) => currentPool && coverageOf(kw, currentPool).covered;
-
-  // A swap has two sides and the card only ever showed one. Which phrases the
-  // recommendation would win is the case for it; which it would give up is the
-  // case against, and both have to be counted on the same denominator or there
-  // is no way to tell whether the trade is worth making.
-  return {
-    field,
-    chars: field.length,
-    covers: wanted.filter(([kw]) => satisfiedBy(kw, picks)).length,
-    of: wanted.length,
-    ...(currentPool && {
-      currentCovers: wanted.filter(([kw]) => holds(kw)).length,
-      adds: picks.filter((p) => !current.has(fold(p))),
-      drops: [...current].filter((w) => !picks.some((p) => fold(p) === w) && !claimed?.set.has(w)),
-      wins: wanted.filter(([kw]) => !holds(kw) && satisfiedBy(kw, picks)).map(([kw]) => kw),
-      loses: wanted.filter(([kw]) => holds(kw) && !satisfiedBy(kw, picks)).map(([kw]) => kw),
-    }),
-  };
-}
-
-// --- data for the interactive builder ----------------------------------------
-//
-// The page lets you add and drop words and watch coverage move, which means
-// coverage has to be recomputable in the browser. Rather than reimplement
-// segmentation, folding and tiling in a second language and let the two drift,
-// every phrase ships with the unit-sets that would satisfy it. The page then
-// only ever asks "is one of these a subset of what I have picked", which is
-// set arithmetic and cannot disagree with the rules here.
-//
-// A Latin phrase has exactly one such set: its words. A Japanese one can have
-// several, because 睡眠記録 is satisfied by 睡眠記録 whole, or by 睡眠 + 記録.
 const MAX_ALTS = 6;
 
-function tilingsOf(part, claimed) {
+// CJK units match by containment, not equality: a listing carrying 睡眠トラッカー
+// can rank for 睡眠, exactly as coverageOf already treats it. Latin units match
+// on the stem, so "talk" in the field satisfies "talks" in a phrase.
+const satisfies = (unit, have) =>
+  have.has(unit) || (hasCJK(unit) && [...have].some((h) => h.includes(unit)));
+const satisfiedBy = (alts, have) => alts.some((alt) => alt.every((u) => satisfies(u, have)));
+
+function tilingsOf(part, claimed, allowed) {
   const free = (piece) => Boolean(claimed?.segments.some((seg) => seg.includes(piece)));
   const out = [];
   const walk = (i, acc) => {
@@ -670,9 +611,9 @@ function tilingsOf(part, claimed) {
     for (let len = Math.min(6, part.length - i); len >= 2; len--) {
       const piece = part.slice(i, i + len);
       if (free(piece)) walk(i + len, acc);
-      else walk(i + len, [...acc, piece]);
+      else if (allowed(piece)) walk(i + len, [...acc, piece]);
     }
-    // The whole remainder, so a phrase with no shared runs is still expressible.
+    // The whole remainder, so a phrase sharing no runs is still expressible.
     if (part.length - i > 6) {
       const rest = part.slice(i);
       if (!free(rest)) walk(part.length, [...acc, rest]);
@@ -682,8 +623,37 @@ function tilingsOf(part, claimed) {
   return out;
 }
 
-function builderFor(cc, terms, meta) {
+// Per phrase: the alternative unit-sets that would satisfy it, cheapest first.
+function altsFor(terms, meta) {
   const claimed = poolOf({ title: meta?.title, subtitle: meta?.subtitle });
+  // Units are compared by key and shown by label: the key of "talks" is its
+  // stem, but the thing to paste into the field is a real word, and the
+  // cheapest real word carrying that stem is the one to suggest.
+  const label = new Map();
+  const noteLabel = (key, text) => {
+    const seen = label.get(key);
+    if (!seen || text.length < seen.length) label.set(key, text);
+  };
+
+  // Which character runs more than one phrase uses. A run belonging to a single
+  // phrase is not a word, it is a slice of one: チェ is two characters out of
+  // いびきチェッカー and has no business in a keyword field. The whole phrase is
+  // always allowed, so nothing becomes unreachable.
+  const shared = new Map();
+  const parts = new Set();
+  for (const [kw, t] of Object.entries(terms)) {
+    if (!CHASEABLE.has(t.intent) || !hasCJK(kw)) continue;
+    for (const part of fold(kw).split(/\s+/).filter(Boolean)) {
+      if (!hasCJK(part)) continue;
+      parts.add(part);
+      const seen = new Set();
+      for (let len = 2; len <= Math.min(6, part.length); len++)
+        for (let i = 0; i + len <= part.length; i++) seen.add(part.slice(i, i + len));
+      for (const run of seen) shared.set(run, (shared.get(run) ?? 0) + 1);
+    }
+  }
+  const allowedPiece = (piece) => (shared.get(piece) ?? 0) >= 2 || parts.has(piece);
+
   const rows = [];
   for (const [kw, t] of Object.entries(terms)) {
     if (!CHASEABLE.has(t.intent)) continue;
@@ -691,32 +661,44 @@ function builderFor(cc, terms, meta) {
     if (hasCJK(kw)) {
       alts = [[]];
       for (const part of fold(kw).split(/\s+/).filter(Boolean)) {
-        const partAlts = hasCJK(part)
-          ? tilingsOf(part, claimed)
-          : claimed?.set.has(part)
-            ? [[]]
-            : [[part]];
+        let partAlts;
+        if (hasCJK(part)) partAlts = tilingsOf(part, claimed, allowedPiece);
+        else if (claimed?.set.has(stem(part)) || implicit.has(stem(part))) partAlts = [[]];
+        else {
+          // A Latin word inside a CJK phrase ("apple watch 睡眠") still needs a
+          // label, or the chip shows the stem: "appl".
+          noteLabel(stem(part), part);
+          partAlts = [[stem(part)]];
+        }
         if (!partAlts.length) {
           alts = [];
           break;
         }
         alts = alts.flatMap((a) => partAlts.map((p) => [...new Set([...a, ...p])])).slice(0, 60);
       }
+      // CJK pieces are their own label. Latin ones inside a CJK phrase were
+      // labelled here too, and since noteLabel keeps the shortest string, the
+      // stem "appl" beat the word "apple" it came from.
+      for (const a of alts) for (const u of a) if (hasCJK(u)) noteLabel(u, u);
     } else {
-      alts = [tokens(kw).map(fold).filter((w) => !claimed?.set.has(w))];
+      const need = [];
+      for (const w of tokens(kw)) {
+        const key = stem(w);
+        // Implicit words and anything the title or subtitle already carries
+        // cost nothing and are never part of what a phrase still needs.
+        if (implicit.has(key) || claimed?.set.has(key)) continue;
+        noteLabel(key, w);
+        need.push(key);
+      }
+      alts = [[...new Set(need)]];
     }
-    // Fewest words first: the cheapest way to satisfy a phrase is the one a
-    // reader cares about, and the rest are only there so an unusual field
-    // still scores correctly.
-    // A phrase reachable only through a vetoed word is not reachable. Leaving
-    // it in offered "+ ai" as a suggestion in the builder, which is the exact
-    // decision the veto list exists to stop being re-asked.
     alts = alts.filter((a) => !a.some((u) => vetoed.has(fold(u))));
     if (!alts.length) continue;
+
     const seen = new Set();
     const unique = [];
     for (const a of alts.sort((x, y) => x.length - y.length || x.join().length - y.join().length)) {
-      const key = [...a].sort().join(" ");
+      const key = [...a].sort().join("|");
       if (seen.has(key)) continue;
       seen.add(key);
       unique.push([...a].sort());
@@ -725,13 +707,89 @@ function builderFor(cc, terms, meta) {
     rows.push({ kw, pop: t.pop, intent: t.intent, rank: t.rank, alts: unique });
   }
   const units = [...new Set(rows.flatMap((r) => r.alts.flat()))].sort();
+  for (const u of units) if (!label.has(u)) label.set(u, u);
   return {
+    rows,
     units,
-    claimed: [...new Set([...(claimed?.set ?? [])])].sort(),
-    current: meta?.keywordField ? [...new Set(words(meta.keywordField))] : null,
-    terms: rows,
+    label,
+    claimedKeys: [...(claimed?.set ?? [])],
+    claimed,
   };
 }
+
+// Greedy weighted set cover. The move is a whole missing set, not a single
+// word: adding one word of a two-word phrase covers nothing, so a loop that
+// required immediate gain from every single addition stalled the moment every
+// remaining phrase needed a pair. Chinese stopped at 53 of 100 characters with
+// sixteen phrases uncovered and budget to spare.
+function recommendField(cc, terms, meta, model) {
+  const { rows, label } = model;
+  const picks = [];
+  const have = new Set();
+  let chars = 0;
+
+  while (true) {
+    const unmet = rows.filter((r) => !satisfiedBy(r.alts, have));
+    if (!unmet.length) break;
+    let best = null;
+    for (const r of unmet) {
+      for (const alt of r.alts) {
+        const need = alt.filter((u) => !satisfies(u, have));
+        if (!need.length) continue;
+        const cost = need.reduce((n, u) => n + label.get(u).length + 1, 0) - (picks.length ? 0 : 1);
+        if (chars + cost > FIELD_LIMIT) continue;
+        const next = new Set([...have, ...need]);
+        let gain = 0;
+        for (const o of unmet) if (satisfiedBy(o.alts, next)) gain += o.pop * FIT[o.intent];
+        if (gain > 0 && (!best || gain / cost > best.gain / best.cost)) best = { need, gain, cost };
+      }
+    }
+    if (!best) break;
+    for (const u of best.need) {
+      picks.push(label.get(u));
+      have.add(u);
+    }
+    chars += best.cost;
+  }
+
+  const field = picks.join(",");
+  const covered = rows.filter((r) => satisfiedBy(r.alts, have));
+  const currentKeys = meta?.keywordField ? new Set(words(meta.keywordField)) : null;
+  const holds = (r) => currentKeys && satisfiedBy(r.alts, currentKeys);
+
+  return {
+    field,
+    chars: field.length,
+    covers: covered.length,
+    of: rows.length,
+    ...(currentKeys && {
+      currentCovers: rows.filter(holds).length,
+      adds: picks.filter((p) => !currentKeys.has(stem(p))),
+      // Read off the field itself, so a dropped word is shown the way it is
+      // written there rather than as the stem it matches on.
+      drops: tokens(meta.keywordField).filter(
+        (w) =>
+          !have.has(stem(w)) && !model.claimedKeys.includes(stem(w)) && !implicit.has(stem(w))
+      ),
+      wins: rows.filter((r) => !holds(r) && satisfiedBy(r.alts, have)).map((r) => r.kw),
+      loses: rows.filter((r) => holds(r) && !satisfiedBy(r.alts, have)).map((r) => r.kw),
+    }),
+  };
+}
+
+// The same model, shipped to the page. The browser needs the label for every
+// unit so a chip reads "talk" rather than its stem, and nothing else: coverage
+// there is the satisfies() rule above, which is set arithmetic over these keys.
+function builderFor(model, meta) {
+  return {
+    units: model.units,
+    labels: Object.fromEntries(model.units.map((u) => [u, model.label.get(u)])),
+    claimed: model.claimedKeys,
+    current: meta?.keywordField ? [...new Set(words(meta.keywordField))] : null,
+    terms: model.rows,
+  };
+}
+
 
 function fieldFor(cc) {
   const m = analyseMarket(cc);
