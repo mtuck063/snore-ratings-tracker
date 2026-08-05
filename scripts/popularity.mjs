@@ -237,7 +237,7 @@ async function fetchMarket(cc) {
 // this file is a US-only artifact; if they diverge, all eleven markets are real.
 async function probe() {
   if (!cookie) {
-    console.error("ASA_COOKIE is not set. See docs/popularity.md.");
+    console.error("ASA_COOKIE is not set. See “Apple’s own popularity index” in the README.");
     process.exit(1);
   }
   // English terms on purpose: a localized phrase scoring 5 in Japan proves
