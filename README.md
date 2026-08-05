@@ -247,8 +247,40 @@ since their queries have no spaces: 睡眠記録アプリ is covered when the li
 carries 睡眠, 記録 and アプリ across any of its fields.
 
 **Priority.** Demand alone puts the unwinnable at the top, so the score weights
-it by how much rank is left to win (a phrase at #2 has none), whether the
-searcher is one this app converts, and whether the words are there at all.
+it by how much rank is left to win (a phrase at #2 has none), how hard the apps
+in the way are to pass, whether the searcher is one this app converts, and
+whether the words are there at all.
+
+**Difficulty.** How much rank is left is not the same question as what it would
+cost: #40 is #40 whether the thirty-nine above are dormant hobby projects or
+Calm. Each phrase is graded 0-100 against the apps it would actually have to
+pass — the ones directly above you, not the head of the list — on five signals,
+each dropped rather than guessed when its input is missing:
+
+| Signal | Reads | From |
+| --- | --- | --- |
+| Authority | their rating counts against yours, log-scaled | `stats` |
+| Relevance | how many of them rank without naming the phrase | app names |
+| Tenure | how long they have been on the store | release dates |
+| Stasis | how often the top ten turns over | `turn`, per keyword |
+| Momentum | whether their ratings are growing faster than yours | `statsLog` |
+
+Rating count is the load-bearing proxy, and it earns the position: across the
+US phrases inside the top ten, the apps above outweigh the apps below on
+ratings in ten cases out of eleven. The exception is "sleep talking tracker",
+where a smaller app outranks larger ones because the phrase names what it does.
+That split is the model — authority sets the wall, relevance is what gets over
+it.
+
+Nothing here is a probability. Apple publishes no ranking weights, no search
+volume and no competitor installs, so every input is a public stand-in. It
+ranks phrases against each other, and it discounts a hard phrase by at most 60%
+rather than ruling it out, because heavy demand behind a hard phrase can still
+beat an easy phrase nobody searches.
+
+Two of the five need history to say anything. Stasis needs five day-boundaries
+of turnover before it reports, and momentum needs the growth series to span
+twenty hours. Both start empty on a fresh install and fill themselves in.
 
 The dashboard turns this into a field builder: start from the recommendation,
 drop a word to see what it was holding up, add one to see what it buys, and
@@ -309,7 +341,7 @@ constraint there. Working state that no page reads lives in `scripts/` instead.
 | `histograms.json` | per-star breakdown per storefront |
 | `pending.json` | unconfirmed rating decreases, held 48h before they stick |
 | `reviews.json` | written reviews, kept indefinitely |
-| `keywords.json` | current rank and demand per keyword, plus 30-day history |
+| `keywords.json` | current rank and demand per keyword, the apps holding the places above you, top-ten turnover, plus 30-day history |
 | `kw-events/` | rank and autocomplete movements, one shard per month |
 | `aso.json` | intent, coverage and priority per keyword, plus each market's chase list |
 | `glossary.json` | localized keyword to English, for the dashboard |

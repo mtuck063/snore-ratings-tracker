@@ -1231,6 +1231,23 @@ li.log-day {
     color: var(--good);
     background: color-mix(in srgb, var(--good) 14%, transparent);
 }
+/* How hard the phrase is to climb. Same quiet treatment as the intent chips:
+   it qualifies the score beside it rather than competing with it. A soft climb
+   is the one worth colouring, because it is the one that changes a plan. */
+.badge.kw-hard {
+    font-size: 0.62rem;
+    font-weight: 600;
+    border-radius: 5px;
+    padding: 1px 5px;
+    margin-left: 6px;
+    vertical-align: 1px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    background: color-mix(in srgb, var(--text-secondary) 14%, transparent);
+}
+.badge.hard-soft { color: var(--good); background: color-mix(in srgb, var(--good) 14%, transparent); }
+.badge.hard-hard { color: var(--bad); background: color-mix(in srgb, var(--bad) 13%, transparent); }
 /* The intent mix summarises the phrase columns, so it spans them. */
 .fb-panel .fb-mix {
     grid-column: 1 / -1;

@@ -841,6 +841,21 @@ const FIT_SHORT = {
     offtarget: "not this app's category, so none of the demand counts",
     mine: "your own app name, so there is nothing to win",
 };
+// Who a difficulty reading is about. Which apps were graded matters as much as
+// the number: "the five I have to pass are enormous" and "page one is enormous,
+// and I am at #90" are different situations, and the collector only started
+// recording the apps directly above us recently — anything measured before that
+// is graded against page one and has to say so.
+const hardWho = (hard) =>
+    hard.basis === "above"
+        ? `the ${hard.blockers} app${hard.blockers === 1 ? "" : "s"} directly above you`
+        : "page one, since the apps immediately above you are not recorded yet";
+
+// Bands for the difficulty chip. Deliberately coarse: the inputs are public
+// proxies for competitive strength, not measurements, so three buckets are as
+// much precision as the number can carry.
+const HARD_BAND = (n) => (n >= 65 ? "hard" : n >= 45 ? "steady" : "soft");
+
 const INTENT_HELP = {
     symptom:
         "Someone describing the problem in their own words. They have not decided an app is the answer yet, so they respond to a listing that names the problem back at them.",
@@ -971,7 +986,7 @@ function renderPlan(host, cc, plan, onRefresh) {
     card.appendChild(
         line(
             "",
-            "Ranked by what climbing is worth, so most of these are phrases you already rank for — page one is the top ten, and the top three take most of the taps. Popularity is the 5–100 demand score from Apple's autocomplete, weighted by how far you have left to climb, whether this app converts that searcher, and whether your listing carries the words." +
+            "Ranked by what climbing is worth, so most of these are phrases you already rank for — page one is the top ten, and the top three take most of the taps. Popularity is the 5–100 demand score from Apple's autocomplete, weighted by how far you have left to climb, how hard the apps in the way are to pass, whether this app converts that searcher, and whether your listing carries the words." +
                 (rescored ? " Scored against the field you pasted above." : ""),
             "muted"
         )
@@ -1058,13 +1073,21 @@ function renderPlan(host, cc, plan, onRefresh) {
                           : c.rank <= 100
                             ? `#${c.rank} is past page one, so an edit moves it slower`
                             : `#${c.rank} is far back, so an edit moves it slowly`;
+            // Difficulty grades the apps in the way rather than the distance
+            // to them, so it is a separate step from headroom. Terms with no
+            // reading (the top slot, or a market with nothing recorded) carry
+            // a flat 1 and the line is left out rather than shown as a no-op.
+            const hard = termFull.hard;
+            const easeWhy = !hard ? null : `${hardWho(hard)}: ${hard.why}`;
             const step = (n) => Math.round(n * 100) / 100;
             const x = (n) => n.toFixed(2).replace(/\.?0+$/, "");
             const afterReach = step(c.pop * f.reach);
-            const afterFit = step(afterReach * f.fit);
+            const afterEase = step(afterReach * (f.ease ?? 1));
+            const afterFit = step(afterEase * f.fit);
             score.dataset.tip =
                 `${c.pop} popularity\n` +
                 `× ${x(f.reach)} rank headroom (${reachWhy}) = ${afterReach}\n` +
+                (easeWhy ? `× ${x(f.ease ?? 1)} difficulty ${hard.score}/100 (${easeWhy}) = ${afterEase}\n` : "") +
                 `× ${x(f.fit)} searcher fit (${FIT_SHORT[c.intent] ?? c.intent}) = ${afterFit}\n` +
                 `× ${x(lever)} coverage (${leverWhy}) = ${c.score}`;
         }
@@ -1109,6 +1132,21 @@ function renderPlan(host, cc, plan, onRefresh) {
         }
 
         li.append(score, kwEl, chip);
+        // How hard the phrase is to climb, beside how much there is to gain.
+        // The two are independent, and a plan that shows only the second sends
+        // you at the phrase with the most demand and the least chance.
+        const hardFull = m.terms[c.kw]?.hard;
+        if (hardFull) {
+            const band = HARD_BAND(hardFull.score);
+            const hardChip = document.createElement("span");
+            hardChip.className = `badge kw-hard hard-${band}`;
+            hardChip.textContent = `${band} climb`;
+            hardChip.dataset.tip =
+                `Difficulty ${hardFull.score}/100, grading ${hardWho(hardFull)}: ${hardFull.why}. ` +
+                `It ranks phrases against each other from public signals — ratings, names, release dates — ` +
+                `and is not a probability of winning.`;
+            li.appendChild(hardChip);
+        }
         // Nothing left to do here in this card, which is a finished state
         // rather than an omission. Marking it says the wording work landed.
         if (action.kind === "elsewhere") {
@@ -2171,8 +2209,8 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
                     // reader has to go and edit and it is three separate boxes
                     // in App Store Connect.
                     gap.dataset.tip = fieldKnown
-                        ? `Missing from your title, subtitle and keyword field: ${gone}`
-                        : `Missing from your title and subtitle: ${gone}. This market's keyword field is not recorded, so it may already be there.`;
+                        ? `Missing from your title, subtitle or keyword field: ${gone}`
+                        : `Missing from your title or subtitle: ${gone}. This market's keyword field is not recorded, so it may already be there.`;
                     tdKw.appendChild(gap);
                 }
             }

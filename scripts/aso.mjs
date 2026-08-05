@@ -87,7 +87,34 @@ const tokens = (s) => s.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
 // and snoring meet at "snor". Anything more aggressive starts merging words
 // that are genuinely different, and a false match is worse here than a missed
 // one — it would claim coverage the listing does not have.
-const stem = (w) => {
+// Past English the rules above stop at the first inflection, and every market
+// that is not English was being told to buy a word it already owned: a German
+// subtitle reading "Schnarchen" was reported as having no word for "schnarch",
+// a Dutch one saying "Snurken" as having none for "snurk", and a French
+// subtitle carrying "Ronflement" as having none for "ronfler".
+//
+// Same restraint as the English set, and the same asymmetry behind it — a false
+// match claims coverage a listing does not have, a missed one only costs a
+// suggestion. So: inflections rather than word-builders, and only where enough
+// of the word survives to still be one. Spanish is deliberately absent. Its
+// families here are irregular (roncar/ronquido, dormir/duermes/dormido), no
+// suffix rule joins them, and the plural -s it does want is already shared.
+//
+// Nothing tries to undo a vowel change: Dutch slapen/slaap and German
+// schlafen/schlief stay apart, which costs a match rather than inventing one.
+const EXTRA_SUFFIXES = {
+  de: [["en", 4]],
+  nl: [["en", 4]],
+  fr: [
+    ["ment", 5],
+    ["eur", 4],
+  ],
+};
+// Trailing -e, applied after the language pass as well as inside it, so
+// "ronflement" and "ronfler" still meet: the first only loses its -e once
+// "ment" is gone.
+const trimE = (s) => (/e$/.test(s) && s.length > 4 ? s.slice(0, -1) : s);
+const stem = (w, lang = "en") => {
   let s = fold(w);
   if (s.length <= 3) return s;
   if (/ies$/.test(s)) s = s.slice(0, -3) + "y";
@@ -96,10 +123,21 @@ const stem = (w) => {
   if (/ing$/.test(s) && s.length > 5) s = s.slice(0, -3);
   else if (/ed$/.test(s) && s.length > 4) s = s.slice(0, -2);
   else if (/er$/.test(s) && s.length > 4) s = s.slice(0, -2);
-  if (/e$/.test(s) && s.length > 4) s = s.slice(0, -1);
+  s = trimE(s);
+  for (const [suffix, min] of EXTRA_SUFFIXES[lang] ?? []) {
+    if (s.endsWith(suffix) && s.length - suffix.length >= min) {
+      s = trimE(s.slice(0, -suffix.length));
+      break;
+    }
+  }
   return s;
 };
-const words = (s) => tokens(s).map(stem);
+const words = (s, lang) => tokens(s).map((w) => stem(w, lang));
+
+// Which rules a market's words are read under. English is the default
+// everywhere, including for markets whose language has no rules of its own,
+// so a term is never left unstemmed.
+const langOf = (cc) => (overrides.marketLanguage ?? MARKET_LANG)[cc] ?? "en";
 
 // Words Apple does not make you buy. Every one of the thirty phrases whose
 // only missing word was "app" was ranking, median #13, best #2 — the store
@@ -107,16 +145,64 @@ const words = (s) => tokens(s).map(stem);
 // is an English-language fact, not a universal one.
 const implicit = new Set((overrides.implicitWords ?? ["app", "apps"]).map(stem));
 
+// The same finding as "app", in every language it could be checked: Apple
+// matches articles, prepositions, conjunctions and pronouns without your
+// having to carry them. Of the phrases whose ONLY gap was one of these, every
+// one was ranking without the word — "suivi de sommeil" #96 and "suivi du
+// sommeil" #74 in FR, "alarma de ronquidos" #18 ES and #19 MX, "monitor de
+// sueño" #66 ES, "do i snore" #25 US, #13 GB, #9 AU. Reporting them as gaps
+// sent people to spend characters on "de", which buys nothing.
+//
+// Closed classes only. A homograph that is also a real search word is left out
+// on purpose: French "son" is the possessive in "parler dans son sommeil" and
+// the noun "sound" everywhere else, and this file would rather miss a gap than
+// claim coverage a listing does not have. Same reason "mientras" and other
+// open-class conjunctions are absent — no phrase isolates them, so there is no
+// evidence, and a guess here reads as a verdict.
+//
+// Scoped by language, never pooled: "die" is a German article and an English
+// verb, "de" is Spanish and Dutch, "a" is an English article and a French
+// verb. A shared list would quietly excuse the wrong word in the wrong market.
+const FUNCTION_WORDS = {
+  // Elided forms (l', d', j') tokenise to bare letters, so they are listed as
+  // letters. No tracked term carries one yet; discovery adds terms unattended.
+  fr: "le la les un une des du de d au aux a et ou en dans pour sur avec sans je tu il elle on nous vous ma mes ta tes sa ses mon ton leur leurs notre nos votre vos ce cet cette ces que qui quoi ne pas l j n s c m t qu".split(" "),
+  es: "el la los las un una unos unas lo de del al a y o e u en para por con sin sobre entre mi mis tu tus su sus que se me te nos no".split(" "),
+  de: "der die das den dem des ein eine einen einem eines und oder zu zum zur mit im in auf an am von vom für fur bei beim aus nach über uber ohne mein meine dein deine ist es nicht".split(" "),
+  nl: "de het een en of te met in op van voor bij aan uit over om door naar mijn je jouw ik is niet dat die".split(" "),
+  en: "a an the and or of for in on to at by with from about my me i you your is it do does did not".split(" "),
+};
+// Storefront to language. Canada is English here because every term tracked for
+// it is English; a French-Canadian list would need its own market entry rather
+// than a second language bolted onto this one.
+const MARKET_LANG = { us: "en", ca: "en", gb: "en", au: "en", fr: "fr", es: "es", mx: "es", de: "de", nl: "nl", jp: "ja", cn: "zh" };
+// Japanese and Chinese are deliberately absent. Those are graded by
+// segmentation rather than word membership, and cjkGaps already widens any
+// one-character run back to the phrase it came from, so a bare particle cannot
+// surface as a gap there in the first place.
+const skipCache = new Map();
+function skipFor(cc) {
+  if (!skipCache.has(cc)) {
+    const lang = langOf(cc);
+    const list = (overrides.functionWords ?? FUNCTION_WORDS)[lang] ?? [];
+    // The function words are in that language, so they are stemmed under its
+    // rules too: German "einen" has to reduce the same way the term does.
+    skipCache.set(cc, new Set([...implicit, ...list.map((w) => stem(w, lang))]));
+  }
+  return skipCache.get(cc);
+}
+
 // Apple pools the words of the title, subtitle and keyword field and builds
 // phrases by combining them: "night" in the field plus "recorder" in the field
 // is what makes "night recorder" rankable. Coverage therefore tests the pool,
 // not any single field, and never looks for the phrase itself.
-function poolOf(meta) {
+function poolOf(meta, lang) {
   if (!meta || !(meta.title || meta.subtitle || meta.keywordField)) return null;
   const raw = [meta.title, meta.subtitle, meta.keywordField].filter(Boolean).join(",");
   return {
     raw,
-    set: new Set(words(raw)),
+    lang,
+    set: new Set(words(raw, lang)),
     // Whole comma-separated entries, kept unsplit for the CJK tiling below.
     segments: raw
       .split(/[,、，。\s·・|｜:：]+/)
@@ -179,7 +265,7 @@ function cjkGaps(part, pool) {
 // Returns what the listing is missing before this phrase can rank at all.
 // `null` means the market has no metadata recorded, which must not read as
 // "covered nothing" — an empty shopping list and an unknown one are different.
-function coverageOf(term, pool) {
+function coverageOf(term, pool, skip = implicit) {
   if (!pool) return null;
   const partial = !pool.complete;
   if (hasCJK(term)) {
@@ -190,8 +276,12 @@ function coverageOf(term, pool) {
     return { mode: "segment", covered: missing.length === 0, missing, partial };
   }
   // Compared on stems, since that is what the pool holds, and skipping the
-  // words Apple never makes you buy.
-  const missing = tokens(term).filter((w) => !implicit.has(stem(w)) && !pool.set.has(stem(w)));
+  // words Apple never makes you buy — "app", plus the market language's
+  // articles, prepositions and pronouns. Stemmed under the pool's own language,
+  // so both sides of the comparison reduce the same way.
+  const missing = tokens(term).filter(
+    (w) => !skip.has(stem(w, pool.lang)) && !pool.set.has(stem(w, pool.lang))
+  );
   return { mode: "word", covered: missing.length === 0, missing, partial };
 }
 
@@ -239,11 +329,249 @@ function classify(term) {
 
 const modsOf = (english) => MODS.filter(([, re]) => re.test(english)).map(([m]) => m);
 
+// --- difficulty --------------------------------------------------------------
+//
+// How hard it would be to move UP a phrase, which is a different question from
+// how far there is to move. Winnability below reads the rank alone: #40 is #40
+// whether the thirty-nine apps above are dormant hobby projects or Calm. This
+// grades the apps themselves.
+//
+// Difficulty is measured against the apps we would actually have to pass, not
+// against the head of the list. For a term we already place inside page one
+// that is the handful above us; past page one it is the neighbour list the
+// collector records (`near`); with neither it falls back to the top ten and
+// says so, because "the head of this list is enormous" is weaker evidence than
+// "the five apps I need to pass are enormous".
+//
+// Nothing here is a probability. Apple publishes no ranking weights, no search
+// volume and no competitor installs, so every input is a public proxy: rating
+// counts stand in for install base, names for relevance, release dates for
+// accumulated standing. It ranks phrases against each other. It does not
+// predict outcomes, and a number that reads as a percentage would imply it does
+// — which is why this is reported on its own rather than folded invisibly into
+// the priority score.
+
+// Rating count is the load-bearing proxy, so it is worth saying why it is
+// trusted. Across the US terms we place inside the top ten, the apps above us
+// outweigh the apps below us on rating count in ten cases out of eleven. The
+// exception is "sleep talking tracker", where we outrank larger apps because
+// the phrase names what we do. That split is the whole model: authority sets
+// the wall, relevance is what gets over it.
+const ratingsOf = (cc, id) => kwData.stats?.[cc]?.[id]?.[0] ?? null;
+const bareIds = (list) => (list ?? []).map((e) => (Array.isArray(e) ? e[0] : e));
+
+// Ratings counts span four orders of magnitude across a single top ten, so the
+// mean is whatever the largest app is. The geometric mean answers the question
+// actually being asked: what size of app is typical of the ones in the way.
+const geoMean = (v) =>
+  v.length ? 10 ** (v.reduce((a, x) => a + Math.log10(x), 0) / v.length) : null;
+const clamp01 = (n) => Math.max(0, Math.min(1, n));
+const median = (v) => (v.length ? [...v].sort((a, b) => a - b)[Math.floor(v.length / 2)] : null);
+
+// The apps between us and one place better. `kind` records which question the
+// answer is to, because the two are not equally strong evidence.
+function blockersOf(cur) {
+  const top = bareIds(cur.top);
+  const near = bareIds(cur.near);
+  if (cur.rank == null) return { ids: top, kind: "head" }; // unranked: the head is all we know
+  if (cur.rank === 1) return { ids: [], kind: "held" };
+  if (cur.rank <= 10) return { ids: top.slice(0, cur.rank - 1), kind: "above" };
+  if (near.length) return { ids: near, kind: "above" };
+  return { ids: top, kind: "head" }; // past page one, no neighbour list recorded yet
+}
+
+// Does this app's name claim the phrase? An app ranking for words it never
+// says is ranking on standing rather than on relevance, and standing is not
+// purchasable with a keyword field. Where every app in the way already names
+// the term, wording is live and the contest is winnable on our own terms.
+function namesTerm(name, kw, lang) {
+  if (hasCJK(kw)) {
+    // No word boundaries to split on, so match on character pairs: a two-glyph
+    // run is about the size of a Latin word, and single glyphs match far too
+    // freely to mean anything.
+    const s = fold(kw).replace(/\s+/g, "");
+    const hay = fold(name);
+    for (let i = 0; i + 2 <= s.length; i++) if (hay.includes(s.slice(i, i + 2))) return true;
+    return false;
+  }
+  const named = new Set(words(name, lang));
+  return words(kw, lang).some((w) => named.has(w));
+}
+
+// An app that has been shipping for a decade holds ranking signal that no
+// metadata edit buys. Graded between three years and twelve rather than from
+// zero, because a flat "age over eight years" scored almost every term in this
+// category at 1 and stopped separating anything: the median blocker across the
+// US list is about ten years old, and the spread that matters runs from the
+// six-year-olds to the fourteen-year-olds.
+const TENURE_FLOOR = 3;
+const TENURE_CEIL = 12;
+// Blockers to smooth the relevance share against. With one app in the way the
+// raw share is 0 or 1 and reads as certainty about a single coin flip; this
+// pulls a small sample toward the middle and leaves a full page one alone.
+const LEXICAL_PRIOR = 2;
+// Day boundaries the turnover counter needs before its rate is worth reading.
+// Under a working week, one reshuffle reads as a permanent property.
+const TURN_MIN_DAYS = 5;
+// Entrants per day that count as a fully fluid top ten. Provisional: no market
+// has been observed long enough yet to place this from data. Once a season of
+// turnover has accumulated, set it from the distribution rather than by guess.
+const TURN_FLUID = 1;
+// Hours the growth series must span before a rate is subtracted from it, the
+// same floor the collector keeps its snapshots against.
+const MOMENTUM_MIN_HOURS = 20;
+
+// Rating growth per day, per app, from the run-level snapshots. Page-one apps
+// only — the neighbour lists are deliberately kept out of that series, so a
+// difficulty resting on `near` will have no momentum term and says so by
+// leaving it out rather than by scoring it zero.
+function growthRates(cc) {
+  const log = kwData.statsLog ?? [];
+  if (log.length < 2) return null;
+  const first = log[0], last = log[log.length - 1];
+  const hours = (new Date(last.at) - new Date(first.at)) / 36e5;
+  if (!(hours >= MOMENTUM_MIN_HOURS)) return null;
+  const a = first.markets?.[cc] ?? {}, b = last.markets?.[cc] ?? {};
+  const rates = {};
+  for (const id of Object.keys(b)) {
+    if (a[id] == null) continue;
+    rates[id] = Math.max(0, (b[id] - a[id]) / (hours / 24));
+  }
+  return rates;
+}
+
+// Each part is 0 (nothing in the way) to 1 (immovable), and each is dropped
+// rather than guessed when its input is missing — a term with no growth series
+// is scored on what is known about it, not marked easy for the gap.
+const WEIGHTS = { authority: 0.35, lexical: 0.25, entrenchment: 0.15, stasis: 0.15, momentum: 0.1 };
+
+// A number nobody can act on is a number nobody should be shown, so every
+// reading carries the fact that produced it. The sentence names the two
+// components contributing most, weight included: on a list where every entry
+// scores high on size, the part that separates one term from the next is
+// whichever of the others moved.
+const round = (n) =>
+  n >= 10000
+    ? `${Math.round(n / 1000)}k`
+    : String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+const SAYS = {
+  authority: ({ wall, mine }) =>
+    wall == null
+      ? null
+      : mine != null
+        ? `they average ${round(wall)} ratings against your ${round(mine)}`
+        : `they average ${round(wall)} ratings`,
+  // From the raw count, not from the part: the part is smoothed toward the
+  // middle for small samples, and reads as a fraction of an app when reversed.
+  lexical: ({ ids, unnamed }) =>
+    unnamed >= ids.length
+      ? "not one of them names the phrase, so wording is not what is holding the position"
+      : unnamed === 0
+        ? "every one of them names the phrase, so wording is live here"
+        : `${unnamed} of ${ids.length} rank without naming the phrase`,
+  entrenchment: ({ age }) => (age == null ? null : `they have been on the store ${Math.round(age)} years`),
+  stasis: ({ parts }) =>
+    parts.stasis > 0.8 ? "the list has not turned over since tracking began" : "the list turns over slowly",
+  momentum: ({ parts }) =>
+    parts.momentum > 0.3 ? "and they are pulling further ahead by the day" : null,
+};
+
+function hardWhy(parts, facts) {
+  const ranked = Object.entries(parts)
+    .map(([k, v]) => [k, v * WEIGHTS[k]])
+    .sort((a, b) => b[1] - a[1])
+    .map(([k]) => k);
+  const said = ranked.map((k) => SAYS[k]({ ...facts, parts })).filter(Boolean);
+  return said.slice(0, 2).join(", ");
+}
+
+function difficultyOf(cc, kw, cur, ctx) {
+  const { ids, kind } = blockersOf(cur);
+  if (!ids.length) return null; // held the top slot: there is no "up" to grade
+  const counts = ids.map((id) => ratingsOf(cc, id)).filter((n) => n > 0);
+  const parts = {};
+
+  // Authority. Three orders of magnitude between their typical size and ours
+  // is the practical ceiling: at that distance the gap is the whole story.
+  const wall = geoMean(counts);
+  if (wall != null) {
+    parts.authority = clamp01(
+      ctx.mine != null
+        ? Math.log10((wall + 1) / (ctx.mine + 1)) / 3
+        : // No rating count recorded for us in this market, so there is no gap
+          // to measure. Fall back to absolute size, where 100k reads as a wall.
+          Math.log10(wall + 1) / 5
+    );
+  }
+
+  // Relevance. The share of the apps in the way that never name the phrase.
+  const unnamed = ids.filter((id) => !namesTerm(ctx.apps[id]?.name ?? "", kw, ctx.lang)).length;
+  parts.lexical = (unnamed + LEXICAL_PRIOR / 2) / (ids.length + LEXICAL_PRIOR);
+
+  // Tenure.
+  const ages = ids
+    .map((id) => ctx.apps[id]?.released)
+    .filter(Boolean)
+    .map((d) => (ctx.now - new Date(d)) / 31557600000);
+  const age = median(ages);
+  if (age != null) {
+    parts.entrenchment = clamp01((age - TENURE_FLOOR) / (TENURE_CEIL - TENURE_FLOOR));
+  }
+
+  // Stasis. Always measured on the top ten, which is the blocking set itself
+  // for a page-one term and a read on the whole market's fluidity for one
+  // further down: a head that reshuffles nightly is not a list where positions
+  // further back are welded on either.
+  const [days, entrants] = cur.turn ?? [];
+  if (days >= TURN_MIN_DAYS) parts.stasis = clamp01(1 - entrants / days / TURN_FLUID);
+
+  // Momentum. Two orders of magnitude between their daily rating gain and ours
+  // is a gap widening faster than any wording change closes it.
+  if (ctx.rates) {
+    const theirs = median(ids.map((id) => ctx.rates[id]).filter((n) => n != null));
+    if (theirs != null) {
+      parts.momentum = clamp01(Math.log10((theirs + 1) / ((ctx.myRate ?? 0) + 1)) / 2);
+    }
+  }
+
+  const have = Object.keys(parts);
+  if (!have.length) return null;
+  const weight = have.reduce((a, k) => a + WEIGHTS[k], 0);
+  const score = have.reduce((a, k) => a + parts[k] * WEIGHTS[k], 0) / weight;
+  return {
+    score: Math.round(100 * score),
+    // What was graded, so a reader can tell "the five apps above me are
+    // enormous" from "the head of this list is enormous, and I am nowhere
+    // near it".
+    basis: kind,
+    blockers: ids.length,
+    ...(wall != null && { wall: Math.round(wall) }),
+    why: hardWhy(parts, { ids, unnamed, wall, mine: ctx.mine, age }),
+    parts: Object.fromEntries(have.map((k) => [k, Math.round(parts[k] * 100) / 100])),
+  };
+}
+
+// Everything difficulty needs that is the same for every keyword in a market.
+const difficultyCtx = (cc) => {
+  const rates = growthRates(cc);
+  return {
+    apps: kwData.apps ?? {},
+    lang: langOf(cc),
+    now: new Date(kwData.fetchedAt ?? Date.now()),
+    mine: ratingsOf(cc, config.appId),
+    rates,
+    myRate: rates?.[config.appId] ?? null,
+  };
+};
+
 // --- priority ----------------------------------------------------------------
 
 // What a place gained here is worth. Demand is only half the story: the top of
 // the list is where the least room is left, and a phrase nothing has ever
 // ranked for is upside without evidence.
+//
+// This is headroom, not difficulty: how much is left to gain, read off the
+// rank alone. What it would cost to gain it is graded separately, above.
 function winnability(rank) {
   if (rank == null) return 0.45; // outside the top 200: real upside, unproven
   if (rank <= 3) return 0.1; // already won; this is a defend, not a chase
@@ -278,14 +606,23 @@ function lever(cov) {
   return cov.missing.length <= 2 ? 1.25 : 0.85;
 }
 
+// Difficulty discounts a phrase; it never rules one out. A hard phrase with
+// heavy demand can still be worth more than an easy phrase nobody searches,
+// and the inputs are proxies rather than measurements, so the most an unwinnable
+// -looking term loses is 60% of its score. Terms with no difficulty reading
+// (top slot held, or nothing recorded yet) keep the full weight.
+const MAX_DISCOUNT = 0.6;
+const ease = (diff) => (diff == null ? 1 : 1 - MAX_DISCOUNT * (diff / 100));
+
 // Split into the part the browser cannot change and the part it can. The page
 // lets you paste your real keyword field, which changes coverage and therefore
 // the score; shipping the whole formula there instead would leave two copies
 // to drift apart.
-const baseOf = ({ pop, rank, intent }) => (pop / 100) * winnability(rank) * FIT[intent];
+const baseOf = ({ pop, rank, intent, diff }) =>
+  (pop / 100) * winnability(rank) * ease(diff) * FIT[intent];
 
-function scoreOf({ pop, rank, intent, cov }) {
-  return Math.round(100 * baseOf({ pop, rank, intent }) * lever(cov));
+function scoreOf({ pop, rank, intent, cov, diff }) {
+  return Math.round(100 * baseOf({ pop, rank, intent, diff }) * lever(cov));
 }
 
 // The coverage multipliers by name, so the page applies these same numbers.
@@ -320,27 +657,32 @@ function analyseMarket(cc) {
   const list = kwFor(cc);
   const latest = kwData.latest?.[cc] ?? {};
   const meta = metadata.markets?.[cc] ?? null;
-  const pool = poolOf(meta);
+  const lang = langOf(cc);
+  const pool = poolOf(meta, lang);
 
   const terms = {};
+  const dctx = difficultyCtx(cc);
   for (const kw of list) {
     const cur = latest[kw] ?? {};
     const pop = cur.pop ?? 5;
     const rank = cur.rank ?? null;
     const { intent, english } = classify(kw);
-    const cov = coverageOf(kw, pool);
+    const cov = coverageOf(kw, pool, skipFor(cc));
     const mods = modsOf(english);
+    const hard = difficultyOf(cc, kw, cur, dctx);
+    const diff = hard?.score ?? null;
     terms[kw] = {
       intent,
       ...(mods.length && { mods }),
       pop,
       rank,
       ...(cov && { covered: cov.covered, ...(cov.missing.length && { missing: cov.missing }) }),
-      score: scoreOf({ pop, rank, intent, cov }),
-      base: Math.round(baseOf({ pop, rank, intent }) * 1000) / 1000,
+      ...(hard && { hard }),
+      score: scoreOf({ pop, rank, intent, cov, diff }),
+      base: Math.round(baseOf({ pop, rank, intent, diff }) * 1000) / 1000,
       // The score's factors, kept separate so the page can show its working
       // rather than asking anyone to trust a bare number.
-      factors: { reach: winnability(rank), fit: FIT[intent] },
+      factors: { reach: winnability(rank), ease: ease(diff), fit: FIT[intent] },
       why: reasonFor({ pop, rank, cov, intent }),
     };
   }
@@ -370,18 +712,20 @@ function analyseMarket(cc) {
   const needed = new Set();
   for (const [kw, t] of Object.entries(terms)) {
     if (!CHASEABLE.has(t.intent)) continue;
-    for (const w of hasCJK(kw) ? [] : words(kw)) needed.add(w);
+    for (const w of hasCJK(kw) ? [] : words(kw, lang)) needed.add(w);
   }
   const fieldWords = meta?.keywordField ? tokens(meta.keywordField) : [];
-  const unused = fieldWords.filter((w) => !needed.has(stem(w)) && !implicit.has(stem(w)));
+  const unused = fieldWords.filter(
+    (w) => !needed.has(stem(w, lang)) && !implicit.has(stem(w, lang))
+  );
 
   // Subtitle words repeated in the field: Apple pools them, so the second copy
   // buys nothing and the characters could hold another word.
-  const subtitleWords = new Set(words(meta?.subtitle ?? ""));
-  const repeated = fieldWords.filter((w) => subtitleWords.has(stem(w)));
+  const subtitleWords = new Set(words(meta?.subtitle ?? "", lang));
+  const repeated = fieldWords.filter((w) => subtitleWords.has(stem(w, lang)));
 
   // One alternatives model, shared by the recommendation and the builder.
-  const model = altsFor(terms, meta);
+  const model = altsFor(terms, meta, lang);
 
   const chase = Object.entries(terms)
     .filter(([, t]) => t.score > 0)
@@ -414,7 +758,7 @@ function analyseMarket(cc) {
     // field should say does not depend on anyone having written down what it
     // says now.
     recommended: recommendField(cc, terms, meta, model),
-    builder: builderFor(model, meta),
+    builder: builderFor(model, meta, lang),
     byIntent,
     shoppingList: shoppingList.slice(0, 12),
     unusedFieldWords: unused,
@@ -506,6 +850,9 @@ async function writeData() {
     JSON.stringify({
       generatedAt: new Date().toISOString(),
       levers: LEVERS,
+      // The page rescores against a pasted keyword field, so it needs the same
+      // constants rather than a second copy of them.
+      discount: MAX_DISCOUNT,
       markets: all,
     })
   );
@@ -557,21 +904,32 @@ function report(only) {
     }
     console.log("\n  Chase list:");
     for (const c of m.chase) {
-      console.log(`    ${pad(c.score, 4)} ${pad(c.kw, 30)} ${pad(c.intent, 9)} ${c.why}`);
+      // Difficulty in its own column rather than folded into `why`: the score
+      // beside it already carries the discount, and what the reader needs here
+      // is whether a low score means thin demand or a wall of incumbents.
+      const hard = m.terms[c.kw]?.hard;
+      console.log(
+        `    ${pad(c.score, 4)} ${pad(hard ? `${hard.score}↑` : "", 5)} ${pad(c.kw, 30)} ${pad(c.intent, 9)} ${c.why}`
+      );
+    }
+    if (m.chase.some((c) => m.terms[c.kw]?.hard)) {
+      console.log("    (second column: difficulty of climbing, 0-100)");
     }
   }
 }
 
 function csv(only) {
   const all = analyseAll();
-  console.log("market,keyword,intent,pop,rank,score,covered,missing,why");
+  console.log("market,keyword,intent,pop,rank,score,difficulty,basis,wall,covered,missing,why");
   for (const [cc, m] of Object.entries(all)) {
     if (only && cc !== only) continue;
     for (const c of m.chase) {
       const t = m.terms[c.kw];
       const cell = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
       console.log(
-        [cc, cell(c.kw), t.intent, t.pop, t.rank ?? "", t.score, t.covered ?? "", cell((t.missing ?? []).join(" ")), cell(t.why)].join(",")
+        [cc, cell(c.kw), t.intent, t.pop, t.rank ?? "", t.score,
+         t.hard?.score ?? "", t.hard?.basis ?? "", t.hard?.wall ?? "",
+         t.covered ?? "", cell((t.missing ?? []).join(" ")), cell(t.why)].join(",")
       );
     }
   }
@@ -627,8 +985,8 @@ function tilingsOf(part, claimed, allowed) {
 }
 
 // Per phrase: the alternative unit-sets that would satisfy it, cheapest first.
-function altsFor(terms, meta) {
-  const claimed = poolOf({ title: meta?.title, subtitle: meta?.subtitle });
+function altsFor(terms, meta, lang) {
+  const claimed = poolOf({ title: meta?.title, subtitle: meta?.subtitle }, lang);
   // Units are compared by key and shown by label: the key of "talks" is its
   // stem, but the thing to paste into the field is a real word, and the
   // cheapest real word carrying that stem is the one to suggest.
@@ -671,12 +1029,12 @@ function altsFor(terms, meta) {
       for (const part of fold(kw).split(/\s+/).filter(Boolean)) {
         let partAlts;
         if (hasCJK(part)) partAlts = tilingsOf(part, claimed, allowedPiece);
-        else if (claimed?.set.has(stem(part)) || implicit.has(stem(part))) partAlts = [[]];
+        else if (claimed?.set.has(stem(part, lang)) || implicit.has(stem(part, lang))) partAlts = [[]];
         else {
           // A Latin word inside a CJK phrase ("apple watch 睡眠") still needs a
           // label, or the chip shows the stem: "appl".
-          noteLabel(stem(part), part);
-          partAlts = [[stem(part)]];
+          noteLabel(stem(part, lang), part);
+          partAlts = [[stem(part, lang)]];
         }
         if (!partAlts.length) {
           alts = [];
@@ -691,7 +1049,7 @@ function altsFor(terms, meta) {
     } else {
       const need = [];
       for (const w of tokens(kw)) {
-        const key = stem(w);
+        const key = stem(w, lang);
         wordKeys[w] = key;
         // Implicit words and anything the title or subtitle already carries
         // cost nothing and are never part of what a phrase still needs.
@@ -733,6 +1091,7 @@ function altsFor(terms, meta) {
 // sixteen phrases uncovered and budget to spare.
 function recommendField(cc, terms, meta, model) {
   const { rows, label } = model;
+  const lang = langOf(cc);
   const picks = [];
   const have = new Set();
   let chars = 0;
@@ -763,7 +1122,7 @@ function recommendField(cc, terms, meta, model) {
 
   const field = picks.join(",");
   const covered = rows.filter((r) => satisfiedBy(r.alts, have));
-  const currentKeys = meta?.keywordField ? new Set(words(meta.keywordField)) : null;
+  const currentKeys = meta?.keywordField ? new Set(words(meta.keywordField, lang)) : null;
   const holds = (r) => currentKeys && satisfiedBy(r.alts, currentKeys);
 
   return {
@@ -773,12 +1132,14 @@ function recommendField(cc, terms, meta, model) {
     of: rows.length,
     ...(currentKeys && {
       currentCovers: rows.filter(holds).length,
-      adds: picks.filter((p) => !currentKeys.has(stem(p))),
+      adds: picks.filter((p) => !currentKeys.has(stem(p, lang))),
       // Read off the field itself, so a dropped word is shown the way it is
       // written there rather than as the stem it matches on.
       drops: tokens(meta.keywordField).filter(
         (w) =>
-          !have.has(stem(w)) && !model.claimedKeys.includes(stem(w)) && !implicit.has(stem(w))
+          !have.has(stem(w, lang)) &&
+          !model.claimedKeys.includes(stem(w, lang)) &&
+          !implicit.has(stem(w, lang))
       ),
       wins: rows.filter((r) => !holds(r) && satisfiedBy(r.alts, have)).map((r) => r.kw),
       loses: rows.filter((r) => holds(r) && !satisfiedBy(r.alts, have)).map((r) => r.kw),
@@ -789,14 +1150,14 @@ function recommendField(cc, terms, meta, model) {
 // The same model, shipped to the page. The browser needs the label for every
 // unit so a chip reads "talk" rather than its stem, and nothing else: coverage
 // there is the satisfies() rule above, which is set arithmetic over these keys.
-function builderFor(model, meta) {
+function builderFor(model, meta, lang) {
   return {
     // Where a word already lives, because the three fields do not carry equal
     // weight: a phrase whose words sit only in the keyword field has a wording
     // lever left (promote one into the subtitle), and a phrase already spelled
     // out in the title has none — its rank moves on conversion and ratings.
-    titleKeys: [...new Set(words(meta?.title ?? ""))],
-    subtitleKeys: [...new Set(words(meta?.subtitle ?? ""))],
+    titleKeys: [...new Set(words(meta?.title ?? "", lang))],
+    subtitleKeys: [...new Set(words(meta?.subtitle ?? "", lang))],
     units: model.units,
     labels: Object.fromEntries(model.units.map((u) => [u, model.label.get(u)])),
     wordKeys: model.wordKeys,
