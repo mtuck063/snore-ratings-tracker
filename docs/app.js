@@ -1258,6 +1258,12 @@ function expandable(head, items) {
 function makeCollapsible(headEl, key, defaultOpen = true) {
     const store = `asoOpen:${key}`;
     const body = headEl.parentElement;
+    // The competitor panel defers this to a microtask, so a second render in
+    // the same turn — two market tabs tapped inside one frame — clears the
+    // panel before the first header is ever wired. That header has no section
+    // left to fold, and reaching for its parent threw. Stale work, and the
+    // live header gets a call of its own, so there is nothing to do but stop.
+    if (!body) return () => {};
     let open = (localStorage.getItem(store) ?? (defaultOpen ? "1" : "0")) === "1";
     headEl.classList.add("sec-toggle");
     headEl.setAttribute("role", "button");
