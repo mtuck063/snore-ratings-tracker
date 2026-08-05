@@ -70,12 +70,38 @@ document.addEventListener("pointermove", (e) => {
     if (e.target.closest("[data-tip]") && !tooltip.hidden) placeTooltip(e);
 });
 
+// Touch has no hover, so the delegation above is half an interaction: on a
+// phone every one of these explanations was unreachable unless it happened to
+// sit on a header that does not sort. Not only the column meanings — the
+// reason behind a score, the intent chips, how hard a phrase is to climb, the
+// arithmetic behind a priority number. A tap does the explaining there.
+document.addEventListener("click", (e) => {
+    const el = e.target.closest("[data-tip]");
+    if (!el) return;
+    // A control does its own job on tap, and a sortable header sorts. Both
+    // keep their tap; the sortable ones get the mark below instead.
+    if (el.closest("button") || el.matches("th[data-sort]")) return;
+    showTip(el, e);
+});
+
 function wireHeaderTips(root = document) {
-    for (const th of root.querySelectorAll("th[data-tip]")) {
-        // A sortable header keeps its tap for sorting; reading what a column
-        // means must not cost the user their sort order. Those stay
-        // hover-only, which is the desktop-shaped half of the interaction.
-        if (!th.hasAttribute("data-sort")) th.addEventListener("click", (e) => showTip(th, e));
+    // A sortable header keeps its tap for sorting; reading what a column
+    // means must not cost the user their sort order. So it carries a mark
+    // that can afford the tap. Added from the tip rather than written into
+    // the markup, so a column added later gets one by having something to
+    // explain, and cannot be given an explanation with no way to reach it.
+    for (const th of root.querySelectorAll("th[data-sort][data-tip]")) {
+        if (th.querySelector(".th-info")) continue;
+        const info = document.createElement("button");
+        info.type = "button";
+        info.className = "th-info";
+        info.textContent = "?";
+        info.setAttribute("aria-label", `What ${th.textContent.trim()} means`);
+        info.addEventListener("click", (e) => {
+            e.stopPropagation(); // the header's own tap sorts, this one does not
+            showTip(th, e);
+        });
+        th.appendChild(info);
     }
 }
 wireHeaderTips();

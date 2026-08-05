@@ -379,6 +379,35 @@ th[data-tip] {
 th[data-tip]:not([data-sort]) { cursor: help; }
 th[data-tip]:hover { color: var(--text); }
 .sort-arrow { font-size: 0.6rem; margin-left: 3px; }
+/* The dotted rule promises an explanation that hover delivers, and a phone
+   has no hover — so on a sortable header, where the tap is already spent on
+   sorting, the promise was one a touch screen could not keep. The mark is the
+   way to reach it, and it appears only where hover cannot: on a mouse the
+   header is unchanged, because there it already works. */
+.th-info { display: none; }
+@media (hover: none) {
+    /* Sized as the target rather than padded out to one. An invisible box
+       spilling past the circle would reach back over the label, and the label
+       is the sort control — a mark that explains the column by quietly eating
+       taps meant for sorting trades one broken interaction for another. */
+    .th-info {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        margin-left: 5px;
+        padding: 0;
+        vertical-align: middle;
+        border: 1px solid var(--border);
+        border-radius: 50%;
+        background: none;
+        color: var(--text-secondary);
+        font: inherit;
+        font-size: 0.62rem;
+        line-height: 1;
+    }
+}
 .star-bar-wrap { display: inline-flex; align-items: center; gap: 5px; }
 .star-bar {
     display: inline-flex;
