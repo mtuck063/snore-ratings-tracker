@@ -2101,6 +2101,76 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
     draw();
 }
 
+// A rival's own listing: subtitle, screenshots, and a way to go and look.
+//
+// One lookup call per app per open, memoised for the session. Nothing here is
+// load-bearing: every piece is appended only once it arrives, so a blocked or
+// slow call leaves the keyword lists below it exactly as they were.
+const rivalCache = new Map();
+function rivalHeader(id, cc, meta, plan) {
+    const box = document.createElement("div");
+    box.className = "rival-head";
+
+    // Collected, not fetched: the subtitle is not in the lookup API, and the
+    // product page that carries it sends no CORS header. Absent until the next
+    // aso.mjs run has seen this app, which is why it renders only when present.
+    const sub = plan?.markets?.[cc]?.rivals?.[id]?.subtitle;
+    if (sub) {
+        const p = document.createElement("p");
+        p.className = "rival-sub";
+        p.textContent = sub;
+        box.appendChild(p);
+    }
+
+    const link = document.createElement("a");
+    link.className = "rival-link";
+    link.href = `https://apps.apple.com/${cc}/app/id${id}`;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = `Open ${meta.name ?? "this app"} in the App Store →`;
+    box.appendChild(link);
+
+    const shelf = document.createElement("div");
+    shelf.className = "rival-shots";
+    box.appendChild(shelf);
+
+    const key = `${id}:${cc}`;
+    const load =
+        rivalCache.get(key) ??
+        fetch(`https://itunes.apple.com/lookup?id=${id}&country=${cc}`)
+            .then((r) => r.json())
+            .then((j) => j.results?.[0] ?? null)
+            .catch(() => null);
+    rivalCache.set(key, load);
+    load.then((app) => {
+        // Phone shots first, iPad only when there are no phone ones: an app
+        // that ships both would otherwise show the same screens twice.
+        const shots = (app?.screenshotUrls?.length ? app.screenshotUrls : app?.ipadScreenshotUrls) ?? [];
+        if (!shots.length) {
+            shelf.remove();
+            return;
+        }
+        for (const url of shots.slice(0, 6)) {
+            const a = document.createElement("a");
+            a.href = url.replace(/\/\d+x\d+bb\.(jpg|png)$/, "/626x0w.$1");
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+            const img = document.createElement("img");
+            img.className = "rival-shot";
+            img.src = url;
+            img.alt = "";
+            // No loading="lazy" here, unlike the icons. These are built only
+            // once a row is opened, so they are already deferred by intent, and
+            // Chrome never fires the lazy load for an image inserted mid-click
+            // inside a fresh row: the six stalled at complete=false forever,
+            // showing six empty frames.
+            a.appendChild(img);
+            shelf.appendChild(a);
+        }
+    });
+    return box;
+}
+
 async function renderKeywords(kw, glossary = {}, plan = null, applePop = null) {
     if (!kw?.latest || !Object.keys(kw.latest).length) return;
     document.getElementById("keywords-section").hidden = false;
@@ -2736,6 +2806,20 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null) {
                         det.className = "kw-comp-detail";
                         const td = document.createElement("td");
                         td.colSpan = 10;
+                        // What the listing itself says, above the keywords it
+                        // wins. The counts tell you a rival owns your phrases;
+                        // the subtitle and the screenshots are the part you can
+                        // read and answer.
+                        //
+                        // Screenshots and the store link come from the lookup
+                        // API on open rather than from a data file: the browser
+                        // may call it (it sends access-control-allow-origin: *),
+                        // ten URLs per app across eleven markets is a file this
+                        // repo does not need to carry, and a screenshot fetched
+                        // now cannot be a month stale. The subtitle is the one
+                        // piece that must be collected, since it has never been
+                        // in the API and the product page blocks the browser.
+                        td.appendChild(rivalHeader(id, cc, meta, plan));
                         const firsts = e.at.filter((a) => a.place === 1);
                         const rest = e.at.filter((a) => a.place > 1);
                         const group = (label, list) => {

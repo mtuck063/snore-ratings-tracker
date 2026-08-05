@@ -1018,6 +1018,44 @@ li.log-day {
 /* Competitor rows expand to the keywords behind their counts. */
 .kw-comp-open { cursor: pointer; }
 .kw-comp-detail td { padding: 8px 10px 12px; }
+
+/* The rival's own listing, above the keywords it wins. Screenshots are the
+   only images on the page big enough to carry a layout, so they scroll in
+   their own strip rather than reflowing the table around them. */
+.rival-head { margin: 2px 0 10px; }
+.rival-sub {
+    font-size: 0.86rem;
+    color: var(--text);
+    margin: 0 0 4px;
+}
+.rival-link {
+    display: inline-block;
+    font-size: 0.78rem;
+    color: var(--accent);
+    text-decoration: none;
+    margin-bottom: 8px;
+}
+.rival-link:hover { text-decoration: underline; }
+.rival-shots {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+}
+.rival-shot {
+    height: 190px;
+    width: auto;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    display: block;
+    /* Apple's thumbs arrive at wildly different aspect ratios across device
+       families; a fixed height keeps the strip a strip. */
+    flex: 0 0 auto;
+}
+@media (max-width: 640px) {
+    .rival-shot { height: 150px; }
+}
 .kw-comp-detail-head {
     font-size: 0.7rem;
     text-transform: uppercase;

@@ -754,6 +754,9 @@ function analyseMarket(cc) {
         }
       : null,
     coverage: gradable ? { covered, of: gradable, partial } : null,
+    // Rival subtitles, keyed by app id. Only the apps whose pages a --fetch run
+    // has read, so absent entries mean unread rather than no subtitle.
+    ...(meta?.rivals && { rivals: meta.rivals }),
     // Always present, including where the current field is unknown. What the
     // field should say does not depend on anyone having written down what it
     // says now.
@@ -768,6 +771,27 @@ function analyseMarket(cc) {
   };
 }
 
+// The apps whose listings are worth reading: the same eight the dashboard's
+// competitor panel lists, ranked the same way, so the two never disagree about
+// who the rivals are. Top-five ownership decides it, top-ten breaks ties.
+function rivalIds(cc) {
+  const slots = new Map();
+  for (const cur of Object.values(kwData.latest?.[cc] ?? {})) {
+    (cur.top ?? []).forEach((raw, i) => {
+      const id = String(Array.isArray(raw) ? raw[0] : raw);
+      const e = slots.get(id) ?? { top5: 0, top10: 0 };
+      if (i < 5) e.top5++;
+      e.top10++;
+      slots.set(id, e);
+    });
+  }
+  return [...slots.entries()]
+    .sort((a, b) => b[1].top5 - a[1].top5 || b[1].top10 - a[1].top10)
+    .slice(0, 8)
+    .map(([id]) => id)
+    .filter((id) => id !== String(config.appId));
+}
+
 // --- live title and subtitle -------------------------------------------------
 
 // The product page renders both in the header. The lookup API has never
@@ -780,10 +804,10 @@ function analyseMarket(cc) {
 // "Gesundheit und Fitness" / "Gezondheid en fitness" and would have been
 // graded as if that were the copy. The lookup API's localized `genres[0]` is
 // the same string, which is what tells the two apart.
-async function fetchListing(cc) {
+async function fetchListing(cc, appId = config.appId) {
   const [res, genre] = await Promise.all([
-    fetch(`https://apps.apple.com/${cc}/app/id${config.appId}`),
-    fetch(`https://itunes.apple.com/lookup?id=${config.appId}&country=${cc}`)
+    fetch(`https://apps.apple.com/${cc}/app/id${appId}`),
+    fetch(`https://itunes.apple.com/lookup?id=${appId}&country=${cc}`)
       .then((r) => r.json())
       .then((j) => j.results?.[0]?.genres?.[0] ?? null)
       .catch(() => null),
@@ -833,6 +857,22 @@ async function refreshListings() {
     } catch (err) {
       console.warn(`${cc}: ${err.message}, keeping stored listing`);
     }
+    // Rival subtitles, for the same eight apps the dashboard's competitor panel
+    // shows. Collected rather than read live because the subtitle has never
+    // been in the lookup API and the product page that carries it sends no
+    // CORS header, so the browser cannot go and get it the way it gets their
+    // screenshots. Eight pages per market, and a failure keeps what is stored.
+    const rivals = { ...(metadata.markets[cc]?.rivals ?? {}) };
+    for (const id of rivalIds(cc)) {
+      try {
+        const live = await fetchListing(cc, id);
+        rivals[id] = { subtitle: live.subtitle ?? null, at };
+      } catch {
+        // Left as it was. A rival whose page we have never read simply has no
+        // entry, which the page renders as no subtitle line rather than blank.
+      }
+    }
+    if (Object.keys(rivals).length) metadata.markets[cc].rivals = rivals;
   }
   await writeFile(metadataFile, JSON.stringify(metadata, null, 2) + "\n");
   console.log(`listings refreshed for ${ok}/${Object.keys(markets).length} markets`);
