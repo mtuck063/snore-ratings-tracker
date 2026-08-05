@@ -124,12 +124,32 @@ async function readJson(file, fallback) {
 // --- Rank: iTunes Search API -----------------------------------------------
 
 // Resolves to { rank (1-based | null if outside top 200), top (the top ten
-// [appId, name] results — competitor context that comes free with the same
-// request) } or "error".
+// results), near (the handful sitting directly above us, when that is past
+// the top ten) } or "error".
 // Ten rather than five because page one of App Store search is ten results:
 // an app sitting at 6-10 is still visible to a searcher, and counting only
 // the top five hid every competitor in that band.
 const TOP_DEPTH = 10;
+// Results above our own position to record once we rank past the top ten.
+// "How hard is this keyword" is not a property of the keyword: gaining five
+// places means passing the five apps holding them, and for the two thirds of
+// tracked terms where we sit outside page one, the top ten describes apps we
+// are nowhere near. The request already carries 200 results, so this costs no
+// extra call — only the metadata a few more ids pull into the shared `apps`
+// map, which is why these entries skip the icon (see collectMarket).
+const NEAR_DEPTH = 5;
+const describe = (r, withIcon) => ({
+  id: String(r.trackId),
+  name: (r.trackName ?? "").slice(0, 42),
+  ...(withIcon && { icon: r.artworkUrl60 ?? null }),
+  // First-ever release, not the current version's date. Identical in
+  // every storefront, so it rides along in the shared `apps` map.
+  released: (r.releaseDate ?? "").slice(0, 10) || null,
+  // Rating count and score ARE per-storefront, so they are kept per
+  // market in `stats` — a US count shown under the MX tab would lie.
+  ratings: r.userRatingCount ?? null,
+  score: r.averageUserRating ?? null,
+});
 async function fetchRank(kw, cc, attempt = 1) {
   const url = `https://itunes.apple.com/search?term=${encodeURIComponent(kw)}&country=${cc}&entity=software&limit=200`;
   try {
@@ -141,18 +161,13 @@ async function fetchRank(kw, cc, attempt = 1) {
     const idx = results.findIndex((r) => String(r.trackId) === appId);
     return {
       rank: idx === -1 ? null : idx + 1,
-      top: results.slice(0, TOP_DEPTH).map((r) => ({
-        id: String(r.trackId),
-        name: (r.trackName ?? "").slice(0, 42),
-        icon: r.artworkUrl60 ?? null,
-        // First-ever release, not the current version's date. Identical in
-        // every storefront, so it rides along in the shared `apps` map.
-        released: (r.releaseDate ?? "").slice(0, 10) || null,
-        // Rating count and score ARE per-storefront, so they are kept per
-        // market in `stats` — a US count shown under the MX tab would lie.
-        ratings: r.userRatingCount ?? null,
-        score: r.averageUserRating ?? null,
-      })),
+      top: results.slice(0, TOP_DEPTH).map((r) => describe(r, true)),
+      // Empty when unranked (nobody to name) and when we are already inside
+      // the top ten, where `top` covers the same apps.
+      near:
+        idx >= TOP_DEPTH
+          ? results.slice(Math.max(0, idx - NEAR_DEPTH), idx).map((r) => describe(r, false))
+          : [],
     };
   } catch (err) {
     if (attempt <= BACKOFFS_MS.length) {
@@ -252,7 +267,8 @@ async function collectMarket(cc, shard = null) {
     ),
   ]);
   const ranks = {};
-  const tops = {}; // kw -> [appId x5]; app metadata deduped into `apps`
+  const tops = {}; // kw -> [appId x10]; app metadata deduped into `apps`
+  const nears = {}; // kw -> [appId x5], the apps directly above us
   const apps = {};
   const stats = {}; // id -> [ratings, score] for THIS storefront only
   list.forEach((kw, i) => {
@@ -260,8 +276,14 @@ async function collectMarket(cc, shard = null) {
     ranks[kw] = r === "error" ? "error" : r.rank;
     if (r !== "error") {
       tops[kw] = r.top.map((t) => t.id);
-      for (const t of r.top) {
+      if (r.near.length) nears[kw] = r.near.map((t) => t.id);
+      for (const t of [...r.top, ...r.near]) {
+        // Merged rather than assigned: an app can be page one for one keyword
+        // and a neighbour for another, and the neighbour entry carries no
+        // icon. Overwriting would blank an icon the competitor cards render,
+        // in whichever order the two keywords happened to be collected.
         apps[t.id] = {
+          ...apps[t.id],
           name: t.name,
           ...(t.icon && { icon: t.icon }),
           ...(t.released && { released: t.released }),
@@ -274,8 +296,12 @@ async function collectMarket(cc, shard = null) {
   const errors = rankResults.filter((r) => r === "error").length;
   const label = shard ? `${cc} shard ${shard.idx + 1}/${shard.of}` : cc;
   console.log(`${label}: collected ${list.length} keywords (${errors} rank fetches failed)`);
-  return { cc, ranks, pops, watch, tops, apps, stats };
+  return { cc, ranks, pops, watch, tops, nears, apps, stats };
 }
+
+// Result lists have held bare ids since the top-5 lists grew a shared app
+// dictionary; entries carried forward from before that are [id, name] pairs.
+const bareIds = (list) => (list ?? []).map((e) => (Array.isArray(e) ? e[0] : e));
 
 // --- Merge: previous-state logic, events, history, writes -------------------
 
@@ -352,13 +378,33 @@ async function merge(partials) {
         ...(prevKw?.recent ?? []).filter(([at]) => new Date(runAt(at)) >= dayAgo),
         [runIndex(fetchedAt), rank, pops.pop],
       ];
-      // Top-5 result lists carry over on failure like everything else.
+      // Result lists carry over on failure like everything else.
       // Legacy carried entries ([id, name] pairs) fold into the apps map.
+      const measuredTop = Boolean(part?.tops?.[kw]);
       let top = part?.tops?.[kw];
       if (!top && prevKw?.top) {
-        top = prevKw.top.map((e) => (Array.isArray(e) ? e[0] : e));
+        top = bareIds(prevKw.top);
         for (const e of prevKw.top) if (Array.isArray(e)) apps[e[0]] ??= { name: e[1] };
       }
+      // The apps standing directly above us, recorded only once we rank past
+      // page one. Read from this run when it measured, so that moving onto
+      // page one clears a list that now describes apps we are ahead of.
+      const near = measuredTop ? part.nears?.[kw] : prevKw?.near;
+      // Turnover: day boundaries observed and apps that entered the top ten
+      // across them, as [days, entrants]. A wall of large incumbents that
+      // never reshuffles and one that turns over nightly look identical in a
+      // single snapshot and are opposite propositions to compete in, and the
+      // difference is only visible over days. Counted against yesterday's
+      // closing list, and only when this run actually measured one: a list
+      // carried through an outage would bank a false day of "nothing moved".
+      const turn =
+        newDay && measuredTop && prevKw?.top?.length
+          ? [
+              (prevKw.turn?.[0] ?? 0) + 1,
+              (prevKw.turn?.[1] ?? 0) +
+                top.filter((id) => !new Set(bareIds(prevKw.top)).has(id)).length,
+            ]
+          : prevKw?.turn;
       // Yesterday's surfacing details ([pop, prefix, pos] as of the previous
       // day's last run), so the dashboard can decompose a day-over-day demand
       // change into "prefix moved" vs "position moved" with point values.
@@ -373,7 +419,8 @@ async function merge(partials) {
       latest[cc][kw] = {
         rank, ...pops, recent,
         ...(since && { since }),
-        ...(top && { top }), ...(daySurf && { daySurf }),
+        ...(top && { top }), ...(near?.length && { near }), ...(turn && { turn }),
+        ...(daySurf && { daySurf }),
       };
     }
     hints[cc] = {};
@@ -512,10 +559,17 @@ async function merge(partials) {
   else history.push(row);
   history.sort((a, b) => a.date.localeCompare(b.date));
 
-  // Prune app metadata nothing references anymore.
+  // Prune app metadata nothing references anymore. Two sets, because the two
+  // kinds of reference cost different amounts: `shown` is what a page draws a
+  // card for, `used` adds the neighbour lists, which are read for their rating
+  // counts and never rendered.
+  const shown = new Set();
   const used = new Set();
   for (const kws of Object.values(latest))
-    for (const cur of Object.values(kws)) for (const id of cur.top ?? []) used.add(id);
+    for (const cur of Object.values(kws)) {
+      for (const id of bareIds(cur.top)) { shown.add(id); used.add(id); }
+      for (const id of bareIds(cur.near)) used.add(id);
+    }
   for (const id of Object.keys(apps)) if (!used.has(id)) delete apps[id];
   for (const perCc of Object.values(stats))
     for (const id of Object.keys(perCc)) if (!used.has(id)) delete perCc[id];
@@ -556,12 +610,21 @@ async function merge(partials) {
   // consecutive missed runs. Costs four more snapshots, about 85KB.
   const BUCKET_MS = 6 * 3600e3;
   const RETAIN_MS = 48 * 3600e3;
+  // Page-one apps only. This series is the largest thing in the file — every
+  // snapshot repeats every app in every market — so extending it to the
+  // neighbour lists would have cost more than the growth rates are worth.
+  // Their current rating counts are still in `stats`, which is one row per
+  // app rather than one per app per snapshot.
   const snapshot = {
     at: fetchedAt,
     markets: Object.fromEntries(
       Object.entries(stats).map(([cc, m]) => [
         cc,
-        Object.fromEntries(Object.entries(m).map(([id, v]) => [id, v[0]])),
+        Object.fromEntries(
+          Object.entries(m)
+            .filter(([id]) => shown.has(id))
+            .map(([id, v]) => [id, v[0]])
+        ),
       ])
     ),
   };
@@ -575,7 +638,7 @@ async function merge(partials) {
   // top list; they would otherwise accumulate forever behind the same prune.
   for (const snap of statsLog)
     for (const perCc of Object.values(snap.markets))
-      for (const id of Object.keys(perCc)) if (!used.has(id)) delete perCc[id];
+      for (const id of Object.keys(perCc)) if (!shown.has(id)) delete perCc[id];
 
   await writeFile(hintsFile, JSON.stringify(hints) + "\n");
   await writeFile(path.join(kwEventsDir, `${month}.json`), JSON.stringify(events));
@@ -631,6 +694,7 @@ const joinShards = (a, b) => ({
   pops: { ...a.pops, ...b.pops },
   watch: { ...a.watch, ...b.watch },
   tops: { ...a.tops, ...b.tops },
+  nears: { ...a.nears, ...b.nears },
   apps: { ...a.apps, ...b.apps },
   stats: { ...a.stats, ...b.stats },
 });
