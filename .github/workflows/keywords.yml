@@ -97,6 +97,16 @@ jobs:
           set -o pipefail
           node scripts/keywords.mjs --merge 2>&1 | tee run.log
 
+      # Apple's own popularity index deliberately does NOT run here, though
+      # scripts/popularity.mjs is written to. Two measurements killed it: the
+      # Apple Ads session cookie carries a four-hour expiry, against a six-hour
+      # cron, so a secret would be stale before nearly every run; and Apple
+      # answers for 25 of the 602 tracked terms, none of them the English
+      # snoring vocabulary this app lives on. A credential in the secrets and a
+      # caveat on every "no authentication needed" claim, to refresh 4% of one
+      # column, is not a trade worth making. Run it by hand when the head terms
+      # are worth a look. See the README.
+
       # Prioritisation runs on the merged data, and re-reads the live title and
       # subtitle so coverage is graded against what the listing says today
       # rather than what it said when someone last wrote it down. Never fails

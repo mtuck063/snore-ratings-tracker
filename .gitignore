@@ -1,1 +1,7 @@
 .DS_Store
+
+# Apple Ads session cookie for scripts/popularity.mjs, if you keep it in a file
+# rather than typing it. It is a live credential: committing it hands anyone
+# reading the repo your Apple Ads session.
+.env
+.asa-cookie

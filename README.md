@@ -16,6 +16,7 @@ below is the checklist.
 | Search rank and demand per keyword per market | `scripts/keywords.mjs` | 4x daily | `keywords.json`, `kw-events/` |
 | Website visitors, optional | `scripts/pageviews.mjs` | with ratings | `pageviews.json` |
 | Intent, coverage and priority per keyword | `scripts/aso.mjs` | with keywords | `aso.json`, `metadata.json` |
+| Apple's popularity index, optional | `scripts/popularity.mjs` | by hand | `popularity.json` |
 | Freshness check | `scripts/check-freshness.mjs` | 4x daily | opens an issue |
 
 Two more scripts are manual, for growing the keyword list rather than tracking
@@ -24,8 +25,13 @@ it: `kw-harvest.mjs` pulls candidate phrases out of Apple's autocomplete, and
 
 Every source is public and unauthenticated: the iTunes lookup and search APIs,
 the storefront web page, the search-hints autocomplete endpoint, and the
-customer-reviews RSS feed. The only credential anywhere is an optional
-GoatCounter token.
+customer-reviews RSS feed. The only credential in any scheduled workflow is an
+optional GoatCounter token.
+
+One script sits outside that and is run by hand:
+[Apple's popularity index](#apples-own-popularity-index-optional) needs an Apple
+Ads session cookie. It is deliberately not wired into any workflow, for reasons
+worth reading before you reach for it.
 
 ## Health
 
@@ -308,6 +314,165 @@ the app does not serve, scored to zero so they stay out of the chase list and
 out of the field recommendation. It is what keeps white noise and insomnia
 phrases from being recommended to a snoring app.
 
+## Apple's own popularity index, optional
+
+Every popularity number described above is a proxy. `keywords.mjs` scores demand
+by prefix-probing Apple's autocomplete: the shorter the prefix at which a term
+surfaces and the higher it sits, the more people search it. That is ordinal and
+uncalibrated. It answers "busier than yesterday" and never "how busy".
+
+Apple publishes the real index, 5 to 100, inside Apple Ads. `popularity.mjs`
+fetches it, for all eleven markets.
+
+**It is not wired into any workflow, and that is deliberate.** Two measurements
+decided it. The Apple Ads session cookie carries a four-hour expiry against a
+six-hour cron, so a repo secret would be stale before nearly every run and no
+token exists that could renew it. And Apple answers for 25 of the 602 tracked
+terms, none of them the English snoring vocabulary this app lives on. A
+credential in the secrets, plus an asterisk on every "nothing here needs
+authentication" claim, to refresh 4% of one column, is not a trade worth making.
+Read [what it actually returns](#what-it-actually-returns-measured) before
+reaching for it.
+
+What is left is a hand-run tool, useful for the handful of head terms Apple will
+speak to. Two things to know:
+
+- The endpoint is undocumented. It is the private call the Apple Ads web page
+  makes, not part of the Campaign Management API, which has no popularity data
+  at all. Apple can change or withdraw it without notice.
+- Nothing else depends on the file. Ranks, coverage and the chase list all work
+  exactly as before if you never set this up.
+
+### Setting it up
+
+1. Create an Apple Ads account at [searchads.apple.com](https://searchads.apple.com),
+   signing in with the Apple ID that owns App Store Connect. Pick United States
+   if your country is not offered.
+2. Open the Advanced tier at [searchads.apple.com/advanced](https://searchads.apple.com/advanced).
+   Basic does not expose this data.
+3. Link App Store Connect: account name top-left, then Settings under Campaign
+   Groups, then Link Accounts. You need Account Holder, App Manager, Admin or
+   Marketer in App Store Connect, and the same email on both sides. Clear your
+   browser cache and sign back in afterwards, which Apple's own instructions
+   call for and which makes a successful link look failed if you skip it.
+4. Ignore the missing-billing warning. No campaign, no card, no spend. Do not
+   create a campaign; nothing here needs one and a live one costs money.
+5. Capture the session cookie. With Apple Ads open and signed in, open DevTools,
+   go to Network, click a request whose `:authority` is `app-ads.apple.com`,
+   find `Cookie` under Request Headers, and copy the whole value. It must come
+   from that host: an App Store Connect cookie looks similar and is rejected.
+6. Keep it out of the repo and out of your shell history:
+
+```sh
+pbpaste > ~/.asa-cookie && chmod 600 ~/.asa-cookie
+ASA_COOKIE="$(cat ~/.asa-cookie)" node scripts/popularity.mjs --check
+```
+
+Skip Apple's Campaign Management API documentation entirely. It will route you
+through API roles and OAuth credentials that this endpoint does not use.
+
+### How long the cookie lasts
+
+About four hours, which is the single fact that kept this out of the workflow.
+
+The `Cookie` header itself carries no expiry: the lifetime was in the
+`Set-Cookie` that created it and is gone by the time it reaches your clipboard.
+But the `itctx` value inside it is base64 JSON with an explicit `ex` field, and
+on the session measured here it read `2026-8-5 6:0:14` against an issue time of
+01:58 UTC. Four hours and two minutes.
+
+The collector measures it independently as a check. Each cookie is identified by
+a short digest of its value, never the value itself, and `popularity.json`
+records when that session first worked and last worked; paste a new one and the
+old one's lifetime lands in `sessionHistory`.
+
+```sh
+ASA_COOKIE="$(cat ~/.asa-cookie)" node scripts/popularity.mjs --check
+```
+
+reports how long the current session has been alive and what previous ones
+managed. In practice you capture a fresh cookie each time you want a reading,
+which for a hand-run tool is no burden at all.
+
+### What it actually returns, measured
+
+All eleven markets work. Storefronts are honoured and want two-letter country
+codes, not the numeric ids the rest of this repo passes around: `143441` is
+rejected as "Invalid storefront name". `sleep tracker` measured 62 in the US,
+54 in GB, 53 in AU, 49 in CA and 41 in DE, so these are genuinely per-market
+figures rather than eleven copies of one number.
+
+The catch is coverage of this app's vocabulary, and it is severe. Apple returns
+its floor of 5 for nearly every English snoring phrase while answering normally
+for neighbouring terms in the same request:
+
+| | |
+| --- | --- |
+| `sleep tracker` 62, `sleep cycle` 56, `snore lab` 50, `sleep recorder` 46 | measured |
+| `snore`, `snoring`, `snore recorder`, `snoring app`, `sleep apnea`, `cpap`, `sleep sounds`, `sleep monitor` | all 5 |
+
+First full run: 25 of 602 tracked terms above the floor. US 4/82, GB 4/75,
+AU 4/70, CA 4/67, JP 5/58, CN 2/54, DE 1/39, FR 1/45, and nothing at all in ES,
+MX or NL.
+
+No cause established, and the obvious explanations are all ruled out. It is not
+the account, which returns 100 for `instagram` and 96 for `facebook`. It is not
+the App Store Connect link, since an `adamId` you do not own is rejected outright
+with `NO_USER_OWNED_APPS_FOUND_CODE`. It is not casing, pluralisation, batching,
+match type or storefront: `snore`, `Snore`, `snores`, `snoring` and `snorer` all
+return 5 alone or together, in US and CA. It is not the subject matter either,
+because the Japanese snoring terms work fine, `いびき` scoring 60. Whatever the
+rule is, English snoring vocabulary sits below it.
+
+So treat this as competitive context for a handful of head terms, not as demand
+data for the keyword list. The prefix-probe score in `keywords.mjs` remains the
+only signal that covers all 602 terms.
+
+Floor values are counted, never stored. A 5 that means "we cannot tell you" must
+not enter the file as though it meant "nobody searches this", because from there
+it flows into charts and averages that read as findings. Each market records
+`asked` and `measured` so the gap stays visible.
+
+The collector also re-checks every run that storefronts are still being honoured,
+rather than trusting one probe. Three control phrases ride along in each market's
+existing call, and any market whose control values match the reference market to
+the digit is labelled `mirrors` instead of being passed off as its own data. The
+controls are `sleep tracker`, `sleep cycle` and `alarm clock` deliberately:
+snoring terms would compare equal everywhere by sitting on the floor together,
+and every market would look like a mirror of every other.
+
+```sh
+ASA_COOKIE='...' node scripts/popularity.mjs --probe
+```
+
+re-runs that comparison on demand.
+
+A market Apple refuses carries its previous values forward rather than blanking
+them, the same rule the rank collectors follow, and the run reports
+`POP_SESSION=partial` rather than calling the cookie dead. A run where the US
+answered and Mexico did not is a storefront limitation, not an expired session.
+
+### Once it is collecting
+
+```sh
+node scripts/popularity.mjs --report
+```
+
+compares Apple's index against ours by Spearman correlation, per market, and
+lists the terms the two disagree about most. Both are ordinal, so agreement on
+ordering is the only claim worth testing.
+
+This was the main reason for setting the whole thing up, and it does not
+currently work: with four measured terms per market the correlation swings from
+-0.21 to 0.90 across storefronts, which is sampling noise rather than a finding.
+Calibrating `popScore` against Apple needs Apple to answer for more than 4% of
+the list. Worth re-running if coverage ever improves.
+
+A full pass over all eleven markets takes about thirteen seconds and eleven
+calls. The script still gates itself to one fetch per market per day, so
+re-running it in the same session costs nothing; use `--force` when you want to
+override that.
+
 ## Working on it locally
 
 ```sh
@@ -317,6 +482,11 @@ node scripts/keywords.mjs --collect us   # one market, writes partials/
 node scripts/keywords.mjs --merge        # partials -> data files
 node scripts/aso.mjs --report us         # which keywords are worth chasing
 node scripts/check-freshness.mjs         # what the watchdog runs
+
+ASA_COOKIE='...' node scripts/popularity.mjs --check    # is the session alive
+ASA_COOKIE='...' node scripts/popularity.mjs --probe    # do non-US storefronts answer
+ASA_COOKIE='...' node scripts/popularity.mjs --force    # fetch now, skip the daily gate
+node scripts/popularity.mjs --report                    # Apple's index vs ours
 
 python3 -m http.server -d docs 8000      # the dashboard at localhost:8000
 ```
@@ -344,6 +514,7 @@ constraint there. Working state that no page reads lives in `scripts/` instead.
 | `keywords.json` | current rank and demand per keyword, the apps holding the places above you, top-ten turnover, plus 30-day history |
 | `kw-events/` | rank and autocomplete movements, one shard per month |
 | `aso.json` | intent, coverage and priority per keyword, plus each market's chase list |
+| `popularity.json` | Apple's own 5-100 demand index per keyword, when the optional Apple Ads collector is set up, plus how long each session cookie survived |
 | `glossary.json` | localized keyword to English, for the dashboard |
 | `status-*.json` | collector heartbeats |
 | `scripts/keywords.json` | the config, which auto-discovery also writes to |
