@@ -2101,7 +2101,7 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
     draw();
 }
 
-async function renderKeywords(kw, glossary = {}, plan = null) {
+async function renderKeywords(kw, glossary = {}, plan = null, applePop = null) {
     if (!kw?.latest || !Object.keys(kw.latest).length) return;
     document.getElementById("keywords-section").hidden = false;
     if (kw.fetchedAt) {
@@ -2330,10 +2330,23 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
             // prefix and position are the whole derivation.
             const band =
                 cur.pop >= 70 ? "High demand." : cur.pop <= 5 ? "No measurable demand." : "";
-            tdPop.dataset.tip = cur.prefix
-                ? `${band} Popularity ${cur.pop} of 100: Apple suggests “${term}” once you have typed “${cur.prefix}”, ` +
-                  `and it sits at position ${cur.pos} in that list. Earlier and higher means more people search it.`
-                : `${band || "Popularity 5 of 100."} Apple's autocomplete never suggests this phrase, so there is no demand signal for it.`;
+            // Apple's own 5-100 index, on the rows that have one. Written only
+            // where a value exists rather than as a column: it answers for a
+            // handful of head terms per market, and an empty cell on all the
+            // rest would be read as a zero rather than as a silence.
+            const applePopVal = applePop?.markets?.[cc]?.terms?.[term]?.pop;
+            const appleLine =
+                applePopVal == null
+                    ? ""
+                    : ` Apple's own index puts it at ${applePopVal} of 100${
+                          applePopVal > cur.pop ? ", higher than the reading here" : applePopVal < cur.pop ? ", lower than the reading here" : ", the same reading"
+                      }.`;
+            tdPop.dataset.tip =
+                (cur.prefix
+                    ? `${band} Popularity ${cur.pop} of 100: Apple suggests “${term}” once you have typed “${cur.prefix}”, ` +
+                      `and it sits at position ${cur.pos} in that list. Earlier and higher means more people search it.`
+                    : `${band || "Popularity 5 of 100."} Apple's autocomplete never suggests this phrase, so there is no demand signal for it.`) +
+                appleLine;
             if (cur.pop <= 5) tdPop.classList.add("muted");
             else if (cur.pop >= 70) tdPop.classList.add("pop-hot");
             const prevDayVals = prevDayRow?.markets?.[cc]?.[term];
@@ -2944,11 +2957,11 @@ async function renderKeywords(kw, glossary = {}, plan = null) {
 
 async function main() {
     const meta = document.getElementById("meta");
-    let latest, history, events, reviews, kwData, hist, glossary, pageviews, plan;
+    let latest, history, events, reviews, kwData, hist, glossary, pageviews, plan, applePop;
     try {
         // no-cache: revalidate every load so the data files can't come from
         // differently-aged browser caches and contradict each other.
-        [latest, history, events, reviews, kwData, hist, glossary, pageviews, plan] = await Promise.all([
+        [latest, history, events, reviews, kwData, hist, glossary, pageviews, plan, applePop] = await Promise.all([
             fetch("data/latest.json", { cache: "no-cache" }).then((r) => r.json()),
             fetch("data/history.json", { cache: "no-cache" }).then((r) => r.json()),
             fetch("data/events.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => []),
@@ -2963,6 +2976,11 @@ async function main() {
             // on a repo that has never run it, which only costs the extra
             // column and the panel above the table.
             fetch("data/aso.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => null),
+            // Apple's own popularity index, written by hand runs of
+            // scripts/popularity.mjs. Absent on a repo that has never set the
+            // cookie up, and even where it exists it answers for a handful of
+            // head terms, so it annotates the tooltip and nothing more.
+            fetch("data/popularity.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => null),
         ]);
     } catch {
         meta.textContent = "No data yet. Run the collect workflow once to seed data/.";
@@ -3115,7 +3133,7 @@ async function main() {
     // waits on its shard, so blocking the rest of the page on that fetch would
     // buy nothing. Caught so a missing shard cannot surface as an unhandled
     // rejection and take the reviews below it down with it.
-    renderKeywords(kwData, glossary, plan).catch((err) => console.warn("keyword section:", err));
+    renderKeywords(kwData, glossary, plan, applePop).catch((err) => console.warn("keyword section:", err));
     renderWeekReviews(reviews);
     renderReviews(reviews);
     renderEvents(history, events);
