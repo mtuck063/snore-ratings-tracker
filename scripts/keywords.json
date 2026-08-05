@@ -194,7 +194,9 @@
         "mieux dormir",
         "appli dormir",
         "application dormir",
-        "dormir enregistrer"
+        "dormir enregistrer",
+        "snorelab",
+        "shuteye"
       ]
     },
     "es": {
@@ -252,7 +254,9 @@
         "control sueño gratis",
         "dormir grabadora",
         "control del sueño gratis",
-        "despertador inteligente"
+        "despertador inteligente",
+        "snorelab",
+        "shuteye"
       ]
     },
     "mx": {
@@ -302,7 +306,9 @@
         "calidad sueño",
         "grabar sueño",
         "grabar mientras duermes",
-        "despertador inteligente"
+        "despertador inteligente",
+        "snorelab",
+        "shuteye"
       ]
     },
     "de": {
@@ -357,7 +363,9 @@
         "schlafgeräusche",
         "schlafgeräusche aufnehmen",
         "schlafprotokoll",
-        "im schlaf reden"
+        "im schlaf reden",
+        "snorelab",
+        "shuteye"
       ]
     },
     "nl": {
@@ -413,7 +421,9 @@
         "slaap volgen",
         "slaapwekker",
         "slimme wekker",
-        "slaap apple watch"
+        "slaap apple watch",
+        "snorelab",
+        "shuteye"
       ]
     },
     "jp": {
@@ -489,7 +499,10 @@
         "スリープトラッカー",
         "睡眠負債",
         "歯ぎしり",
-        "歯ぎしり録音"
+        "歯ぎしり録音",
+        "snorelab",
+        "スリープマイスター",
+        "sleep meister"
       ]
     },
     "cn": {
@@ -562,7 +575,10 @@
         "磨牙",
         "磨牙监测",
         "睡眠呼吸暂停",
-        "呼噜声检测"
+        "呼噜声检测",
+        "蜗牛睡眠",
+        "小睡眠",
+        "熊猫睡眠"
       ]
     }
   },
@@ -625,6 +641,15 @@
     "sleep talking recorder 2025",
     "my sleep talks",
     "sleep talk ai recorder",
-    "snorescout"
+    "snorescout",
+    "snorelab",
+    "shuteye",
+    "sleepwatch",
+    "autosleep",
+    "sleepzy",
+    "snoregym",
+    "sleep meister",
+    "noxogy sleep tracker",
+    "snore control"
   ]
 }
