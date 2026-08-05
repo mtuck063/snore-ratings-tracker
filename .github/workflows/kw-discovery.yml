@@ -23,7 +23,7 @@ jobs:
     outputs:
       matrix: ${{ steps.gen.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - id: gen
         # Same reasoning as the keyword collector: Apple throttles /search per
         # IP and runner IPs are a lottery, so cap each runner near 40 calls.
@@ -47,13 +47,13 @@ jobs:
       max-parallel: 4
       matrix: ${{ fromJson(needs.setup.outputs.matrix) }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 24
       - name: Probe ${{ matrix.market }} chunk ${{ matrix.chunk }}
         run: node scripts/kw-discover.mjs ${{ matrix.market }} ${{ matrix.chunk }} ${{ matrix.chunks }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: discovery-${{ matrix.market }}-${{ matrix.chunk }}
           path: discovery/*.json
@@ -65,7 +65,7 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: discovery-*
           merge-multiple: true
@@ -79,7 +79,7 @@ jobs:
             console.log("validated terms:", rows.length);
             console.log("category-relevant (3+ known apps in top 10):", rows.filter(r=>r.known>=3).length);
           '
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: kw-discovery-results
           path: discovery/*.json
