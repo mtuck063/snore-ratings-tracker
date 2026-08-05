@@ -2150,7 +2150,11 @@ function rivalHeader(id, cc, meta, plan) {
             shelf.remove();
             return;
         }
-        for (const url of shots.slice(0, 6)) {
+        // All of them, not a sample. Apple allows ten and the apps worth
+        // reading use most of them; the last few are where the feature claims
+        // and the pricing screens live, which is the part worth seeing. The
+        // strip scrolls, so the count costs layout nothing.
+        for (const url of shots) {
             const a = document.createElement("a");
             a.href = url.replace(/\/\d+x\d+bb\.(jpg|png)$/, "/626x0w.$1");
             a.target = "_blank";
