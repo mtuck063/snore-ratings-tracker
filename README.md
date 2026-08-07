@@ -253,6 +253,21 @@ Japanese and Chinese are tested by segmentation rather than word membership,
 since their queries have no spaces: 睡眠記録アプリ is covered when the listing
 carries 睡眠, 記録 and アプリ across any of its fields.
 
+Some words are free. Apple matches articles, prepositions, conjunctions and
+pronouns without your carrying them, which was measured rather than assumed:
+of the tracked phrases whose only gap was one of these, every one was already
+ranking without the word, in five languages. "sleep tracker and sleep recorder"
+sits at #21 in the US with `and` nowhere in the listing. The lists live in
+`FUNCTION_WORDS`, one per language and never pooled, because "die" is a German
+article and an English verb. Closed classes only: a word that is also a real
+search term is left out, since a guess here reads as a verdict.
+
+The same list governs what the field recommendation will buy. It did not
+always, and the gap was expensive: the recommendation read a much smaller set
+and went on packing `and`, `do`, `i` and `my` into fields while the coverage
+column beside it reported those phrases as already covered. Eight characters
+per English market, spent on nothing.
+
 **Priority.** Demand alone puts the unwinnable at the top, so the score weights
 it by how much rank is left to win (a phrase at #2 has none), how hard the apps
 in the way are to pass, whether the searcher is one this app converts, and
@@ -300,14 +315,30 @@ twenty hours. Both start empty on a fresh install and fill themselves in.
 The dashboard turns this into a field builder: start from the recommendation,
 drop a word to see what it was holding up, add one to see what it buys, and
 watch characters, phrases covered, total Pop and the intent mix move as you
-edit. It also names the characters that are buying nothing: words the title or
-subtitle already carries, since Apple pools all three fields and indexes the
-word once; words no tracked phrase can be built from; and words naming a year
-that has already passed. The last two are prompts rather than faults. A word no
-tracked phrase uses may be earning on a phrase nobody thought to track, and
-demand for a stale year is real right up until it isn't. Coverage is recomputed in the browser, but none of the language rules
-are — each phrase ships with the unit-sets that would satisfy it, so the page
-does set arithmetic and cannot drift from the rules in `aso.mjs`.
+edit.
+
+It also names the characters that are buying nothing, in four kinds, ordered by
+how sure it is:
+
+| The word | Why it buys nothing | How sure |
+| --- | --- | --- |
+| already in the title or subtitle | Apple pools all three fields and indexes the word once | certain |
+| is a function word | Apple matches it without your buying it | measured |
+| no tracked phrase can use it | may be earning on a phrase nobody thought to track | unmeasurable here |
+| names a year that has passed | the demand is real today and dated | a forecast |
+
+Only the first two are faults. The last two are prompts, and the panel says so
+rather than presenting all four as one number to fix.
+
+That third test is run against the same unit-sets coverage uses, which is what
+makes it mean anything in Japanese and Chinese. Built the obvious way, by
+splitting tracked phrases on spaces, it produced an empty set for a language
+whose queries have no spaces, and reported every JP and CN field word as
+useless.
+
+Coverage is recomputed in the browser, but none of the language rules are: each
+phrase ships with the unit-sets that would satisfy it, so the page does set
+arithmetic and cannot drift from the rules in `aso.mjs`.
 
 ```sh
 node scripts/aso.mjs --fetch        # refresh live listings, rebuild aso.json
@@ -353,6 +384,14 @@ arithmetic: it is true the second the release goes live and no waiting makes it
 truer. It is also the only check that catches a field that shipped with a typo,
 came back truncated, or traded six phrases for six others while the count sat
 still. `gained` and `lost` are the lines to read.
+
+It only reads if both sides were graded the same way. A market whose keyword
+field was never written down was graded on title and subtitle alone, so writing
+the field down at the same moment as shipping it makes coverage leap from 10 to
+56 for reasons that have nothing to do with the release. The report and the
+panel both refuse that comparison rather than printing the flattering number,
+and the refusal spreads: with almost every phrase reading as "changed", the
+cohort split below has no control group either, so the lift is withheld too.
 
 **Rank, over days.** Every rank in the table moves whether or not you ship
 anything, so the phrases whose coverage changed are compared against the
@@ -590,7 +629,7 @@ constraint there. Working state that no page reads lives in `scripts/` instead.
 | `reviews.json` | written reviews, kept indefinitely |
 | `keywords.json` | current rank and demand per keyword, the apps holding the places above you, top-ten turnover, plus 30-day history |
 | `kw-events/` | rank and autocomplete movements, one shard per month |
-| `aso.json` | intent, coverage and priority per keyword, plus each market's chase list |
+| `aso.json` | intent, coverage and priority per keyword, plus each market's chase list and the characters its field is wasting |
 | `releases.json` | one entry per release: the listing before and after, per market, and the before-and-after read on rank |
 | `popularity.json` | Apple's own 5-100 demand index per keyword, when the optional Apple Ads collector is set up, plus how long each session cookie survived |
 | `glossary.json` | localized keyword to English, for the dashboard |
