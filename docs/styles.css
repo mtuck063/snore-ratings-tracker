@@ -565,6 +565,8 @@ tr.kw-detail td {
     background: rgba(91, 127, 255, 0.07);
     font-weight: 500;
 }
+#kw-events li.log-release.pending { border-left-color: var(--text-secondary); }
+#kw-events .log-release-what { color: var(--text-secondary); font-weight: 400; }
 
 /* Full movement log page (keyword-log.html). The list itself reuses the
    #kw-events rules above; everything here is the surrounding chrome. */

@@ -31,7 +31,13 @@ const releaseRows = (month) =>
             const parts = [];
             if (fields.length) parts.push(`keyword field in ${fields.join(", ").toUpperCase()}`);
             if (shots.length) parts.push(`screenshots in ${shots.join(", ").toUpperCase()}`);
-            return { at: r.at, type: "release", version: r.version, what: parts.join("; ") };
+            // An unsealed release has no after side, so nothing is on record
+            // about what it changed. Saying that is the honest row; a bare one
+            // reads as a release that changed nothing.
+            const what = !r.after
+                ? "not sealed yet, so what it changed is not on record"
+                : parts.join("; ") || "no wording or screenshot change recorded";
+            return { at: r.at, type: "release", version: r.version, what, pending: !r.after };
         });
 
 function chip(label, active, onClick) {
@@ -63,8 +69,9 @@ function row(ev) {
     const when = new Date(ev.at);
     const time = `<span class="event-time">${when.toLocaleTimeString(undefined, { timeStyle: "short" })}</span>`;
     if (ev.type === "release") {
-        li.className = "log-release";
-        li.innerHTML = `${time}🚀 <strong></strong> went live${ev.what ? ` — ${ev.what}` : ""}`;
+        li.className = "log-release" + (ev.pending ? " pending" : "");
+        li.innerHTML = `${time}🚀 <strong></strong> went live${ev.what ? ` · <span class="log-release-what"></span>` : ""}`;
+        if (ev.what) li.querySelector(".log-release-what").textContent = ev.what;
         li.querySelector("strong").textContent = ev.version;
     } else if (ev.type === "hint") {
         li.innerHTML = `${time}${flag(ev.cc)} Apple now suggests <strong></strong> under “${ev.prefix}”<span class="badge new">NEW</span>`;
