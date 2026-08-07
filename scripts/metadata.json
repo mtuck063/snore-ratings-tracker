@@ -2,8 +2,8 @@
   "_note": "What the App Store listing claims, per market. title and subtitle are refreshed from the live storefront pages by `node scripts/aso.mjs --fetch`; do not edit them by hand, they will be overwritten. keywordField and screenshots are NOT public anywhere and are maintained here by hand: copy the field out of App Store Connect whenever you change it, and set fieldUpdated to that date. An unrecorded field is not treated as an empty one; coverage simply reports the market as ungraded.",
   "markets": {
     "us": {
-      "keywordField": "recorder,monitor,apple watch,cpap,score,diary,night,detector,apnea,quality,sounds,rem,log,talk,free",
-      "fieldUpdated": "2026-07-30",
+      "keywordField": "free,record,rem,my,monitor,score,cpap,ai,quality,do,i,stop,auto,apnea,detector,king,night,log,2025",
+      "fieldUpdated": "2026-08-06",
       "screenshots": [
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/7a/91/e4/7a91e4b8-4663-271d-22c2-ef7f9f6cd0ae/Slice_1.png/320x480bb.jpg",
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/27/bb/93/27bb93fa-c6d8-1f5b-5545-0174d5fba67b/Slice_2.png/320x480bb.jpg",
@@ -57,8 +57,8 @@
       "versionAt": "2026-08-06T22:15:32Z"
     },
     "ca": {
-      "keywordField": "recorder,detector,monitor,apple,watch,cpap,apnea,score,alarm,sounds,diary,log,talk,do,i,free,cycle",
-      "fieldUpdated": "2026-07-30",
+      "keywordField": "free,monitor,my,apnea,do,i,2025,cpap,log,sounds,diary,score,alarm,detector,control,apple,watch,stop",
+      "fieldUpdated": "2026-08-06",
       "screenshots": [
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/7a/91/e4/7a91e4b8-4663-271d-22c2-ef7f9f6cd0ae/Slice_1.png/320x480bb.jpg",
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/27/bb/93/27bb93fa-c6d8-1f5b-5545-0174d5fba67b/Slice_2.png/320x480bb.jpg",
@@ -112,8 +112,8 @@
       "versionAt": "2026-08-06T22:15:32Z"
     },
     "gb": {
-      "keywordField": "recorder,monitor,cpap,quality,apnea,score,sounds,night,apple,watch,rem,diary,detector,log,talk,free",
-      "fieldUpdated": "2026-07-30",
+      "keywordField": "record,free,my,monitor,apnea,ai,cpap,do,i,rem,night,2025,log,score,control,sounds,diary,quality,stop",
+      "fieldUpdated": "2026-08-06",
       "screenshots": [
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/7a/91/e4/7a91e4b8-4663-271d-22c2-ef7f9f6cd0ae/Slice_1.png/320x480bb.jpg",
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/27/bb/93/27bb93fa-c6d8-1f5b-5545-0174d5fba67b/Slice_2.png/320x480bb.jpg",
@@ -171,8 +171,8 @@
       "versionAt": "2026-08-06T22:15:32Z"
     },
     "au": {
-      "keywordField": "recorder,detector,monitor,cpap,apnea,score,sounds,diary,apple,watch,smart,log",
-      "fieldUpdated": "2026-07-30",
+      "keywordField": "free,record,my,apnea,monitor,cpap,do,i,2025,sounds,log,score,diary,smart,detector,apple,watch,stop",
+      "fieldUpdated": "2026-08-06",
       "screenshots": [
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/7a/91/e4/7a91e4b8-4663-271d-22c2-ef7f9f6cd0ae/Slice_1.png/320x480bb.jpg",
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/27/bb/93/27bb93fa-c6d8-1f5b-5545-0174d5fba67b/Slice_2.png/320x480bb.jpg",
@@ -242,12 +242,12 @@
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/ed/ee/42/edee4295-44f6-6718-fdc6-8deb7d1eb1cc/Slice_9.png/320x480bb.jpg"
       ],
       "title": "Snore Timeline: Suivi Sommeil",
-      "subtitle": "Parole, Ronflement & Réveil",
+      "subtitle": "Parole, Ronflement & R\u00e9veil",
       "fetchedAt": "2026-08-04T15:01:35.137Z",
       "subtitleSet": true,
       "rivals": {
         "320606217": {
-          "subtitle": "App Alarme, Réveil et Horloge",
+          "subtitle": "App Alarme, R\u00e9veil et Horloge",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "529443604": {
@@ -255,7 +255,7 @@
           "at": "2026-08-07T14:49:52.987Z"
         },
         "968720724": {
-          "subtitle": "Sommeil, ronflements, rêves",
+          "subtitle": "Sommeil, ronflements, r\u00eaves",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "1064910141": {
@@ -263,11 +263,11 @@
           "at": "2026-08-07T14:49:52.987Z"
         },
         "1163786766": {
-          "subtitle": "Étude & Suivi du ronflement",
+          "subtitle": "\u00c9tude & Suivi du ronflement",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "1490078804": {
-          "subtitle": "Sons pour dormir & Méditation",
+          "subtitle": "Sons pour dormir & M\u00e9ditation",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "1551928101": {
@@ -294,7 +294,7 @@
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/79/ed/36/79ed363a-cdca-41c7-696b-143aa1b5a6a0/Slice_8.png/320x480bb.jpg",
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/34/b9/0f/34b90f60-d5cc-72c9-e2f0-69d8ba0b0f73/Slice_9.png/320x480bb.jpg"
       ],
-      "title": "Snore Timeline: Monitor Sueño",
+      "title": "Snore Timeline: Monitor Sue\u00f1o",
       "subtitle": "Ronquidos, Habla & Alarma",
       "fetchedAt": "2026-08-04T15:01:35.137Z",
       "subtitleSet": true,
@@ -304,7 +304,7 @@
           "at": "2026-08-07T14:49:52.987Z"
         },
         "529443604": {
-          "subtitle": "Grabador de ronquidos y sueño",
+          "subtitle": "Grabador de ronquidos y sue\u00f1o",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "878691772": {
@@ -312,7 +312,7 @@
           "at": "2026-08-07T14:49:52.987Z"
         },
         "968720724": {
-          "subtitle": "Ronquidos & Ciclo del sueño",
+          "subtitle": "Ronquidos & Ciclo del sue\u00f1o",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "1110284050": {
@@ -324,7 +324,7 @@
           "at": "2026-08-07T14:49:52.987Z"
         },
         "1510325113": {
-          "subtitle": "Dream Talk, Analisis del Sueño",
+          "subtitle": "Dream Talk, Analisis del Sue\u00f1o",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "1551928101": {
@@ -347,7 +347,7 @@
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/db/05/15/db0515c8-e3d5-a4ec-c985-ca2e5b16f739/Slice_8.png/320x480bb.jpg",
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/13/94/0c/13940c57-c4fd-8804-f8ca-87770c3efb56/Slice_9.png/320x480bb.jpg"
       ],
-      "title": "Snore Timeline: Monitor Sueño",
+      "title": "Snore Timeline: Monitor Sue\u00f1o",
       "subtitle": "Ronquidos, Habla & Alarma",
       "fetchedAt": "2026-08-04T15:01:35.137Z",
       "subtitleSet": true,
@@ -357,15 +357,15 @@
           "at": "2026-08-07T14:49:52.987Z"
         },
         "529443604": {
-          "subtitle": "Grabador de ronquidos y sueño",
+          "subtitle": "Grabador de ronquidos y sue\u00f1o",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "571800810": {
-          "subtitle": "Meditación y Sueño",
+          "subtitle": "Meditaci\u00f3n y Sue\u00f1o",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "968720724": {
-          "subtitle": "Ciclo sueño, Alarma, Grabadora",
+          "subtitle": "Ciclo sue\u00f1o, Alarma, Grabadora",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "1064910141": {
@@ -439,7 +439,9 @@
         }
       },
       "version": "4.13",
-      "versionAt": "2026-08-06T22:15:32Z"
+      "versionAt": "2026-08-06T22:15:32Z",
+      "keywordField": "tracker,apnoe,apple,aufnahme,aufnehmen,cpap,watch,kostenlos,schlafanalyse,\u00fcberwachen,schlafger\u00e4usche",
+      "fieldUpdated": "2026-08-06"
     },
     "nl": {
       "screenshots": [
@@ -487,7 +489,7 @@
           "at": "2026-08-07T14:49:52.987Z"
         },
         "6782670971": {
-          "subtitle": "Snurkrecorder, privé & gratis",
+          "subtitle": "Snurkrecorder, priv\u00e9 & gratis",
           "at": "2026-08-07T14:49:52.987Z"
         }
       },
@@ -506,54 +508,56 @@
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/f2/fb/1b/f2fb1be6-3324-7f58-36e2-574f9ef08473/Slice_8.png/320x480bb.jpg",
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/bf/c9/a2/bfc9a279-44a1-9d36-abd3-ec3e1937891d/Slice_9.png/320x480bb.jpg"
       ],
-      "title": "Snore Timeline: 睡眠トラッカー・録音",
-      "subtitle": "呼吸・いびき・寝言を記録。ウェアラブル・スマートアラーム対応",
+      "title": "Snore Timeline: \u7761\u7720\u30c8\u30e9\u30c3\u30ab\u30fc\u30fb\u9332\u97f3",
+      "subtitle": "\u547c\u5438\u30fb\u3044\u3073\u304d\u30fb\u5bdd\u8a00\u3092\u8a18\u9332\u3002\u30a6\u30a7\u30a2\u30e9\u30d6\u30eb\u30fb\u30b9\u30de\u30fc\u30c8\u30a2\u30e9\u30fc\u30e0\u5bfe\u5fdc",
       "fetchedAt": "2026-08-04T19:09:31.873Z",
       "subtitleSet": true,
       "rivals": {
         "320606217": {
-          "subtitle": "寝言録音アプリ & いびき, 睡眠音 & スマートアラーム",
+          "subtitle": "\u5bdd\u8a00\u9332\u97f3\u30a2\u30d7\u30ea & \u3044\u3073\u304d, \u7761\u7720\u97f3 & \u30b9\u30de\u30fc\u30c8\u30a2\u30e9\u30fc\u30e0",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "529443604": {
-          "subtitle": "いびき録音＆睡眠トラッカー",
+          "subtitle": "\u3044\u3073\u304d\u9332\u97f3\uff06\u7761\u7720\u30c8\u30e9\u30c3\u30ab\u30fc",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "599456380": {
-          "subtitle": "眠りの浅い時に鳴動するアラーム",
+          "subtitle": "\u7720\u308a\u306e\u6d45\u3044\u6642\u306b\u9cf4\u52d5\u3059\u308b\u30a2\u30e9\u30fc\u30e0",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "827600695": {
-          "subtitle": "睡眠＆いびき計測目覚ましアプリ",
+          "subtitle": "\u7761\u7720\uff06\u3044\u3073\u304d\u8a08\u6e2c\u76ee\u899a\u307e\u3057\u30a2\u30d7\u30ea",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "968720724": {
-          "subtitle": "寝言＆いびきレコーダー (Sleep recorder)",
+          "subtitle": "\u5bdd\u8a00\uff06\u3044\u3073\u304d\u30ec\u30b3\u30fc\u30c0\u30fc (Sleep recorder)",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "1352785781": {
-          "subtitle": "眠りの質を計測・分析、Apple Watch対応",
+          "subtitle": "\u7720\u308a\u306e\u8cea\u3092\u8a08\u6e2c\u30fb\u5206\u6790\u3001Apple Watch\u5bfe\u5fdc",
           "at": "2026-08-06T00:22:15.241Z"
         },
         "1531800310": {
-          "subtitle": "睡眠をよくするアプリ",
+          "subtitle": "\u7761\u7720\u3092\u3088\u304f\u3059\u308b\u30a2\u30d7\u30ea",
           "at": "2026-08-07T03:25:34.506Z"
         },
         "1551928101": {
-          "subtitle": "スマートアラーム、瞑想、睡眠音、 ホワイトノイズ",
+          "subtitle": "\u30b9\u30de\u30fc\u30c8\u30a2\u30e9\u30fc\u30e0\u3001\u7791\u60f3\u3001\u7761\u7720\u97f3\u3001 \u30db\u30ef\u30a4\u30c8\u30ce\u30a4\u30ba",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "1579464667": {
-          "subtitle": "ポケモンの寝顔をゲットできる 睡眠アプリ",
+          "subtitle": "\u30dd\u30b1\u30e2\u30f3\u306e\u5bdd\u9854\u3092\u30b2\u30c3\u30c8\u3067\u304d\u308b \u7761\u7720\u30a2\u30d7\u30ea",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "1632947950": {
-          "subtitle": "いびきらぼ、睡眠記録、ねごと録音、いびき録音アプリ、寝言",
+          "subtitle": "\u3044\u3073\u304d\u3089\u307c\u3001\u7761\u7720\u8a18\u9332\u3001\u306d\u3054\u3068\u9332\u97f3\u3001\u3044\u3073\u304d\u9332\u97f3\u30a2\u30d7\u30ea\u3001\u5bdd\u8a00",
           "at": "2026-08-07T14:49:52.987Z"
         }
       },
       "version": "4.13",
-      "versionAt": "2026-08-06T22:15:32Z"
+      "versionAt": "2026-08-06T22:15:32Z",
+      "keywordField": "\u30a2\u30d7\u30ea\u7121\u6599,\u7ba1\u7406,\u5bdd\u606f,\u7720\u308a\u306e\u8cea,\u8a08\u6e2c,\u6642\u7121\u547c\u5438\u75c7\u5019\u7fa4,\u6b6f\u304e\u3057\u308a,\u76ee\u899a\u307e\u3057,\u5bdd\u3066\u308b\u9593\u9332\u97f3,\u7761\u7720\u6539\u5584,\u30ec\u30b3\u30fc\u30c0\u30fc,apple,watch,\u7761\u7720\u5206\u6790,\u7761\u7720\u8ca0\u50b5,\u7761\u7720\u30b9\u30b3\u30a2,\u3044\u3073\u304d\u5bfe\u7b56,\u7761\u7720\u6642\u9593\u8a18\u9332",
+      "fieldUpdated": "2026-08-06"
     },
     "cn": {
       "screenshots": [
@@ -567,54 +571,56 @@
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/5c/3f/47/5c3f4778-1cd3-9bce-b6f9-aab88f8d22ae/Slice_8.png/320x480bb.jpg",
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/14/ff/78/14ff78b5-99ba-0cae-bd6e-194e20089433/Slice_9.png/320x480bb.jpg"
       ],
-      "title": "Snore Timeline：鼾声睡眠追踪",
-      "subtitle": "记录打鼾、梦话、呼吸暂停、磨牙、心率。支持穿戴设备与闹钟",
+      "title": "Snore Timeline\uff1a\u9f3e\u58f0\u7761\u7720\u8ffd\u8e2a",
+      "subtitle": "\u8bb0\u5f55\u6253\u9f3e\u3001\u68a6\u8bdd\u3001\u547c\u5438\u6682\u505c\u3001\u78e8\u7259\u3001\u5fc3\u7387\u3002\u652f\u6301\u7a7f\u6234\u8bbe\u5907\u4e0e\u95f9\u949f",
       "fetchedAt": "2026-08-04T19:09:31.873Z",
       "subtitleSet": true,
       "rivals": {
         "320606217": {
-          "subtitle": "助眠及睡眠监测：睡眠检测、梦话录音、噪音监测、睡眠记录",
+          "subtitle": "\u52a9\u7720\u53ca\u7761\u7720\u76d1\u6d4b\uff1a\u7761\u7720\u68c0\u6d4b\u3001\u68a6\u8bdd\u5f55\u97f3\u3001\u566a\u97f3\u76d1\u6d4b\u3001\u7761\u7720\u8bb0\u5f55",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "529443604": {
-          "subtitle": "打鼾记录仪和睡眠追踪器",
+          "subtitle": "\u6253\u9f3e\u8bb0\u5f55\u4eea\u548c\u7761\u7720\u8ffd\u8e2a\u5668",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "1025313530": {
-          "subtitle": "助眠 | 呼吸暂停 | 梦话 | 白噪音 | 雨声冥想催眠",
+          "subtitle": "\u52a9\u7720 | \u547c\u5438\u6682\u505c | \u68a6\u8bdd | \u767d\u566a\u97f3 | \u96e8\u58f0\u51a5\u60f3\u50ac\u7720",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "1048518210": {
-          "subtitle": "正念｜睡眠｜解压放松｜缓解焦虑｜专注｜情绪管理｜自律｜呼吸法",
+          "subtitle": "\u6b63\u5ff5\uff5c\u7761\u7720\uff5c\u89e3\u538b\u653e\u677e\uff5c\u7f13\u89e3\u7126\u8651\uff5c\u4e13\u6ce8\uff5c\u60c5\u7eea\u7ba1\u7406\uff5c\u81ea\u5f8b\uff5c\u547c\u5438\u6cd5",
           "at": "2026-08-07T00:21:25.345Z"
         },
         "1077776989": {
-          "subtitle": "睡眠 | 正念 | HRV | 解压 | 专注 | 呼吸法",
+          "subtitle": "\u7761\u7720 | \u6b63\u5ff5 | HRV | \u89e3\u538b | \u4e13\u6ce8 | \u547c\u5438\u6cd5",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "1164801111": {
-          "subtitle": "闹钟和睡眠分析|睡眠周期跟踪器|助眠及检测睡眠|HRV",
+          "subtitle": "\u95f9\u949f\u548c\u7761\u7720\u5206\u6790|\u7761\u7720\u5468\u671f\u8ddf\u8e2a\u5668|\u52a9\u7720\u53ca\u68c0\u6d4b\u7761\u7720|HRV",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "1194338569": {
-          "subtitle": "8000万失眠星人口碑之选｜梦话鼾声记录｜打呼噜检测｜催眠",
+          "subtitle": "8000\u4e07\u5931\u7720\u661f\u4eba\u53e3\u7891\u4e4b\u9009\uff5c\u68a6\u8bdd\u9f3e\u58f0\u8bb0\u5f55\uff5c\u6253\u547c\u565c\u68c0\u6d4b\uff5c\u50ac\u7720",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "1490078804": {
-          "subtitle": "白噪音助眠，睡眠质量监控分析，智能闹钟",
+          "subtitle": "\u767d\u566a\u97f3\u52a9\u7720\uff0c\u7761\u7720\u8d28\u91cf\u76d1\u63a7\u5206\u6790\uff0c\u667a\u80fd\u95f9\u949f",
           "at": "2026-08-07T14:49:52.987Z"
         },
         "1538111605": {
-          "subtitle": "睡眠报告，专家在线指导，专业止鼾好帮手",
+          "subtitle": "\u7761\u7720\u62a5\u544a\uff0c\u4e13\u5bb6\u5728\u7ebf\u6307\u5bfc\uff0c\u4e13\u4e1a\u6b62\u9f3e\u597d\u5e2e\u624b",
           "at": "2026-08-05T16:28:44.290Z"
         },
         "6447752327": {
-          "subtitle": "助眠｜呼吸暂停｜改善睡眠｜智能闹钟｜宝宝哄睡｜解压放松",
+          "subtitle": "\u52a9\u7720\uff5c\u547c\u5438\u6682\u505c\uff5c\u6539\u5584\u7761\u7720\uff5c\u667a\u80fd\u95f9\u949f\uff5c\u5b9d\u5b9d\u54c4\u7761\uff5c\u89e3\u538b\u653e\u677e",
           "at": "2026-08-07T14:49:52.987Z"
         }
       },
       "version": "4.13",
-      "versionAt": "2026-08-06T22:15:32Z"
+      "versionAt": "2026-08-06T22:15:32Z",
+      "keywordField": "\u6253\u547c\u565c,\u9f3e\u75c7,\u52a9\u7720,\u767d\u566a\u97f3,\u5fc3\u7387,\u82f9\u679c\u624b\u8868,\u5931\u7720,CPAP,\u5f55\u97f3,REM,\u76d1\u6d4b,\u81ea\u52a8,\u591c\u95f4,\u5b89\u7720,\u6b62\u9f3e,\u9632\u9f3e,\u6d45\u7761,\u6df1\u5ea6,\u5468\u671f,\u62a5\u544a,\u8d28\u91cf,\u68c0\u6d4b,\u514d\u8d39,\u7761\u89c9,\u78e8\u7259,\u8bf4,\u5668,\u5206\u6790,\u52a9\u624b,\u8bad\u7ec3,\u62a4\u7406,\u5927\u5e08",
+      "fieldUpdated": "2026-08-06"
     }
   }
 }
