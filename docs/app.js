@@ -1843,7 +1843,7 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
             row(
                 "past year",
                 w.stale,
-                `It is ${thisYear}. These only unlock phrases naming an earlier year, and that demand has an expiry date even though it is real today.`
+                `It is ${thisYear}. These only unlock phrases naming an earlier year. The demand is real today and dated: the score halves it for every year elapsed rather than ignoring it, so a phrase heavy enough to still pay is still recommended.`
             );
             const terms = m.staleYear?.terms ?? [];
             if (terms.length) {
@@ -1856,6 +1856,20 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
                 }
                 waste.appendChild(ul);
             }
+            // The recommendation is scored with the same discount, so when it
+            // keeps one of these words it has already weighed the fade and
+            // decided the demand still pays. Saying so is the difference
+            // between two panels disagreeing and one of them showing its work.
+            const rec = new Set(rawWords(m.recommended?.field).map((w) => w.toLowerCase()));
+            const kept = w.stale.filter((x) => rec.has(x.toLowerCase()));
+            if (kept.length)
+                waste.appendChild(
+                    line(
+                        "",
+                        `The recommendation below keeps ${kept.join(", ")} anyway: at half weight the demand behind it still pays for the characters. Drop it if you think that demand goes before your next release does.`,
+                        "muted"
+                    )
+                );
         }
     }
 

@@ -594,6 +594,29 @@ const FIT = {
   mine: 0,
 };
 
+// A phrase naming a year is demand with an expiry date on it, and the demand
+// score cannot see the cliff coming: Apple's autocomplete is a reading of what
+// is being searched now, so "sleep talking recorder 2025" still reads 53 in
+// 2026 and will read something in 2027, right up until it doesn't. Without
+// this, the field builder happily spends five characters on last year's number
+// forever, which is exactly what it did.
+//
+// Halved per year elapsed, and floored rather than zeroed, because the demand
+// is real today and somebody is being served by it. A multiplier rather than a
+// filter, for the same reason difficulty is one: heavy enough demand behind a
+// fading phrase can still beat a fresh phrase nobody searches.
+const YEAR_FLOOR = 0.15;
+const thisYear = new Date().getUTCFullYear();
+const yearNamed = (s) => {
+  const m = String(s).match(/(?:^|[^\d])((?:19|20)\d{2})(?:[^\d]|$)/);
+  return m ? Number(m[1]) : null;
+};
+const freshness = (s) => {
+  const y = yearNamed(s);
+  if (y == null || y >= thisYear) return 1;
+  return Math.max(YEAR_FLOOR, 0.5 ** (thisYear - y));
+};
+
 // Coverage as a multiplier rather than a filter. An uncovered phrase needing
 // one word is the cheapest thing on the board; one needing four is a rewrite,
 // and should not outrank a covered phrase that only needs the ranking to move.
@@ -618,18 +641,22 @@ const ease = (diff) => (diff == null ? 1 : 1 - MAX_DISCOUNT * (diff / 100));
 // lets you paste your real keyword field, which changes coverage and therefore
 // the score; shipping the whole formula there instead would leave two copies
 // to drift apart.
-const baseOf = ({ pop, rank, intent, diff }) =>
-  (pop / 100) * winnability(rank) * ease(diff) * FIT[intent];
+const baseOf = ({ pop, rank, intent, diff, fresh = 1 }) =>
+  (pop / 100) * winnability(rank) * ease(diff) * FIT[intent] * fresh;
 
-function scoreOf({ pop, rank, intent, cov, diff }) {
-  return Math.round(100 * baseOf({ pop, rank, intent, diff }) * lever(cov));
+function scoreOf({ pop, rank, intent, cov, diff, fresh }) {
+  return Math.round(100 * baseOf({ pop, rank, intent, diff, fresh }) * lever(cov));
 }
 
 // The coverage multipliers by name, so the page applies these same numbers.
 const LEVERS = { covered: 1, unknown: 1, cheap: 1.25, dear: 0.85 };
 
-function reasonFor({ pop, rank, cov, intent }) {
+function reasonFor({ pop, rank, cov, intent, fresh = 1, year = null }) {
   const where = rank == null ? "unranked" : `#${rank}`;
+  if (fresh < 1) {
+    const covNote = cov && !cov.covered ? ", not covered" : "";
+    return `${pop} pop, ${where}${covNote}, but it names ${year} and this is ${thisYear} — demand discounted ${Math.round((1 - fresh) * 100)}%`;
+  }
   if (cov && !cov.covered) {
     const list = cov.missing.map((m) => `"${m}"`).join(", ");
     const where2 = cov.partial ? "title and subtitle have no" : "listing has no";
@@ -671,6 +698,10 @@ function analyseMarket(cc) {
     const mods = modsOf(english);
     const hard = difficultyOf(cc, kw, cur, dctx);
     const diff = hard?.score ?? null;
+    // Read off the phrase rather than its English gloss: a year is digits in
+    // every market, and the gloss is missing for the phrases nobody translated.
+    const year = yearNamed(kw);
+    const fresh = freshness(kw);
     terms[kw] = {
       intent,
       ...(mods.length && { mods }),
@@ -678,12 +709,13 @@ function analyseMarket(cc) {
       rank,
       ...(cov && { covered: cov.covered, ...(cov.missing.length && { missing: cov.missing }) }),
       ...(hard && { hard }),
-      score: scoreOf({ pop, rank, intent, cov, diff }),
-      base: Math.round(baseOf({ pop, rank, intent, diff }) * 1000) / 1000,
+      score: scoreOf({ pop, rank, intent, cov, diff, fresh }),
+      base: Math.round(baseOf({ pop, rank, intent, diff, fresh }) * 1000) / 1000,
       // The score's factors, kept separate so the page can show its working
       // rather than asking anyone to trust a bare number.
-      factors: { reach: winnability(rank), ease: ease(diff), fit: FIT[intent] },
-      why: reasonFor({ pop, rank, cov, intent }),
+      factors: { reach: winnability(rank), ease: ease(diff), fit: FIT[intent], ...(fresh < 1 && { fresh }) },
+      ...(fresh < 1 && { staleYear: year }),
+      why: reasonFor({ pop, rank, cov, intent, fresh, year }),
     };
   }
 
@@ -1203,7 +1235,11 @@ function recommendField(cc, terms, meta, model) {
         if (chars + cost > FIELD_LIMIT) continue;
         const next = new Set([...have, ...need]);
         let gain = 0;
-        for (const o of unmet) if (satisfiedBy(o.alts, next)) gain += o.pop * FIT[o.intent];
+        // Same discount the score uses. Without it the pack would keep buying
+        // last year's number for as long as anyone still searched it, while
+        // the panel above the builder called the same word waste.
+        for (const o of unmet)
+          if (satisfiedBy(o.alts, next)) gain += o.pop * FIT[o.intent] * freshness(o.kw);
         if (gain > 0 && (!best || gain / cost > best.gain / best.cost)) best = { need, gain, cost };
       }
     }

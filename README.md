@@ -279,6 +279,14 @@ where a smaller app outranks larger ones because the phrase names what it does.
 That split is the model — authority sets the wall, relevance is what gets over
 it.
 
+**Freshness.** A phrase naming a year is demand with an expiry date, and the
+demand score cannot see the cliff coming: Apple's autocomplete reads what is
+being searched today, so "sleep talking recorder 2025" still scores 53 in 2026.
+Its weight is halved for each year elapsed, floored at 15%. Like difficulty,
+this discounts rather than excludes, so the recommendation drops the year where
+it can no longer pay for its characters and keeps it where the demand is heavy
+enough to still be worth them.
+
 Nothing here is a probability. Apple publishes no ranking weights, no search
 volume and no competitor installs, so every input is a public stand-in. It
 ranks phrases against each other, and it discounts a hard phrase by at most 60%
