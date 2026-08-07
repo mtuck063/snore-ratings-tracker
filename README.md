@@ -16,6 +16,7 @@ below is the checklist.
 | Search rank and demand per keyword per market | `scripts/keywords.mjs` | 4x daily | `keywords.json`, `kw-events/` |
 | Website visitors, optional | `scripts/pageviews.mjs` | with ratings | `pageviews.json` |
 | Intent, coverage and priority per keyword | `scripts/aso.mjs` | with keywords | `aso.json`, `metadata.json` |
+| What a release changed, and what it did | `scripts/release.mjs` | by hand, then with keywords | `releases.json` |
 | Apple's popularity index, optional | `scripts/popularity.mjs` | by hand | `popularity.json` |
 | Freshness check | `scripts/check-freshness.mjs` | 4x daily | opens an issue |
 
@@ -314,6 +315,68 @@ the app does not serve, scored to zero so they stay out of the chase list and
 out of the field recommendation. It is what keeps white noise and insomnia
 phrases from being recommended to a snoring app.
 
+## Did the release work
+
+A metadata change is the only thing here you can act on, so the release that
+carries it is the one event worth measuring against. `scripts/release.mjs`
+records what shipped and reads the result.
+
+The ordering is the whole trick. `metadata.json` holds the current listing and
+only the current listing: the moment you paste the new keyword field in, the
+old one exists nowhere except the git history. So the baseline is taken first.
+
+```sh
+node scripts/release.mjs --record 4.14   # BEFORE editing metadata.json
+# paste the shipped keyword fields into scripts/metadata.json, set fieldUpdated
+node scripts/aso.mjs --fetch             # pull the live title, subtitle, screenshots
+node scripts/release.mjs --seal          # capture the after side
+node scripts/release.mjs --report us     # read it, any day after
+```
+
+Three things come out of it, and they arrive at different speeds.
+
+**Coverage, immediately.** Which phrases the listing can rank for at all is
+arithmetic: it is true the second the release goes live and no waiting makes it
+truer. It is also the only check that catches a field that shipped with a typo,
+came back truncated, or traded six phrases for six others while the count sat
+still. `gained` and `lost` are the lines to read.
+
+**Rank, over days.** Every rank in the table moves whether or not you ship
+anything, so the phrases whose coverage changed are compared against the
+phrases nothing touched, over the same days, and the difference between the two
+is the report's `lift`. If both cohorts gained eight places, Apple moved and
+you did not. Medians of daily closes, never single days, because the 24h column
+already shows phrases swinging fifty places inside one day. Phrases that move
+more than 30 places on their own are counted and held out, since nothing a
+release does to them would be visible over that. Apple re-indexes over days,
+so the report labels itself `indexing` for two days, `provisional` to a week,
+and `settled` after that.
+
+Phrases crossing from unranked to ranked are reported separately, and they are
+the cleanest evidence a field change ever produces: an indexed word does not
+walk a phrase up the list, it puts the phrase on the list.
+
+**Conversion, nowhere.** Screenshots move the impression-to-download rate, and
+nothing in this repo can see impressions or downloads. The screenshot half of a
+release is judged in App Store Connect (Analytics, then Impressions, Product
+Page Views and Conversion Rate by territory) or not at all. Ratings per day is
+the only proxy here and at one or two a day it cannot separate a good release
+from a quiet week for months, so it is shown with that caveat attached. If
+screenshots are the point of the change, ship them as a Product Page
+Optimization test instead: a build that changes screenshots and keywords at
+once has confounded the two beyond any later untangling.
+
+The dashboard reads the same file: a dashed rule at the release on every rank
+and rating chart, a panel above the keyword table, and the release inline in
+the movement log where the moves it caused sit under it. `--effect` reruns on
+every keyword workflow and rewrites only the computed block, so the panel keeps
+up on its own.
+
+Screenshots are recorded from the lookup API on every `--fetch`, so the git
+history of `metadata.json` becomes a log of when the visuals changed. Apple
+serves the current set and only the current set, so a release recorded after it
+went live reports its screenshot change as unknown rather than guessing.
+
 ## Apple's own popularity index, optional
 
 Every popularity number described above is a proxy. `keywords.mjs` scores demand
@@ -481,6 +544,7 @@ node scripts/keywords.mjs                # every market in-process
 node scripts/keywords.mjs --collect us   # one market, writes partials/
 node scripts/keywords.mjs --merge        # partials -> data files
 node scripts/aso.mjs --report us         # which keywords are worth chasing
+node scripts/release.mjs --report        # what the last release did
 node scripts/check-freshness.mjs         # what the watchdog runs
 
 ASA_COOKIE='...' node scripts/popularity.mjs --check    # is the session alive
@@ -514,13 +578,14 @@ constraint there. Working state that no page reads lives in `scripts/` instead.
 | `keywords.json` | current rank and demand per keyword, the apps holding the places above you, top-ten turnover, plus 30-day history |
 | `kw-events/` | rank and autocomplete movements, one shard per month |
 | `aso.json` | intent, coverage and priority per keyword, plus each market's chase list |
+| `releases.json` | one entry per release: the listing before and after, per market, and the before-and-after read on rank |
 | `popularity.json` | Apple's own 5-100 demand index per keyword, when the optional Apple Ads collector is set up, plus how long each session cookie survived |
 | `glossary.json` | localized keyword to English, for the dashboard |
 | `status-*.json` | collector heartbeats |
 | `scripts/keywords.json` | the config, which auto-discovery also writes to |
 | `scripts/hints.json` | last autocomplete state, diffed for new suggestions |
 | `scripts/kw-candidates.json` | harvested phrases awaiting a relevance test |
-| `scripts/metadata.json` | what the listing claims; title and subtitle fetched, keyword field by hand |
+| `scripts/metadata.json` | what the listing claims; title, subtitle and screenshots fetched, keyword field by hand |
 | `scripts/intents.json` | intent corrections and off-target neighbourhoods |
 
 ## Limits worth knowing

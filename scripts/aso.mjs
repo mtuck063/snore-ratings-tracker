@@ -805,13 +805,14 @@ function rivalIds(cc) {
 // graded as if that were the copy. The lookup API's localized `genres[0]` is
 // the same string, which is what tells the two apart.
 async function fetchListing(cc, appId = config.appId) {
-  const [res, genre] = await Promise.all([
+  const [res, lookup] = await Promise.all([
     fetch(`https://apps.apple.com/${cc}/app/id${appId}`),
     fetch(`https://itunes.apple.com/lookup?id=${appId}&country=${cc}`)
       .then((r) => r.json())
-      .then((j) => j.results?.[0]?.genres?.[0] ?? null)
+      .then((j) => j.results?.[0] ?? null)
       .catch(() => null),
   ]);
+  const genre = lookup?.genres?.[0] ?? null;
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const html = await res.text();
   const unescape = (s) =>
@@ -833,6 +834,14 @@ async function fetchListing(cc, appId = config.appId) {
     // Recorded rather than inferred from a null, so a market that has never
     // been fetched and one that genuinely has no subtitle stay distinguishable.
     subtitleSet: !isCategory && Boolean(sub),
+    // The one part of the listing that changes on release and is written down
+    // nowhere else. Each URL carries the asset's own uuid, so a swapped
+    // screenshot is a changed string and the git history of this file becomes
+    // a log of when the visuals changed. Free: the lookup call above was
+    // already being made for the category name. Absent rather than empty when
+    // the lookup fails, so an outage cannot read as a screenshot change.
+    ...(lookup?.screenshotUrls && { screenshots: lookup.screenshotUrls }),
+    ...(lookup?.version && { version: lookup.version, versionAt: lookup.currentVersionReleaseDate }),
   };
 }
 
@@ -844,10 +853,19 @@ async function refreshListings() {
     try {
       const live = await fetchListing(cc);
       const prev = metadata.markets[cc] ?? {};
-      const changed = prev.title !== live.title || prev.subtitle !== live.subtitle;
+      const shotsMoved =
+        live.screenshots &&
+        prev.screenshots?.length &&
+        prev.screenshots.join("\n") !== live.screenshots.join("\n");
+      const changed =
+        prev.title !== live.title || prev.subtitle !== live.subtitle || Boolean(shotsMoved);
       if (changed && (prev.title || prev.subtitle)) {
         console.log(`${cc}: listing changed\n  was "${prev.subtitle ?? "(no subtitle)"}"\n  now "${live.subtitle ?? "(no subtitle)"}"`);
       }
+      // Called out separately because it is the one change here that no rank
+      // or coverage number will ever reflect: screenshots move conversion,
+      // which nothing in this repo measures.
+      if (shotsMoved) console.log(`${cc}: screenshots changed (${live.screenshots.length} shots)`);
       // The timestamp only moves when the listing does. Stamping every run
       // would rewrite this file four times a day with nothing in it, and the
       // git history of a metadata file is worth more as a log of when the

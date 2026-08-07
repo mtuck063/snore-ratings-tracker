@@ -167,7 +167,7 @@ function deltaCell(delta) {
     return span;
 }
 
-function sparkline(points, label, fmtVal = fmt, minSpan = 0) {
+function sparkline(points, label, fmtVal = fmt, minSpan = 0, markDate = null) {
     // points: [{date, count}] oldest→newest, nulls already dropped
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("width", SPARK_W);
@@ -208,6 +208,24 @@ function sparkline(points, label, fmtVal = fmt, minSpan = 0) {
         const d = counts[i] - counts[i - 1];
         return d > 0.05 ? " up" : d < -0.05 ? " down" : "";
     };
+
+    // The release, as one rule the line crosses. Drawn first so it sits behind
+    // the data, and placed between the last day before and the first day after
+    // rather than on either of them: the release landed at some hour inside a
+    // day, and putting the rule on a day would claim that day for one side.
+    if (markDate) {
+        const i = points.findIndex((p) => p.date > markDate);
+        if (i > 0) {
+            const rule = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            rule.setAttribute("class", "spark-mark");
+            const mx = ((x(i - 1) + x(i)) / 2).toFixed(1);
+            rule.setAttribute("x1", mx);
+            rule.setAttribute("x2", mx);
+            rule.setAttribute("y1", 1);
+            rule.setAttribute("y2", SPARK_H - 1);
+            svg.appendChild(rule);
+        }
+    }
     for (let i = 1; i < points.length; i++) {
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         path.setAttribute("class", "spark-line" + segDir(i));
@@ -2175,8 +2193,158 @@ function rivalHeader(id, cc, meta, plan) {
     return box;
 }
 
-async function renderKeywords(kw, glossary = {}, plan = null, applePop = null) {
+// What the last release did to this market, written by scripts/release.mjs.
+//
+// The panel exists because the table below cannot answer the question on its
+// own. Every rank in it moves whether or not you ship anything, so the number
+// that matters is not how the changed phrases moved, it is how they moved
+// against the phrases nothing touched. That comparison is the one line here
+// the rest of the dashboard has no place for.
+//
+// It is also the only panel that says "too early" out loud. Apple re-indexes a
+// changed keyword field over days, and a day-one glance at a rank column would
+// otherwise read as a verdict on a release that has not been indexed yet.
+// The newest release with both sides on record, and the newest date any
+// release is known to have gone live. They differ for exactly as long as a
+// release sits recorded but unsealed, which is the window where the charts can
+// already mark it and the panel still has nothing to say.
+const newestSealed = (releases) => [...(releases ?? [])].reverse().find((r) => r.effect) ?? null;
+const releaseMarkDay = (releases) =>
+    ([...(releases ?? [])].reverse().find((r) => r.at)?.at ?? "").slice(0, 10) || null;
+
+const STAGE_NOTE = {
+    indexing: "Apple is still re-indexing the new keyword field, so the rank numbers below cannot answer anything yet. Coverage can: it is arithmetic, and it was true the moment the release went live.",
+    provisional: "Early. One noisy day can still swing these numbers, so treat a small move as no move.",
+    settled: "Far enough out to read as a result.",
+};
+
+function renderRelease(host, cc, rel, kw) {
+    host.replaceChildren();
+    const e = rel?.effect;
+    const m = e?.markets?.[cc];
+    if (!m) {
+        host.hidden = true;
+        return;
+    }
+    host.hidden = false;
+    const card = document.createElement("div");
+    card.className = "plan-card release-card";
+
+    const h = document.createElement("h3");
+    h.textContent = `Since ${rel.version}`;
+    const when = document.createElement("span");
+    when.className = "release-when";
+    const at = new Date(rel.at);
+    when.textContent = `live ${at.toLocaleDateString(undefined, { day: "numeric", month: "short" })}, day ${e.days}`;
+    when.title = at.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+    h.appendChild(when);
+    card.appendChild(h);
+    card.appendChild(line("", STAGE_NOTE[e.stage] ?? "", "muted"));
+
+    const pop = (term) => kw?.latest?.[cc]?.[term]?.pop ?? null;
+    const withPop = (terms) =>
+        terms
+            .slice()
+            .sort((a, b) => (pop(b) ?? 0) - (pop(a) ?? 0))
+            .map((t) => (pop(t) ? `${t} (${pop(t)})` : t))
+            .join(", ");
+
+    const tiles = document.createElement("div");
+    tiles.className = "fb-stats";
+    const tile = (value, label, cls, tip) => {
+        const d = document.createElement("div");
+        d.className = "fb-tile" + (cls ? ` ${cls}` : "");
+        if (tip) d.dataset.tip = tip;
+        const v = document.createElement("div");
+        v.className = "fb-tile-num";
+        v.textContent = value;
+        const t = document.createElement("div");
+        t.className = "fb-tile-label";
+        t.textContent = label;
+        d.append(v, t);
+        tiles.appendChild(d);
+    };
+    const sign = (n) => (n == null ? "—" : n > 0 ? `+${n}` : String(n));
+
+    const cov = m.coverage;
+    if (cov.after != null) {
+        const d = cov.after - cov.before;
+        tile(
+            `${cov.before} → ${cov.after}`,
+            `of ${cov.of} phrases covered`,
+            d > 0 ? "good" : d < 0 ? "bad" : "",
+            "Phrases whose words the listing carries somewhere across title, subtitle and keyword field. Apple cannot rank you for a phrase you cannot build, so this is the ceiling the release moved. It is arithmetic, not a measurement: no waiting needed."
+        );
+    }
+    tile(
+        String(m.appeared.length),
+        m.appeared.length === 1 ? "phrase newly ranked" : "phrases newly ranked",
+        m.appeared.length ? "good" : "",
+        "Phrases that were nowhere in the top 200 before the release and are now. A keyword change usually shows up like this rather than as a slow climb."
+    );
+    tile(
+        sign(m.lift),
+        "lift vs untouched",
+        m.lift > 0 ? "good" : m.lift < 0 ? "bad" : "",
+        `Places the phrases whose coverage changed gained beyond the phrases nothing touched, over the same days. The second half is the control: if both cohorts moved together, the market moved and the release did not. Changed ${m.target.n}, untouched ${m.control.n}.`
+    );
+    tile(
+        m.shotsChanged === null ? "—" : m.shotsChanged ? "changed" : "same",
+        "screenshots",
+        "",
+        (m.shotsChanged === null
+            ? "Unknown: no screenshot set was on record before this release went live, and Apple serves only the current one. Recorded from now on, so the next release can answer it. "
+            : "") +
+            "Screenshots move conversion, and conversion is not measured anywhere in this repo. App Store Connect → Analytics → Impressions, Product Page Views and Conversion Rate by territory is the only place this can be judged."
+    );
+    card.appendChild(tiles);
+
+    if (cov.gained.length) card.appendChild(line("gained ", withPop(cov.gained)));
+    if (cov.lost.length) card.appendChild(line("lost ", withPop(cov.lost), "warn"));
+    if (m.appeared.length)
+        card.appendChild(
+            line("newly ranked ", m.appeared.map((r) => `${r.kw} #${r.rank}`).join(", "), "good-line")
+        );
+    if (m.vanished.length)
+        card.appendChild(
+            line("dropped out ", m.vanished.map((r) => `${r.kw} (was #${r.was})`).join(", "), "warn")
+        );
+
+    // Movers are shown only once rank means something. During indexing they
+    // are yesterday's noise wearing a release's name.
+    if (e.stage !== "indexing" && m.movers.length) {
+        const ul = document.createElement("ul");
+        ul.className = "release-movers";
+        for (const r of m.movers.slice(0, 6)) {
+            const li = document.createElement("li");
+            li.className = r.gain > 0 ? "up" : "down";
+            li.textContent = `${sign(r.gain)}  ${r.kw}  #${r.before} → #${r.after}`;
+            li.title = `${r.cohort === "target" ? "coverage changed in this release" : r.cohort === "control" ? "covered before and after, untouched" : "not covered either side"}`;
+            ul.appendChild(li);
+        }
+        card.appendChild(ul);
+    }
+
+    if (m.noisy)
+        card.appendChild(
+            line(
+                "",
+                `${m.noisy} phrase${m.noisy === 1 ? "" : "s"} held out of these numbers: they already move more than 30 places on their own, within a day or between days, which is larger than anything a release would do to them.`,
+                "muted"
+            )
+        );
+
+    host.appendChild(card);
+}
+
+async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, releases = []) {
     if (!kw?.latest || !Object.keys(kw.latest).length) return;
+    // Two different questions about the same log. The panel needs a release
+    // with both sides recorded, because there is nothing to compare until then.
+    // The rule on the charts needs only a date, so it appears as soon as a
+    // release is on the record, whether or not anyone has sealed it yet.
+    const release = newestSealed(releases);
+    const releaseDay = releaseMarkDay(releases);
     document.getElementById("keywords-section").hidden = false;
     if (kw.fetchedAt) {
         const updated = document.getElementById("kw-updated");
@@ -2250,6 +2418,7 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null) {
         const refreshPlan = () =>
             renderPlan(document.getElementById("kw-plan"), cc, plan, () => render(currentCc));
         refreshPlan();
+        renderRelease(document.getElementById("kw-release"), cc, release, kw);
         renderBuilder(document.getElementById("kw-builder"), cc, plan, () => render(currentCc), refreshPlan);
         tbody.replaceChildren();
         const rescored = rescoreFor(cc, plan);
@@ -2608,7 +2777,9 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null) {
                     return { date: row.date, count: -close, label: `#${close}${range}` };
                 })
                 .filter(Boolean);
-            tdSpark.appendChild(sparkline(points, `${term} rank, last 30 days`, (v) => `#${-v}`, 4));
+            tdSpark.appendChild(
+                sparkline(points, `${term} rank, last 30 days`, (v) => `#${-v}`, 4, releaseDay)
+            );
 
             // Priority sits beside demand deliberately: the two disagree
             // often, and the disagreement is the whole point of the column.
@@ -3045,11 +3216,11 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null) {
 
 async function main() {
     const meta = document.getElementById("meta");
-    let latest, history, events, reviews, kwData, hist, glossary, pageviews, plan, applePop;
+    let latest, history, events, reviews, kwData, hist, glossary, pageviews, plan, applePop, releases;
     try {
         // no-cache: revalidate every load so the data files can't come from
         // differently-aged browser caches and contradict each other.
-        [latest, history, events, reviews, kwData, hist, glossary, pageviews, plan, applePop] = await Promise.all([
+        [latest, history, events, reviews, kwData, hist, glossary, pageviews, plan, applePop, releases] = await Promise.all([
             fetch("data/latest.json", { cache: "no-cache" }).then((r) => r.json()),
             fetch("data/history.json", { cache: "no-cache" }).then((r) => r.json()),
             fetch("data/events.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => []),
@@ -3069,11 +3240,17 @@ async function main() {
             // cookie up, and even where it exists it answers for a handful of
             // head terms, so it annotates the tooltip and nothing more.
             fetch("data/popularity.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => null),
+            // The release log, written by scripts/release.mjs. Absent until a
+            // release has been recorded, which costs the panel and the rule on
+            // the charts and nothing else.
+            fetch("data/releases.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => []),
         ]);
     } catch {
         meta.textContent = "No data yet. Run the collect workflow once to seed data/.";
         return;
     }
+
+    const releaseDay = releaseMarkDay(releases);
 
     // Website traffic: daily visitors from GoatCounter, collected by
     // scripts/pageviews.mjs on the same hourly run as ratings. The section
@@ -3159,7 +3336,7 @@ async function main() {
             avg: worldAvg,
             mix: mixCell(worldCounts, worldGains),
             to5: fiveStarsToFiveExact(worldCounts) ?? fiveStarsToFive(worldCount, worldAvg),
-            spark: sparkline(seriesFor(history, null), "Global total, last 30 days"),
+            spark: sparkline(seriesFor(history, null), "Global total, last 30 days", fmt, 0, releaseDay),
             isTotal: true,
         })
     );
@@ -3179,7 +3356,7 @@ async function main() {
             avg: cur?.avg ?? null,
             mix: mixCell(hist?.countries[cc]?.counts, gains[cc]),
             to5: fiveStarsToFiveExact(hist?.countries[cc]?.counts) ?? fiveStarsToFive(cur?.count, cur?.avg),
-            spark: sparkline(seriesFor(history, cc), `${countryName} ratings, last 30 days`),
+            spark: sparkline(seriesFor(history, cc), `${countryName} ratings, last 30 days`, fmt, 0, releaseDay),
         });
         tr.hidden = hidden;
         if (hidden) tr.classList.add("unrated");
@@ -3221,7 +3398,7 @@ async function main() {
     // waits on its shard, so blocking the rest of the page on that fetch would
     // buy nothing. Caught so a missing shard cannot surface as an unhandled
     // rejection and take the reviews below it down with it.
-    renderKeywords(kwData, glossary, plan, applePop).catch((err) => console.warn("keyword section:", err));
+    renderKeywords(kwData, glossary, plan, applePop, releases).catch((err) => console.warn("keyword section:", err));
     renderWeekReviews(reviews);
     renderReviews(reviews);
     renderEvents(history, events);

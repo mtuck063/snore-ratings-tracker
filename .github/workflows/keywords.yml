@@ -116,6 +116,14 @@ jobs:
         continue-on-error: true
         run: node scripts/aso.mjs --fetch
 
+      # The before-and-after read on the last release, recomputed against the
+      # rank history that just landed. Writes only the computed block of
+      # releases.json, so it is safe on every run and does nothing at all until
+      # a release has been recorded and sealed by hand.
+      - name: Refresh the release read
+        continue-on-error: true
+        run: node scripts/release.mjs --effect
+
       - name: Commit data
         run: |
           git config user.name "ratings-bot"

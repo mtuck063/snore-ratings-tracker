@@ -259,6 +259,9 @@ svg.spark { display: block; margin-left: auto; touch-action: none; }
 .spark-line.down { stroke: var(--bad); }
 .spark-dot.down { fill: var(--bad); }
 .spark-hover { fill: var(--text); stroke: var(--bg); stroke-width: 2; }
+/* The release, on every rank and rating chart at once. Dashed and dim on
+   purpose: it is the axis the line is read against, not another series. */
+.spark-mark { stroke: var(--text-secondary); stroke-width: 1; stroke-dasharray: 2 2; opacity: 0.55; }
 
 #week-reviews { margin-bottom: 20px; }
 #week-reviews h2 { font-size: 1.05rem; margin-bottom: 10px; }
@@ -555,6 +558,13 @@ tr.kw-detail td {
     vertical-align: 1px;
 }
 #kw-events .badge.new { color: var(--accent); background: rgba(91, 127, 255, 0.14); }
+/* A release inside the movement log. Weighted heavier than the rows around it
+   because it is the one entry that explains the others. */
+#kw-events li.log-release {
+    border-left-color: var(--accent);
+    background: rgba(91, 127, 255, 0.07);
+    font-weight: 500;
+}
 
 /* Full movement log page (keyword-log.html). The list itself reuses the
    #kw-events rules above; everything here is the surrounding chrome. */
@@ -748,6 +758,26 @@ li.log-day {
 }
 .plan-line.warn { color: var(--star4); }
 .plan-line.muted { color: var(--text-secondary); }
+.plan-line.good-line { color: var(--good); }
+
+/* What the last release did to this market. Sits directly under the market
+   tabs so it is read before the table, which is the order the questions come
+   in: what changed, then where everything stands. */
+.release-card { margin: 14px 0 4px; }
+/* Longer labels than the plan card's, and they must not run into the phrase
+   list beside them. */
+.release-card .plan-label { min-width: 96px; padding-right: 8px; }
+.release-card h3 { display: flex; align-items: baseline; gap: 8px; }
+.release-when { text-transform: none; letter-spacing: 0; font-weight: 400; }
+.release-movers { margin: 8px 0 0; padding-left: 0; list-style: none; }
+.release-movers li {
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+    padding: 2px 0;
+    overflow-wrap: anywhere;
+}
+.release-movers li.up { color: var(--good); }
+.release-movers li.down { color: var(--bad); }
 .plan-label {
     display: inline-block;
     min-width: 66px;

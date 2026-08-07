@@ -12,6 +12,27 @@ const rankText = (r) => (r == null ? "—" : `#${r}`);
 
 const state = { market: "all", type: "all", q: "" };
 let events = [];
+// Releases are merged into the same list rather than shown in their own strip:
+// the log is read to work out why a rank moved, and the release is usually the
+// answer. It only reads as the answer when it sits in the same column, at the
+// hour it happened, with the moves it caused underneath it.
+let releases = [];
+
+const releaseRows = (month) =>
+    releases
+        .filter((r) => r.at?.slice(0, 7) === month)
+        .map((r) => {
+            const ccs = Object.keys(r.after ?? {});
+            const fields = ccs.filter((cc) => r.before?.[cc]?.field !== r.after[cc]?.field);
+            const shots = ccs.filter(
+                (cc) =>
+                    r.before?.[cc]?.shots && r.after[cc]?.shots && r.before[cc].shots !== r.after[cc].shots
+            );
+            const parts = [];
+            if (fields.length) parts.push(`keyword field in ${fields.join(", ").toUpperCase()}`);
+            if (shots.length) parts.push(`screenshots in ${shots.join(", ").toUpperCase()}`);
+            return { at: r.at, type: "release", version: r.version, what: parts.join("; ") };
+        });
 
 function chip(label, active, onClick) {
     const b = document.createElement("button");
@@ -22,11 +43,14 @@ function chip(label, active, onClick) {
 }
 
 function matches(ev) {
-    if (state.market !== "all" && ev.cc !== state.market) return false;
+    // A release is not a per-market event: it shipped everywhere at once, and
+    // it is the thing most of the rank moves below it are being read against,
+    // so a market filter must not hide the cause of what it leaves on screen.
+    if (state.market !== "all" && ev.type !== "release" && ev.cc !== state.market) return false;
     const type = ev.type ?? "rank";
     if (state.type !== "all" && type !== state.type) return false;
     if (state.q) {
-        const hay = `${ev.kw ?? ""} ${ev.term ?? ""} ${ev.prefix ?? ""}`.toLowerCase();
+        const hay = `${ev.kw ?? ""} ${ev.term ?? ""} ${ev.prefix ?? ""} ${ev.version ?? ""}`.toLowerCase();
         if (!hay.includes(state.q)) return false;
     }
     return true;
@@ -38,7 +62,11 @@ function row(ev) {
     const li = document.createElement("li");
     const when = new Date(ev.at);
     const time = `<span class="event-time">${when.toLocaleTimeString(undefined, { timeStyle: "short" })}</span>`;
-    if (ev.type === "hint") {
+    if (ev.type === "release") {
+        li.className = "log-release";
+        li.innerHTML = `${time}🚀 <strong></strong> went live${ev.what ? ` — ${ev.what}` : ""}`;
+        li.querySelector("strong").textContent = ev.version;
+    } else if (ev.type === "hint") {
         li.innerHTML = `${time}${flag(ev.cc)} Apple now suggests <strong></strong> under “${ev.prefix}”<span class="badge new">NEW</span>`;
         li.querySelector("strong").textContent = `“${ev.term}”`;
     } else if (ev.type === "autotrack") {
@@ -81,7 +109,7 @@ function render() {
 }
 
 function buildFilters() {
-    const markets = [...new Set(events.map((e) => e.cc))].sort();
+    const markets = [...new Set(events.filter((e) => e.cc).map((e) => e.cc))].sort();
     const mrow = document.getElementById("log-markets");
     const paint = () => {
         mrow.replaceChildren();
@@ -103,6 +131,7 @@ function buildFilters() {
         ["rank", "Rank moves"],
         ["hint", "New suggestions"],
         ["autotrack", "Newly tracked"],
+        ["release", "Releases"],
     ];
     const paintTypes = () => {
         trow.replaceChildren();
@@ -137,7 +166,8 @@ const monthLabel = (m) =>
 
 async function loadMonth(m, index) {
     const meta = document.getElementById("meta");
-    events = (await grab(`${m}.json`).catch(() => [])).slice().reverse(); // newest first
+    const shard = (await grab(`${m}.json`).catch(() => [])).slice();
+    events = [...shard, ...releaseRows(m)].sort((a, b) => b.at.localeCompare(a.at)); // newest first
     // A market filter set on one month may name a market absent from another,
     // which would leave the list empty with no chip showing why. Filters carry
     // over where they still apply and reset where they do not.
@@ -171,6 +201,11 @@ function buildMonths(index, current, onPick) {
 async function main() {
     const meta = document.getElementById("meta");
     try {
+        // Absent until a release has been recorded, and absent is not an error:
+        // the log is complete without it, just without the causes marked.
+        releases = await fetch("data/releases.json", { cache: "no-cache" })
+            .then((r) => r.json())
+            .catch(() => []);
         const index = await grab("index.json");
         if (!index?.months?.length) { meta.textContent = "No keyword events recorded yet."; return; }
         const newest = index.months[index.months.length - 1];
