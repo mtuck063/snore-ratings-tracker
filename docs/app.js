@@ -1785,8 +1785,10 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
             .map((w) => w.trim())
             .filter(Boolean);
 
+    const freeWords = new Set(b.free ?? []);
     const wasteOf = (text) => {
         const dead = [];
+        const gratis = [];
         const stale = [];
         for (const w of rawWords(text)) {
             if (isPastYear(w)) {
@@ -1798,10 +1800,15 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
             // Already counted under the field box as a duplicate. Counting it
             // twice would read as two separate problems with one word.
             if (claimedKeys.has(key)) continue;
-            if (!unitList.some((u) => sat(u, new Set([key])))) dead.push(w);
+            // Separated from `dead` because the confidence differs. Apple
+            // matching articles and pronouns for free is a measured finding;
+            // a word no tracked phrase uses is only unmeasurable.
+            if (freeWords.has(key) || freeWords.has(lower)) gratis.push(w);
+            else if (!unitList.some((u) => sat(u, new Set([key])))) dead.push(w);
         }
         // The comma each word costs is part of what dropping it returns.
-        return { dead, stale, chars: dead.reduce((n, w) => n + w.length + 1, 0) };
+        const cost = (ws) => ws.reduce((n, w) => n + w.length + 1, 0);
+        return { dead, gratis, stale, chars: cost(dead) + cost(gratis) };
     };
 
     const waste = document.createElement("div");
@@ -1811,7 +1818,7 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
         waste.replaceChildren();
         const text = input.value.trim() || b.current || "";
         const w = wasteOf(text);
-        if (!w.dead.length && !w.stale.length) {
+        if (!w.dead.length && !w.gratis.length && !w.stale.length) {
             waste.hidden = true;
             return;
         }
@@ -1833,6 +1840,12 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
             p.appendChild(document.createTextNode(words.join(", ")));
             waste.appendChild(p);
         };
+        if (w.gratis.length)
+            row(
+                "already free",
+                w.gratis,
+                "Apple matches articles, prepositions, conjunctions and pronouns without your carrying them. Measured, not assumed: every tracked phrase whose only gap was one of these was already ranking without it. These characters are recoverable outright."
+            );
         if (w.dead.length)
             row(
                 "no phrase uses",

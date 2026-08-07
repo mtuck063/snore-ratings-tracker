@@ -739,7 +739,7 @@ function analyseMarket(cc) {
   const shoppingList = Object.values(blocked).sort((a, b) => b.demand - a.demand);
 
   // One alternatives model, shared by the recommendation and the builder.
-  const model = altsFor(terms, meta, lang);
+  const model = altsFor(terms, meta, lang, skipFor(cc));
 
   const fieldWords = meta?.keywordField ? tokens(meta.keywordField) : [];
 
@@ -764,8 +764,15 @@ function analyseMarket(cc) {
     const have = new Set([stem(w, lang), w]);
     return model.units.some((u) => satisfies(u, have));
   };
+  // Function words in the field, which are the third kind of waste and the one
+  // this tool was creating itself: Apple matches articles, prepositions,
+  // conjunctions and pronouns without your carrying them, so every character
+  // spent on one is recoverable. Reported separately from `unused`, because
+  // the fix is certain here and only likely there.
+  const free = skipFor(cc);
+  const freeWords = fieldWords.filter((w) => free.has(stem(w, lang)));
   const unused = fieldWords.filter(
-    (w) => !repeated.includes(w) && !implicit.has(stem(w, lang)) && !buys(w)
+    (w) => !repeated.includes(w) && !freeWords.includes(w) && !buys(w)
   );
 
   // Phrases naming a year that has already been and gone, and the field words
@@ -816,10 +823,11 @@ function analyseMarket(cc) {
     // field should say does not depend on anyone having written down what it
     // says now.
     recommended: recommendField(cc, terms, meta, model),
-    builder: builderFor(model, meta, lang),
+    builder: builderFor(model, meta, lang, free),
     byIntent,
     shoppingList: shoppingList.slice(0, 12),
     unusedFieldWords: unused,
+    freeFieldWords: freeWords,
     repeatedInSubtitle: repeated,
     staleYear,
     chase,
@@ -999,9 +1007,11 @@ function report(only) {
       if (l.keywordField) console.log(`             ${l.fieldChars}/100 chars, updated ${l.fieldUpdated ?? "?"}`);
       if (m.repeatedInSubtitle.length)
         console.log(`  repeated   ${m.repeatedInSubtitle.join(", ")} (already in the title or subtitle, so the field copy is dead weight)`);
+      if (m.freeFieldWords?.length)
+        console.log(`  free       ${m.freeFieldWords.join(", ")} (Apple matches these without your buying them)`);
       if (m.unusedFieldWords.length)
         console.log(`  unused     ${m.unusedFieldWords.join(", ")} (no tracked phrase can use these)`);
-      const waste = [...m.repeatedInSubtitle, ...m.unusedFieldWords];
+      const waste = [...m.repeatedInSubtitle, ...(m.freeFieldWords ?? []), ...m.unusedFieldWords];
       if (waste.length)
         console.log(
           `  wasted     ${waste.reduce((n, w) => n + w.length + 1, 0)} of ${l.fieldChars} characters, on the ${waste.length} word(s) above`
@@ -1112,7 +1122,7 @@ function tilingsOf(part, claimed, allowed) {
 }
 
 // Per phrase: the alternative unit-sets that would satisfy it, cheapest first.
-function altsFor(terms, meta, lang) {
+function altsFor(terms, meta, lang, free = implicit) {
   const claimed = poolOf({ title: meta?.title, subtitle: meta?.subtitle }, lang);
   // Units are compared by key and shown by label: the key of "talks" is its
   // stem, but the thing to paste into the field is a real word, and the
@@ -1156,7 +1166,7 @@ function altsFor(terms, meta, lang) {
       for (const part of fold(kw).split(/\s+/).filter(Boolean)) {
         let partAlts;
         if (hasCJK(part)) partAlts = tilingsOf(part, claimed, allowedPiece);
-        else if (claimed?.set.has(stem(part, lang)) || implicit.has(stem(part, lang))) partAlts = [[]];
+        else if (claimed?.set.has(stem(part, lang)) || free.has(stem(part, lang))) partAlts = [[]];
         else {
           // A Latin word inside a CJK phrase ("apple watch 睡眠") still needs a
           // label, or the chip shows the stem: "appl".
@@ -1178,9 +1188,16 @@ function altsFor(terms, meta, lang) {
       for (const w of tokens(kw)) {
         const key = stem(w, lang);
         wordKeys[w] = key;
-        // Implicit words and anything the title or subtitle already carries
-        // cost nothing and are never part of what a phrase still needs.
-        if (implicit.has(key) || claimed?.set.has(key)) continue;
+        // Words that cost nothing and are never part of what a phrase still
+        // needs: anything the title or subtitle already carries, and anything
+        // Apple matches without your buying it. That second set is the one
+        // this used to get wrong. Coverage has graded articles, prepositions,
+        // conjunctions and pronouns as free since the evidence for it went
+        // into FUNCTION_WORDS, but the recommendation was still reading the
+        // much smaller `implicit`, so it went on packing "and", "do", "i" and
+        // "my" into fields while the coverage column beside it said those
+        // phrases were already covered.
+        if (free.has(key) || claimed?.set.has(key)) continue;
         noteLabel(key, w);
         need.push(key);
       }
@@ -1266,11 +1283,12 @@ function recommendField(cc, terms, meta, model) {
       adds: picks.filter((p) => !currentKeys.has(stem(p, lang))),
       // Read off the field itself, so a dropped word is shown the way it is
       // written there rather than as the stem it matches on.
+      // A function word in the current field IS a drop: Apple matches it for
+      // free, so its characters are recoverable. Only words the listing
+      // already carries elsewhere are excused, since dropping those changes
+      // nothing either way.
       drops: tokens(meta.keywordField).filter(
-        (w) =>
-          !have.has(stem(w, lang)) &&
-          !model.claimedKeys.includes(stem(w, lang)) &&
-          !implicit.has(stem(w, lang))
+        (w) => !have.has(stem(w, lang)) && !model.claimedKeys.includes(stem(w, lang))
       ),
       wins: rows.filter((r) => !holds(r) && satisfiedBy(r.alts, have)).map((r) => r.kw),
       loses: rows.filter((r) => holds(r) && !satisfiedBy(r.alts, have)).map((r) => r.kw),
@@ -1281,7 +1299,7 @@ function recommendField(cc, terms, meta, model) {
 // The same model, shipped to the page. The browser needs the label for every
 // unit so a chip reads "talk" rather than its stem, and nothing else: coverage
 // there is the satisfies() rule above, which is set arithmetic over these keys.
-function builderFor(model, meta, lang) {
+function builderFor(model, meta, lang, free = []) {
   return {
     // Where a word already lives, because the three fields do not carry equal
     // weight: a phrase whose words sit only in the keyword field has a wording
@@ -1289,6 +1307,9 @@ function builderFor(model, meta, lang) {
     // out in the title has none — its rank moves on conversion and ratings.
     titleKeys: [...new Set(words(meta?.title ?? "", lang))],
     subtitleKeys: [...new Set(words(meta?.subtitle ?? "", lang))],
+    // Words Apple matches without your buying them, so the page can tell a
+    // field word that is free apart from one that is merely useless.
+    free: [...free],
     units: model.units,
     labels: Object.fromEntries(model.units.map((u) => [u, model.label.get(u)])),
     wordKeys: model.wordKeys,
