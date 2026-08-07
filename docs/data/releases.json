@@ -508,7 +508,2491 @@
     "shots": "e16e7ede"
    }
   },
-  "after": null,
-  "effect": null
+  "after": {
+   "us": {
+    "title": "Snore Timeline: Sleep Tracker",
+    "subtitle": "Snoring, Talking & Smart Alarm",
+    "field": "free,record,rem,my,monitor,score,cpap,ai,quality,do,i,stop,auto,apnea,detector,king,night,log,2025",
+    "fieldChars": 98,
+    "fieldUpdated": "2026-08-06",
+    "covered": [
+     "auto sleep tracker",
+     "cpap sleep tracker",
+     "cpap tracker",
+     "do i snore",
+     "free sleep talking app",
+     "free sleep tracker",
+     "free snore app",
+     "free snore recorder",
+     "free snoring app",
+     "my sleep talks",
+     "night recorder",
+     "record my sleep",
+     "record sleep talking",
+     "rem sleep",
+     "rem sleep alarm",
+     "rem sleep tracker",
+     "sleep apnea",
+     "sleep apnea detector",
+     "sleep apnea monitor",
+     "sleep log",
+     "sleep monitor",
+     "sleep monitor free",
+     "sleep quality",
+     "sleep quality tracker",
+     "sleep recorder",
+     "sleep recorder free",
+     "sleep score",
+     "sleep score free",
+     "sleep talk",
+     "sleep talk ai recorder",
+     "sleep talk recorder",
+     "sleep talk tracker",
+     "sleep talking",
+     "sleep talking app",
+     "sleep talking recorder",
+     "sleep talking recorder 2025",
+     "sleep talking recorder free",
+     "sleep talking tracker",
+     "sleep tracker",
+     "sleep tracker and sleep recorder",
+     "smart alarm",
+     "smart sleep alarm",
+     "snore",
+     "snore ai",
+     "snore alarm",
+     "snore app",
+     "snore detector",
+     "snore monitor",
+     "snore monitor app",
+     "snore recorder",
+     "snore recorder app",
+     "snore recorder app free",
+     "snore recorder free",
+     "snore score",
+     "snore timeline",
+     "snore tracker",
+     "snore tracker apnea monitor",
+     "snore tracker free",
+     "snore tracking",
+     "snoring",
+     "snoring app",
+     "snoring king",
+     "snoring monitor",
+     "snoring recorder",
+     "snoring tracker",
+     "stop snoring",
+     "stop snoring app",
+     "stop snoring free"
+    ],
+    "gradable": 100,
+    "partial": false,
+    "shots": "c34b9e0f",
+    "shotsAt": "2026-08-07T15:19:18.116Z"
+   },
+   "ca": {
+    "title": "Snore Timeline: Sleep Tracker",
+    "subtitle": "Record Snoring & Sleep Talking",
+    "field": "free,monitor,my,apnea,do,i,2025,cpap,log,sounds,diary,score,alarm,detector,control,apple,watch,stop",
+    "fieldChars": 99,
+    "fieldUpdated": "2026-08-06",
+    "covered": [
+     "cpap sleep tracker",
+     "cpap tracker",
+     "do i snore",
+     "free sleep talking app",
+     "free sleep tracker",
+     "free snore app",
+     "free snoring app",
+     "my sleep talks",
+     "record sleep talking",
+     "sleep apnea",
+     "sleep apnea monitor",
+     "sleep diary",
+     "sleep log",
+     "sleep monitor",
+     "sleep monitor free",
+     "sleep monitoring free",
+     "sleep recorder",
+     "sleep recorder free",
+     "sleep score",
+     "sleep sound recorder",
+     "sleep talk recorder",
+     "sleep talk recorder free",
+     "sleep talk tracker",
+     "sleep talking",
+     "sleep talking app",
+     "sleep talking recorder",
+     "sleep talking recorder 2025",
+     "sleep talking recorder free",
+     "sleep talking tracker",
+     "sleep tracker",
+     "sleep tracker apple watch",
+     "sleep tracking",
+     "snore",
+     "snore alarm",
+     "snore app",
+     "snore control",
+     "snore detector",
+     "snore diary",
+     "snore monitor",
+     "snore monitor app",
+     "snore recorder",
+     "snore recorder app",
+     "snore recorder free",
+     "snore score",
+     "snore timeline",
+     "snore tracker",
+     "snore tracker apnea monitor",
+     "snore tracker free",
+     "snore tracking",
+     "snoring",
+     "snoring app",
+     "snoring monitoring",
+     "snoring recorder",
+     "snoring sounds",
+     "snoring tracker",
+     "stop snoring",
+     "stop snoring app",
+     "stop snoring free"
+    ],
+    "gradable": 84,
+    "partial": false,
+    "shots": "c34b9e0f",
+    "shotsAt": "2026-08-07T15:19:18.138Z"
+   },
+   "gb": {
+    "title": "Snore Timeline: Sleep Tracker",
+    "subtitle": "Snoring, Sleep Talking & Alarm",
+    "field": "record,free,my,monitor,apnea,ai,cpap,do,i,rem,night,2025,log,score,control,sounds,diary,quality,stop",
+    "fieldChars": 100,
+    "fieldUpdated": "2026-08-06",
+    "covered": [
+     "cpap sleep tracker",
+     "cpap tracker",
+     "do i snore",
+     "free sleep recording",
+     "free sleep talking app",
+     "free sleep tracker",
+     "free snore app",
+     "free snore recorder",
+     "free snoring app",
+     "my sleep talks",
+     "night recorder",
+     "record my sleep",
+     "record sleep talking",
+     "record snoring",
+     "rem sleep",
+     "sleep apnea",
+     "sleep apnea monitor",
+     "sleep diary",
+     "sleep log",
+     "sleep monitor",
+     "sleep monitor free",
+     "sleep monitoring free",
+     "sleep quality",
+     "sleep recorder",
+     "sleep recorder free",
+     "sleep score",
+     "sleep snore",
+     "sleep sound recorder",
+     "sleep talk",
+     "sleep talk ai recorder",
+     "sleep talk recorder",
+     "sleep talk recorder free",
+     "sleep talk tracker",
+     "sleep talking",
+     "sleep talking app",
+     "sleep talking app free",
+     "sleep talking recorder",
+     "sleep talking recorder 2025",
+     "sleep talking recorder free",
+     "sleep talking tracker",
+     "sleep tracker",
+     "sleep tracker free",
+     "sleep tracking",
+     "snore",
+     "snore ai",
+     "snore alarm",
+     "snore app",
+     "snore control",
+     "snore diary",
+     "snore monitor",
+     "snore monitor app",
+     "snore recorder",
+     "snore recorder app",
+     "snore recorder app free",
+     "snore recorder free",
+     "snore score",
+     "snore timeline",
+     "snore tracker",
+     "snore tracker apnea monitor",
+     "snore tracker free",
+     "snore tracking",
+     "snoring",
+     "snoring app",
+     "snoring recorder",
+     "snoring sounds",
+     "snoring tracker",
+     "snoring tracker free",
+     "stop snoring",
+     "stop snoring app",
+     "stop snoring free"
+    ],
+    "gradable": 95,
+    "partial": false,
+    "shots": "c34b9e0f",
+    "shotsAt": "2026-08-07T15:19:18.157Z"
+   },
+   "au": {
+    "title": "Snore Timeline: Sleep Tracker",
+    "subtitle": "Snoring, Sleep Talking & Alarm",
+    "field": "free,record,my,apnea,monitor,cpap,do,i,2025,sounds,log,score,diary,smart,detector,apple,watch,stop",
+    "fieldChars": 98,
+    "fieldUpdated": "2026-08-06",
+    "covered": [
+     "cpap",
+     "cpap sleep tracker",
+     "cpap tracker",
+     "do i snore",
+     "free sleep talking app",
+     "free sleep tracker",
+     "free snore app",
+     "free snoring app",
+     "my sleep talks",
+     "record sleep",
+     "record sleep talking",
+     "sleep apnea",
+     "sleep apnea monitor",
+     "sleep diary",
+     "sleep log",
+     "sleep monitor",
+     "sleep monitor free",
+     "sleep recorder",
+     "sleep recorder free",
+     "sleep score",
+     "sleep talk",
+     "sleep talk recorder",
+     "sleep talk recorder free",
+     "sleep talk tracker",
+     "sleep talking",
+     "sleep talking app",
+     "sleep talking recorder",
+     "sleep talking recorder 2025",
+     "sleep talking recorder free",
+     "sleep talking tracker",
+     "sleep tracker",
+     "sleep tracker apple watch",
+     "sleep tracking",
+     "smart alarm",
+     "snore",
+     "snore alarm",
+     "snore app",
+     "snore detector",
+     "snore diary",
+     "snore monitor",
+     "snore monitor app",
+     "snore recorder",
+     "snore recorder app",
+     "snore recorder free",
+     "snore score",
+     "snore timeline",
+     "snore tracker",
+     "snore tracker apnea monitor",
+     "snore tracker free",
+     "snore tracking",
+     "snoring",
+     "snoring app",
+     "snoring monitoring",
+     "snoring sounds",
+     "snoring tracker",
+     "stop snoring",
+     "stop snoring app",
+     "stop snoring free"
+    ],
+    "gradable": 87,
+    "partial": false,
+    "shots": "c34b9e0f",
+    "shotsAt": "2026-08-07T15:19:18.177Z"
+   },
+   "fr": {
+    "title": "Snore Timeline: Suivi Sommeil",
+    "subtitle": "Parole, Ronflement & Réveil",
+    "field": "il,enregistre,gratuit,de,apnée,du,nuit,analyse,appli,dormir,application,anti,score,détecteur",
+    "fieldChars": 92,
+    "fieldUpdated": "2026-08-06",
+    "covered": [
+     "analyse sommeil",
+     "analyse sommeil gratuit",
+     "anti ronflement",
+     "apnee du sommeil",
+     "apnee du sommeil gratuit",
+     "apnée",
+     "apnée du sommeil",
+     "apnée sommeil",
+     "appli dormir",
+     "appli ronflement",
+     "application dormir",
+     "application ronflement",
+     "application sommeil gratuit",
+     "dormir enregistrer",
+     "détecteur de ronflement",
+     "enregistrement nuit",
+     "enregistrement ronflement",
+     "enregistrement sommeil",
+     "enregistrer sommeil",
+     "enregistreur nuit",
+     "enregistreur ronflement",
+     "il ronfle",
+     "reveil",
+     "reveil gratuit",
+     "ronfle",
+     "ronflement",
+     "ronflement gratuit",
+     "ronfler",
+     "score sommeil",
+     "snore timeline",
+     "sommeil enregistre",
+     "sommeil enregistre gratuit",
+     "sommeil gratuit",
+     "suivi de sommeil",
+     "suivi de sommeil gratuit",
+     "suivi du sommeil",
+     "suivi sommeil",
+     "suivi sommeil gratuit"
+    ],
+    "gradable": 50,
+    "partial": false,
+    "shots": "fc331a03",
+    "shotsAt": "2026-08-07T15:19:18.194Z"
+   },
+   "es": {
+    "title": "Snore Timeline: Monitor Sueño",
+    "subtitle": "Ronquidos, Habla & Alarma",
+    "field": "de,del,gratis,seguimiento,apnea,grabar,control,dormir,grabadora,grabador,ciclos,medir,roncar,ronco",
+    "fieldChars": 98,
+    "fieldUpdated": "2026-08-06",
+    "covered": [
+     "alarma de ronquidos",
+     "apnea",
+     "apnea del sueño",
+     "apnea sueño",
+     "app sueño",
+     "ciclos de sueño",
+     "control del sueño gratis",
+     "control sueño gratis",
+     "dormir grabadora",
+     "grabador de ronquidos",
+     "grabador ronquidos sueño",
+     "grabadora de ronquidos",
+     "grabadora sueño",
+     "grabar dormir",
+     "grabar ronquidos",
+     "grabar sueño",
+     "medir sueño",
+     "monitor de sueño",
+     "monitor sueño",
+     "roncar",
+     "ronco",
+     "ronquidos",
+     "ronquidos gratis",
+     "seguimiento de sueño",
+     "seguimiento del sueño",
+     "seguimiento del sueño gratis",
+     "snore timeline",
+     "sueño gratis",
+     "sueño seguimiento",
+     "sueño seguimiento gratis"
+    ],
+    "gradable": 44,
+    "partial": false,
+    "shots": "5c27e5ba",
+    "shotsAt": "2026-08-07T15:19:18.318Z"
+   },
+   "mx": {
+    "title": "Snore Timeline: Monitor Sueño",
+    "subtitle": "Ronquidos, Habla & Alarma",
+    "field": "de,grabar,gratis,apnea,del,seguimiento,grabador,y,ciclos,roncar,medir,ronco,apple,watch,detector",
+    "fieldChars": 96,
+    "fieldUpdated": "2026-08-06",
+    "covered": [
+     "alarma de ronquidos",
+     "apnea",
+     "apnea del sueño",
+     "app sueño",
+     "ciclo sueño",
+     "ciclos de sueño",
+     "detector de ronquidos",
+     "grabador de ronquidos",
+     "grabador de ronquidos y sueno",
+     "grabador ronquidos sueño",
+     "grabar ronquidos",
+     "grabar sueño",
+     "medir sueño",
+     "monitor de sueño",
+     "monitor de sueño gratis",
+     "monitor sueño",
+     "roncar",
+     "ronco",
+     "ronquidos",
+     "ronquidos gratis",
+     "seguimiento de sueño",
+     "seguimiento del sueño",
+     "snore timeline",
+     "sueño apple watch",
+     "sueño gratis",
+     "sueño seguimiento"
+    ],
+    "gradable": 35,
+    "partial": false,
+    "shots": "2188e387",
+    "shotsAt": "2026-08-07T15:19:18.367Z"
+   },
+   "de": {
+    "title": "Snore Timeline: Schlaftracker",
+    "subtitle": "Schnarchen & Reden im Schlaf",
+    "field": "tracker,apnoe,apple,aufnahme,aufnehmen,cpap,watch,kostenlos,schlafanalyse,überwachen,schlafgeräusche",
+    "fieldChars": 100,
+    "fieldUpdated": "2026-08-06",
+    "covered": [
+     "apnoe",
+     "cpap",
+     "cpap tracker",
+     "im schlaf reden",
+     "schlaf",
+     "schlaf app",
+     "schlaf app kostenlos",
+     "schlaf aufnahme",
+     "schlaf aufnahme kostenlos",
+     "schlaf tracker",
+     "schlaf tracker kostenlos",
+     "schlaf überwachen",
+     "schlafanalyse",
+     "schlafanalyse kostenlos",
+     "schlafen",
+     "schlafgeräusche",
+     "schlafgeräusche aufnehmen",
+     "schlaftracker",
+     "schlaftracker apple watch",
+     "schlaftracker kostenlos",
+     "schnarch app",
+     "schnarch app kostenlos",
+     "schnarchen",
+     "schnarchen app",
+     "schnarchen aufnehmen",
+     "schnarchen kostenlos",
+     "schnarcher",
+     "snore timeline"
+    ],
+    "gradable": 43,
+    "partial": false,
+    "shots": "2625b691",
+    "shotsAt": "2026-08-07T15:19:18.387Z"
+   },
+   "nl": {
+    "title": "Snore Timeline: Slaaptracker",
+    "subtitle": "Snurken, praten, slaapgeluiden",
+    "field": "geluid,opnemen,slaap,in,gratis,tracker,cpap,apneu,slapen,opname,slaapapp,slaapapneu,slaaprecorder",
+    "fieldChars": 97,
+    "fieldUpdated": "2026-08-06",
+    "covered": [
+     "apneu",
+     "apneue",
+     "cpap",
+     "cpap tracker",
+     "geluid opnemen",
+     "praten in slaap",
+     "slaap",
+     "slaap app",
+     "slaap geluiden",
+     "slaap geluiden opnemen",
+     "slaap opname",
+     "slaap opnemen",
+     "slaap opnemen gratis",
+     "slaap tracker",
+     "slaap tracker gratis",
+     "slaapapneu",
+     "slaapapp",
+     "slaapgeluiden",
+     "slaaprecorder",
+     "slaaptracker",
+     "slapen",
+     "snore timeline",
+     "snurk",
+     "snurk app",
+     "snurk app gratis",
+     "snurken",
+     "snurken gratis",
+     "snurken opnemen"
+    ],
+    "gradable": 45,
+    "partial": false,
+    "shots": "c34b9e0f",
+    "shotsAt": "2026-08-07T15:19:18.423Z"
+   },
+   "jp": {
+    "title": "Snore Timeline: 睡眠トラッカー・録音",
+    "subtitle": "呼吸・いびき・寝言を記録。ウェアラブル・スマートアラーム対応",
+    "field": "アプリ無料,管理,寝息,眠りの質,計測,時無呼吸症候群,歯ぎしり,目覚まし,寝てる間録音,睡眠改善,レコーダー,apple,watch,睡眠分析,睡眠負債,睡眠スコア,いびき対策,睡眠時間記録",
+    "fieldChars": 96,
+    "fieldUpdated": "2026-08-06",
+    "covered": [
+     "apple watch 睡眠",
+     "snore timeline",
+     "いびき",
+     "いびき 無料",
+     "いびき 録音 無料",
+     "いびきアプリ",
+     "いびきアプリ 無料",
+     "いびきレコーダー",
+     "いびき対策",
+     "いびき録音",
+     "いびき録音アプリ",
+     "いびき録音アプリ無料",
+     "寝てる間録音",
+     "寝息",
+     "寝息録音",
+     "寝言",
+     "寝言 録音 アプリ",
+     "寝言 録音 アプリ無料",
+     "寝言いびきレコーダー",
+     "寝言アプリ無料",
+     "寝言記録",
+     "寝言録音",
+     "寝言録音 無料",
+     "歯ぎしり",
+     "歯ぎしり録音",
+     "無呼吸",
+     "無呼吸症候群",
+     "目覚まし",
+     "眠り",
+     "眠りの質",
+     "睡眠",
+     "睡眠 いびき 無料",
+     "睡眠 無呼吸",
+     "睡眠 録音",
+     "睡眠の質",
+     "睡眠の質 無料",
+     "睡眠アプリ",
+     "睡眠アプリ apple watch",
+     "睡眠アプリ いびき",
+     "睡眠アプリ 無料",
+     "睡眠アプリ無呼吸",
+     "睡眠スコア",
+     "睡眠トラッカー",
+     "睡眠分析",
+     "睡眠改善",
+     "睡眠時無呼吸症候群",
+     "睡眠時間記録",
+     "睡眠管理",
+     "睡眠管理アプリ",
+     "睡眠管理アプリ 無料",
+     "睡眠計測",
+     "睡眠計測アプリ",
+     "睡眠記録",
+     "睡眠記録 アプリ",
+     "睡眠記録無料",
+     "睡眠負債"
+    ],
+    "gradable": 64,
+    "partial": false,
+    "shots": "b919facc",
+    "shotsAt": "2026-08-07T15:19:18.446Z"
+   },
+   "cn": {
+    "title": "Snore Timeline：鼾声睡眠追踪",
+    "subtitle": "记录打鼾、梦话、呼吸暂停、磨牙、心率。支持穿戴设备与闹钟",
+    "field": "打呼噜,鼾症,助眠,白噪音,心率,苹果手表,失眠,CPAP,录音,REM,监测,自动,夜间,安眠,止鼾,防鼾,浅睡,深度,周期,报告,质量,检测,免费,睡觉,磨牙,说,器,分析,助手,训练,护理,大师",
+    "fieldChars": 100,
+    "fieldUpdated": "2026-08-06",
+    "covered": [
+     "snore timeline",
+     "助眠",
+     "呼吸暂停",
+     "呼噜",
+     "呼噜检测",
+     "呼噜监测",
+     "失眠",
+     "心率监测",
+     "打呼",
+     "打呼噜",
+     "打呼噜录音",
+     "打呼噜检测",
+     "打呼噜检测免费",
+     "打呼噜监测",
+     "打呼检测",
+     "打呼监测",
+     "打鼾",
+     "打鼾检测",
+     "打鼾监测",
+     "打鼾记录",
+     "打鼾记录器",
+     "梦话",
+     "梦话录音",
+     "梦话监测",
+     "梦话记录",
+     "止鼾",
+     "深度睡眠",
+     "深度睡眠监测",
+     "白噪音",
+     "睡眠",
+     "睡眠周期",
+     "睡眠呼吸暂停",
+     "睡眠报告",
+     "睡眠监测",
+     "睡眠监测免费",
+     "睡眠监测打呼噜",
+     "睡眠记录",
+     "睡眠质量",
+     "睡眠质量监测",
+     "睡眠追踪",
+     "睡觉录音",
+     "睡觉打呼噜",
+     "睡觉监测",
+     "睡觉记录",
+     "磨牙",
+     "磨牙监测",
+     "说梦话",
+     "说梦话记录",
+     "闹钟",
+     "鼾声",
+     "鼾声分析器",
+     "鼾声护理",
+     "鼾声检测",
+     "鼾声监测",
+     "鼾声记录"
+    ],
+    "gradable": 59,
+    "partial": false,
+    "shots": "e16e7ede",
+    "shotsAt": "2026-08-07T15:19:18.465Z"
+   }
+  },
+  "effect": {
+   "computedAt": "2026-08-07T15:20:37.124Z",
+   "days": 0,
+   "stage": "indexing",
+   "baselineDays": 7,
+   "postDays": 1,
+   "markets": {
+    "us": {
+     "graded": true,
+     "coverage": {
+      "before": 66,
+      "after": 68,
+      "of": 100,
+      "gained": [
+       "auto sleep tracker",
+       "sleep talk ai recorder",
+       "sleep talking recorder 2025",
+       "snore ai",
+       "snoring king",
+       "stop snoring",
+       "stop snoring app",
+       "stop snoring free"
+      ],
+      "lost": [
+       "apple watch sleep tracker",
+       "sleep diary",
+       "sleep score apple watch",
+       "sleep sound recorder",
+       "snore diary",
+       "snoring sounds"
+      ],
+      "comparable": true
+     },
+     "fieldChanged": true,
+     "subtitleChanged": false,
+     "shotsChanged": null,
+     "target": {
+      "n": 5,
+      "gain": -0.8
+     },
+     "control": {
+      "n": 38,
+      "gain": -1.5
+     },
+     "floor": {
+      "n": 3,
+      "gain": 1.2
+     },
+     "lift": 0.7,
+     "appeared": [
+      {
+       "kw": "free snore recorder",
+       "pop": 78,
+       "rank": 26
+      },
+      {
+       "kw": "autosleep",
+       "pop": 72,
+       "rank": 135
+      },
+      {
+       "kw": "sleep tracker and sleep recorder",
+       "pop": 69,
+       "rank": 21
+      },
+      {
+       "kw": "snore recorder app free",
+       "pop": 68,
+       "rank": 10
+      },
+      {
+       "kw": "snoring king",
+       "pop": 54,
+       "rank": 6
+      }
+     ],
+     "vanished": [],
+     "movers": [
+      {
+       "kw": "rem sleep alarm",
+       "pop": 70,
+       "before": 53,
+       "after": 145,
+       "gain": -92,
+       "cohort": "control"
+      },
+      {
+       "kw": "sleep talk recorder",
+       "pop": 51,
+       "before": 70,
+       "after": 131,
+       "gain": -61,
+       "cohort": "control"
+      },
+      {
+       "kw": "night recorder",
+       "pop": 61,
+       "before": 90,
+       "after": 119,
+       "gain": -29,
+       "cohort": "control"
+      },
+      {
+       "kw": "sleep tracker",
+       "pop": 77,
+       "before": 54,
+       "after": 81,
+       "gain": -27,
+       "cohort": "control"
+      },
+      {
+       "kw": "snore ai",
+       "pop": 5,
+       "before": 38,
+       "after": 15,
+       "gain": 23,
+       "cohort": "target"
+      },
+      {
+       "kw": "sleep quality",
+       "pop": 67,
+       "before": 38.3,
+       "after": 56,
+       "gain": -17.7,
+       "cohort": "control"
+      },
+      {
+       "kw": "snore monitor",
+       "pop": 70,
+       "before": 26,
+       "after": 14,
+       "gain": 12,
+       "cohort": "control"
+      },
+      {
+       "kw": "snorescout",
+       "pop": 67,
+       "before": 83,
+       "after": 71,
+       "gain": 12,
+       "cohort": "floor"
+      },
+      {
+       "kw": "snore recorder",
+       "pop": 5,
+       "before": 15,
+       "after": 26,
+       "gain": -11,
+       "cohort": "control"
+      },
+      {
+       "kw": "sleep talking recorder",
+       "pop": 78,
+       "before": 26,
+       "after": 37,
+       "gain": -11,
+       "cohort": "control"
+      },
+      {
+       "kw": "sleep recorder free",
+       "pop": 74,
+       "before": 69,
+       "after": 77,
+       "gain": -8,
+       "cohort": "control"
+      },
+      {
+       "kw": "snore detection app",
+       "pop": 5,
+       "before": 33,
+       "after": 41,
+       "gain": -8,
+       "cohort": "floor"
+      }
+     ],
+     "noisy": 26,
+     "ratings": {
+      "before": 0.7,
+      "after": 2
+     }
+    },
+    "ca": {
+     "graded": true,
+     "coverage": {
+      "before": 56,
+      "after": 58,
+      "of": 84,
+      "gained": [
+       "sleep talking recorder 2025",
+       "snore control",
+       "stop snoring",
+       "stop snoring app",
+       "stop snoring free"
+      ],
+      "lost": [
+       "sleep cycle",
+       "sleep cycle tracker",
+       "snoring tracker cycle"
+      ],
+      "comparable": true
+     },
+     "fieldChanged": true,
+     "subtitleChanged": false,
+     "shotsChanged": null,
+     "target": {
+      "n": 1,
+      "gain": 0
+     },
+     "control": {
+      "n": 47,
+      "gain": 0
+     },
+     "floor": {
+      "n": 9,
+      "gain": -0.1
+     },
+     "lift": 0,
+     "appeared": [
+      {
+       "kw": "app for cpap machine users",
+       "pop": 89,
+       "rank": 23
+      },
+      {
+       "kw": "snore diary",
+       "pop": 45,
+       "rank": 6
+      },
+      {
+       "kw": "snoring king",
+       "pop": 5,
+       "rank": 44
+      }
+     ],
+     "vanished": [],
+     "movers": [
+      {
+       "kw": "sleep sound recorder",
+       "pop": 59,
+       "before": 29,
+       "after": 46,
+       "gain": -17,
+       "cohort": "control"
+      },
+      {
+       "kw": "snore recorder",
+       "pop": 61,
+       "before": 3,
+       "after": 19,
+       "gain": -16,
+       "cohort": "control"
+      },
+      {
+       "kw": "sleep recorder",
+       "pop": 75,
+       "before": 31.7,
+       "after": 43,
+       "gain": -11.3,
+       "cohort": "control"
+      },
+      {
+       "kw": "sleep log",
+       "pop": 50,
+       "before": 24,
+       "after": 32,
+       "gain": -8,
+       "cohort": "control"
+      },
+      {
+       "kw": "snore score",
+       "pop": 5,
+       "before": 8,
+       "after": 15,
+       "gain": -7,
+       "cohort": "control"
+      },
+      {
+       "kw": "sleep talk recorder",
+       "pop": 67,
+       "before": 32,
+       "after": 39,
+       "gain": -7,
+       "cohort": "control"
+      },
+      {
+       "kw": "free sleep tracker",
+       "pop": 65,
+       "before": 32,
+       "after": 26,
+       "gain": 6,
+       "cohort": "control"
+      },
+      {
+       "kw": "sleep talk tracker",
+       "pop": 5,
+       "before": 14.5,
+       "after": 20,
+       "gain": -5.5,
+       "cohort": "control"
+      },
+      {
+       "kw": "sleep talking",
+       "pop": 5,
+       "before": 20,
+       "after": 25,
+       "gain": -5,
+       "cohort": "control"
+      },
+      {
+       "kw": "snoring detection app",
+       "pop": 5,
+       "before": 35,
+       "after": 40,
+       "gain": -5,
+       "cohort": "floor"
+      },
+      {
+       "kw": "breathing monitor sleep",
+       "pop": 5,
+       "before": 20,
+       "after": 25,
+       "gain": -5,
+       "cohort": "floor"
+      },
+      {
+       "kw": "sleep apnea",
+       "pop": 40,
+       "before": 32.6,
+       "after": 28,
+       "gain": 4.6,
+       "cohort": "control"
+      }
+     ],
+     "noisy": 4,
+     "ratings": {
+      "before": 0,
+      "after": 0
+     }
+    },
+    "gb": {
+     "graded": true,
+     "coverage": {
+      "before": 65,
+      "after": 70,
+      "of": 95,
+      "gained": [
+       "sleep talk ai recorder",
+       "sleep talking recorder 2025",
+       "snore ai",
+       "snore control",
+       "stop snoring",
+       "stop snoring app",
+       "stop snoring free"
+      ],
+      "lost": [
+       "sleep tracker apple watch",
+       "snore detector"
+      ],
+      "comparable": true
+     },
+     "fieldChanged": true,
+     "subtitleChanged": false,
+     "shotsChanged": null,
+     "target": {
+      "n": 5,
+      "gain": 1
+     },
+     "control": {
+      "n": 45,
+      "gain": -1
+     },
+     "floor": {
+      "n": 5,
+      "gain": -2
+     },
+     "lift": 2,
+     "appeared": [
+      {
+       "kw": "snore recorder app free",
+       "pop": 88,
+       "rank": 22
+      },
+      {
+       "kw": "snoring tracker free",
+       "pop": 78,
+       "rank": 9
+      },
+      {
+       "kw": "sleep talk recorder free",
+       "pop": 73,
+       "rank": 54
+      },
+      {
+       "kw": "free snore recorder",
+       "pop": 69,
+       "rank": 16
+      },
+      {
+       "kw": "snore diary",
+       "pop": 57,
+       "rank": 5
+      },
+      {
+       "kw": "snoring king",
+       "pop": 5,
+       "rank": 51
+      }
+     ],
+     "vanished": [],
+     "movers": [
+      {
+       "kw": "snore ai",
+       "pop": 52,
+       "before": 36.3,
+       "after": 9,
+       "gain": 27.3,
+       "cohort": "target"
+      },
+      {
+       "kw": "sleep monitor",
+       "pop": 61,
+       "before": 46.5,
+       "after": 72,
+       "gain": -25.5,
+       "cohort": "control"
+      },
+      {
+       "kw": "sleep talk",
+       "pop": 50,
+       "before": 32.7,
+       "after": 55,
+       "gain": -22.3,
+       "cohort": "control"
+      },
+      {
+       "kw": "sleep monitoring free",
+       "pop": 68,
+       "before": 27,
+       "after": 46,
+       "gain": -19,
+       "cohort": "control"
+      },
+      {
+       "kw": "sleep tracking",
+       "pop": 47,
+       "before": 51,
+       "after": 67,
+       "gain": -16,
+       "cohort": "control"
+      },
+      {
+       "kw": "sleep recorder",
+       "pop": 89,
+       "before": 48,
+       "after": 62,
+       "gain": -14,
+       "cohort": "control"
+      },
+      {
+       "kw": "sleep score",
+       "pop": 60,
+       "before": 40.3,
+       "after": 52,
+       "gain": -11.7,
+       "cohort": "control"
+      },
+      {
+       "kw": "record sleep talking",
+       "pop": 61,
+       "before": 42.5,
+       "after": 53,
+       "gain": -10.5,
+       "cohort": "control"
+      },
+      {
+       "kw": "sleep snore",
+       "pop": 52,
+       "before": 24,
+       "after": 33,
+       "gain": -9,
+       "cohort": "control"
+      },
+      {
+       "kw": "sleep talk ai recorder",
+       "pop": 56,
+       "before": 34,
+       "after": 27,
+       "gain": 7,
+       "cohort": "target"
+      },
+      {
+       "kw": "sleep talking",
+       "pop": 52,
+       "before": 23,
+       "after": 29,
+       "gain": -6,
+       "cohort": "control"
+      },
+      {
+       "kw": "do i snore",
+       "pop": 83,
+       "before": 13,
+       "after": 19,
+       "gain": -6,
+       "cohort": "control"
+      }
+     ],
+     "noisy": 13,
+     "ratings": {
+      "before": 0.3,
+      "after": 0
+     }
+    },
+    "au": {
+     "graded": true,
+     "coverage": {
+      "before": 44,
+      "after": 58,
+      "of": 87,
+      "gained": [
+       "free sleep talking app",
+       "free sleep tracker",
+       "free snore app",
+       "free snoring app",
+       "sleep monitor free",
+       "sleep recorder free",
+       "sleep talk recorder free",
+       "sleep talking recorder 2025",
+       "sleep talking recorder free",
+       "snore recorder free",
+       "snore tracker free",
+       "stop snoring",
+       "stop snoring app",
+       "stop snoring free"
+      ],
+      "lost": [],
+      "comparable": true
+     },
+     "fieldChanged": true,
+     "subtitleChanged": false,
+     "shotsChanged": null,
+     "target": {
+      "n": 11,
+      "gain": 0.5
+     },
+     "control": {
+      "n": 36,
+      "gain": 0
+     },
+     "floor": {
+      "n": 12,
+      "gain": 0
+     },
+     "lift": 0.5,
+     "appeared": [
+      {
+       "kw": "cpap",
+       "pop": 53,
+       "rank": 40
+      },
+      {
+       "kw": "snore diary",
+       "pop": 52,
+       "rank": 5
+      },
+      {
+       "kw": "snoring king",
+       "pop": 5,
+       "rank": 29
+      }
+     ],
+     "vanished": [],
+     "movers": [
+      {
+       "kw": "sleep cycle free",
+       "pop": 73,
+       "before": 32.5,
+       "after": 76,
+       "gain": -43.5,
+       "cohort": "floor"
+      },
+      {
+       "kw": "sleep talk",
+       "pop": 50,
+       "before": 53,
+       "after": 96,
+       "gain": -43,
+       "cohort": "control"
+      },
+      {
+       "kw": "snoring tracker cycle",
+       "pop": 5,
+       "before": 8,
+       "after": 28,
+       "gain": -20,
+       "cohort": "floor"
+      },
+      {
+       "kw": "my sleep talks",
+       "pop": 66,
+       "before": 21,
+       "after": 7,
+       "gain": 14,
+       "cohort": "control"
+      },
+      {
+       "kw": "snore ai",
+       "pop": 5,
+       "before": 23,
+       "after": 9,
+       "gain": 14,
+       "cohort": "floor"
+      },
+      {
+       "kw": "sleep talk recorder",
+       "pop": 76,
+       "before": 26.8,
+       "after": 38,
+       "gain": -11.2,
+       "cohort": "control"
+      },
+      {
+       "kw": "record sleep talking",
+       "pop": 5,
+       "before": 26,
+       "after": 15,
+       "gain": 11,
+       "cohort": "control"
+      },
+      {
+       "kw": "sleep quality tracker",
+       "pop": 5,
+       "before": 9,
+       "after": 20,
+       "gain": -11,
+       "cohort": "floor"
+      },
+      {
+       "kw": "sleep diary",
+       "pop": 63,
+       "before": 35,
+       "after": 27,
+       "gain": 8,
+       "cohort": "control"
+      },
+      {
+       "kw": "sleep apnea monitor",
+       "pop": 80,
+       "before": 41,
+       "after": 34,
+       "gain": 7,
+       "cohort": "control"
+      },
+      {
+       "kw": "smart alarm",
+       "pop": 56,
+       "before": 80,
+       "after": 73,
+       "gain": 7,
+       "cohort": "control"
+      },
+      {
+       "kw": "snore recorder",
+       "pop": 5,
+       "before": 11,
+       "after": 16,
+       "gain": -5,
+       "cohort": "control"
+      }
+     ],
+     "noisy": 9,
+     "ratings": {
+      "before": 0.3,
+      "after": 0
+     }
+    },
+    "fr": {
+     "graded": true,
+     "coverage": {
+      "before": 9,
+      "after": 38,
+      "of": 50,
+      "gained": [
+       "analyse sommeil",
+       "analyse sommeil gratuit",
+       "anti ronflement",
+       "apnee du sommeil",
+       "apnee du sommeil gratuit",
+       "apnée",
+       "apnée du sommeil",
+       "apnée sommeil",
+       "appli dormir",
+       "appli ronflement",
+       "application dormir",
+       "application ronflement",
+       "application sommeil gratuit",
+       "dormir enregistrer",
+       "détecteur de ronflement",
+       "enregistrement nuit",
+       "enregistrement ronflement",
+       "enregistrement sommeil",
+       "enregistrer sommeil",
+       "enregistreur nuit",
+       "enregistreur ronflement",
+       "reveil gratuit",
+       "ronflement gratuit",
+       "score sommeil",
+       "sommeil enregistre",
+       "sommeil enregistre gratuit",
+       "sommeil gratuit",
+       "suivi de sommeil gratuit",
+       "suivi sommeil gratuit"
+      ],
+      "lost": [],
+      "comparable": false
+     },
+     "fieldChanged": true,
+     "subtitleChanged": false,
+     "shotsChanged": null,
+     "target": {
+      "n": 16,
+      "gain": -0.5
+     },
+     "control": {
+      "n": 4,
+      "gain": 1
+     },
+     "floor": {
+      "n": 1,
+      "gain": -25
+     },
+     "lift": -1.5,
+     "appeared": [
+      {
+       "kw": "dormir enregistrer",
+       "pop": 89,
+       "rank": 13
+      },
+      {
+       "kw": "i ronfle",
+       "pop": 83,
+       "rank": 24
+      },
+      {
+       "kw": "sommeil gratuit",
+       "pop": 64,
+       "rank": 95
+      },
+      {
+       "kw": "appli dormir",
+       "pop": 60,
+       "rank": 14
+      }
+     ],
+     "vanished": [],
+     "movers": [
+      {
+       "kw": "enregistrement nuit",
+       "pop": 42,
+       "before": 23,
+       "after": 59,
+       "gain": -36,
+       "cohort": "target"
+      },
+      {
+       "kw": "il ronfle",
+       "pop": 82,
+       "before": 49,
+       "after": 23,
+       "gain": 26,
+       "cohort": "control"
+      },
+      {
+       "kw": "dream talk recorder",
+       "pop": 59,
+       "before": 64,
+       "after": 89,
+       "gain": -25,
+       "cohort": "floor"
+      },
+      {
+       "kw": "sommeil enregistre",
+       "pop": 84,
+       "before": 22,
+       "after": 36,
+       "gain": -14,
+       "cohort": "target"
+      },
+      {
+       "kw": "enregistrer sommeil",
+       "pop": 53,
+       "before": 49,
+       "after": 41,
+       "gain": 8,
+       "cohort": "target"
+      },
+      {
+       "kw": "analyse sommeil gratuit",
+       "pop": 91,
+       "before": 29,
+       "after": 36,
+       "gain": -7,
+       "cohort": "target"
+      },
+      {
+       "kw": "ronflement gratuit",
+       "pop": 76,
+       "before": 22,
+       "after": 28,
+       "gain": -6,
+       "cohort": "target"
+      },
+      {
+       "kw": "enregistrement ronflement",
+       "pop": 60,
+       "before": 19,
+       "after": 25,
+       "gain": -6,
+       "cohort": "target"
+      },
+      {
+       "kw": "score sommeil",
+       "pop": 53,
+       "before": 18,
+       "after": 14,
+       "gain": 4,
+       "cohort": "target"
+      },
+      {
+       "kw": "anti ronflement",
+       "pop": 71,
+       "before": 19,
+       "after": 16,
+       "gain": 3,
+       "cohort": "target"
+      },
+      {
+       "kw": "détecteur de ronflement",
+       "pop": 59,
+       "before": 13,
+       "after": 10,
+       "gain": 3,
+       "cohort": "target"
+      },
+      {
+       "kw": "appli ronflement",
+       "pop": 72,
+       "before": 31,
+       "after": 28,
+       "gain": 3,
+       "cohort": "target"
+      }
+     ],
+     "noisy": 12,
+     "ratings": {
+      "before": 0,
+      "after": 0
+     }
+    },
+    "es": {
+     "graded": true,
+     "coverage": {
+      "before": 6,
+      "after": 30,
+      "of": 44,
+      "gained": [
+       "apnea",
+       "apnea del sueño",
+       "apnea sueño",
+       "ciclos de sueño",
+       "control del sueño gratis",
+       "control sueño gratis",
+       "dormir grabadora",
+       "grabador de ronquidos",
+       "grabador ronquidos sueño",
+       "grabadora de ronquidos",
+       "grabadora sueño",
+       "grabar dormir",
+       "grabar ronquidos",
+       "grabar sueño",
+       "medir sueño",
+       "roncar",
+       "ronco",
+       "ronquidos gratis",
+       "seguimiento de sueño",
+       "seguimiento del sueño",
+       "seguimiento del sueño gratis",
+       "sueño gratis",
+       "sueño seguimiento",
+       "sueño seguimiento gratis"
+      ],
+      "lost": [],
+      "comparable": false
+     },
+     "fieldChanged": true,
+     "subtitleChanged": false,
+     "shotsChanged": null,
+     "target": {
+      "n": 14,
+      "gain": 8.8
+     },
+     "control": {
+      "n": 5,
+      "gain": 8
+     },
+     "floor": {
+      "n": 7,
+      "gain": 7
+     },
+     "lift": 0.8,
+     "appeared": [
+      {
+       "kw": "apnea del sueño",
+       "pop": 83,
+       "rank": 17
+      },
+      {
+       "kw": "seguimiento del sueño",
+       "pop": 75,
+       "rank": 42
+      },
+      {
+       "kw": "control del sueño gratis",
+       "pop": 67,
+       "rank": 14
+      },
+      {
+       "kw": "control sueño gratis",
+       "pop": 66,
+       "rank": 18
+      },
+      {
+       "kw": "grabar sueño",
+       "pop": 60,
+       "rank": 26
+      }
+     ],
+     "vanished": [],
+     "movers": [
+      {
+       "kw": "grabar mientras duermes",
+       "pop": 78,
+       "before": 58,
+       "after": 34,
+       "gain": 24,
+       "cohort": "floor"
+      },
+      {
+       "kw": "monitor de sueño",
+       "pop": 64,
+       "before": 47.7,
+       "after": 24,
+       "gain": 23.7,
+       "cohort": "control"
+      },
+      {
+       "kw": "ronco",
+       "pop": 47,
+       "before": 31,
+       "after": 10,
+       "gain": 21,
+       "cohort": "target"
+      },
+      {
+       "kw": "controlar sueño",
+       "pop": 39,
+       "before": 79.5,
+       "after": 100,
+       "gain": -20.5,
+       "cohort": "floor"
+      },
+      {
+       "kw": "seguimiento del sueño gratis",
+       "pop": 69,
+       "before": 54,
+       "after": 35,
+       "gain": 19,
+       "cohort": "target"
+      },
+      {
+       "kw": "sueño seguimiento gratis",
+       "pop": 77,
+       "before": 40,
+       "after": 21,
+       "gain": 19,
+       "cohort": "target"
+      },
+      {
+       "kw": "detector de ronquidos",
+       "pop": 53,
+       "before": 32,
+       "after": 13,
+       "gain": 19,
+       "cohort": "floor"
+      },
+      {
+       "kw": "monitor sueño",
+       "pop": 5,
+       "before": 38,
+       "after": 20,
+       "gain": 18,
+       "cohort": "control"
+      },
+      {
+       "kw": "grabar ronquidos",
+       "pop": 72,
+       "before": 53,
+       "after": 36,
+       "gain": 17,
+       "cohort": "target"
+      },
+      {
+       "kw": "dream talk recorder",
+       "pop": 69,
+       "before": 71,
+       "after": 88,
+       "gain": -17,
+       "cohort": "floor"
+      },
+      {
+       "kw": "ronquidos gratis",
+       "pop": 79,
+       "before": 28,
+       "after": 12,
+       "gain": 16,
+       "cohort": "target"
+      },
+      {
+       "kw": "sueño apple watch",
+       "pop": 84,
+       "before": 79,
+       "after": 63,
+       "gain": 16,
+       "cohort": "floor"
+      }
+     ],
+     "noisy": 6,
+     "ratings": {
+      "before": 0,
+      "after": 0
+     }
+    },
+    "mx": {
+     "graded": true,
+     "coverage": {
+      "before": 6,
+      "after": 26,
+      "of": 35,
+      "gained": [
+       "apnea",
+       "apnea del sueño",
+       "ciclo sueño",
+       "ciclos de sueño",
+       "detector de ronquidos",
+       "grabador de ronquidos",
+       "grabador de ronquidos y sueno",
+       "grabador ronquidos sueño",
+       "grabar ronquidos",
+       "grabar sueño",
+       "medir sueño",
+       "monitor de sueño gratis",
+       "roncar",
+       "ronco",
+       "ronquidos gratis",
+       "seguimiento de sueño",
+       "seguimiento del sueño",
+       "sueño apple watch",
+       "sueño gratis",
+       "sueño seguimiento"
+      ],
+      "lost": [],
+      "comparable": false
+     },
+     "fieldChanged": true,
+     "subtitleChanged": false,
+     "shotsChanged": null,
+     "target": {
+      "n": 11,
+      "gain": 2
+     },
+     "control": {
+      "n": 4,
+      "gain": 1.5
+     },
+     "floor": {
+      "n": 3,
+      "gain": 1
+     },
+     "lift": 0.5,
+     "appeared": [
+      {
+       "kw": "apnea del sueño",
+       "pop": 83,
+       "rank": 5
+      },
+      {
+       "kw": "grabar sueño",
+       "pop": 60,
+       "rank": 10
+      },
+      {
+       "kw": "seguimiento del sueño",
+       "pop": 47,
+       "rank": 21
+      }
+     ],
+     "vanished": [],
+     "movers": [
+      {
+       "kw": "ciclo sueño",
+       "pop": 5,
+       "before": 159,
+       "after": 51,
+       "gain": 108,
+       "cohort": "target"
+      },
+      {
+       "kw": "ciclos de sueño",
+       "pop": 73,
+       "before": 147.4,
+       "after": 95,
+       "gain": 52.4,
+       "cohort": "target"
+      },
+      {
+       "kw": "monitor de sueño",
+       "pop": 65,
+       "before": 54,
+       "after": 38,
+       "gain": 16,
+       "cohort": "control"
+      },
+      {
+       "kw": "monitor de sueño gratis",
+       "pop": 58,
+       "before": 48,
+       "after": 39,
+       "gain": 9,
+       "cohort": "target"
+      },
+      {
+       "kw": "despertador inteligente",
+       "pop": 5,
+       "before": 158,
+       "after": 165,
+       "gain": -7,
+       "cohort": "floor"
+      },
+      {
+       "kw": "roncar",
+       "pop": 75,
+       "before": 27.8,
+       "after": 23,
+       "gain": 4.8,
+       "cohort": "target"
+      },
+      {
+       "kw": "grabador de ronquidos y sueno",
+       "pop": 73,
+       "before": 16,
+       "after": 13,
+       "gain": 3,
+       "cohort": "target"
+      },
+      {
+       "kw": "alarma de ronquidos",
+       "pop": 62,
+       "before": 19,
+       "after": 16,
+       "gain": 3,
+       "cohort": "control"
+      },
+      {
+       "kw": "hablar dormido",
+       "pop": 5,
+       "before": 10,
+       "after": 7,
+       "gain": 3,
+       "cohort": "floor"
+      },
+      {
+       "kw": "ronco",
+       "pop": 50,
+       "before": 30,
+       "after": 28,
+       "gain": 2,
+       "cohort": "target"
+      },
+      {
+       "kw": "grabador ronquidos sueño",
+       "pop": 76,
+       "before": 18,
+       "after": 16,
+       "gain": 2,
+       "cohort": "target"
+      }
+     ],
+     "noisy": 8,
+     "ratings": {
+      "before": 0,
+      "after": 0
+     }
+    },
+    "de": {
+     "graded": true,
+     "coverage": {
+      "before": 10,
+      "after": 28,
+      "of": 43,
+      "gained": [
+       "apnoe",
+       "cpap",
+       "cpap tracker",
+       "schlaf app kostenlos",
+       "schlaf aufnahme",
+       "schlaf aufnahme kostenlos",
+       "schlaf tracker",
+       "schlaf tracker kostenlos",
+       "schlaf überwachen",
+       "schlafanalyse",
+       "schlafanalyse kostenlos",
+       "schlafgeräusche",
+       "schlafgeräusche aufnehmen",
+       "schlaftracker apple watch",
+       "schlaftracker kostenlos",
+       "schnarch app kostenlos",
+       "schnarchen aufnehmen",
+       "schnarchen kostenlos"
+      ],
+      "lost": [],
+      "comparable": false
+     },
+     "fieldChanged": true,
+     "subtitleChanged": false,
+     "shotsChanged": null,
+     "target": {
+      "n": 12,
+      "gain": 2
+     },
+     "control": {
+      "n": 5,
+      "gain": 8
+     },
+     "floor": {
+      "n": 3,
+      "gain": -1
+     },
+     "lift": -6,
+     "appeared": [
+      {
+       "kw": "schlaf",
+       "pop": 47,
+       "rank": 160
+      }
+     ],
+     "vanished": [],
+     "movers": [
+      {
+       "kw": "schlafanalyse",
+       "pop": 67,
+       "before": 80,
+       "after": 45,
+       "gain": 35,
+       "cohort": "target"
+      },
+      {
+       "kw": "schnarchen app",
+       "pop": 5,
+       "before": 68,
+       "after": 53,
+       "gain": 15,
+       "cohort": "control"
+      },
+      {
+       "kw": "schnarchen",
+       "pop": 58,
+       "before": 27.5,
+       "after": 37,
+       "gain": -9.5,
+       "cohort": "control"
+      },
+      {
+       "kw": "cpap",
+       "pop": 67,
+       "before": 21.5,
+       "after": 30,
+       "gain": -8.5,
+       "cohort": "target"
+      },
+      {
+       "kw": "im schlaf reden",
+       "pop": 84,
+       "before": 20.5,
+       "after": 12,
+       "gain": 8.5,
+       "cohort": "control"
+      },
+      {
+       "kw": "schnarchen kostenlos",
+       "pop": 71,
+       "before": 36,
+       "after": 28,
+       "gain": 8,
+       "cohort": "target"
+      },
+      {
+       "kw": "schnarch app",
+       "pop": 84,
+       "before": 130,
+       "after": 122,
+       "gain": 8,
+       "cohort": "control"
+      },
+      {
+       "kw": "schlaf überwachen",
+       "pop": 73,
+       "before": 33.5,
+       "after": 27,
+       "gain": 6.5,
+       "cohort": "target"
+      },
+      {
+       "kw": "schlafanalyse kostenlos",
+       "pop": 73,
+       "before": 33,
+       "after": 27,
+       "gain": 6,
+       "cohort": "target"
+      },
+      {
+       "kw": "schlafaufnahme",
+       "pop": 64,
+       "before": 51,
+       "after": 57,
+       "gain": -6,
+       "cohort": "floor"
+      },
+      {
+       "kw": "schlaf tracker kostenlos",
+       "pop": 59,
+       "before": 75,
+       "after": 70,
+       "gain": 5,
+       "cohort": "target"
+      },
+      {
+       "kw": "schlaftracker apple watch",
+       "pop": 71,
+       "before": 29,
+       "after": 32,
+       "gain": -3,
+       "cohort": "target"
+      }
+     ],
+     "noisy": 2,
+     "ratings": {
+      "before": 0,
+      "after": 0
+     }
+    },
+    "nl": {
+     "graded": true,
+     "coverage": {
+      "before": 6,
+      "after": 28,
+      "of": 45,
+      "gained": [
+       "apneu",
+       "apneue",
+       "cpap",
+       "cpap tracker",
+       "geluid opnemen",
+       "praten in slaap",
+       "slaap",
+       "slaap app",
+       "slaap geluiden",
+       "slaap geluiden opnemen",
+       "slaap opname",
+       "slaap opnemen",
+       "slaap opnemen gratis",
+       "slaap tracker",
+       "slaap tracker gratis",
+       "slaapapneu",
+       "slaapapp",
+       "slaaprecorder",
+       "slapen",
+       "snurk app gratis",
+       "snurken gratis",
+       "snurken opnemen"
+      ],
+      "lost": [],
+      "comparable": false
+     },
+     "fieldChanged": true,
+     "subtitleChanged": false,
+     "shotsChanged": null,
+     "target": {
+      "n": 2,
+      "gain": -1
+     },
+     "control": {
+      "n": 1,
+      "gain": 0
+     },
+     "floor": {
+      "n": 1,
+      "gain": 1
+     },
+     "lift": -1,
+     "appeared": [
+      {
+       "kw": "slaap",
+       "pop": 64,
+       "rank": 54
+      },
+      {
+       "kw": "apneue",
+       "pop": 44,
+       "rank": 14
+      }
+     ],
+     "vanished": [],
+     "movers": [
+      {
+       "kw": "cpap",
+       "pop": 5,
+       "before": 21,
+       "after": 23,
+       "gain": -2,
+       "cohort": "target"
+      }
+     ],
+     "noisy": 6,
+     "ratings": {
+      "before": 0.1,
+      "after": 0
+     }
+    },
+    "jp": {
+     "graded": true,
+     "coverage": {
+      "before": 10,
+      "after": 56,
+      "of": 64,
+      "gained": [
+       "apple watch 睡眠",
+       "いびき 無料",
+       "いびき 録音 無料",
+       "いびきアプリ",
+       "いびきアプリ 無料",
+       "いびきレコーダー",
+       "いびき対策",
+       "いびき録音アプリ",
+       "いびき録音アプリ無料",
+       "寝てる間録音",
+       "寝息",
+       "寝息録音",
+       "寝言 録音 アプリ",
+       "寝言 録音 アプリ無料",
+       "寝言いびきレコーダー",
+       "寝言アプリ無料",
+       "寝言録音 無料",
+       "歯ぎしり",
+       "歯ぎしり録音",
+       "無呼吸",
+       "無呼吸症候群",
+       "目覚まし",
+       "眠り",
+       "眠りの質",
+       "睡眠 いびき 無料",
+       "睡眠 無呼吸",
+       "睡眠の質",
+       "睡眠の質 無料",
+       "睡眠アプリ",
+       "睡眠アプリ apple watch",
+       "睡眠アプリ いびき",
+       "睡眠アプリ 無料",
+       "睡眠アプリ無呼吸",
+       "睡眠スコア",
+       "睡眠分析",
+       "睡眠改善",
+       "睡眠時無呼吸症候群",
+       "睡眠時間記録",
+       "睡眠管理",
+       "睡眠管理アプリ",
+       "睡眠管理アプリ 無料",
+       "睡眠計測",
+       "睡眠計測アプリ",
+       "睡眠記録 アプリ",
+       "睡眠記録無料",
+       "睡眠負債"
+      ],
+      "lost": [],
+      "comparable": false
+     },
+     "fieldChanged": true,
+     "subtitleChanged": false,
+     "shotsChanged": null,
+     "target": {
+      "n": 15,
+      "gain": 7
+     },
+     "control": {
+      "n": 4,
+      "gain": 8.8
+     },
+     "floor": {
+      "n": 1,
+      "gain": 0
+     },
+     "lift": -1.8,
+     "appeared": [
+      {
+       "kw": "寝言 録音 アプリ無料",
+       "pop": 97,
+       "rank": 32
+      },
+      {
+       "kw": "寝言いびきレコーダー",
+       "pop": 89,
+       "rank": 32
+      },
+      {
+       "kw": "寝言アプリ無料",
+       "pop": 86,
+       "rank": 37
+      },
+      {
+       "kw": "睡眠時間記録",
+       "pop": 74,
+       "rank": 119
+      },
+      {
+       "kw": "睡眠 無呼吸",
+       "pop": 72,
+       "rank": 115
+      }
+     ],
+     "vanished": [],
+     "movers": [
+      {
+       "kw": "歯ぎしり",
+       "pop": 100,
+       "before": 81,
+       "after": 45,
+       "gain": 36,
+       "cohort": "target"
+      },
+      {
+       "kw": "無呼吸",
+       "pop": 94,
+       "before": 32,
+       "after": 55,
+       "gain": -23,
+       "cohort": "target"
+      },
+      {
+       "kw": "睡眠 いびき 無料",
+       "pop": 65,
+       "before": 51.5,
+       "after": 74,
+       "gain": -22.5,
+       "cohort": "target"
+      },
+      {
+       "kw": "いびき 無料",
+       "pop": 61,
+       "before": 50,
+       "after": 29,
+       "gain": 21,
+       "cohort": "target"
+      },
+      {
+       "kw": "寝言",
+       "pop": 94,
+       "before": 136,
+       "after": 115,
+       "gain": 21,
+       "cohort": "control"
+      },
+      {
+       "kw": "いびき対策",
+       "pop": 56,
+       "before": 40,
+       "after": 57,
+       "gain": -17,
+       "cohort": "target"
+      },
+      {
+       "kw": "睡眠管理アプリ 無料",
+       "pop": 86,
+       "before": 120,
+       "after": 103,
+       "gain": 17,
+       "cohort": "target"
+      },
+      {
+       "kw": "睡眠 録音",
+       "pop": 83,
+       "before": 52,
+       "after": 38,
+       "gain": 14,
+       "cohort": "control"
+      },
+      {
+       "kw": "睡眠アプリ 無料",
+       "pop": 94,
+       "before": 41,
+       "after": 28,
+       "gain": 13,
+       "cohort": "target"
+      },
+      {
+       "kw": "睡眠アプリ無呼吸",
+       "pop": 52,
+       "before": 36,
+       "after": 49,
+       "gain": -13,
+       "cohort": "target"
+      },
+      {
+       "kw": "睡眠スコア",
+       "pop": 78,
+       "before": 47.5,
+       "after": 35,
+       "gain": 12.5,
+       "cohort": "target"
+      },
+      {
+       "kw": "睡眠計測",
+       "pop": 64,
+       "before": 135,
+       "after": 126,
+       "gain": 9,
+       "cohort": "target"
+      }
+     ],
+     "noisy": 10,
+     "ratings": {
+      "before": 0.1,
+      "after": 0
+     }
+    },
+    "cn": {
+     "graded": true,
+     "coverage": {
+      "before": 14,
+      "after": 55,
+      "of": 59,
+      "gained": [
+       "助眠",
+       "呼噜",
+       "呼噜检测",
+       "呼噜监测",
+       "失眠",
+       "心率监测",
+       "打呼",
+       "打呼噜",
+       "打呼噜录音",
+       "打呼噜检测",
+       "打呼噜检测免费",
+       "打呼噜监测",
+       "打呼检测",
+       "打呼监测",
+       "打鼾检测",
+       "打鼾监测",
+       "打鼾记录器",
+       "梦话录音",
+       "梦话监测",
+       "止鼾",
+       "深度睡眠",
+       "深度睡眠监测",
+       "白噪音",
+       "睡眠周期",
+       "睡眠报告",
+       "睡眠监测",
+       "睡眠监测免费",
+       "睡眠监测打呼噜",
+       "睡眠质量",
+       "睡眠质量监测",
+       "睡觉录音",
+       "睡觉打呼噜",
+       "睡觉监测",
+       "睡觉记录",
+       "磨牙监测",
+       "说梦话",
+       "说梦话记录",
+       "鼾声分析器",
+       "鼾声护理",
+       "鼾声检测",
+       "鼾声监测"
+      ],
+      "lost": [],
+      "comparable": false
+     },
+     "fieldChanged": true,
+     "subtitleChanged": false,
+     "shotsChanged": null,
+     "target": {
+      "n": 19,
+      "gain": 0
+     },
+     "control": {
+      "n": 7,
+      "gain": -4
+     },
+     "floor": {
+      "n": 0,
+      "gain": null
+     },
+     "lift": 4,
+     "appeared": [
+      {
+       "kw": "鼾声护理",
+       "pop": 89,
+       "rank": 12
+      }
+     ],
+     "vanished": [],
+     "movers": [
+      {
+       "kw": "睡眠追踪",
+       "pop": 67,
+       "before": 26,
+       "after": 163,
+       "gain": -137,
+       "cohort": "control"
+      },
+      {
+       "kw": "鼾声检测",
+       "pop": 74,
+       "before": 53.5,
+       "after": 31,
+       "gain": 22.5,
+       "cohort": "target"
+      },
+      {
+       "kw": "呼吸暂停",
+       "pop": 91,
+       "before": 25,
+       "after": 47,
+       "gain": -22,
+       "cohort": "control"
+      },
+      {
+       "kw": "打鼾检测",
+       "pop": 86,
+       "before": 51,
+       "after": 37,
+       "gain": 14,
+       "cohort": "target"
+      },
+      {
+       "kw": "打呼噜检测",
+       "pop": 100,
+       "before": 43,
+       "after": 29,
+       "gain": 14,
+       "cohort": "target"
+      },
+      {
+       "kw": "打呼噜",
+       "pop": 89,
+       "before": 43,
+       "after": 32,
+       "gain": 11,
+       "cohort": "target"
+      },
+      {
+       "kw": "深度睡眠监测",
+       "pop": 81,
+       "before": 101,
+       "after": 90,
+       "gain": 11,
+       "cohort": "target"
+      },
+      {
+       "kw": "打呼噜监测",
+       "pop": 97,
+       "before": 35,
+       "after": 27,
+       "gain": 8,
+       "cohort": "target"
+      },
+      {
+       "kw": "睡觉记录",
+       "pop": 97,
+       "before": 112,
+       "after": 120,
+       "gain": -8,
+       "cohort": "target"
+      },
+      {
+       "kw": "睡眠呼吸暂停",
+       "pop": 83,
+       "before": 18,
+       "after": 23,
+       "gain": -5,
+       "cohort": "control"
+      },
+      {
+       "kw": "打鼾记录",
+       "pop": 5,
+       "before": 54,
+       "after": 58,
+       "gain": -4,
+       "cohort": "control"
+      },
+      {
+       "kw": "打呼噜检测免费",
+       "pop": 94,
+       "before": 20.5,
+       "after": 23,
+       "gain": -2.5,
+       "cohort": "target"
+      }
+     ],
+     "noisy": 4,
+     "ratings": {
+      "before": 0.1,
+      "after": 0
+     }
+    }
+   }
+  },
+  "sealedAt": "2026-08-07T15:19:18.465Z"
  }
 ]

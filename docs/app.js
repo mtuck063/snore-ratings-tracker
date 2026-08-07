@@ -2270,10 +2270,12 @@ function renderRelease(host, cc, rel, kw) {
     if (cov.after != null) {
         const d = cov.after - cov.before;
         tile(
-            `${cov.before} → ${cov.after}`,
-            `of ${cov.of} phrases covered`,
-            d > 0 ? "good" : d < 0 ? "bad" : "",
-            "Phrases whose words the listing carries somewhere across title, subtitle and keyword field. Apple cannot rank you for a phrase you cannot build, so this is the ceiling the release moved. It is arithmetic, not a measurement: no waiting needed."
+            cov.comparable ? `${cov.before} → ${cov.after}` : `${cov.after}`,
+            cov.comparable ? `of ${cov.of} phrases covered` : `of ${cov.of} covered, no before`,
+            cov.comparable ? (d > 0 ? "good" : d < 0 ? "bad" : "") : "",
+            cov.comparable
+                ? "Phrases whose words the listing carries somewhere across title, subtitle and keyword field. Apple cannot rank you for a phrase you cannot build, so this is the ceiling the release moved. It is arithmetic, not a measurement: no waiting needed."
+                : "This market had no keyword field on record before the release, so the before side was graded on title and subtitle alone and there is nothing honest to compare against. The current number is real; the change is not."
         );
     }
     tile(
@@ -2283,10 +2285,12 @@ function renderRelease(host, cc, rel, kw) {
         "Phrases that were nowhere in the top 200 before the release and are now. A keyword change usually shows up like this rather than as a slow climb."
     );
     tile(
-        sign(m.lift),
+        cov.comparable ? sign(m.lift) : "n/a",
         "lift vs untouched",
-        m.lift > 0 ? "good" : m.lift < 0 ? "bad" : "",
-        `Places the phrases whose coverage changed gained beyond the phrases nothing touched, over the same days. The second half is the control: if both cohorts moved together, the market moved and the release did not. Changed ${m.target.n}, untouched ${m.control.n}.`
+        cov.comparable ? (m.lift > 0 ? "good" : m.lift < 0 ? "bad" : "") : "",
+        cov.comparable
+            ? `Places the phrases whose coverage changed gained beyond the phrases nothing touched, over the same days. The second half is the control: if both cohorts moved together, the market moved and the release did not. Changed ${m.target.n}, untouched ${m.control.n}.`
+            : "Not available here. Without a keyword field on record before the release, almost every phrase counts as changed, which leaves no control group to measure against."
     );
     tile(
         m.shotsChanged === null ? "—" : m.shotsChanged ? "changed" : "same",
@@ -2299,8 +2303,16 @@ function renderRelease(host, cc, rel, kw) {
     );
     card.appendChild(tiles);
 
-    if (cov.gained.length) card.appendChild(line("gained ", withPop(cov.gained)));
-    if (cov.lost.length) card.appendChild(line("lost ", withPop(cov.lost), "warn"));
+    if (!cov.comparable)
+        card.appendChild(
+            line(
+                "",
+                "This market's keyword field was not written down until the release shipped, so the before side was graded on title and subtitle alone. Coverage and lift are not readable here. The rank moves below still are.",
+                "warn"
+            )
+        );
+    if (cov.comparable && cov.gained.length) card.appendChild(line("gained ", withPop(cov.gained)));
+    if (cov.comparable && cov.lost.length) card.appendChild(line("lost ", withPop(cov.lost), "warn"));
     if (m.appeared.length)
         card.appendChild(
             line("newly ranked ", m.appeared.map((r) => `${r.kw} #${r.rank}`).join(", "), "good-line")

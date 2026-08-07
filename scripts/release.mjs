@@ -295,6 +295,14 @@ function effectFor(entry, kwData, ratings) {
         of: entry.after?.[cc]?.gradable ?? entry.before?.[cc]?.gradable ?? null,
         gained,
         lost,
+        // Both sides have to have been graded the same way. A market whose
+        // keyword field was not on record before the release was graded on
+        // title and subtitle alone, so writing the field down at the same time
+        // as shipping it makes coverage leap for reasons that have nothing to
+        // do with the release. Everything downstream of coverage inherits the
+        // problem: almost every phrase reads as "changed", which leaves the
+        // cohort split with no control group and the lift with nothing to say.
+        comparable: !entry.before?.[cc]?.partial && !entry.after?.[cc]?.partial,
       },
       fieldChanged: entry.before?.[cc]?.field !== entry.after?.[cc]?.field,
       subtitleChanged: entry.before?.[cc]?.subtitle !== entry.after?.[cc]?.subtitle,
@@ -481,7 +489,7 @@ async function report(only) {
 
     if (m.subtitleChanged) console.log(`  subtitle   "${b.subtitle ?? "none"}"\n         →   "${a.subtitle ?? "none"}"`);
     if (m.fieldChanged) {
-      console.log(`  field      ${b.field ?? "not recorded"}`);
+      console.log(`  field      ${b.field ?? "NOT ON RECORD before this release"}`);
       console.log(`         →   ${a.field ?? "not recorded"}  (${a.fieldChars}/100)`);
     }
     if (!m.fieldChanged && !m.subtitleChanged) console.log("  wording    unchanged");
@@ -498,7 +506,15 @@ async function report(only) {
     // Coverage first, and separately, because it is the only line on this page
     // that is arithmetic rather than a measurement: it is true the moment the
     // field ships and no amount of waiting makes it truer.
-    if (m.coverage.after != null) {
+    if (!m.coverage.comparable) {
+      console.log(
+        `  coverage   ${m.coverage.before} → ${m.coverage.after} of ${m.coverage.of} phrases,` +
+          ` NOT COMPARABLE\n` +
+          `             the field was not on record before this release, so the before side was\n` +
+          `             graded on title and subtitle alone. The jump is bookkeeping. The cohort\n` +
+          `             split below has no real control group and the lift means nothing here.`
+      );
+    } else if (m.coverage.after != null) {
       console.log(
         `  coverage   ${m.coverage.before} → ${m.coverage.after} of ${m.coverage.of} phrases` +
           (a.partial ? "  (title and subtitle only, no field on record)" : "")
