@@ -292,7 +292,12 @@ twenty hours. Both start empty on a fresh install and fill themselves in.
 The dashboard turns this into a field builder: start from the recommendation,
 drop a word to see what it was holding up, add one to see what it buys, and
 watch characters, phrases covered, total Pop and the intent mix move as you
-edit. Coverage is recomputed in the browser, but none of the language rules
+edit. It also names the characters that are buying nothing: words the title or
+subtitle already carries, since Apple pools all three fields and indexes the
+word once; words no tracked phrase can be built from; and words naming a year
+that has already passed. The last two are prompts rather than faults. A word no
+tracked phrase uses may be earning on a phrase nobody thought to track, and
+demand for a stale year is real right up until it isn't. Coverage is recomputed in the browser, but none of the language rules
 are — each phrase ships with the unit-sets that would satisfy it, so the page
 does set arithmetic and cannot drift from the rules in `aso.mjs`.
 

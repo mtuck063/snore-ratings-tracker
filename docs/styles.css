@@ -921,6 +921,36 @@ li.log-day {
     font-weight: 600;
 }
 .fb-stats { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+
+/* Characters the field is spending on nothing. Amber rather than red: none of
+   it is broken, it is all money left on the table. */
+.fb-waste {
+    margin: 12px 0;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--star4);
+    border-radius: 8px;
+    background: var(--bg);
+}
+.fb-waste h4 {
+    margin: 0 0 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--star4);
+}
+.fb-waste .plan-line { margin-bottom: 4px; }
+.fb-waste .plan-label { min-width: 116px; cursor: help; }
+.fb-waste-terms {
+    margin: 6px 0 0 116px;
+    padding: 0;
+    list-style: none;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+@media (max-width: 640px) {
+    .fb-waste .plan-label { display: block; min-width: 0; }
+    .fb-waste-terms { margin-left: 0; }
+}
 .fb-tile {
     flex: 1 1 120px;
     background: var(--bg);

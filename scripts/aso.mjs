@@ -706,26 +706,49 @@ function analyseMarket(cc) {
   }
   const shoppingList = Object.values(blocked).sort((a, b) => b.demand - a.demand);
 
-  // Words the listing is spending characters on that no tracked term needs.
-  // Not automatically waste: it may be covering a phrase nobody thought to
-  // track. Worth a look every time the field gets rewritten.
-  const needed = new Set();
-  for (const [kw, t] of Object.entries(terms)) {
-    if (!CHASEABLE.has(t.intent)) continue;
-    for (const w of hasCJK(kw) ? [] : words(kw, lang)) needed.add(w);
-  }
-  const fieldWords = meta?.keywordField ? tokens(meta.keywordField) : [];
-  const unused = fieldWords.filter(
-    (w) => !needed.has(stem(w, lang)) && !implicit.has(stem(w, lang))
-  );
-
-  // Subtitle words repeated in the field: Apple pools them, so the second copy
-  // buys nothing and the characters could hold another word.
-  const subtitleWords = new Set(words(meta?.subtitle ?? "", lang));
-  const repeated = fieldWords.filter((w) => subtitleWords.has(stem(w, lang)));
-
   // One alternatives model, shared by the recommendation and the builder.
   const model = altsFor(terms, meta, lang);
+
+  const fieldWords = meta?.keywordField ? tokens(meta.keywordField) : [];
+
+  // Title and subtitle words repeated in the field. Apple pools all three, so
+  // the second copy buys nothing and its characters could hold another word.
+  const claimedWords = new Set([
+    ...words(meta?.subtitle ?? "", lang),
+    ...words(meta?.title ?? "", lang),
+  ]);
+  const repeated = fieldWords.filter((w) => claimedWords.has(stem(w, lang)));
+
+  // Words the listing is spending characters on that no tracked phrase can
+  // use. Tested against the same unit sets coverage is tested against, which
+  // is what makes the answer mean anything in Japanese and Chinese: the old
+  // test built a needed-words set by splitting phrases on spaces, and a
+  // language whose queries have no spaces produced an empty set, so every
+  // field word in JP and CN came back unused.
+  //
+  // Still not automatically waste: it may be covering a phrase nobody thought
+  // to track. Worth a look every time the field is rewritten.
+  const buys = (w) => {
+    const have = new Set([stem(w, lang), w]);
+    return model.units.some((u) => satisfies(u, have));
+  };
+  const unused = fieldWords.filter(
+    (w) => !repeated.includes(w) && !implicit.has(stem(w, lang)) && !buys(w)
+  );
+
+  // Phrases naming a year that has already been and gone, and the field words
+  // spent on them. Demand for them is real and measured today, so they are
+  // reported rather than discounted: dropping "2025" is a judgement about how
+  // long that demand lasts, and that is the reader's call, not a rule.
+  const thisYear = new Date().getUTCFullYear();
+  const pastYear = (w) => /^(19|20)\d{2}$/.test(w) && Number(w) < thisYear;
+  const staleYear = {
+    fieldWords: fieldWords.filter(pastYear),
+    terms: Object.entries(terms)
+      .filter(([kw, t]) => CHASEABLE.has(t.intent) && tokens(kw).some(pastYear))
+      .map(([kw, t]) => ({ kw, pop: t.pop, rank: t.rank, covered: t.covered }))
+      .sort((a, b) => b.pop - a.pop),
+  };
 
   const chase = Object.entries(terms)
     .filter(([, t]) => t.score > 0)
@@ -766,6 +789,7 @@ function analyseMarket(cc) {
     shoppingList: shoppingList.slice(0, 12),
     unusedFieldWords: unused,
     repeatedInSubtitle: repeated,
+    staleYear,
     chase,
     terms,
   };
@@ -942,9 +966,22 @@ function report(only) {
       console.log(`  field      ${l.keywordField ?? "not recorded (add it to scripts/metadata.json)"}`);
       if (l.keywordField) console.log(`             ${l.fieldChars}/100 chars, updated ${l.fieldUpdated ?? "?"}`);
       if (m.repeatedInSubtitle.length)
-        console.log(`  repeated   ${m.repeatedInSubtitle.join(", ")} (already in the subtitle, so the field copy is dead weight)`);
+        console.log(`  repeated   ${m.repeatedInSubtitle.join(", ")} (already in the title or subtitle, so the field copy is dead weight)`);
       if (m.unusedFieldWords.length)
-        console.log(`  unused     ${m.unusedFieldWords.join(", ")} (no tracked term needs these)`);
+        console.log(`  unused     ${m.unusedFieldWords.join(", ")} (no tracked phrase can use these)`);
+      const waste = [...m.repeatedInSubtitle, ...m.unusedFieldWords];
+      if (waste.length)
+        console.log(
+          `  wasted     ${waste.reduce((n, w) => n + w.length + 1, 0)} of ${l.fieldChars} characters, on the ${waste.length} word(s) above`
+        );
+      if (m.staleYear?.fieldWords.length)
+        console.log(
+          `  stale year ${m.staleYear.fieldWords.join(", ")} in the field, unlocking only phrases that name a past year:\n` +
+            m.staleYear.terms
+              .slice(0, 6)
+              .map((t) => `             ${pad(t.kw, 34)} ${pad(t.pop + " pop", 9)} ${t.rank ? "#" + t.rank : "unranked"}`)
+              .join("\n")
+        );
     }
     if (m.coverage) {
       console.log(

@@ -1767,6 +1767,98 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
     // A tile can open to the phrases behind its number. "55 of 73 covered" is
     // a claim about a specific 55 and a specific 18, and the only way to judge
     // whether the trade is good is to see which is which.
+    // Two faults the box above does not already cover. Words the title or
+    // subtitle repeats are reported under the field itself, since duplication
+    // is a property of what you typed. These two are properties of the phrases
+    // being tracked: a word no tracked phrase can use, and a word naming a
+    // year that has already passed.
+    //
+    // Recomputed here rather than read from aso.json so it follows the field
+    // in the box as it is edited. The rule is the same set arithmetic coverage
+    // uses, so the two cannot drift.
+    const unitList = b.units ?? [];
+    const thisYear = new Date().getFullYear();
+    const isPastYear = (w) => /^(19|20)\d{2}$/.test(w) && Number(w) < thisYear;
+    const rawWords = (text) =>
+        (text ?? "")
+            .split(/[,、，\n\s]+/)
+            .map((w) => w.trim())
+            .filter(Boolean);
+
+    const wasteOf = (text) => {
+        const dead = [];
+        const stale = [];
+        for (const w of rawWords(text)) {
+            if (isPastYear(w)) {
+                stale.push(w);
+                continue;
+            }
+            const lower = w.toLowerCase();
+            const key = wordKeys[lower] ?? keyOf.get(lower) ?? lower;
+            // Already counted under the field box as a duplicate. Counting it
+            // twice would read as two separate problems with one word.
+            if (claimedKeys.has(key)) continue;
+            if (!unitList.some((u) => sat(u, new Set([key])))) dead.push(w);
+        }
+        // The comma each word costs is part of what dropping it returns.
+        return { dead, stale, chars: dead.reduce((n, w) => n + w.length + 1, 0) };
+    };
+
+    const waste = document.createElement("div");
+    waste.className = "fb-waste";
+
+    function drawWaste() {
+        waste.replaceChildren();
+        const text = input.value.trim() || b.current || "";
+        const w = wasteOf(text);
+        if (!w.dead.length && !w.stale.length) {
+            waste.hidden = true;
+            return;
+        }
+        waste.hidden = false;
+        const h4 = document.createElement("h4");
+        h4.textContent = w.chars
+            ? `${w.chars} of ${text.length} characters may be buying nothing`
+            : "Worth a second look";
+        waste.appendChild(h4);
+
+        const row = (label, words, tip) => {
+            const p = document.createElement("p");
+            p.className = "plan-line";
+            if (tip) p.dataset.tip = tip;
+            const b1 = document.createElement("span");
+            b1.className = "plan-label";
+            b1.textContent = label;
+            p.appendChild(b1);
+            p.appendChild(document.createTextNode(words.join(", ")));
+            waste.appendChild(p);
+        };
+        if (w.dead.length)
+            row(
+                "no phrase uses",
+                w.dead,
+                "No phrase this market tracks can be built from these. That is not proof they are useless: they may be earning on a phrase nobody thought to track. It does mean nothing here can show you what they are worth."
+            );
+        if (w.stale.length) {
+            row(
+                "past year",
+                w.stale,
+                `It is ${thisYear}. These only unlock phrases naming an earlier year, and that demand has an expiry date even though it is real today.`
+            );
+            const terms = m.staleYear?.terms ?? [];
+            if (terms.length) {
+                const ul = document.createElement("ul");
+                ul.className = "fb-waste-terms";
+                for (const t of terms.slice(0, 4)) {
+                    const li = document.createElement("li");
+                    li.textContent = `${t.kw} · ${t.pop} pop · ${t.rank ? "#" + t.rank : "unranked"}`;
+                    ul.appendChild(li);
+                }
+                waste.appendChild(ul);
+            }
+        }
+    }
+
     let openPanel = null;
     const tile = (value, label, cls, tip, panel) => {
         const d = document.createElement("div");
@@ -1794,6 +1886,7 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
 
     function draw() {
         remember();
+        drawWaste();
         const yourKeys = new Set(parseField(input.value));
         const yourCovers = input.value.trim() ? b.terms.filter((t) => holdsIn(t, yourKeys)).length : null;
         const yourPop = input.value.trim()
@@ -2114,7 +2207,7 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
     chipHint.textContent =
         "Click a word to drop it, or add one from the list below. When these cover more than your own keywords, copy them into App Store Connect.";
     draft.append(chipHead, preview, chipRow, chipHint, buttons);
-    host.append(h, context, how, yours, draft, stats, panel, suggest);
+    host.append(h, context, how, yours, waste, draft, stats, panel, suggest);
     setSummary = makeCollapsible(h, "builder", false);
     draw();
 }
