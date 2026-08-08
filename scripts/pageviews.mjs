@@ -57,6 +57,39 @@ try {
   for (const s of body.stats ?? []) {
     stored.days[String(s.day).slice(0, 10)] = s.daily ?? 0;
   }
+
+  // Per-country splits for the same window. GoatCounter's locations stat is an
+  // aggregate over the requested range with no per-day option, so each day is
+  // its own request; ~15 tiny calls per run stays well inside the API limits.
+  // A failure partway through keeps whatever landed — the window refetch heals
+  // the rest next run, same as days.
+  stored.countries ??= {};
+  try {
+    for (let ms = new Date(start).getTime(); fmt(new Date(ms)) <= today; ms += 864e5) {
+      const day = fmt(new Date(ms));
+      const dayEnd = fmt(new Date(ms + 864e5));
+      const locRes = await fetch(
+        `${SITE}/api/v0/stats/locations?start=${day}&end=${dayEnd}&limit=100`,
+        { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+      );
+      if (!locRes.ok) {
+        const detail = (await locRes.text().catch(() => "")).slice(0, 200);
+        throw new Error(`HTTP ${locRes.status}${detail ? ` ${detail}` : ""}`);
+      }
+      const locBody = await locRes.json();
+      const counts = {};
+      for (const s of locBody.stats ?? []) {
+        if (s.count > 0) counts[s.id || "??"] = s.count;
+      }
+      // Sorted keys keep a no-change run rewriting the file byte-identically.
+      stored.countries[day] = Object.fromEntries(
+        Object.entries(counts).sort(([a], [b]) => a.localeCompare(b))
+      );
+    }
+  } catch (err) {
+    console.warn(`pageviews: locations ${err.message}; keeping stored country splits.`);
+  }
+
   await writeFile(file, JSON.stringify(stored));
   console.log(
     `pageviews: today so far ${stored.days[today] ?? 0}, ${Object.keys(stored.days).length} day(s) stored`

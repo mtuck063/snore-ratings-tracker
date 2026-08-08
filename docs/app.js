@@ -167,11 +167,15 @@ function deltaCell(delta) {
     return span;
 }
 
-function sparkline(points, label, fmtVal = fmt, minSpan = 0, markDate = null) {
+function sparkline(points, label, fmtVal = fmt, minSpan = 0, markDate = null, opts = {}) {
     // points: [{date, count}] oldest→newest, nulls already dropped
+    // opts.w/opts.h override the tile size; opts.axes adds the furniture a
+    // full-width chart needs (zero baseline, gridlines, value and date labels,
+    // an area wash) that would swamp a 100×28 tile.
+    const { w = SPARK_W, h = SPARK_H, axes = false } = opts;
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("width", SPARK_W);
-    svg.setAttribute("height", SPARK_H);
+    svg.setAttribute("width", w);
+    svg.setAttribute("height", h);
     svg.setAttribute("class", "spark");
     svg.setAttribute("role", "img");
     svg.setAttribute("aria-label", label);
@@ -188,12 +192,57 @@ function sparkline(points, label, fmtVal = fmt, minSpan = 0, markDate = null) {
         min -= extra;
         max += extra;
     }
-    const pad = 3;
-    const x = (i) => pad + (i / (points.length - 1)) * (SPARK_W - pad * 2);
+    // Visitor counts sit on a zero baseline; without it the axis would zoom
+    // into the data's range and the area wash would hang from a false floor.
+    if (axes) min = Math.min(min, 0);
+    const padL = axes ? 34 : 3;
+    const padR = axes ? 8 : 3;
+    const padT = axes ? 6 : 3;
+    const padB = axes ? 20 : 3;
+    const x = (i) => padL + (i / (points.length - 1)) * (w - padL - padR);
     const y = (v) =>
         max === min
-            ? SPARK_H / 2
-            : SPARK_H - pad - ((v - min) / (max - min)) * (SPARK_H - pad * 2);
+            ? padT + (h - padT - padB) / 2
+            : h - padB - ((v - min) / (max - min)) * (h - padT - padB);
+
+    if (axes) {
+        // Recessive furniture first so the data draws over it: hairlines at
+        // clean values with labels in the left gutter, and a date tick every
+        // week counting back from the newest point so "today" always has one.
+        const rawStep = (max - min) / 3 || 1;
+        const mag = 10 ** Math.floor(Math.log10(rawStep));
+        const step = [1, 2, 5, 10].map((m) => m * mag).find((s) => s >= rawStep);
+        for (let v = Math.ceil(min / step) * step; v <= max; v += step) {
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("class", "spark-grid");
+            line.setAttribute("x1", padL);
+            line.setAttribute("x2", w - padR);
+            line.setAttribute("y1", y(v).toFixed(1));
+            line.setAttribute("y2", y(v).toFixed(1));
+            svg.appendChild(line);
+            const lab = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            lab.setAttribute("class", "spark-tick");
+            lab.setAttribute("x", padL - 6);
+            lab.setAttribute("y", y(v).toFixed(1));
+            lab.setAttribute("text-anchor", "end");
+            lab.setAttribute("dy", "0.32em");
+            lab.textContent = fmtVal(v);
+            svg.appendChild(lab);
+        }
+        for (let i = points.length - 1; i >= 0; i -= 7) {
+            const lab = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            lab.setAttribute("class", "spark-tick");
+            lab.setAttribute("x", x(i).toFixed(1));
+            lab.setAttribute("y", h - 6);
+            lab.setAttribute("text-anchor", i === points.length - 1 ? "end" : "middle");
+            lab.textContent = new Date(points[i].date + "T00:00:00Z").toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                timeZone: "UTC",
+            });
+            svg.appendChild(lab);
+        }
+    }
 
     // Per-segment coloring: any real move carries a color. Rank charts plot
     // -rank, so "up" is better for both chart kinds.
@@ -221,10 +270,22 @@ function sparkline(points, label, fmtVal = fmt, minSpan = 0, markDate = null) {
             const mx = ((x(i - 1) + x(i)) / 2).toFixed(1);
             rule.setAttribute("x1", mx);
             rule.setAttribute("x2", mx);
-            rule.setAttribute("y1", 1);
-            rule.setAttribute("y2", SPARK_H - 1);
+            rule.setAttribute("y1", axes ? padT : 1);
+            rule.setAttribute("y2", axes ? h - padB : h - 1);
             svg.appendChild(rule);
         }
+    }
+    if (axes && max > min) {
+        const base = y(min).toFixed(1);
+        const area = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        area.setAttribute("class", "spark-area");
+        area.setAttribute(
+            "d",
+            `M${x(0).toFixed(1)},${base}` +
+                points.map((p, i) => `L${x(i).toFixed(1)},${y(p.count).toFixed(1)}`).join("") +
+                `L${x(points.length - 1).toFixed(1)},${base}Z`
+        );
+        svg.appendChild(area);
     }
     for (let i = 1; i < points.length; i++) {
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
@@ -251,7 +312,7 @@ function sparkline(points, label, fmtVal = fmt, minSpan = 0, markDate = null) {
 
     const showTip = (e) => {
         const rect = svg.getBoundingClientRect();
-        const rel = (e.clientX - rect.left - pad) / (SPARK_W - pad * 2);
+        const rel = (e.clientX - rect.left - padL) / (w - padL - padR);
         const i = Math.max(0, Math.min(points.length - 1, Math.round(rel * (points.length - 1))));
         hover.setAttribute("cx", x(i));
         hover.setAttribute("cy", y(points[i].count));
@@ -3415,11 +3476,76 @@ async function main() {
             tile(sum(7), "last 7 days"),
             tile(sum(30), "last 30 days")
         );
-        const sparkWrap = document.createElement("div");
-        sparkWrap.className = "traffic-spark";
-        sparkWrap.appendChild(sparkline(days.slice(-30), "Daily website visitors, last 30 days"));
-        trafficRow.appendChild(sparkWrap);
+        // Unhide before drawing: the chart is sized from clientWidth, which is
+        // 0 while the section is display:none.
         document.getElementById("traffic-section").hidden = false;
+
+        const chartWrap = document.getElementById("traffic-chart");
+        const last30 = days.slice(-30);
+        const drawChart = () => {
+            const w = chartWrap.clientWidth;
+            if (w && last30.length) {
+                chartWrap.replaceChildren(
+                    sparkline(last30, "Daily website visitors, last 30 days", fmt, 0, null, {
+                        w,
+                        h: 200,
+                        axes: true,
+                    })
+                );
+            }
+        };
+        drawChart();
+        let chartW = chartWrap.clientWidth;
+        new ResizeObserver(() => {
+            if (chartWrap.clientWidth !== chartW) {
+                chartW = chartWrap.clientWidth;
+                drawChart();
+            }
+        }).observe(chartWrap);
+
+        // Country split over the same window the chart draws, so the two
+        // always agree. Stays hidden when the data file predates the
+        // per-country collector.
+        const since = last30[0]?.date ?? "";
+        const totals = {};
+        for (const [date, split] of Object.entries(pageviews.countries ?? {})) {
+            if (date < since) continue;
+            for (const [cc, n] of Object.entries(split)) totals[cc] = (totals[cc] ?? 0) + n;
+        }
+        const ranked = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+        if (ranked.length) {
+            const most = ranked[0][1];
+            const list = document.getElementById("traffic-countries");
+            for (const [cc, n] of ranked.slice(0, 8)) {
+                const row = document.createElement("div");
+                row.className = "traffic-country";
+                const top = document.createElement("div");
+                top.className = "tc-top";
+                const name = document.createElement("span");
+                name.textContent =
+                    cc === "??" ? "🌐 Unknown" : `${flag(cc)} ${regionNames.of(cc.toUpperCase())}`;
+                const count = document.createElement("span");
+                count.className = "tc-count";
+                count.textContent = fmt(n);
+                top.append(name, count);
+                const track = document.createElement("div");
+                track.className = "tc-track";
+                const fill = document.createElement("div");
+                fill.className = "tc-fill";
+                fill.style.width = `${Math.max(2, (n / most) * 100)}%`;
+                track.appendChild(fill);
+                row.append(top, track);
+                list.appendChild(row);
+            }
+            if (ranked.length > 8) {
+                const rest = ranked.slice(8);
+                const more = document.createElement("div");
+                more.className = "tc-more";
+                more.textContent = `+${rest.length} more · ${fmt(rest.reduce((s, [, n]) => s + n, 0))} visitors`;
+                list.appendChild(more);
+            }
+            document.getElementById("traffic-countries-wrap").hidden = false;
+        }
     }
 
     const tbody = document.querySelector("#ratings tbody");

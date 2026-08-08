@@ -709,7 +709,9 @@ li.log-day {
 .tip-swatch { width: 9px; height: 9px; border-radius: 2px; flex: none; }
 .tip-gain { color: var(--good); font-weight: 600; font-size: 0.72rem; }
 
-/* Website traffic: stat tiles plus a daily-visitors sparkline. */
+/* Website traffic: stat tiles, a full-width daily-visitors chart, and a
+   by-country split. app.js draws the chart at the wrapper's pixel width, so
+   the wrapper only has to claim the room. */
 .traffic-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: stretch; }
 .traffic-tile {
     background: var(--bg-raised);
@@ -720,7 +722,19 @@ li.log-day {
 }
 .traffic-num { font-size: 1.3rem; font-weight: 600; }
 .traffic-label { color: var(--text-secondary); font-size: 0.75rem; }
-.traffic-spark { flex: 1 1 220px; display: flex; align-items: center; justify-content: flex-end; }
+.traffic-detail { display: flex; gap: 28px; margin-top: 16px; flex-wrap: wrap; }
+.traffic-chart-wrap { flex: 1 1 420px; min-width: 0; }
+.traffic-countries-wrap { flex: 0 1 260px; min-width: 220px; }
+.traffic-sub { color: var(--text-secondary); font-size: 0.75rem; margin-bottom: 8px; }
+.spark-area { fill: var(--accent); opacity: 0.1; }
+.spark-grid { stroke: var(--border); stroke-width: 1; }
+.spark-tick { fill: var(--text-secondary); font-size: 10px; }
+.traffic-country { padding: 4px 0; }
+.tc-top { display: flex; justify-content: space-between; gap: 8px; font-size: 0.85rem; }
+.tc-count { font-variant-numeric: tabular-nums; }
+.tc-track { height: 3px; border-radius: 2px; background: var(--bg-raised); margin-top: 4px; }
+.tc-fill { height: 100%; border-radius: 2px; background: var(--accent); }
+.tc-more { color: var(--text-secondary); font-size: 0.75rem; margin-top: 6px; }
 
 /* --- Prioritisation panel and columns -------------------------------------
    The keyword table says where you rank. These say which of those rows is
