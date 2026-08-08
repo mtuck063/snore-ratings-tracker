@@ -317,7 +317,9 @@ function sparkline(points, label, fmtVal = fmt, minSpan = 0, markDate = null, op
         hover.setAttribute("cx", x(i));
         hover.setAttribute("cy", y(points[i].count));
         hover.setAttribute("visibility", "visible");
-        tooltip.innerHTML = `<span class="tip-value">${points[i].label ?? fmtVal(points[i].count)}</span><span class="tip-date">${points[i].date}</span>`;
+        tooltip.innerHTML =
+            `<span class="tip-value">${points[i].label ?? fmtVal(points[i].count)}</span><span class="tip-date">${points[i].date}</span>` +
+            (points[i].extra ?? "");
         placeTooltip(e);
     };
     // Hover-tracking is mouse-only; touch would flash the tooltip while the
@@ -3481,7 +3483,20 @@ async function main() {
         document.getElementById("traffic-section").hidden = false;
 
         const chartWrap = document.getElementById("traffic-chart");
-        const last30 = days.slice(-30);
+        // Each point's tooltip carries that day's country split. The
+        // collector's per-day slices run on the site's day boundary rather
+        // than UTC's, so a split can disagree with the day total by a few
+        // visitors around midnight — close enough for who-came-that-day.
+        const byDay = pageviews.countries?.byDay ?? {};
+        const last30 = days.slice(-30).map((p) => {
+            const split = Object.entries(byDay[p.date] ?? {}).sort((a, b) => b[1] - a[1]);
+            if (!split.length) return p;
+            const parts = split
+                .slice(0, 4)
+                .map(([cc, n]) => `${cc === "??" ? "🌐" : flag(cc)} ${n}`);
+            if (split.length > 4) parts.push(`+${split.length - 4}`);
+            return { ...p, extra: `<span class="tip-text">${parts.join(" · ")}</span>` };
+        });
         const drawChart = () => {
             const w = chartWrap.clientWidth;
             if (w && last30.length) {
@@ -3503,19 +3518,18 @@ async function main() {
             }
         }).observe(chartWrap);
 
-        // Country split: a rolling 30-day snapshot from the collector.
-        // GoatCounter's location counts run on a different unit than the
-        // visitor totals in the tiles (they sum higher), so the panel shows
-        // each country's share rather than a number that would visibly
-        // disagree with "last 30 days". Stays hidden when the data file
-        // predates the per-country collector.
+        // Country split: a rolling 30-day snapshot from the collector, shown
+        // as visitor counts — the snapshot's total reconciles with the day
+        // totals, so the numbers agree with the tiles above. Stays hidden
+        // when the data file predates the per-country collector.
         const ranked = Object.entries(pageviews.countries?.counts ?? {}).sort(
             (a, b) => b[1] - a[1]
         );
-        const grand = ranked.reduce((s, [, n]) => s + n, 0);
-        const pct = (n) => (n / grand >= 0.005 ? `${Math.round((n / grand) * 100)}%` : "<1%");
         if (ranked.length) {
             const most = ranked[0][1];
+            const grand = ranked.reduce((s, [, n]) => s + n, 0);
+            document.querySelector("#traffic-countries-wrap .traffic-sub").textContent =
+                `By country, last 30 days · ${fmt(grand)} visitors`;
             const list = document.getElementById("traffic-countries");
             for (const [cc, n] of ranked.slice(0, 8)) {
                 const row = document.createElement("div");
@@ -3527,7 +3541,7 @@ async function main() {
                     cc === "??" ? "🌐 Unknown" : `${flag(cc)} ${regionNames.of(cc.toUpperCase())}`;
                 const count = document.createElement("span");
                 count.className = "tc-count";
-                count.textContent = pct(n);
+                count.textContent = fmt(n);
                 top.append(name, count);
                 const track = document.createElement("div");
                 track.className = "tc-track";
@@ -3542,7 +3556,7 @@ async function main() {
                 const rest = ranked.slice(8);
                 const more = document.createElement("div");
                 more.className = "tc-more";
-                more.textContent = `+${rest.length} more · ${pct(rest.reduce((s, [, n]) => s + n, 0))}`;
+                more.textContent = `+${rest.length} more · ${fmt(rest.reduce((s, [, n]) => s + n, 0))} visitors`;
                 list.appendChild(more);
             }
             document.getElementById("traffic-countries-wrap").hidden = false;
