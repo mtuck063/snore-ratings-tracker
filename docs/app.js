@@ -3525,6 +3525,32 @@ async function main() {
         const ranked = Object.entries(pageviews.countries?.counts ?? {}).sort(
             (a, b) => b[1] - a[1]
         );
+        const bdRow = (label, n, most) => {
+            const row = document.createElement("div");
+            row.className = "traffic-country";
+            const top = document.createElement("div");
+            top.className = "tc-top";
+            const name = document.createElement("span");
+            name.textContent = label;
+            const count = document.createElement("span");
+            count.className = "tc-count";
+            count.textContent = fmt(n);
+            top.append(name, count);
+            const track = document.createElement("div");
+            track.className = "tc-track";
+            const fill = document.createElement("div");
+            fill.className = "tc-fill";
+            fill.style.width = `${Math.max(2, (n / most) * 100)}%`;
+            track.appendChild(fill);
+            row.append(top, track);
+            return row;
+        };
+        const bdMore = (list, rest) => {
+            const more = document.createElement("div");
+            more.className = "tc-more";
+            more.textContent = `+${rest.length} more · ${fmt(rest.reduce((s, [, n]) => s + n, 0))} visitors`;
+            list.appendChild(more);
+        };
         if (ranked.length) {
             const most = ranked[0][1];
             const grand = ranked.reduce((s, [, n]) => s + n, 0);
@@ -3532,35 +3558,28 @@ async function main() {
                 `By country, last 30 days · ${fmt(grand)} visitors`;
             const list = document.getElementById("traffic-countries");
             for (const [cc, n] of ranked.slice(0, 8)) {
-                const row = document.createElement("div");
-                row.className = "traffic-country";
-                const top = document.createElement("div");
-                top.className = "tc-top";
-                const name = document.createElement("span");
-                name.textContent =
-                    cc === "??" ? "🌐 Unknown" : `${flag(cc)} ${regionNames.of(cc.toUpperCase())}`;
-                const count = document.createElement("span");
-                count.className = "tc-count";
-                count.textContent = fmt(n);
-                top.append(name, count);
-                const track = document.createElement("div");
-                track.className = "tc-track";
-                const fill = document.createElement("div");
-                fill.className = "tc-fill";
-                fill.style.width = `${Math.max(2, (n / most) * 100)}%`;
-                track.appendChild(fill);
-                row.append(top, track);
-                list.appendChild(row);
+                list.appendChild(
+                    bdRow(cc === "??" ? "🌐 Unknown" : `${flag(cc)} ${regionNames.of(cc.toUpperCase())}`, n, most)
+                );
             }
-            if (ranked.length > 8) {
-                const rest = ranked.slice(8);
-                const more = document.createElement("div");
-                more.className = "tc-more";
-                more.textContent = `+${rest.length} more · ${fmt(rest.reduce((s, [, n]) => s + n, 0))} visitors`;
-                list.appendChild(more);
-            }
+            if (ranked.length > 8) bdMore(list, ranked.slice(8));
             document.getElementById("traffic-countries-wrap").hidden = false;
         }
+
+        // Referrers, operating systems, and languages: the collector stores
+        // each as [label, count] pairs already sorted, so rendering is the
+        // same shape as the country panel minus the flags.
+        const renderBreakdown = (wrapId, listId, rows) => {
+            if (!rows?.length) return;
+            const list = document.getElementById(listId);
+            const most = rows[0][1];
+            for (const [label, n] of rows.slice(0, 6)) list.appendChild(bdRow(label, n, most));
+            if (rows.length > 6) bdMore(list, rows.slice(6));
+            document.getElementById(wrapId).hidden = false;
+        };
+        renderBreakdown("traffic-refs-wrap", "traffic-refs", pageviews.extras?.refs);
+        renderBreakdown("traffic-systems-wrap", "traffic-systems", pageviews.extras?.systems);
+        renderBreakdown("traffic-langs-wrap", "traffic-langs", pageviews.extras?.langs);
     }
 
     const tbody = document.querySelector("#ratings tbody");

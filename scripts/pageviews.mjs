@@ -129,6 +129,43 @@ try {
     console.warn(`pageviews: locations by day ${err.message}; keeping stored splits.`);
   }
 
+  // Referrers, operating systems, and languages over the same trailing 30
+  // days — the rest of who visits and how they arrived. Same treatment as
+  // the country snapshot: one aggregate request each, replaced whole every
+  // run, quiet on failure. Stored as [label, count] pairs already sorted so
+  // the frontend renders them as-is.
+  try {
+    const start30 = fmt(new Date(now.getTime() - 30 * 864e5));
+    const headers = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
+    const extras = { asOf: today };
+    const pages = [
+      ["refs", "toprefs", "Direct / none"],
+      ["systems", "systems", "Unknown"],
+      ["langs", "languages", "Unknown"],
+    ];
+    for (const [key, page, blank] of pages) {
+      await sleep(300);
+      const url = `${SITE}/api/v0/stats/${page}?start=${start30}&end=${end}&limit=20`;
+      let res = await fetch(url, { headers });
+      if (res.status === 429) {
+        await sleep(1000);
+        res = await fetch(url, { headers });
+      }
+      if (!res.ok) {
+        const detail = (await res.text().catch(() => "")).slice(0, 200);
+        throw new Error(`${page} HTTP ${res.status}${detail ? ` ${detail}` : ""}`);
+      }
+      const body = await res.json();
+      extras[key] = (body.stats ?? [])
+        .filter((s) => s.count > 0)
+        .map((s) => [s.name || s.id || blank, s.count])
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    }
+    stored.extras = extras;
+  } catch (err) {
+    console.warn(`pageviews: extras ${err.message}; keeping stored breakdowns.`);
+  }
+
   await writeFile(file, JSON.stringify(stored));
   console.log(
     `pageviews: today so far ${stored.days[today] ?? 0}, ${Object.keys(stored.days).length} day(s) stored`

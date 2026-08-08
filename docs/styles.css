@@ -729,8 +729,11 @@ li.log-day {
 .spark-area { fill: var(--accent); opacity: 0.1; }
 .spark-grid { stroke: var(--border); stroke-width: 1; }
 .spark-tick { fill: var(--text-secondary); font-size: 10px; }
+.traffic-breakdowns { display: flex; gap: 28px; flex-wrap: wrap; margin-top: 20px; }
+.traffic-bd { flex: 1 1 240px; min-width: 220px; }
 .traffic-country { padding: 4px 0; }
 .tc-top { display: flex; justify-content: space-between; gap: 8px; font-size: 0.85rem; }
+.tc-top span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tc-count { font-variant-numeric: tabular-nums; }
 .tc-track { height: 3px; border-radius: 2px; background: var(--bg-raised); margin-top: 4px; }
 .tc-fill { height: 100%; border-radius: 2px; background: var(--accent); }
