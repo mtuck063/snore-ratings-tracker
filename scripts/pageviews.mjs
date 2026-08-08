@@ -60,18 +60,23 @@ try {
 
   // Per-country splits for the same window. GoatCounter's locations stat is an
   // aggregate over the requested range with no per-day option, so each day is
-  // its own request; ~15 tiny calls per run stays well inside the API limits.
-  // A failure partway through keeps whatever landed — the window refetch heals
-  // the rest next run, same as days.
+  // its own request. Back-to-back calls trip the API's per-second rate limit
+  // on the fourth request, so each call is spaced out, with one retry as the
+  // safety net. A failure partway through keeps whatever landed — the window
+  // refetch heals the rest next run, same as days.
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   stored.countries ??= {};
   try {
     for (let ms = new Date(start).getTime(); fmt(new Date(ms)) <= today; ms += 864e5) {
       const day = fmt(new Date(ms));
       const dayEnd = fmt(new Date(ms + 864e5));
-      const locRes = await fetch(
-        `${SITE}/api/v0/stats/locations?start=${day}&end=${dayEnd}&limit=100`,
-        { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
-      );
+      const locUrl = `${SITE}/api/v0/stats/locations?start=${day}&end=${dayEnd}&limit=100`;
+      const headers = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
+      let locRes = await fetch(locUrl, { headers });
+      if (locRes.status === 429) {
+        await sleep(1000);
+        locRes = await fetch(locUrl, { headers });
+      }
       if (!locRes.ok) {
         const detail = (await locRes.text().catch(() => "")).slice(0, 200);
         throw new Error(`HTTP ${locRes.status}${detail ? ` ${detail}` : ""}`);
@@ -85,6 +90,7 @@ try {
       stored.countries[day] = Object.fromEntries(
         Object.entries(counts).sort(([a], [b]) => a.localeCompare(b))
       );
+      await sleep(300);
     }
   } catch (err) {
     console.warn(`pageviews: locations ${err.message}; keeping stored country splits.`);
