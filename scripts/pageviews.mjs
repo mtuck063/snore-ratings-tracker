@@ -58,42 +58,35 @@ try {
     stored.days[String(s.day).slice(0, 10)] = s.daily ?? 0;
   }
 
-  // Per-country splits for the same window. GoatCounter's locations stat is an
-  // aggregate over the requested range with no per-day option, so each day is
-  // its own request. Back-to-back calls trip the API's per-second rate limit
-  // on the fourth request, so each call is spaced out, with one retry as the
-  // safety net. A failure partway through keeps whatever landed — the window
-  // refetch heals the rest next run, same as days.
-  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-  stored.countries ??= {};
+  // Per-country split for the trailing 30 days, as one aggregate request.
+  // GoatCounter's locations stat cannot split by day (per-day requests turned
+  // out to sit on a shifted day boundary and a different counting unit than
+  // the visitor totals above), and the dashboard only shows a 30-day share,
+  // so a rolling snapshot replaces history here. Overwritten whole each run;
+  // a failure keeps the previous snapshot.
   try {
-    for (let ms = new Date(start).getTime(); fmt(new Date(ms)) <= today; ms += 864e5) {
-      const day = fmt(new Date(ms));
-      const dayEnd = fmt(new Date(ms + 864e5));
-      const locUrl = `${SITE}/api/v0/stats/locations?start=${day}&end=${dayEnd}&limit=100`;
-      const headers = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
-      let locRes = await fetch(locUrl, { headers });
-      if (locRes.status === 429) {
-        await sleep(1000);
-        locRes = await fetch(locUrl, { headers });
-      }
-      if (!locRes.ok) {
-        const detail = (await locRes.text().catch(() => "")).slice(0, 200);
-        throw new Error(`HTTP ${locRes.status}${detail ? ` ${detail}` : ""}`);
-      }
-      const locBody = await locRes.json();
-      const counts = {};
-      for (const s of locBody.stats ?? []) {
-        if (s.count > 0) counts[s.id || "??"] = s.count;
-      }
-      // Sorted keys keep a no-change run rewriting the file byte-identically.
-      stored.countries[day] = Object.fromEntries(
-        Object.entries(counts).sort(([a], [b]) => a.localeCompare(b))
-      );
-      await sleep(300);
+    const start30 = fmt(new Date(now.getTime() - 30 * 864e5));
+    const locRes = await fetch(
+      `${SITE}/api/v0/stats/locations?start=${start30}&end=${end}&limit=100`,
+      { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+    );
+    if (!locRes.ok) {
+      const detail = (await locRes.text().catch(() => "")).slice(0, 200);
+      throw new Error(`HTTP ${locRes.status}${detail ? ` ${detail}` : ""}`);
     }
+    const locBody = await locRes.json();
+    const counts = {};
+    for (const s of locBody.stats ?? []) {
+      if (s.count > 0) counts[s.id || "??"] = s.count;
+    }
+    // Sorted keys keep a no-change run rewriting the file byte-identically.
+    stored.countries = {
+      since: start30,
+      asOf: today,
+      counts: Object.fromEntries(Object.entries(counts).sort(([a], [b]) => a.localeCompare(b))),
+    };
   } catch (err) {
-    console.warn(`pageviews: locations ${err.message}; keeping stored country splits.`);
+    console.warn(`pageviews: locations ${err.message}; keeping stored country split.`);
   }
 
   await writeFile(file, JSON.stringify(stored));
