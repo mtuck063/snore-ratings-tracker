@@ -10,11 +10,20 @@ const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
 const tooltip = document.getElementById("tooltip");
 
 // Place the tooltip near the pointer, above it when there's room, clamped to
-// the viewport.
-function placeTooltip(e) {
+// the viewport. Chart tips pass the marked point as an anchor instead: the
+// box sits beside the dot, never on top of it, so the marked spot stays
+// visible under a tall tooltip.
+function placeTooltip(e, anchor) {
     tooltip.hidden = false;
     const tw = tooltip.offsetWidth;
     const th = tooltip.offsetHeight;
+    if (anchor) {
+        const gap = 14;
+        const fitsRight = anchor.x + gap + tw <= window.innerWidth - 8;
+        tooltip.style.left = `${Math.max(8, fitsRight ? anchor.x + gap : anchor.x - tw - gap)}px`;
+        tooltip.style.top = `${Math.min(Math.max(8, anchor.y - th / 2), window.innerHeight - th - 8)}px`;
+        return;
+    }
     tooltip.style.left = `${Math.min(e.clientX + 12, window.innerWidth - tw - 8)}px`;
     tooltip.style.top = `${Math.max(8, e.clientY - th - 14)}px`;
 }
@@ -320,7 +329,7 @@ function sparkline(points, label, fmtVal = fmt, minSpan = 0, markDate = null, op
         tooltip.innerHTML =
             `<span class="tip-value">${points[i].label ?? fmtVal(points[i].count)}</span><span class="tip-date">${points[i].date}</span>` +
             (points[i].extra ?? "");
-        placeTooltip(e);
+        placeTooltip(e, { x: rect.left + x(i), y: rect.top + y(counts[i]) });
     };
     // Hover-tracking is mouse-only; touch would flash the tooltip while the
     // finger settles into a scroll.
