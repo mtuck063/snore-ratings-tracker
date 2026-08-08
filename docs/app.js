@@ -3488,14 +3488,19 @@ async function main() {
         // than UTC's, so a split can disagree with the day total by a few
         // visitors around midnight — close enough for who-came-that-day.
         const byDay = pageviews.countries?.byDay ?? {};
+        const ccLabel = (cc) =>
+            cc === "??" ? "🌐 Unknown" : `${flag(cc)} ${regionNames.of(cc.toUpperCase())}`;
         const last30 = days.slice(-30).map((p) => {
             const split = Object.entries(byDay[p.date] ?? {}).sort((a, b) => b[1] - a[1]);
             if (!split.length) return p;
-            const parts = split
-                .slice(0, 4)
-                .map(([cc, n]) => `${cc === "??" ? "🌐" : flag(cc)} ${n}`);
-            if (split.length > 4) parts.push(`+${split.length - 4}`);
-            return { ...p, extra: `<span class="tip-text">${parts.join(" · ")}</span>` };
+            const rows = split
+                .slice(0, 5)
+                .map(([cc, n]) => `<span class="tip-bd-row"><span>${ccLabel(cc)}</span><span>${n}</span></span>`);
+            if (split.length > 5) {
+                const restSum = split.slice(5).reduce((s, [, n]) => s + n, 0);
+                rows.push(`<span class="tip-bd-row"><span>+${split.length - 5} more</span><span>${restSum}</span></span>`);
+            }
+            return { ...p, extra: `<span class="tip-bd">${rows.join("")}</span>` };
         });
         const drawChart = () => {
             const w = chartWrap.clientWidth;
@@ -3545,10 +3550,18 @@ async function main() {
             row.append(top, track);
             return row;
         };
-        const bdMore = (list, rest) => {
-            const more = document.createElement("div");
+        // The tail is a button: clicking it swaps itself for the rows it was
+        // summarizing. Bars keep the same scale as the visible rows so the
+        // whole list stays comparable.
+        const bdMore = (list, rest, most, labelFor) => {
+            const more = document.createElement("button");
+            more.type = "button";
             more.className = "tc-more";
             more.textContent = `+${rest.length} more · ${fmt(rest.reduce((s, [, n]) => s + n, 0))} visitors`;
+            more.addEventListener("click", () => {
+                for (const [key, n] of rest) list.insertBefore(bdRow(labelFor(key), n, most), more);
+                more.remove();
+            });
             list.appendChild(more);
         };
         if (ranked.length) {
@@ -3558,11 +3571,9 @@ async function main() {
                 `By country, last 30 days · ${fmt(grand)} visitors`;
             const list = document.getElementById("traffic-countries");
             for (const [cc, n] of ranked.slice(0, 8)) {
-                list.appendChild(
-                    bdRow(cc === "??" ? "🌐 Unknown" : `${flag(cc)} ${regionNames.of(cc.toUpperCase())}`, n, most)
-                );
+                list.appendChild(bdRow(ccLabel(cc), n, most));
             }
-            if (ranked.length > 8) bdMore(list, ranked.slice(8));
+            if (ranked.length > 8) bdMore(list, ranked.slice(8), most, ccLabel);
             document.getElementById("traffic-countries-wrap").hidden = false;
         }
 
@@ -3574,7 +3585,7 @@ async function main() {
             const list = document.getElementById(listId);
             const most = rows[0][1];
             for (const [label, n] of rows.slice(0, 6)) list.appendChild(bdRow(label, n, most));
-            if (rows.length > 6) bdMore(list, rows.slice(6));
+            if (rows.length > 6) bdMore(list, rows.slice(6), most, (label) => label);
             document.getElementById(wrapId).hidden = false;
         };
         renderBreakdown("traffic-refs-wrap", "traffic-refs", pageviews.extras?.refs);

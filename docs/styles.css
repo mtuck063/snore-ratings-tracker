@@ -671,6 +671,10 @@ li.log-day {
 }
 #tooltip .tip-value { font-weight: 600; font-variant-numeric: tabular-nums; }
 #tooltip .tip-date { display: block; color: var(--text-secondary); font-size: 0.72rem; }
+/* Per-day country rows under a traffic-chart tip: names left, counts right. */
+#tooltip .tip-bd { display: block; margin-top: 5px; }
+#tooltip .tip-bd-row { display: flex; justify-content: space-between; gap: 16px; color: var(--text-secondary); font-size: 0.74rem; }
+#tooltip .tip-bd-row span:last-child { color: var(--text); font-variant-numeric: tabular-nums; }
 .tip-row { display: flex; align-items: center; gap: 7px; white-space: nowrap; }
 .tip-text {
     display: block;
@@ -737,7 +741,18 @@ li.log-day {
 .tc-count { font-variant-numeric: tabular-nums; }
 .tc-track { height: 3px; border-radius: 2px; background: var(--bg-raised); margin-top: 4px; }
 .tc-fill { height: 100%; border-radius: 2px; background: var(--accent); }
-.tc-more { color: var(--text-secondary); font-size: 0.75rem; margin-top: 6px; }
+.tc-more {
+    display: block;
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    margin-top: 6px;
+    cursor: pointer;
+}
+.tc-more:hover { color: var(--accent); }
 
 /* --- Prioritisation panel and columns -------------------------------------
    The keyword table says where you rank. These say which of those rows is
