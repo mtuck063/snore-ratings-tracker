@@ -89,6 +89,36 @@ try {
     console.warn(`pageviews: locations ${err.message}; keeping stored country split.`);
   }
 
+  // TEMPORARY probe, log-only: which start/end phrasing slices locations to
+  // exactly one day? Each sum is compared against the known day total in the
+  // workflow log, then this block gets removed.
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  const probeDay = "2026-08-05";
+  const probeNext = "2026-08-06";
+  const probes = {
+    "same-day": `start=${probeDay}&end=${probeDay}`,
+    "next-day": `start=${probeDay}&end=${probeNext}`,
+    "utc-ts": `start=${encodeURIComponent(`${probeDay}T00:00:00Z`)}&end=${encodeURIComponent(`${probeNext}T00:00:00Z`)}`,
+    "space-ts": `start=${encodeURIComponent(`${probeDay} 00:00:00`)}&end=${encodeURIComponent(`${probeDay} 23:59:59`)}`,
+  };
+  for (const [name, qs] of Object.entries(probes)) {
+    await sleep(400);
+    try {
+      const r = await fetch(`${SITE}/api/v0/stats/locations?${qs}&limit=100`, {
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      });
+      if (!r.ok) {
+        console.log(`probe ${name}: HTTP ${r.status} ${(await r.text().catch(() => "")).slice(0, 150)}`);
+        continue;
+      }
+      const b = await r.json();
+      const sum = (b.stats ?? []).reduce((s, x) => s + x.count, 0);
+      console.log(`probe ${name}: ${sum} (want ${stored.days[probeDay]})`);
+    } catch (e) {
+      console.log(`probe ${name}: ${e.message}`);
+    }
+  }
+
   await writeFile(file, JSON.stringify(stored));
   console.log(
     `pageviews: today so far ${stored.days[today] ?? 0}, ${Object.keys(stored.days).length} day(s) stored`
