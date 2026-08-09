@@ -2987,10 +2987,16 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
             }
             // Tap the score for its arithmetic and, if it moved, a numeric
             // before/after decomposition. Mirrors popScore in the collector:
-            // 5 base + up to 66.5 earliness + up to 28.5 list position.
+            // 5 base + up to 66.5 earliness + up to 28.5 list position, with
+            // earliness in weighted characters — a CJK glyph counts 2.5, so
+            // JP/CN phrases stop saturating the scale.
+            const weighChars = (s) =>
+                [...s].reduce((n, ch) => n + (/[぀-ヿ一-鿿]/.test(ch) ? 2.5 : 1), 0);
             const popParts = (prefix, pos) => {
                 if (!prefix) return null;
-                const depth = term.length === 2 ? 1 : 1 - (prefix.length - 2) / (term.length - 2);
+                const wt = weighChars(term);
+                const wp = weighChars(prefix);
+                const depth = Math.max(0, Math.min(1, wt <= 2 ? 1 : 1 - (wp - 2) / (wt - 2)));
                 const early = 0.7 * 95 * depth;
                 const posPts = 0.3 * 95 * ((10 - (pos - 1)) / 10);
                 return { early, posPts };
