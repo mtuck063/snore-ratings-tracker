@@ -1037,14 +1037,19 @@ function actionFor(t, alt, b, keys) {
         }
         // "Cannot rank until covered" turned out to be false: part-covered
         // phrases rank on the words the listing does carry, with Apple
-        // bridging the rest. Say which situation this row is in.
+        // bridging the rest. Say which situation this row is in, and give
+        // the advice the bridged lever already prices in: a bridge that
+        // reaches page one makes the missing word insurance, not entry.
         const one = t.missing.length === 1;
+        const list = t.missing.map((w) => `“${w}”`).join(" and ");
         return {
             kind: "wording",
             text:
-                t.rank != null
-                    ? `Add ${t.missing.map((w) => `“${w}”`).join(" and ")} to your keyword field. Apple already bridges ${one ? "it" : "them"} — the phrase ranks #${t.rank} on the words you carry — so the characters buy a firmer grip, not first entry.`
-                    : `Add ${t.missing.map((w) => `“${w}”`).join(" and ")} to your keyword field. The phrase is unranked, and words Apple has to bridge on its own are the likeliest reason.`,
+                t.rank == null
+                    ? `Add ${list} to your keyword field. The phrase is unranked, and words Apple has to bridge on its own are the likeliest reason.`
+                    : t.rank <= 10
+                      ? `Apple bridges ${list} by itself and still delivers #${t.rank}. Adding ${one ? "it" : "them"} buys insurance more than lift — the characters usually earn more on a phrase that ranks nowhere.`
+                      : `Add ${list} to your keyword field. Apple's bridge only carries this phrase to #${t.rank}; carrying the ${one ? "word" : "words"} yourself is the cheapest push it has left.`,
             add: alt.filter((u) => !keys.has(u)),
         };
     }
@@ -2834,9 +2839,18 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                             );
                             const titled = appendAnchorList(tail, anchors);
                             const one = (asoTerm.missing ?? []).length === 1;
+                            // The advice depends on how far the bridge already
+                            // carries it. Page one for free means the missing
+                            // word buys insurance, not entry — the same
+                            // judgement the bridged lever prices into every
+                            // recommendation, said out loud.
+                            const advice =
+                                cur.rank <= 10
+                                    ? ` Adding ${one ? "it" : "them"} would put the ranking on your own text instead of Apple's inference, but the bridge already delivers page one for free — those characters usually earn more on a phrase that ranks nowhere.`
+                                    : ` The bridge only carries it to #${cur.rank}; adding the missing ${one ? "word" : "words"} is the cheapest push this phrase has left.`;
                             tail.appendChild(
                                 document.createTextNode(
-                                    `${titled ? ", the field Apple weighs most" : ""}. Apple bridges the missing ${one ? "word" : "words"} by itself; add ${one ? "it" : "them"} and the whole phrase is under your control.`
+                                    `${titled ? ", the field Apple weighs most" : ""}. Apple bridges the missing ${one ? "word" : "words"} by itself.${advice}`
                                 )
                             );
                         } else {
