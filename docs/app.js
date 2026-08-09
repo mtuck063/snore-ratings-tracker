@@ -1048,7 +1048,7 @@ function actionFor(t, alt, b, keys) {
                 t.rank == null
                     ? `Add ${list} to your keyword field. The phrase is unranked, and words Apple has to bridge on its own are the likeliest reason.`
                     : t.rank <= 10
-                      ? `Apple bridges ${list} by itself and still delivers #${t.rank}. Adding ${one ? "it" : "them"} buys insurance more than lift — the characters usually earn more on a phrase that ranks nowhere.`
+                      ? `Apple bridges ${list} by itself and still delivers #${t.rank}. Adding ${one ? "it" : "them"} would protect that ranking rather than raise it — the characters usually earn more on a phrase that ranks nowhere.`
                       : `Add ${list} to your keyword field. Apple's bridge only carries this phrase to #${t.rank}; carrying the ${one ? "word" : "words"} yourself is the cheapest push it has left.`,
             add: alt.filter((u) => !keys.has(u)),
         };
@@ -2846,7 +2846,7 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                             // recommendation, said out loud.
                             const advice =
                                 cur.rank <= 10
-                                    ? ` Adding ${one ? "it" : "them"} would put the ranking on your own text instead of Apple's inference, but the bridge already delivers page one for free — those characters usually earn more on a phrase that ranks nowhere.`
+                                    ? ` Adding ${one ? "it" : "them"} would protect this ranking rather than raise it — the match only exists while Apple keeps making it — and since page one is already arriving free, those characters usually earn more on a phrase that ranks nowhere.`
                                     : ` The bridge only carries it to #${cur.rank}; adding the missing ${one ? "word" : "words"} is the cheapest push this phrase has left.`;
                             tail.appendChild(
                                 document.createTextNode(
