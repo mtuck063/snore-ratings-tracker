@@ -695,6 +695,24 @@ function analyseMarket(cc) {
   const lang = langOf(cc);
   const pool = poolOf(meta, lang);
 
+  // Per-field pools, to say where an anchor lives. The three fields do not
+  // weigh the same — the title outranks the subtitle, which outranks the
+  // keyword field — so "snore is in your title" explains a bridged ranking
+  // in a way "somewhere in your listing" does not.
+  const homes =
+    meta &&
+    [
+      ["title", poolOf({ title: meta.title }, lang)],
+      ["subtitle", poolOf({ subtitle: meta.subtitle }, lang)],
+      ["field", poolOf({ keywordField: meta.keywordField }, lang)],
+    ].filter(([, p]) => p);
+  const homeOf = (w) => {
+    for (const [name, p] of homes ?? []) {
+      if (p.set.has(w) || p.set.has(stem(w, lang))) return name;
+    }
+    return "field";
+  };
+
   const terms = {};
   const dctx = difficultyCtx(cc);
   for (const kw of list) {
@@ -719,8 +737,11 @@ function analyseMarket(cc) {
         covered: cov.covered,
         ...(cov.missing.length && { missing: cov.missing }),
         // Only interesting on uncovered phrases: a covered phrase's anchors
-        // are the whole phrase.
-        ...(!cov.covered && cov.anchors.length && { anchors: cov.anchors }),
+        // are the whole phrase. Each anchor carries the field it lives in.
+        ...(!cov.covered &&
+          cov.anchors.length && {
+            anchors: cov.anchors.map((w) => ({ w, in: homeOf(w) })),
+          }),
       }),
       ...(hard && { hard }),
       score: scoreOf({ pop, rank, intent, cov, diff, fresh }),

@@ -1463,7 +1463,12 @@ function rescoreFor(cc, plan) {
                   .map((a) => ({ miss: a.filter((u) => !sat(u)), have: a.filter(sat) }))
                   .sort((a, c) => a.miss.length - c.miss.length)[0] ?? null);
         const missing = (pick?.miss ?? []).map(show);
-        const anchors = (pick?.have ?? []).map(show);
+        const inTitle = new Set(b.titleKeys ?? []);
+        const inSub = new Set(b.subtitleKeys ?? []);
+        const anchors = (pick?.have ?? []).map((u) => ({
+            w: show(u),
+            in: inTitle.has(u) ? "title" : inSub.has(u) ? "subtitle" : "field",
+        }));
         const lever = covered ? levers.covered : (pick?.miss.length ?? 0) <= 2 ? levers.cheap : levers.dear;
         const where = t.rank == null ? "unranked" : `#${t.rank}`;
         // Same sentences as scripts/aso.mjs, because the same facts deserve the
@@ -2773,22 +2778,32 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                                 " — which is the first thing to fix before expecting a position here.";
                         } else if (anchors.length) {
                             // A part-covered phrase ranks on the words the
-                            // listing does carry. Naming them stops "not one
-                            // you control" from overclaiming: half of this
-                            // ranking is the reader's own title.
+                            // listing does carry — and on where they sit. The
+                            // title outranks the subtitle, which outranks the
+                            // keyword field, so the anchor's home is most of
+                            // the explanation and gets named.
                             tail.appendChild(
                                 document.createTextNode(` — yet it ranks #${cur.rank}, held up by `)
                             );
-                            anchors.forEach((w, i) => {
-                                if (i) tail.appendChild(document.createTextNode(", "));
-                                const code = document.createElement("code");
-                                code.textContent = w;
-                                tail.appendChild(code);
+                            const FIELD_NAME = { title: "title", subtitle: "subtitle", field: "keyword field" };
+                            const groups = ["title", "subtitle", "field"]
+                                .map((f) => [f, anchors.filter((a) => (a.in ?? "field") === f)])
+                                .filter(([, list]) => list.length);
+                            groups.forEach(([f, list], gi) => {
+                                if (gi) tail.appendChild(document.createTextNode(" and "));
+                                list.forEach((a, i) => {
+                                    if (i) tail.appendChild(document.createTextNode(", "));
+                                    const code = document.createElement("code");
+                                    code.textContent = a.w ?? a;
+                                    tail.appendChild(code);
+                                });
+                                tail.appendChild(document.createTextNode(` from your ${FIELD_NAME[f]}`));
                             });
+                            const titled = groups.some(([f]) => f === "title");
                             const one = (asoTerm.missing ?? []).length === 1;
                             tail.appendChild(
                                 document.createTextNode(
-                                    ` from your own listing. Apple bridges the missing ${one ? "word" : "words"} by itself; add ${one ? "it" : "them"} and the whole phrase is under your control.`
+                                    `${titled ? ", the field Apple weighs most" : ""}. Apple bridges the missing ${one ? "word" : "words"} by itself; add ${one ? "it" : "them"} and the whole phrase is under your control.`
                                 )
                             );
                         } else {
