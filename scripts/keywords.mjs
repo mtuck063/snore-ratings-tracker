@@ -179,6 +179,36 @@ async function fetchRank(kw, cc, attempt = 1) {
   }
 }
 
+// The cheapest possible probe for the auto-tracker's brand check: only the
+// name of the #1 result matters, so limit=3 instead of the rank fetch's 200.
+async function topNameOf(term, cc) {
+  try {
+    return await searchGate(async () => {
+      const res = await fetch(
+        `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=${cc}&entity=software&limit=3`
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return (await res.json()).results?.[0]?.trackName ?? null;
+    });
+  } catch {
+    return null; // fail open: a network hiccup should not veto tracking
+  }
+}
+
+// A brand query announces itself in its own results: the #1 app is named
+// after the phrase — exactly, or phrase-then-tagline. "snoring king" passed
+// every other guard and was Snoring King's own name. Exact-or-separator
+// rather than a bare prefix match, because "do i snore" loses its #1 to
+// "Do I Snore or Grind" and is still a symptom phrase worth tracking.
+const BRAND_SEP = /^\s*[:\-–—|·•,(（：]/;
+function namesake(name, term) {
+  const n = fold(name);
+  const t = fold(term);
+  if (!n.startsWith(t)) return false;
+  const rest = n.slice(t.length);
+  return rest === "" || BRAND_SEP.test(rest);
+}
+
 // --- Popularity: search-hints prefix probing --------------------------------
 
 async function fetchHints(prefix, storefront, attempt = 1) {
@@ -510,6 +540,14 @@ async function merge(partials) {
       if (weigh(term) > 30) continue;
       if (!seedFor(cc).some((tok) => fold(term).includes(fold(tok)))) continue;
       if (target.some((k) => fold(k) === fold(term))) continue;
+      // One search per surviving candidate — five per market per run at most.
+      // If the top result is the phrase's own namesake, this is somebody's
+      // brand, not a query to chase.
+      const topName = await topNameOf(term, cc);
+      if (topName && namesake(topName, term)) {
+        console.log(`${cc}: not tracking "${term}" — #1 is "${topName}", its own name`);
+        continue;
+      }
       target.push(term);
       added++;
       configChanged = true;

@@ -2707,7 +2707,13 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
         // missing from it.
         const fieldKnown = rescored != null || !plan?.markets?.[cc]?.coverage?.partial;
         const val = ([term, e]) =>
-            sort.key === "rank" ? (e.rank ?? Infinity) : sort.key === "score" ? (aso[term]?.score ?? 0) : e.pop;
+            sort.key === "rank"
+                ? (e.rank ?? Infinity)
+                : sort.key === "score"
+                  ? (aso[term]?.score ?? 0)
+                  : sort.key === "hard"
+                    ? (aso[term]?.hard?.score ?? Infinity)
+                    : e.pop;
         const entries = Object.entries(kw.latest[cc])
             .filter(([term]) => {
                 if (!filter.intents.size && !filter.gapOnly && !filter.titleOnly) return true;
@@ -2798,7 +2804,7 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                     const det = document.createElement("tr");
                     det.className = "kw-detail";
                     const td = document.createElement("td");
-                    td.colSpan = 9;
+                    td.colSpan = 10;
                     // The missing words lead, above the competitor list. The
                     // legend told people to tap the row for them and the row
                     // only ever opened the top ten, which made the instruction
@@ -3138,7 +3144,27 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                 tdScore.classList.add("muted");
             }
 
-            tr.append(tdKw, tdPop, tdScore, tdRank, tdDelta, td24, td7d, tdBest, tdSpark);
+            // Difficulty gets its own column rather than living only inside
+            // the score tooltip: score says what a phrase is worth, this
+            // says what it costs, and the two disagreeing is normal.
+            const tdHard = document.createElement("td");
+            tdHard.className = "col-num kw-hard-cell";
+            const hardT = asoTerm?.hard;
+            if (hardT) {
+                tdHard.textContent = hardT.score;
+                tdHard.classList.add(`hard-${HARD_BAND(hardT.score)}`);
+                tdHard.dataset.tip =
+                    `${HARD_BAND(hardT.score)} climb, grading ${hardWho(hardT)}: ${hardT.why}. ` +
+                    `Ranked from public signals — ratings, names, release dates — not a probability of winning.`;
+            } else {
+                tdHard.textContent = "—";
+                tdHard.classList.add("muted");
+                if (asoTerm)
+                    tdHard.dataset.tip =
+                        "Nothing to grade: either the top slot is held or nothing is recorded above the current rank yet.";
+            }
+
+            tr.append(tdKw, tdPop, tdScore, tdHard, tdRank, tdDelta, td24, td7d, tdBest, tdSpark);
             tbody.appendChild(tr);
         }
 

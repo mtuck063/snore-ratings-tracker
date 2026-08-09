@@ -932,6 +932,10 @@ li.log-day {
 .badge.kw-title { color: var(--good); background: rgba(74, 222, 128, 0.12); }
 .kw-score { font-variant-numeric: tabular-nums; }
 .kw-score.score-hot { color: var(--accent); font-weight: 600; }
+/* Difficulty column, tinted by the same bands as the climb chips. */
+.kw-hard-cell { font-variant-numeric: tabular-nums; }
+.kw-hard-cell.hard-soft { color: var(--good); }
+.kw-hard-cell.hard-hard { color: var(--bad); }
 
 /* --- Field builder ---------------------------------------------------------
    The only interactive thing on the page: coverage is recomputed on every
