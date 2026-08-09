@@ -56,6 +56,7 @@ const metadata = await readJson(metadataFile, { markets: {} });
 const overrides = await readJson(intentsFile, { intents: {}, offtarget: [] });
 const kwData = await readJson(kwDataFile, { latest: {}, history: [] });
 const glossary = await readJson(glossaryFile, {});
+const candidates = await readJson(path.join(repoRoot, "scripts", "kw-candidates.json"), {});
 
 const { markets } = config;
 const kwFor = (cc) =>
@@ -401,6 +402,37 @@ function namesTerm(name, kw, lang) {
   }
   const named = new Set(words(name, lang));
   return words(kw, lang).some((w) => named.has(w));
+}
+
+// The language real searchers use: every harvested autocomplete phrase across
+// every market, plus every tracked phrase. A word appearing in exactly one of
+// these and nowhere else is a coinage rather than vocabulary — "bonit" — and
+// the brand upgrade below leans on that. Family-matched by prefix so log
+// counts logger and talk counts talking.
+const corpus = (() => {
+  const phrases = new Set();
+  for (const list of Object.values(candidates))
+    for (const c of list) {
+      const t = typeof c === "string" ? c : (c.term ?? "");
+      if (t) phrases.add(fold(t));
+    }
+  for (const cc of Object.keys(markets)) for (const t of kwFor(cc)) phrases.add(fold(t));
+  return [...phrases].map((p) => ({ p, words: p.split(/\s+/).filter(Boolean) }));
+})();
+function coinedWordIn(kw) {
+  const self = fold(kw);
+  const toks = fold(kw)
+    .split(/\s+/)
+    .filter((w) => w.length >= 3 && !/^(19|20)\d{2}$/.test(w));
+  // A one-word phrase's word is trivially unique; that is what the hand pins
+  // and the name rules are for ("schlaftagebuch" is a diary, not a brand).
+  if (toks.length < 2) return false;
+  return toks.some(
+    (w) =>
+      !corpus.some(
+        (e) => e.p !== self && e.words.some((x) => x.startsWith(w) || w.startsWith(x))
+      )
+  );
 }
 
 // The name's own slot. Apple hands an app the phrase that is its name, so a
@@ -751,7 +783,7 @@ function analyseMarket(cc) {
     const cur = latest[kw] ?? {};
     const pop = cur.pop ?? 5;
     const rank = cur.rank ?? null;
-    const { intent, english } = classify(kw);
+    let { intent, english } = classify(kw);
     const cov = coverageOf(kw, pool, skipFor(cc));
     const mods = modsOf(english);
     const hard = difficultyOf(cc, kw, cur, dctx);
@@ -761,6 +793,16 @@ function analyseMarket(cc) {
     const year = yearNamed(kw);
     const fresh = freshness(kw);
     const held = nameHeldTop(cc, kw, cur, kwData.apps ?? {}, lang, skipFor(cc));
+    // A name-held #1 plus a word the whole search corpus uses nowhere else is
+    // somebody's coinage: "bonit sleep training" reached the list through its
+    // generic half, but nobody types "bonit" for anything except that app.
+    // Generic phrases squatted by keyword-stuffed names ("my sleep talks",
+    // "snoring sounds") keep their intent — every word they hold is shared
+    // vocabulary. Latin only: an unsegmented CJK phrase is one token and
+    // would always read as coined. Hand pins in intents.json still win.
+    if (held && !hasCJK(kw) && !overrides.intents?.[kw] && intent !== "brand" && intent !== "mine") {
+      if (coinedWordIn(kw)) intent = "brand";
+    }
     terms[kw] = {
       ...(held && { nameHeld: held }),
       intent,
