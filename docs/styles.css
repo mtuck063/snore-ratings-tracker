@@ -909,7 +909,7 @@ li.log-day {
 
 /* Intent chips. Deliberately quiet: they group rows, they don't rank them,
    and eighty coloured pills would fight the numbers for attention. */
-.badge.kw-intent, .badge.kw-gap {
+.badge.kw-intent, .badge.kw-gap, .badge.kw-title {
     font-size: 0.62rem;
     font-weight: 600;
     border-radius: 5px;
@@ -924,9 +924,12 @@ li.log-day {
 .badge.intent-symptom { color: var(--star4); background: rgba(253, 230, 138, 0.13); }
 .badge.intent-category { color: var(--accent); background: rgba(91, 127, 255, 0.13); }
 .badge.intent-mine, .badge.intent-offtarget { opacity: 0.55; }
-/* The one chip that is a call to action: no words in the listing means Apple
-   cannot rank this phrase at all, whatever the demand behind it. */
+/* The one chip that is a call to action: words absent from the listing are
+   words Apple has to bridge on its own. */
 .badge.kw-gap { color: var(--bad); background: rgba(248, 113, 113, 0.13); }
+/* Its mirror: every word of the phrase sits in the app name, the field Apple
+   weighs most — the rankings the title is buying. */
+.badge.kw-title { color: var(--good); background: rgba(74, 222, 128, 0.12); }
 .kw-score { font-variant-numeric: tabular-nums; }
 .kw-score.score-hot { color: var(--accent); font-weight: 600; }
 

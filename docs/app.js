@@ -1458,7 +1458,7 @@ function rescoreFor(cc, plan) {
         // missing — and the same alternative's satisfied units are the
         // anchors the phrase already ranks on.
         const pick = covered
-            ? null
+            ? { miss: [], have: t.alts.find((a) => a.every(sat)) ?? [] }
             : (t.alts
                   .map((a) => ({ miss: a.filter((u) => !sat(u)), have: a.filter(sat) }))
                   .sort((a, c) => a.miss.length - c.miss.length)[0] ?? null);
@@ -1484,13 +1484,40 @@ function rescoreFor(cc, plan) {
             ...term,
             covered,
             ...(missing.length ? { missing } : {}),
-            ...(!covered && anchors.length ? { anchors } : {}),
+            ...(anchors.length ? { anchors } : {}),
             score: Math.round(100 * (term.base ?? 0) * lever),
             why,
         });
     }
     return out;
 }
+
+// Append "`snore`, `tracker` from your title and `talk` from your subtitle"
+// to el, grouped by field with the strongest first. Returns true when any
+// anchor sits in the title, so callers can credit the field Apple weighs
+// most.
+function appendAnchorList(el, anchors) {
+    const FIELD_NAME = { title: "title", subtitle: "subtitle", field: "keyword field" };
+    const groups = ["title", "subtitle", "field"]
+        .map((f) => [f, anchors.filter((a) => (a.in ?? "field") === f)])
+        .filter(([, list]) => list.length);
+    groups.forEach(([f, list], gi) => {
+        if (gi) el.appendChild(document.createTextNode(" and "));
+        list.forEach((a, i) => {
+            if (i) el.appendChild(document.createTextNode(", "));
+            const code = document.createElement("code");
+            code.textContent = a.w ?? a;
+            el.appendChild(code);
+        });
+        el.appendChild(document.createTextNode(` from your ${FIELD_NAME[f]}`));
+    });
+    return groups.some(([f]) => f === "title");
+}
+
+// A phrase the app name carries whole: the strongest wording position there
+// is, and the likeliest explanation for a rank that holds across markets.
+const titleHeld = (t) =>
+    t?.covered === true && (t.anchors?.length ?? 0) > 0 && t.anchors.every((a) => a.in === "title");
 
 // What the tags on each row mean, spelled out on the page rather than hidden
 // in a tooltip, and doubling as filters. "CATEGORY" explains nothing until
@@ -1584,9 +1611,23 @@ function renderLegend(host, cc, plan, filter, onChange, counts) {
             )
         );
     }
+    if (Object.values(terms).some(titleHeld)) {
+        ul.appendChild(
+            row(
+                "kw-title",
+                "in title",
+                "Every word of this phrase sits in your app name, the field Apple weighs most. These are the rankings your title is buying, and the reason they hold across markets.",
+                filter.titleOnly,
+                () => {
+                    filter.titleOnly = !filter.titleOnly;
+                }
+            )
+        );
+    }
     host.appendChild(ul);
 
-    if (filter.intents.size || filter.gapOnly) {
+    const filtering = filter.intents.size > 0 || filter.gapOnly || filter.titleOnly;
+    if (filtering) {
         const count = document.createElement("p");
         count.className = "plan-line muted";
         count.textContent = `Showing ${counts.shown} of ${counts.total} keywords.`;
@@ -1597,18 +1638,15 @@ function renderLegend(host, cc, plan, filter, onChange, counts) {
         clear.addEventListener("click", () => {
             filter.intents.clear();
             filter.gapOnly = false;
+            filter.titleOnly = false;
             onChange();
         });
         host.appendChild(clear);
     }
     // Open when a filter is on, or the rows would be hidden with no visible
     // reason for the table being short.
-    const legendSummary = makeCollapsible(head, "legend", filter.intents.size > 0 || filter.gapOnly);
-    legendSummary(
-        filter.intents.size || filter.gapOnly
-            ? `filtered to ${counts.shown} of ${counts.total}`
-            : `${present.size} tags`
-    );
+    const legendSummary = makeCollapsible(head, "legend", filtering);
+    legendSummary(filtering ? `filtered to ${counts.shown} of ${counts.total}` : `${present.size} tags`);
 }
 
 // The field card: everything about the 100 characters you control, in one
@@ -2637,8 +2675,8 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
     // cannot read the JP one either, so asking twice would be busywork.
     let showEnglish = false;
     // Which tags the table is limited to. Intents are OR'd with each other;
-    // gapOnly narrows whatever that leaves.
-    const filter = { intents: new Set(), gapOnly: false };
+    // gapOnly and titleOnly narrow whatever that leaves.
+    const filter = { intents: new Set(), gapOnly: false, titleOnly: false };
     // Only worth offering where it would change something. An English market
     // has no glossed terms, so the button would sit there doing nothing.
     const translatable = (cc) => Object.keys(kw.latest[cc] ?? {}).some((t) => glossary[t]);
@@ -2666,10 +2704,11 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
             sort.key === "rank" ? (e.rank ?? Infinity) : sort.key === "score" ? (aso[term]?.score ?? 0) : e.pop;
         const entries = Object.entries(kw.latest[cc])
             .filter(([term]) => {
-                if (!filter.intents.size && !filter.gapOnly) return true;
+                if (!filter.intents.size && !filter.gapOnly && !filter.titleOnly) return true;
                 const t = aso[term];
                 if (filter.intents.size && !filter.intents.has(t?.intent)) return false;
                 if (filter.gapOnly && t?.covered !== false) return false;
+                if (filter.titleOnly && !titleHeld(t)) return false;
                 return true;
             })
             .sort((a, b) => (val(a) - val(b)) * sort.dir || (a[1].rank ?? 999) - (b[1].rank ?? 999));
@@ -2720,6 +2759,14 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                         ? `Missing from your title, subtitle or keyword field: ${gone}`
                         : `Missing from your title or subtitle: ${gone}. This market's keyword field is not recorded, so it may already be there.`;
                     tdKw.appendChild(gap);
+                } else if (titleHeld(asoTerm)) {
+                    const held = document.createElement("span");
+                    held.className = "badge kw-title";
+                    held.textContent = "in title";
+                    held.dataset.tipTitle = "Listing coverage";
+                    held.dataset.tip =
+                        "Every word of this phrase sits in your app name, the field Apple weighs most — the likeliest reason it ranks where it does.";
+                    tdKw.appendChild(held);
                 }
             }
             // Newly tracked terms have no history yet, so their delta columns
@@ -2785,21 +2832,7 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                             tail.appendChild(
                                 document.createTextNode(` — yet it ranks #${cur.rank}, held up by `)
                             );
-                            const FIELD_NAME = { title: "title", subtitle: "subtitle", field: "keyword field" };
-                            const groups = ["title", "subtitle", "field"]
-                                .map((f) => [f, anchors.filter((a) => (a.in ?? "field") === f)])
-                                .filter(([, list]) => list.length);
-                            groups.forEach(([f, list], gi) => {
-                                if (gi) tail.appendChild(document.createTextNode(" and "));
-                                list.forEach((a, i) => {
-                                    if (i) tail.appendChild(document.createTextNode(", "));
-                                    const code = document.createElement("code");
-                                    code.textContent = a.w ?? a;
-                                    tail.appendChild(code);
-                                });
-                                tail.appendChild(document.createTextNode(` from your ${FIELD_NAME[f]}`));
-                            });
-                            const titled = groups.some(([f]) => f === "title");
+                            const titled = appendAnchorList(tail, anchors);
                             const one = (asoTerm.missing ?? []).length === 1;
                             tail.appendChild(
                                 document.createTextNode(
@@ -2811,6 +2844,24 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                         }
                         gap.appendChild(tail);
                         td.appendChild(gap);
+                    } else if (asoTerm?.covered && asoTerm.anchors?.length) {
+                        // The mirror image of the gap line: every word is in
+                        // the listing, and where they sit is most of the
+                        // ranking story — the title above all.
+                        const line = document.createElement("div");
+                        line.className = "kw-detail-gap";
+                        const lead = document.createElement("span");
+                        lead.textContent = "Every word of this phrase is yours: ";
+                        line.appendChild(lead);
+                        const where = document.createElement("span");
+                        const titled = appendAnchorList(where, asoTerm.anchors);
+                        line.appendChild(where);
+                        const end = document.createElement("span");
+                        end.textContent = titled
+                            ? " — the field Apple weighs most, and the likeliest reason this phrase ranks where it does."
+                            : ".";
+                        line.appendChild(end);
+                        td.appendChild(line);
                     }
                     const ol = document.createElement("ol");
                     cur.top.forEach((e) => {

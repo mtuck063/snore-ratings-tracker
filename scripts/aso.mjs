@@ -736,12 +736,13 @@ function analyseMarket(cc) {
       ...(cov && {
         covered: cov.covered,
         ...(cov.missing.length && { missing: cov.missing }),
-        // Only interesting on uncovered phrases: a covered phrase's anchors
-        // are the whole phrase. Each anchor carries the field it lives in.
-        ...(!cov.covered &&
-          cov.anchors.length && {
-            anchors: cov.anchors.map((w) => ({ w, in: homeOf(w) })),
-          }),
+        // Each anchor carries the field it lives in, and covered phrases ship
+        // theirs too: a phrase the app name carries whole is the strongest
+        // wording position there is, and worth naming as the likely reason
+        // it ranks.
+        ...(cov.anchors.length && {
+          anchors: cov.anchors.map((w) => ({ w, in: homeOf(w) })),
+        }),
       }),
       ...(hard && { hard }),
       score: scoreOf({ pop, rank, intent, cov, diff, fresh }),
