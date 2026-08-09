@@ -2865,7 +2865,7 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                         const line = document.createElement("div");
                         line.className = "kw-detail-gap";
                         const lead = document.createElement("span");
-                        lead.textContent = "Every word of this phrase is yours: ";
+                        lead.textContent = "Every word of this phrase is already in your listing: ";
                         line.appendChild(lead);
                         const where = document.createElement("span");
                         const titled = appendAnchorList(where, asoTerm.anchors);
