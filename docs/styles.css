@@ -1084,8 +1084,16 @@ li.log-day {
     padding: 2px 0 8px;
     border-bottom: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
     margin-bottom: 8px;
+    /* The detail cell spans the whole scrollable table, so without a cap the
+       sentence runs wider than any phone screen. Sticky keeps it in view
+       while the table pans. */
+    max-width: min(78ch, calc(100vw - 48px));
+    position: sticky;
+    left: 12px;
 }
 .kw-detail-gap code { color: var(--bad); }
+/* Words the listing carries, as opposed to the missing ones beside them. */
+.kw-detail-gap code.kw-anchor { color: var(--good); }
 
 /* Legend rows double as filters, so they have to look pressable. */
 .kw-legend-toggle {

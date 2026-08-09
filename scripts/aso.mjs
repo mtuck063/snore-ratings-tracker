@@ -403,6 +403,38 @@ function namesTerm(name, kw, lang) {
   return words(kw, lang).some((w) => named.has(w));
 }
 
+// The name's own slot. Apple hands an app the phrase that is its name, so a
+// tiny app can sit #1 above giants it could never outrank on standing:
+// "Snore Diary" holds #1 for "snore diary" with zero ratings while SnoreLab
+// waits at #2 with 57k. Flagged when the top app names the whole phrase, is
+// small in absolute terms, and is outranking something at least an order of
+// magnitude bigger — because then first place is not really on the market
+// and the contest starts at #2.
+const NAME_HELD_MAX = 1000;
+function nameHeldTop(cc, kw, cur, apps, lang, skip) {
+  const id = bareIds(cur.top)[0];
+  if (!id || String(id) === String(config.appId)) return null;
+  const app = apps[id];
+  const name = typeof app === "string" ? app : app?.name;
+  if (!name) return null;
+  const ratings = ratingsOf(cc, id);
+  if (ratings == null || ratings > NAME_HELD_MAX) return null;
+  if (hasCJK(kw)) {
+    const hay = fold(name).replace(/\s+/g, "");
+    const parts = fold(kw).split(/\s+/).filter(Boolean);
+    if (!parts.length || !parts.every((p) => hay.includes(p))) return null;
+  } else {
+    const named = new Set(words(name, lang));
+    const need = words(kw, lang).filter((w) => !skip.has(w));
+    if (!need.length || !need.every((w) => named.has(w))) return null;
+  }
+  const biggerBelow = bareIds(cur.top)
+    .slice(1)
+    .some((o) => (ratingsOf(cc, o) ?? 0) >= 10 * (ratings + 100));
+  if (!biggerBelow) return null;
+  return { app: name, ratings };
+}
+
 // An app that has been shipping for a decade holds ranking signal that no
 // metadata edit buys. Graded between three years and twelve rather than from
 // zero, because a flat "age over eight years" scored almost every term in this
@@ -728,7 +760,9 @@ function analyseMarket(cc) {
     // every market, and the gloss is missing for the phrases nobody translated.
     const year = yearNamed(kw);
     const fresh = freshness(kw);
+    const held = nameHeldTop(cc, kw, cur, kwData.apps ?? {}, lang, skipFor(cc));
     terms[kw] = {
+      ...(held && { nameHeld: held }),
       intent,
       ...(mods.length && { mods }),
       pop,

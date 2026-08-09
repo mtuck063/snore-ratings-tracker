@@ -1511,6 +1511,7 @@ function appendAnchorList(el, anchors) {
         list.forEach((a, i) => {
             if (i) el.appendChild(document.createTextNode(", "));
             const code = document.createElement("code");
+            code.className = "kw-anchor";
             code.textContent = a.w ?? a;
             el.appendChild(code);
         });
@@ -2876,6 +2877,15 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                             : ".";
                         line.appendChild(end);
                         td.appendChild(line);
+                    }
+                    // A tiny app named after the phrase holding #1: Apple
+                    // hands an app the slot its own name earns, so first
+                    // place is not really open here whatever the wording.
+                    if (asoTerm?.nameHeld && cur.rank !== 1) {
+                        const note = document.createElement("div");
+                        note.className = "kw-detail-gap";
+                        note.textContent = `#1 here is ${asoTerm.nameHeld.app} — named after the phrase itself, with ${asoTerm.nameHeld.ratings ? fmt(asoTerm.nameHeld.ratings) : "no"} ratings. Apple gives an app the slot its own name earns, so first place is not really open; the winnable contest starts at #2.`;
+                        td.appendChild(note);
                     }
                     const ol = document.createElement("ol");
                     cur.top.forEach((e) => {
