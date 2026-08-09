@@ -909,7 +909,7 @@ li.log-day {
 
 /* Intent chips. Deliberately quiet: they group rows, they don't rank them,
    and eighty coloured pills would fight the numbers for attention. */
-.badge.kw-intent, .badge.kw-gap, .badge.kw-title {
+.badge.kw-intent, .badge.kw-gap, .badge.kw-title, .badge.kw-held {
     font-size: 0.62rem;
     font-weight: 600;
     border-radius: 5px;
@@ -930,6 +930,10 @@ li.log-day {
 /* Its mirror: every word of the phrase sits in the app name, the field Apple
    weighs most — the rankings the title is buying. */
 .badge.kw-title { color: var(--good); background: rgba(74, 222, 128, 0.12); }
+/* The top slot is an app named after the phrase itself: first place is off
+   the market, whatever the wording. Amber, because it is a caveat on the
+   rank column rather than a call to action. */
+.badge.kw-held { color: var(--star4); background: rgba(253, 230, 138, 0.12); }
 .kw-score { font-variant-numeric: tabular-nums; }
 .kw-score.score-hot { color: var(--accent); font-weight: 600; }
 /* Difficulty column, tinted by the same bands as the climb chips. */

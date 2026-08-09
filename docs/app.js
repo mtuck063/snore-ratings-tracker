@@ -1630,9 +1630,23 @@ function renderLegend(host, cc, plan, filter, onChange, counts) {
             )
         );
     }
+    if (Object.values(terms).some((t) => t.nameHeld)) {
+        ul.appendChild(
+            row(
+                "kw-held",
+                "#1 name-held",
+                "The top slot belongs to an app named after the phrase itself — Apple gives an app the slot its own name earns. The phrase can still be worth chasing; first place just is not the prize, #2 is.",
+                filter.heldOnly,
+                () => {
+                    filter.heldOnly = !filter.heldOnly;
+                }
+            )
+        );
+    }
     host.appendChild(ul);
 
-    const filtering = filter.intents.size > 0 || filter.gapOnly || filter.titleOnly;
+    const filtering =
+        filter.intents.size > 0 || filter.gapOnly || filter.titleOnly || filter.heldOnly;
     if (filtering) {
         const count = document.createElement("p");
         count.className = "plan-line muted";
@@ -1645,6 +1659,7 @@ function renderLegend(host, cc, plan, filter, onChange, counts) {
             filter.intents.clear();
             filter.gapOnly = false;
             filter.titleOnly = false;
+            filter.heldOnly = false;
             onChange();
         });
         host.appendChild(clear);
@@ -2682,7 +2697,7 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
     let showEnglish = false;
     // Which tags the table is limited to. Intents are OR'd with each other;
     // gapOnly and titleOnly narrow whatever that leaves.
-    const filter = { intents: new Set(), gapOnly: false, titleOnly: false };
+    const filter = { intents: new Set(), gapOnly: false, titleOnly: false, heldOnly: false };
     // Only worth offering where it would change something. An English market
     // has no glossed terms, so the button would sit there doing nothing.
     const translatable = (cc) => Object.keys(kw.latest[cc] ?? {}).some((t) => glossary[t]);
@@ -2716,11 +2731,13 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                     : e.pop;
         const entries = Object.entries(kw.latest[cc])
             .filter(([term]) => {
-                if (!filter.intents.size && !filter.gapOnly && !filter.titleOnly) return true;
+                if (!filter.intents.size && !filter.gapOnly && !filter.titleOnly && !filter.heldOnly)
+                    return true;
                 const t = aso[term];
                 if (filter.intents.size && !filter.intents.has(t?.intent)) return false;
                 if (filter.gapOnly && t?.covered !== false) return false;
                 if (filter.titleOnly && !titleHeld(t)) return false;
+                if (filter.heldOnly && !t?.nameHeld) return false;
                 return true;
             })
             .sort((a, b) => (val(a) - val(b)) * sort.dir || (a[1].rank ?? 999) - (b[1].rank ?? 999));
@@ -2779,6 +2796,21 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                     held.dataset.tip =
                         "Every word of this phrase sits in your app name, the field Apple weighs most — the likeliest reason it ranks where it does.";
                     tdKw.appendChild(held);
+                }
+                if (asoTerm.nameHeld) {
+                    // Not a brand phrase — the query itself can be generic —
+                    // but its #1 is: an app named after the phrase holds the
+                    // slot its own name earns, so first place is off the
+                    // market and the row should say so without a tap.
+                    const nh = document.createElement("span");
+                    nh.className = "badge kw-held";
+                    nh.textContent = "#1 name-held";
+                    nh.dataset.tipTitle = "Top slot";
+                    nh.dataset.tip =
+                        `${asoTerm.nameHeld.app} holds #1 and is named after the phrase itself` +
+                        `${asoTerm.nameHeld.ratings ? `, on ${fmt(asoTerm.nameHeld.ratings)} ratings` : ", with no ratings"}. ` +
+                        `Apple gives an app the slot its own name earns, so the winnable contest starts at #2.`;
+                    tdKw.appendChild(nh);
                 }
             }
             // Newly tracked terms have no history yet, so their delta columns
