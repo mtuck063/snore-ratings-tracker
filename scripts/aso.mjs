@@ -268,12 +268,14 @@ function cjkGaps(part, pool) {
 function coverageOf(term, pool, skip = implicit) {
   if (!pool) return null;
   const partial = !pool.complete;
+  // `anchors` are the phrase's words the listing does carry. A part-covered
+  // phrase can still rank on them, and naming them separates "your text holds
+  // half of this" from "Apple invented the whole match".
   if (hasCJK(term)) {
-    const missing = fold(term)
-      .split(/\s+/)
-      .filter(Boolean)
-      .flatMap((part) => (pool.set.has(part) ? [] : cjkGaps(part, pool)));
-    return { mode: "segment", covered: missing.length === 0, missing, partial };
+    const parts = fold(term).split(/\s+/).filter(Boolean);
+    const missing = parts.flatMap((part) => (pool.set.has(part) ? [] : cjkGaps(part, pool)));
+    const anchors = parts.filter((part) => pool.set.has(part));
+    return { mode: "segment", covered: missing.length === 0, missing, anchors, partial };
   }
   // Compared on stems, since that is what the pool holds, and skipping the
   // words Apple never makes you buy — "app", plus the market language's
@@ -282,7 +284,10 @@ function coverageOf(term, pool, skip = implicit) {
   const missing = tokens(term).filter(
     (w) => !skip.has(stem(w, pool.lang)) && !pool.set.has(stem(w, pool.lang))
   );
-  return { mode: "word", covered: missing.length === 0, missing, partial };
+  const anchors = tokens(term).filter(
+    (w) => !skip.has(stem(w, pool.lang)) && pool.set.has(stem(w, pool.lang))
+  );
+  return { mode: "word", covered: missing.length === 0, missing, anchors, partial };
 }
 
 // --- intent ------------------------------------------------------------------
@@ -649,7 +654,10 @@ function scoreOf({ pop, rank, intent, cov, diff, fresh }) {
 }
 
 // The coverage multipliers by name, so the page applies these same numbers.
-const LEVERS = { covered: 1, unknown: 1, cheap: 1.25, dear: 0.85 };
+// `bridged` prices a missing word for a phrase Apple already ranks without
+// it: most of that demand arrives free, so the word buys a firmer grip on
+// the ranking rather than first entry.
+const LEVERS = { covered: 1, unknown: 1, cheap: 1.25, dear: 0.85, bridged: 0.3 };
 
 function reasonFor({ pop, rank, cov, intent, fresh = 1, year = null }) {
   const where = rank == null ? "unranked" : `#${rank}`;
@@ -707,7 +715,13 @@ function analyseMarket(cc) {
       ...(mods.length && { mods }),
       pop,
       rank,
-      ...(cov && { covered: cov.covered, ...(cov.missing.length && { missing: cov.missing }) }),
+      ...(cov && {
+        covered: cov.covered,
+        ...(cov.missing.length && { missing: cov.missing }),
+        // Only interesting on uncovered phrases: a covered phrase's anchors
+        // are the whole phrase.
+        ...(!cov.covered && cov.anchors.length && { anchors: cov.anchors }),
+      }),
       ...(hard && { hard }),
       score: scoreOf({ pop, rank, intent, cov, diff, fresh }),
       base: Math.round(baseOf({ pop, rank, intent, diff, fresh }) * 1000) / 1000,
@@ -730,10 +744,17 @@ function analyseMarket(cc) {
   const blocked = {};
   for (const [kw, t] of Object.entries(terms)) {
     if (!t.missing || !CHASEABLE.has(t.intent)) continue;
+    // A phrase Apple already ranks without the word is demand the store
+    // grants for free — "snore diary" sat #5 with "diary" nowhere in the
+    // listing. Count those phrases at LEVERS.bridged so the list ranks what
+    // a word genuinely unlocks, and carry the granted remainder so the
+    // report can show what was priced out.
+    const worth = t.rank == null ? t.pop : Math.round(t.pop * LEVERS.bridged);
     for (const w of t.missing) {
       (blocked[w] ??= { word: w, terms: [], demand: 0, ...(STOPWORD.test(w) && { weak: true }) });
       blocked[w].terms.push(kw);
-      blocked[w].demand += t.pop;
+      blocked[w].demand += worth;
+      if (t.rank != null) blocked[w].granted = (blocked[w].granted ?? 0) + (t.pop - worth);
     }
   }
   const shoppingList = Object.values(blocked).sort((a, b) => b.demand - a.demand);
@@ -1252,11 +1273,17 @@ function recommendField(cc, terms, meta, model) {
         if (chars + cost > FIELD_LIMIT) continue;
         const next = new Set([...have, ...need]);
         let gain = 0;
-        // Same discount the score uses. Without it the pack would keep buying
-        // last year's number for as long as anyone still searched it, while
-        // the panel above the builder called the same word waste.
+        // Same discounts the score uses. Freshness: without it the pack kept
+        // buying last year's number for as long as anyone still searched it,
+        // while the panel above the builder called the same word waste.
+        // Bridged: a phrase Apple already ranks without its missing words
+        // ("snore diary" sat #5 with no "diary" anywhere) delivers most of
+        // its demand free, so completing it counts at LEVERS.bridged and the
+        // characters go to phrases they genuinely unlock.
         for (const o of unmet)
-          if (satisfiedBy(o.alts, next)) gain += o.pop * FIT[o.intent] * freshness(o.kw);
+          if (satisfiedBy(o.alts, next))
+            gain +=
+              o.pop * FIT[o.intent] * freshness(o.kw) * (o.rank == null ? 1 : LEVERS.bridged);
         if (gain > 0 && (!best || gain / cost > best.gain / best.cost)) best = { need, gain, cost };
       }
     }

@@ -1035,9 +1035,16 @@ function actionFor(t, alt, b, keys) {
             const restKeys = alt.filter((u) => !keys.has(u) && !YEAR.test(b.labels?.[u] ?? u));
             return { kind: "wording", text: parts.join(" "), ...(restKeys.length && { add: restKeys }) };
         }
+        // "Cannot rank until covered" turned out to be false: part-covered
+        // phrases rank on the words the listing does carry, with Apple
+        // bridging the rest. Say which situation this row is in.
+        const one = t.missing.length === 1;
         return {
             kind: "wording",
-            text: `Add ${t.missing.map((w) => `“${w}”`).join(" and ")} to your keyword field. Apple cannot rank this phrase until every word is somewhere in your listing.`,
+            text:
+                t.rank != null
+                    ? `Add ${t.missing.map((w) => `“${w}”`).join(" and ")} to your keyword field. Apple already bridges ${one ? "it" : "them"} — the phrase ranks #${t.rank} on the words you carry — so the characters buy a firmer grip, not first entry.`
+                    : `Add ${t.missing.map((w) => `“${w}”`).join(" and ")} to your keyword field. The phrase is unranked, and words Apple has to bridge on its own are the likeliest reason.`,
             add: alt.filter((u) => !keys.has(u)),
         };
     }
@@ -1447,12 +1454,17 @@ function rescoreFor(cc, plan) {
         const term = m.terms[t.kw];
         if (!term) continue;
         const covered = t.alts.some((a) => a.every(sat));
-        // The cheapest way left to satisfy it, which is what to report missing.
-        const missingKeys = covered
-            ? []
-            : (t.alts.map((a) => a.filter((u) => !sat(u))).sort((a, c) => a.length - c.length)[0] ?? []);
-        const missing = missingKeys.map(show);
-        const lever = covered ? levers.covered : missingKeys.length <= 2 ? levers.cheap : levers.dear;
+        // The cheapest way left to satisfy it, which is what to report
+        // missing — and the same alternative's satisfied units are the
+        // anchors the phrase already ranks on.
+        const pick = covered
+            ? null
+            : (t.alts
+                  .map((a) => ({ miss: a.filter((u) => !sat(u)), have: a.filter(sat) }))
+                  .sort((a, c) => a.miss.length - c.miss.length)[0] ?? null);
+        const missing = (pick?.miss ?? []).map(show);
+        const anchors = (pick?.have ?? []).map(show);
+        const lever = covered ? levers.covered : (pick?.miss.length ?? 0) <= 2 ? levers.cheap : levers.dear;
         const where = t.rank == null ? "unranked" : `#${t.rank}`;
         // Same sentences as scripts/aso.mjs, because the same facts deserve the
         // same words wherever they are computed.
@@ -1467,6 +1479,7 @@ function rescoreFor(cc, plan) {
             ...term,
             covered,
             ...(missing.length ? { missing } : {}),
+            ...(!covered && anchors.length ? { anchors } : {}),
             score: Math.round(100 * (term.base ?? 0) * lever),
             why,
         });
@@ -2211,8 +2224,14 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
                 .sort((a, c) => a.length - c.length || a.join().length - c.join().length)[0];
             if (!need?.length) continue;
             const key = [...need].sort().join("\u0001");
-            const entry = gain.get(key) ?? { pop: 0, terms: [], need };
-            entry.pop += t.pop;
+            const entry = gain.get(key) ?? { pop: 0, granted: 0, terms: [], need };
+            // Same number the script's shopping list uses: a phrase Apple
+            // already ranks without these words counts at levers.bridged,
+            // because that demand arrives free and the characters buy a
+            // firmer grip on it, not first entry.
+            const worth = t.rank == null ? t.pop : Math.round(t.pop * (plan?.levers?.bridged ?? 0.3));
+            entry.pop += worth;
+            if (t.rank != null) entry.granted += t.pop - worth;
             entry.terms.push(t.kw);
             gain.set(key, entry);
         }
@@ -2242,6 +2261,11 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
             const n = document.createElement("span");
             n.className = "fb-add-gain";
             n.textContent = `${g.terms.length} phrase${g.terms.length === 1 ? "" : "s"} \u00b7 ${g.pop} popularity`;
+            if (g.granted) {
+                n.textContent += ` \u00b7 ${g.granted} already granted`;
+                n.dataset.tip =
+                    "Apple already ranks some of these phrases without the words, so that share of the demand reaches you free and is priced out of the popularity number. The characters buy a firmer grip, not first entry.";
+            }
             sUl.appendChild(expandable([add, n], g.terms));
         }
         suggest.appendChild(sUl);
@@ -2740,11 +2764,36 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                         // a term, so this read undefined and every market
                         // without a recorded keyword field got told its gap was
                         // the first thing to fix.
-                        tail.textContent = !fieldKnown
-                            ? " — judged on title and subtitle alone, since this market's keyword field is not recorded."
-                            : cur.rank != null
-                              ? ` — yet it ranks #${cur.rank}, which means Apple is matching on something other than your text. That ranking is not one you control.`
-                              : " — which is the first thing to fix before expecting a position here.";
+                        const anchors = asoTerm.anchors ?? [];
+                        if (!fieldKnown) {
+                            tail.textContent =
+                                " — judged on title and subtitle alone, since this market's keyword field is not recorded.";
+                        } else if (cur.rank == null) {
+                            tail.textContent =
+                                " — which is the first thing to fix before expecting a position here.";
+                        } else if (anchors.length) {
+                            // A part-covered phrase ranks on the words the
+                            // listing does carry. Naming them stops "not one
+                            // you control" from overclaiming: half of this
+                            // ranking is the reader's own title.
+                            tail.appendChild(
+                                document.createTextNode(` — yet it ranks #${cur.rank}, held up by `)
+                            );
+                            anchors.forEach((w, i) => {
+                                if (i) tail.appendChild(document.createTextNode(", "));
+                                const code = document.createElement("code");
+                                code.textContent = w;
+                                tail.appendChild(code);
+                            });
+                            const one = (asoTerm.missing ?? []).length === 1;
+                            tail.appendChild(
+                                document.createTextNode(
+                                    ` from your own listing. Apple bridges the missing ${one ? "word" : "words"} by itself; add ${one ? "it" : "them"} and the whole phrase is under your control.`
+                                )
+                            );
+                        } else {
+                            tail.textContent = ` — yet it ranks #${cur.rank}, which means Apple is matching on something other than your text. That ranking is not one you control.`;
+                        }
                         gap.appendChild(tail);
                         td.appendChild(gap);
                     }
