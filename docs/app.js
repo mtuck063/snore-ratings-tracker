@@ -121,6 +121,43 @@ document.addEventListener("scroll", hideTooltip, { capture: true, passive: true 
 const flag = (cc) =>
     String.fromCodePoint(...[...cc.toUpperCase()].map((ch) => 0x1f1a5 + ch.charCodeAt(0)));
 
+// Long-horizon competitor rating history, loaded in main() beside the other
+// data files and read by the who-owns table's growth column.
+let rivalHistory = null;
+
+// Ratings gained per day over up to the last `windowDays`, from the sparse
+// per-day series (an entry exists only for days the count changed, so the
+// value in force at a date is the newest entry at or before it). Returns
+// null until the series spans at least two days.
+function rivalRate(cc, id, asOfISO, windowDays = 30) {
+    const series = rivalHistory?.[cc]?.[id];
+    if (!series) return null;
+    const dates = Object.keys(series).sort();
+    if (!dates.length) return null;
+    const today = String(asOfISO).slice(0, 10);
+    const cutoff = new Date(new Date(`${today}T00:00:00Z`) - windowDays * 864e5)
+        .toISOString()
+        .slice(0, 10);
+    const atOrBefore = (day) => {
+        let hit = null;
+        for (const d of dates) {
+            if (d <= day) hit = d;
+            else break;
+        }
+        return hit;
+    };
+    const end = atOrBefore(today);
+    if (!end) return null;
+    let start = atOrBefore(cutoff);
+    let days = windowDays;
+    if (!start) {
+        start = dates[0];
+        days = (new Date(`${today}T00:00:00Z`) - new Date(`${start}T00:00:00Z`)) / 864e5;
+    }
+    if (days < 2) return null;
+    return { rate: (series[end] - series[start]) / days, days: Math.round(days) };
+}
+
 // Keyword events live in one shard per month under data/kw-events/, listed by
 // index.json. Returns the newest `want` events plus the total across all
 // shards, fetching only as many months as it takes to reach `want`.
@@ -3304,6 +3341,7 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                 ["Age", "col-num"],
                 ["Ratings", "col-num", "Lifetime ratings in this storefront"],
                 ["Δ 1d", "col-num", "Ratings gained in this storefront since the last reading at least a day old, with the equivalent in users at ~75 per rating. Blank where there is no earlier reading yet."],
+                ["Δ/day", "col-num", "Ratings gained per day, averaged over up to the last thirty days of recorded history (the window in the hover). The dominance read: a wall that grows this fast is harder to pass than its size alone says. Blank until an app's history spans two days."],
                 ["Users", "col-num", "Estimated lifetime users in this storefront: ratings × 75, the rule of thumb for how many users it takes to produce one rating"],
                 ["Score", "col-num"],
             ]) {
@@ -3387,7 +3425,7 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                         const det = document.createElement("tr");
                         det.className = "kw-comp-detail";
                         const td = document.createElement("td");
-                        td.colSpan = 10;
+                        td.colSpan = 11;
                         // What the listing itself says, above the keywords it
                         // wins. The counts tell you a rival owns your phrases;
                         // the subtitle and the screenshots are the part you can
@@ -3494,6 +3532,22 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                     }
                 }
 
+                // The month-scale rate beside the day's delta: the day says
+                // what just happened, this says how dominant they are.
+                const tdRate = document.createElement("td");
+                tdRate.className = "col-num";
+                const rr = rivalRate(cc, id, kw.fetchedAt);
+                if (!rr) {
+                    tdRate.textContent = "—";
+                    tdRate.classList.add("muted");
+                } else {
+                    const r = rr.rate;
+                    tdRate.textContent =
+                        r === 0 ? "0" : `${r > 0 ? "+" : "−"}${Math.abs(r) >= 10 ? fmt(Math.round(Math.abs(r))) : Math.abs(r).toFixed(1)}`;
+                    tdRate.classList.add("kw-comp-growth", r > 0 ? "up" : r < 0 ? "down" : "flat");
+                    tdRate.title = `over ${rr.days} day${rr.days === 1 ? "" : "s"} · ≈ ${r > 0 ? "+" : "−"}${fmt(Math.round(Math.abs(r) * USERS_PER_RATING))} users/day`;
+                }
+
                 const tdUsers = document.createElement("td");
                 tdUsers.className = "col-num muted";
                 tdUsers.textContent = ratings == null ? "—" : `~${fmtUsers(ratings * USERS_PER_RATING)}`;
@@ -3502,7 +3556,7 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                 tdScore.className = "col-num muted";
                 tdScore.textContent = score ? score.toFixed(2) : "—";
 
-                row.append(tdName, tdSlots, tdSlots10, tdFirst, tdRel, tdAge, tdRatings, tdGrowth, tdUsers, tdScore);
+                row.append(tdName, tdSlots, tdSlots10, tdFirst, tdRel, tdAge, tdRatings, tdGrowth, tdRate, tdUsers, tdScore);
                 tb.appendChild(row);
             }
             table.appendChild(tb);
@@ -3652,6 +3706,12 @@ async function main() {
             // the charts and nothing else.
             fetch("data/releases.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => []),
         ]);
+        // Long-horizon competitor rating counts, one entry per app per day it
+        // changed. Absent until the collector's first write; costs only the
+        // who-owns table's month-scale growth column.
+        rivalHistory = await fetch("data/rival-history.json", { cache: "no-cache" })
+            .then((r) => r.json())
+            .catch(() => null);
     } catch {
         meta.textContent = "No data yet. Run the collect workflow once to seed data/.";
         return;

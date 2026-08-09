@@ -39,6 +39,7 @@ const dataFile = path.join(servedDataDir, "keywords.json");
 // the repo but out of docs/, because every visitor was downloading it and no
 // page has ever read it.
 const hintsFile = path.join(repoRoot, "scripts", "hints.json");
+const rivalHistoryFile = path.join(servedDataDir, "rival-history.json");
 // Movement log, one shard per month plus an index. The merge only ever appends
 // and both pages want the newest slice, so a single growing array made every
 // visitor download every event ever recorded — 2.6MB gzipped at a year's rate.
@@ -688,6 +689,37 @@ async function merge(partials) {
   for (const snap of statsLog)
     for (const perCc of Object.values(snap.markets))
       for (const id of Object.keys(perCc)) if (!shown.has(id)) delete perCc[id];
+
+  // Long-horizon competitor growth: one rating count per app per market per
+  // UTC day, in its own file so the dashboard payload above stays light.
+  // Sparse on purpose — a day is written only when the count differs from
+  // the last one recorded, so a dormant app costs one entry ever while the
+  // movers append daily. Difficulty grades momentum from this over weeks;
+  // statsLog above only ever answers "what happened since yesterday".
+  const rivalHistory = await readJson(rivalHistoryFile, {});
+  const noteCount = (cc, id, day, count) => {
+    if (count == null) return;
+    const series = ((rivalHistory[cc] ??= {})[id] ??= {});
+    let lastD = "";
+    for (const d of Object.keys(series)) if (d > lastD) lastD = d;
+    if (!lastD || series[lastD] !== count) series[day] = count;
+  };
+  // First run seeds from whatever the 48-hour log still holds, so the series
+  // starts two days deep instead of zero.
+  if (!Object.keys(rivalHistory).length)
+    for (const snap of statsLog)
+      for (const [cc, perCc] of Object.entries(snap.markets))
+        for (const [id, count] of Object.entries(perCc)) noteCount(cc, id, String(snap.at).slice(0, 10), count);
+  const todayUTC = String(fetchedAt).slice(0, 10);
+  for (const [cc, perCc] of Object.entries(stats))
+    for (const [id, v] of Object.entries(perCc)) noteCount(cc, id, todayUTC, v[0]);
+  // Apps every list has let go of leave here too, behind the same prune the
+  // metadata uses.
+  for (const [cc, m] of Object.entries(rivalHistory)) {
+    for (const id of Object.keys(m)) if (!used.has(id)) delete m[id];
+    if (!Object.keys(m).length) delete rivalHistory[cc];
+  }
+  await writeFile(rivalHistoryFile, JSON.stringify(rivalHistory));
 
   await writeFile(hintsFile, JSON.stringify(hints) + "\n");
   await writeFile(path.join(kwEventsDir, `${month}.json`), JSON.stringify(events));

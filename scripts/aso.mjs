@@ -57,6 +57,7 @@ const overrides = await readJson(intentsFile, { intents: {}, offtarget: [] });
 const kwData = await readJson(kwDataFile, { latest: {}, history: [] });
 const glossary = await readJson(glossaryFile, {});
 const candidates = await readJson(path.join(repoRoot, "scripts", "kw-candidates.json"), {});
+const rivalHistory = await readJson(path.join(repoRoot, "docs", "data", "rival-history.json"), {});
 
 const { markets } = config;
 const kwFor = (cc) =>
@@ -620,9 +621,55 @@ function difficultyOf(cc, kw, cur, ctx) {
   };
 }
 
+// Growth per day from the long history — up to RATE_DAYS back, and only when
+// an app's series spans at least RATE_MIN_DAYS, because a rate read off a
+// day and a half is the short log's job. The series is sparse (a day is
+// recorded only when the count changed), so the value in force at a date is
+// the newest entry at or before it.
+const RATE_DAYS = 30;
+const RATE_MIN_DAYS = 5;
+function longRates(cc) {
+  const m = rivalHistory[cc];
+  if (!m) return null;
+  const today = String(kwData.fetchedAt ?? new Date().toISOString()).slice(0, 10);
+  const cutoff = new Date(new Date(`${today}T00:00:00Z`) - RATE_DAYS * 864e5)
+    .toISOString()
+    .slice(0, 10);
+  const out = {};
+  for (const [id, series] of Object.entries(m)) {
+    const dates = Object.keys(series).sort();
+    if (!dates.length) continue;
+    const atOrBefore = (day) => {
+      let hit = null;
+      for (const d of dates) {
+        if (d <= day) hit = d;
+        else break;
+      }
+      return hit;
+    };
+    const end = atOrBefore(today);
+    if (!end) continue;
+    let start = atOrBefore(cutoff);
+    let days = RATE_DAYS;
+    if (!start) {
+      start = dates[0];
+      days = (new Date(`${today}T00:00:00Z`) - new Date(`${start}T00:00:00Z`)) / 864e5;
+    }
+    if (days < RATE_MIN_DAYS) continue;
+    out[id] = Math.max(0, (series[end] - series[start]) / days);
+  }
+  return Object.keys(out).length ? out : null;
+}
+
 // Everything difficulty needs that is the same for every keyword in a market.
 const difficultyCtx = (cc) => {
-  const rates = growthRates(cc);
+  // Per app: the month-scale rate where the history is deep enough, the
+  // 48-hour log's rate while it accrues. Merged per app rather than per
+  // market, so a long-tracked giant's rate does not wait on the newest
+  // entrant's series to mature.
+  const short = growthRates(cc);
+  const long = longRates(cc);
+  const rates = short || long ? { ...(short ?? {}), ...(long ?? {}) } : null;
   return {
     apps: kwData.apps ?? {},
     lang: langOf(cc),
