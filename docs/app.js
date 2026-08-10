@@ -158,6 +158,22 @@ function rivalRate(cc, id, asOfISO, windowDays = 30) {
     return { rate: (series[end] - series[start]) / days, days: Math.round(days) };
 }
 
+// A lifetime count that collapsed by half or more overnight is a ratings
+// reset or purge, not organic movement — flagged instead of graphed, because
+// a negative "growth" reading would claim the app got weaker when it mostly
+// did bookkeeping.
+function rivalReset(cc, id) {
+    const series = rivalHistory?.[cc]?.[id];
+    if (!series) return null;
+    const dates = Object.keys(series).sort();
+    for (let i = dates.length - 1; i > 0; i--) {
+        const to = series[dates[i]];
+        const from = series[dates[i - 1]];
+        if (from >= 100 && to < from * 0.5) return { from, to, date: dates[i] };
+    }
+    return null;
+}
+
 // Keyword events live in one shard per month under data/kw-events/, listed by
 // index.json. Returns the newest `want` events plus the total across all
 // shards, fetching only as many months as it takes to reach `want`.
@@ -3536,8 +3552,13 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                 // what just happened, this says how dominant they are.
                 const tdRate = document.createElement("td");
                 tdRate.className = "col-num";
-                const rr = rivalRate(cc, id, kw.fetchedAt);
-                if (!rr) {
+                const reset = rivalReset(cc, id);
+                const rr = reset ? null : rivalRate(cc, id, kw.fetchedAt);
+                if (reset) {
+                    tdRate.textContent = "reset";
+                    tdRate.classList.add("kw-comp-reset");
+                    tdRate.title = `Lifetime count fell ${fmt(reset.from)} → ${fmt(reset.to)} on ${reset.date} — a ratings reset or purge, so growth reads start over from there.`;
+                } else if (!rr) {
                     tdRate.textContent = "—";
                     tdRate.classList.add("muted");
                 } else {

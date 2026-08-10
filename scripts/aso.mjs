@@ -513,7 +513,13 @@ function growthRates(cc) {
 // Each part is 0 (nothing in the way) to 1 (immovable), and each is dropped
 // rather than guessed when its input is missing — a term with no growth series
 // is scored on what is known about it, not marked easy for the gap.
-const WEIGHTS = { authority: 0.35, lexical: 0.25, entrenchment: 0.15, stasis: 0.15, momentum: 0.1 };
+//
+// Momentum alone may run negative, to -0.5: outgrowing the apps in the way is
+// evidence the gap is closing, and a floor at zero threw that away.
+// Resistance took half of stasis's weight because they overlap: stasis says
+// the list does not move for anyone, resistance says it has not moved for us
+// — measured, not inferred, so it gets its own seat.
+const WEIGHTS = { authority: 0.35, lexical: 0.25, entrenchment: 0.15, stasis: 0.1, momentum: 0.1, resistance: 0.1 };
 
 // A number nobody can act on is a number nobody should be shown, so every
 // reading carries the fact that produced it. The sentence names the two
@@ -543,19 +549,49 @@ const SAYS = {
   stasis: ({ parts }) =>
     parts.stasis > 0.8 ? "the list has not turned over since tracking began" : "the list turns over slowly",
   momentum: ({ parts }) =>
-    parts.momentum > 0.3 ? "and they are pulling further ahead by the day" : null,
+    parts.momentum > 0.3
+      ? "and they are pulling further ahead by the day"
+      : parts.momentum < -0.2
+        ? "though you are closing on them by the day"
+        : null,
+  resistance: ({ streak, parts }) =>
+    parts.resistance > 0.4 ? `every word is in place and the rank has not improved in ${streak} days` : null,
 };
 
 function hardWhy(parts, facts) {
+  // Ranked by contribution magnitude, so a strongly negative momentum earns
+  // its sentence the same way a strongly positive one does.
   const ranked = Object.entries(parts)
-    .map(([k, v]) => [k, v * WEIGHTS[k]])
+    .map(([k, v]) => [k, Math.abs(v) * WEIGHTS[k]])
     .sort((a, b) => b[1] - a[1])
     .map(([k]) => k);
   const said = ranked.map((k) => SAYS[k]({ ...facts, parts })).filter(Boolean);
   return said.slice(0, 2).join(", ");
 }
 
-function difficultyOf(cc, kw, cur, ctx) {
+// Consecutive most-recent days without a day-over-day rank improvement, from
+// the tracked history. The epsilon absorbs the fractional ranks legacy rows
+// hold. Stops at the first gap in the record rather than guessing across it.
+function stuckDays(cc, kw) {
+  const rows = kwData.history ?? [];
+  let streak = 0;
+  for (let i = rows.length - 1; i > 0; i--) {
+    const today = rows[i].markets?.[cc]?.[kw]?.[0];
+    const prev = rows[i - 1].markets?.[cc]?.[kw]?.[0];
+    if (today == null || prev == null) break;
+    if (today < prev - 0.05) break;
+    streak++;
+  }
+  return streak;
+}
+
+// Resistance only counts once the streak clears the floor, and saturates at a
+// month: a covered page-one phrase that has not improved in thirty days is as
+// measured a ceiling as this model gets.
+const RESIST_MIN_DAYS = 5;
+const RESIST_SAT_DAYS = 30;
+
+function difficultyOf(cc, kw, cur, ctx, cov) {
   const { ids, kind } = blockersOf(cur);
   if (!ids.length) return null; // held the top slot: there is no "up" to grade
   const counts = ids.map((id) => ratingsOf(cc, id)).filter((n) => n > 0);
@@ -596,11 +632,28 @@ function difficultyOf(cc, kw, cur, ctx) {
   if (days >= TURN_MIN_DAYS) parts.stasis = clamp01(1 - entrants / days / TURN_FLUID);
 
   // Momentum. Two orders of magnitude between their daily rating gain and ours
-  // is a gap widening faster than any wording change closes it.
+  // is a gap widening faster than any wording change closes it — and the same
+  // measure runs negative when the gap is closing: outgrowing them 10-to-1
+  // reads -0.5. Their rates are floored at zero upstream, so a ratings purge
+  // on their side never masquerades as our tailwind.
   if (ctx.rates) {
     const theirs = median(ids.map((id) => ctx.rates[id]).filter((n) => n != null));
     if (theirs != null) {
-      parts.momentum = clamp01(Math.log10((theirs + 1) / ((ctx.myRate ?? 0) + 1)) / 2);
+      parts.momentum = Math.max(
+        -0.5,
+        Math.min(1, Math.log10((theirs + 1) / ((ctx.myRate ?? 0) + 1)) / 2)
+      );
+    }
+  }
+
+  // Resistance: the one part measured on our own attempt rather than on the
+  // apps in the way. Only a covered page-one phrase counts — an uncovered one
+  // that has not moved proves nothing, since the wording fix was never tried.
+  let streak = null;
+  if (cov?.covered && cur.rank != null && cur.rank <= 10) {
+    streak = stuckDays(cc, kw);
+    if (streak >= RESIST_MIN_DAYS) {
+      parts.resistance = clamp01((streak - RESIST_MIN_DAYS) / (RESIST_SAT_DAYS - RESIST_MIN_DAYS));
     }
   }
 
@@ -609,14 +662,14 @@ function difficultyOf(cc, kw, cur, ctx) {
   const weight = have.reduce((a, k) => a + WEIGHTS[k], 0);
   const score = have.reduce((a, k) => a + parts[k] * WEIGHTS[k], 0) / weight;
   return {
-    score: Math.round(100 * score),
+    score: Math.max(0, Math.round(100 * score)),
     // What was graded, so a reader can tell "the five apps above me are
     // enormous" from "the head of this list is enormous, and I am nowhere
     // near it".
     basis: kind,
     blockers: ids.length,
     ...(wall != null && { wall: Math.round(wall) }),
-    why: hardWhy(parts, { ids, unnamed, wall, mine: ctx.mine, age }),
+    why: hardWhy(parts, { ids, unnamed, wall, mine: ctx.mine, age, streak }),
     parts: Object.fromEntries(have.map((k) => [k, Math.round(parts[k] * 100) / 100])),
   };
 }
@@ -833,7 +886,7 @@ function analyseMarket(cc) {
     let { intent, english } = classify(kw);
     const cov = coverageOf(kw, pool, skipFor(cc));
     const mods = modsOf(english);
-    const hard = difficultyOf(cc, kw, cur, dctx);
+    const hard = difficultyOf(cc, kw, cur, dctx, cov);
     const diff = hard?.score ?? null;
     // Read off the phrase rather than its English gloss: a year is digits in
     // every market, and the gloss is missing for the phrases nobody translated.
