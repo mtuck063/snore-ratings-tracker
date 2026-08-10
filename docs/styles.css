@@ -825,6 +825,16 @@ li.log-day {
 }
 .release-movers li.up { color: var(--good); }
 .release-movers li.down { color: var(--bad); }
+/* Which cohort a mover belongs to, said on the row: hover notes do not
+   exist on a phone. */
+.release-cohort { color: var(--text-secondary); font-size: 0.72rem; margin-left: 8px; }
+/* A label that explains itself on tap gets the affordance to say so. */
+.plan-label[data-tip] {
+    cursor: help;
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+    text-decoration-color: color-mix(in srgb, var(--text-secondary) 55%, transparent);
+}
 .plan-label {
     display: inline-block;
     min-width: 66px;

@@ -1383,13 +1383,16 @@ function renderPlan(host, cc, plan, onRefresh) {
 }
 
 // Shared by both panels.
-function line(label, value, cls) {
+function line(label, value, cls, tip) {
     const p = document.createElement("p");
     p.className = "plan-line" + (cls ? ` ${cls}` : "");
     if (label) {
         const b = document.createElement("span");
         b.className = "plan-label";
         b.textContent = label;
+        // Tappable explanation on the label itself, because a bare word like
+        // "newly covered" cannot carry what it means alone.
+        if (tip) b.dataset.tip = tip;
         p.appendChild(b);
     }
     p.appendChild(document.createTextNode(value));
@@ -2644,27 +2647,67 @@ function renderRelease(host, cc, rel, kw) {
                 "warn"
             )
         );
-    if (cov.comparable && cov.gained.length) card.appendChild(line("gained ", withPop(cov.gained)));
-    if (cov.comparable && cov.lost.length) card.appendChild(line("lost ", withPop(cov.lost), "warn"));
+    if (cov.comparable && cov.gained.length)
+        card.appendChild(
+            line(
+                "newly covered ",
+                withPop(cov.gained),
+                "",
+                "This release's wording added the words these phrases were missing: your title, subtitle and keyword field now carry everything they need. The number in brackets is the phrase's search popularity, 5–100. Coverage is the ceiling, not the ranking — the table below shows what Apple does with it."
+            )
+        );
+    if (cov.comparable && cov.lost.length)
+        card.appendChild(
+            line(
+                "no longer covered ",
+                withPop(cov.lost),
+                "warn",
+                "The new wording dropped a word these phrases needed, so your listing no longer carries them whole. Apple can still bridge and rank them, but they left your direct control. Brackets: search popularity, 5–100."
+            )
+        );
     if (m.appeared.length)
         card.appendChild(
-            line("newly ranked ", m.appeared.map((r) => `${r.kw} #${r.rank}`).join(", "), "good-line")
+            line(
+                "newly ranked ",
+                m.appeared.map((r) => `${r.kw} #${r.rank}`).join(", "),
+                "good-line",
+                "Nowhere in the top 200 before the release, ranked now — the way a wording change usually shows up: a jump from nothing rather than a slow climb."
+            )
         );
     if (m.vanished.length)
         card.appendChild(
-            line("dropped out ", m.vanished.map((r) => `${r.kw} (was #${r.was})`).join(", "), "warn")
+            line(
+                "no longer ranked ",
+                m.vanished.map((r) => `${r.kw} (was #${r.was})`).join(", "),
+                "warn",
+                "Ranked somewhere in the top 200 before the release, nowhere in it now."
+            )
         );
 
     // Movers are shown only once rank means something. During indexing they
-    // are yesterday's noise wearing a release's name.
+    // are yesterday's noise wearing a release's name. Labeled, and each row
+    // says which cohort it belongs to inline — the old hover-only note was
+    // invisible on a phone.
     if (e.stage !== "indexing" && m.movers.length) {
+        card.appendChild(
+            line(
+                "biggest moves ",
+                "places gained or lost since the release went live, whatever the cause",
+                "muted",
+                "The largest rank changes in either direction since the release, across every tracked phrase. Green climbed, red fell. The word after each row says whether this release touched that phrase's wording: “changed” means it did, “untouched” means it did not — so an untouched phrase moving is market weather, not your release — and “uncovered” means the listing does not carry the phrase's words on either side."
+            )
+        );
         const ul = document.createElement("ul");
         ul.className = "release-movers";
         for (const r of m.movers.slice(0, 6)) {
             const li = document.createElement("li");
             li.className = r.gain > 0 ? "up" : "down";
             li.textContent = `${sign(r.gain)}  ${r.kw}  #${r.before} → #${r.after}`;
-            li.title = `${r.cohort === "target" ? "coverage changed in this release" : r.cohort === "control" ? "covered before and after, untouched" : "not covered either side"}`;
+            const cohort = document.createElement("span");
+            cohort.className = "release-cohort";
+            cohort.textContent =
+                r.cohort === "target" ? "changed" : r.cohort === "control" ? "untouched" : "uncovered";
+            li.appendChild(cohort);
             ul.appendChild(li);
         }
         card.appendChild(ul);
