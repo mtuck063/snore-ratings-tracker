@@ -2751,6 +2751,17 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
     // Which tags the table is limited to. Intents are OR'd with each other;
     // gapOnly and titleOnly narrow whatever that leaves.
     const filter = { intents: new Set(), gapOnly: false, titleOnly: false, heldOnly: false };
+    // Free-text narrowing on top of whatever tags are active. Matches the
+    // phrase and its English gloss, so a Latin query finds CJK rows too.
+    // Debounced a touch: every keystroke rebuilds the table, sparklines and
+    // all.
+    const search = document.getElementById("kw-search");
+    search.hidden = false;
+    let searchTimer;
+    search.addEventListener("input", () => {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => render(currentCc), 120);
+    });
     // Only worth offering where it would change something. An English market
     // has no glossed terms, so the button would sit there doing nothing.
     const translatable = (cc) => Object.keys(kw.latest[cc] ?? {}).some((t) => glossary[t]);
@@ -2782,6 +2793,13 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                   : e.pop;
         const entries = Object.entries(kw.latest[cc])
             .filter(([term]) => {
+                const q = search.value.trim().toLowerCase();
+                if (
+                    q &&
+                    !term.toLowerCase().includes(q) &&
+                    !(glossary[term] ?? "").toLowerCase().includes(q)
+                )
+                    return false;
                 if (!filter.intents.size && !filter.gapOnly && !filter.titleOnly && !filter.heldOnly)
                     return true;
                 const t = aso[term];

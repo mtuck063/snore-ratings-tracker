@@ -587,6 +587,19 @@ tr.kw-detail td {
     font-size: 0.85rem;
 }
 #log-search:focus { outline: none; border-color: var(--accent); }
+/* Same control as the log page's search, sized for sitting above the table. */
+#kw-search {
+    display: block;
+    width: min(320px, 100%);
+    margin: 10px 0 12px;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 6px 10px;
+    font-size: 0.85rem;
+}
+#kw-search:focus { outline: none; border-color: var(--accent); }
 /* Day separator: hundreds of rows otherwise blur into one column of times. */
 li.log-day {
     list-style: none;
