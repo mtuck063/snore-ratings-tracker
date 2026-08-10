@@ -2777,11 +2777,9 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
         const val = ([term, e]) =>
             sort.key === "rank"
                 ? (e.rank ?? Infinity)
-                : sort.key === "score"
-                  ? (aso[term]?.score ?? 0)
-                  : sort.key === "hard"
-                    ? (aso[term]?.hard?.score ?? Infinity)
-                    : e.pop;
+                : sort.key === "hard"
+                  ? (aso[term]?.hard?.score ?? Infinity)
+                  : e.pop;
         const entries = Object.entries(kw.latest[cc])
             .filter(([term]) => {
                 if (!filter.intents.size && !filter.gapOnly && !filter.titleOnly && !filter.heldOnly)
@@ -2889,7 +2887,7 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                     const det = document.createElement("tr");
                     det.className = "kw-detail";
                     const td = document.createElement("td");
-                    td.colSpan = 10;
+                    td.colSpan = 9;
                     // The missing words lead, above the competitor list. The
                     // legend told people to tap the row for them and the row
                     // only ever opened the top ten, which made the instruction
@@ -3221,23 +3219,10 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                 sparkline(points, `${term} rank, last 30 days`, (v) => `#${-v}`, 4, releaseDay)
             );
 
-            // Priority sits beside demand deliberately: the two disagree
-            // often, and the disagreement is the whole point of the column.
-            const tdScore = document.createElement("td");
-            tdScore.className = "col-num kw-score";
-            if (asoTerm) {
-                tdScore.textContent = asoTerm.score;
-                tdScore.dataset.tip = asoTerm.why;
-                if (asoTerm.score === 0) tdScore.classList.add("muted");
-                else if (asoTerm.score >= 70) tdScore.classList.add("score-hot");
-            } else {
-                tdScore.textContent = "—";
-                tdScore.classList.add("muted");
-            }
-
-            // Difficulty gets its own column rather than living only inside
-            // the score tooltip: score says what a phrase is worth, this
-            // says what it costs, and the two disagreeing is normal.
+            // The score column retired in favour of this one: demand, coverage
+            // chips and difficulty each say their piece on the row, and the
+            // push-next card still does the worth-versus-cost weighing. What
+            // remains here is the cost.
             const tdHard = document.createElement("td");
             tdHard.className = "col-num kw-hard-cell";
             const hardT = asoTerm?.hard;
@@ -3255,7 +3240,7 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                         "Nothing to grade: either the top slot is held or nothing is recorded above the current rank yet.";
             }
 
-            tr.append(tdKw, tdPop, tdScore, tdHard, tdRank, tdDelta, td24, td7d, tdBest, tdSpark);
+            tr.append(tdKw, tdPop, tdHard, tdRank, tdDelta, td24, td7d, tdBest, tdSpark);
             tbody.appendChild(tr);
         }
 
