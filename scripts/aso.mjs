@@ -177,11 +177,12 @@ const FUNCTION_WORDS = {
   // em+a = na), so the contractions are listed beside the bare words: a field
   // buying "do" is as recoverable as one buying "de".
   pt: "o a os as um uma uns umas de do da dos das em no na nos nas ao aos e ou que se com sem para por mais meu minha seu sua nao é".split(" "),
+  it: "il lo la i gli le un uno una di del dello della dei degli delle da dal dalla in nel nella nei con su sul per tra fra e o che non mi ti si ci vi a al ai alla alle è".split(" "),
 };
 // Storefront to language. Canada is English here because every term tracked for
 // it is English; a French-Canadian list would need its own market entry rather
 // than a second language bolted onto this one.
-const MARKET_LANG = { us: "en", ca: "en", gb: "en", au: "en", fr: "fr", es: "es", mx: "es", br: "pt", de: "de", nl: "nl", jp: "ja", kr: "ko", cn: "zh" };
+const MARKET_LANG = { us: "en", ca: "en", gb: "en", au: "en", fr: "fr", es: "es", mx: "es", br: "pt", it: "it", de: "de", nl: "nl", jp: "ja", kr: "ko", cn: "zh" };
 // Korean is mapped but carries no function-word list: its particles suffix the
 // noun rather than standing alone, so no tracked phrase isolates one, and an
 // invented list would excuse words that are really content. The English suffix
