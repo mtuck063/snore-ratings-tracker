@@ -173,11 +173,22 @@ const FUNCTION_WORDS = {
   de: "der die das den dem des ein eine einen einem eines und oder zu zum zur mit im in auf an am von vom für fur bei beim aus nach über uber ohne mein meine dein deine ist es nicht".split(" "),
   nl: "de het een en of te met in op van voor bij aan uit over om door naar mijn je jouw ik is niet dat die".split(" "),
   en: "a an the and or of for in on to at by with from about my me i you your is it do does did not".split(" "),
+  // Portuguese carries its prepositions into contracted forms (de+o = do,
+  // em+a = na), so the contractions are listed beside the bare words: a field
+  // buying "do" is as recoverable as one buying "de".
+  pt: "o a os as um uma uns umas de do da dos das em no na nos nas ao aos e ou que se com sem para por mais meu minha seu sua nao é".split(" "),
 };
 // Storefront to language. Canada is English here because every term tracked for
 // it is English; a French-Canadian list would need its own market entry rather
 // than a second language bolted onto this one.
-const MARKET_LANG = { us: "en", ca: "en", gb: "en", au: "en", fr: "fr", es: "es", mx: "es", de: "de", nl: "nl", jp: "ja", cn: "zh" };
+const MARKET_LANG = { us: "en", ca: "en", gb: "en", au: "en", fr: "fr", es: "es", mx: "es", br: "pt", de: "de", nl: "nl", jp: "ja", kr: "ko", cn: "zh" };
+// Korean is mapped but carries no function-word list: its particles suffix the
+// noun rather than standing alone, so no tracked phrase isolates one, and an
+// invented list would excuse words that are really content. The English suffix
+// rules it falls back to cannot fire on Hangul, so they are inert rather than
+// wrong. A market left out of this map is read as English — which is how
+// Portuguese "de" once surfaced as a 257-demand gap rather than a free word.
+//
 // Japanese and Chinese are deliberately absent. Those are graded by
 // segmentation rather than word membership, and cjkGaps already widens any
 // one-character run back to the phrase it came from, so a bare particle cannot
