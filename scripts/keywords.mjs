@@ -364,6 +364,25 @@ async function merge(partials) {
     if (part?.apps) for (const [id, meta] of Object.entries(part.apps)) apps[id] ??= meta;
   }
   for (const [id, meta] of Object.entries(prev?.apps ?? {})) apps[id] ??= meta;
+  // Localized display names, per market and only where they differ from the
+  // shared entry above. Each market's search results carry that storefront's
+  // own trackName; the shared map deliberately discards it for the English
+  // one, so this is where a JP or KR listing name survives to the dashboard.
+  // A market that did not report carries its previous overrides, and a
+  // measured run that shows the localized name matching the shared one again
+  // clears the override rather than letting it go stale.
+  const names = {};
+  for (const cc of Object.keys(markets)) {
+    const perCc = { ...(prev?.names?.[cc] ?? {}) };
+    const part = partials.find((p) => p?.cc === cc);
+    if (part?.apps) {
+      for (const [id, meta] of Object.entries(part.apps)) {
+        if (meta.name && meta.name !== apps[id]?.name) perCc[id] = meta.name;
+        else delete perCc[id];
+      }
+    }
+    if (Object.keys(perCc).length) names[cc] = perCc;
+  }
   // A market that errored this run keeps its previous numbers rather than
   // blanking the column, same carry-forward rule the rank data uses.
   const stats = {};
@@ -623,6 +642,14 @@ async function merge(partials) {
   for (const id of Object.keys(apps)) if (!used.has(id)) delete apps[id];
   for (const perCc of Object.values(stats))
     for (const id of Object.keys(perCc)) if (!used.has(id)) delete perCc[id];
+  // Same sweep for the localized names, plus one more case: an id whose
+  // shared entry was just pruned or renamed can leave a carried override
+  // that now matches or points at nothing.
+  for (const [cc, perCc] of Object.entries(names)) {
+    for (const id of Object.keys(perCc))
+      if (!used.has(id) || perCc[id] === apps[id]?.name) delete perCc[id];
+    if (!Object.keys(perCc).length) delete names[cc];
+  }
 
   // Compact the run table. `recent` only holds 24 hours, so older runs fall out
   // of reference every day and would otherwise accumulate forever. Rewrites the
@@ -739,7 +766,7 @@ async function merge(partials) {
   );
   await writeFile(
     dataFile,
-    JSON.stringify({ fetchedAt, runs, apps, stats, statsLog, latest, history })
+    JSON.stringify({ fetchedAt, runs, apps, names, stats, statsLog, latest, history })
   );
   // Heartbeat, so the dashboard can say when data was last *checked*, not only
   // when it last *changed* — the two look identical from the data alone. Its

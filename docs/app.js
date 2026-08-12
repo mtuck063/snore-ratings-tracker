@@ -2482,7 +2482,11 @@ function rivalHeader(id, cc, meta, plan) {
     // Collected, not fetched: the subtitle is not in the lookup API, and the
     // product page that carries it sends no CORS header. Absent until the next
     // aso.mjs run has seen this app, which is why it renders only when present.
-    const sub = plan?.markets?.[cc]?.rivals?.[id]?.subtitle;
+    // Our own subtitle lives with the listing rather than in the rivals map.
+    const sub =
+        id === "6751759381"
+            ? plan?.markets?.[cc]?.listing?.subtitle
+            : plan?.markets?.[cc]?.rivals?.[id]?.subtitle;
     if (sub) {
         const p = document.createElement("p");
         p.className = "rival-sub";
@@ -2775,14 +2779,24 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
     const rankText = (r) => (r == null ? "—" : `#${r}`);
 
     // Top-5 lists hold bare app ids; names/icons resolve through the shared
-    // apps map (legacy [id, name] pairs still supported).
+    // apps map (legacy [id, name] pairs still supported). The shared map keeps
+    // English names, so passing a market code swaps in that storefront's
+    // localized name where the collector recorded one differing. Our own row
+    // additionally falls back to the aso.mjs listing title, which reads the
+    // storefront page directly and covers markets where we rank too low for
+    // the search results to carry our name.
     const appsMeta = kw.apps ?? {};
-    const appEntry = (e) => {
+    const namesByCc = kw.names ?? {};
+    const appEntry = (e, cc) => {
         const id = Array.isArray(e) ? e[0] : e;
         const meta =
             appsMeta[id] ??
             (Array.isArray(e) ? { name: e[1] } : { name: id === "6751759381" ? "Snore Timeline" : `app ${id}` });
-        return { id, ...meta };
+        const name =
+            (cc && namesByCc[cc]?.[id]) ||
+            (cc && id === "6751759381" && plan?.markets?.[cc]?.listing?.title) ||
+            meta.name;
+        return { id, ...meta, name };
     };
     const appLabel = ({ id, name, icon }) => {
         const frag = document.createDocumentFragment();
@@ -3057,7 +3071,7 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                     }
                     const ol = document.createElement("ol");
                     cur.top.forEach((e) => {
-                        const entry = appEntry(e);
+                        const entry = appEntry(e, cc);
                         const li = document.createElement("li");
                         li.appendChild(appLabel(entry));
                         if (entry.id === "6751759381") li.classList.add("you");
@@ -3489,7 +3503,7 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
             for (const [id, e] of top) {
                 const row = document.createElement("tr");
                 if (id === "6751759381") row.className = "you";
-                const meta = appEntry(id);
+                const meta = appEntry(id, cc);
 
                 // Tap the row for the keywords behind the counts, best placing
                 // first. Building it on demand keeps the table itself cheap.
