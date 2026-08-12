@@ -356,9 +356,6 @@ svg.spark { display: block; margin-left: auto; touch-action: none; }
     cursor: pointer;
 }
 .kw-tab.active { color: var(--text); border-color: var(--accent); }
-/* Pushed to the far end: it acts on the whole table, not on one market. */
-.kw-translate { margin-left: auto; }
-.kw-translate[hidden] { display: none; }
 /* The term Apple actually ranks, kept beside its meaning rather than replaced.
    Wraps under the gloss on a narrow screen instead of widening the column. */
 .kw-original {
@@ -587,11 +584,18 @@ tr.kw-detail td {
     font-size: 0.85rem;
 }
 #log-search:focus { outline: none; border-color: var(--accent); }
+/* The two controls that narrow the table, sitting directly on top of it: the
+   search field and the English toggle. Both change what the rows say rather
+   than which market is being read, which is why neither lives with the tabs. */
+#kw-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 0 12px;
+}
 /* Same control as the log page's search, sized for sitting above the table. */
 #kw-search {
-    display: block;
     width: min(320px, 100%);
-    margin: 10px 0 12px;
     background: var(--bg-raised);
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -600,6 +604,23 @@ tr.kw-detail td {
     font-size: 0.85rem;
 }
 #kw-search:focus { outline: none; border-color: var(--accent); }
+/* Matches the field it sits beside rather than the tabs it used to sit with.
+   Never shrinks: on a narrow screen the search field gives up the width, since
+   a squeezed placeholder still reads and a squeezed "Show original" does not. */
+.kw-translate {
+    flex: none;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    cursor: pointer;
+}
+.kw-translate:hover { color: var(--text); }
+.kw-translate.active { color: var(--text); border-color: var(--accent); }
+.kw-translate[hidden] { display: none; }
 /* Day separator: hundreds of rows otherwise blur into one column of times. */
 li.log-day {
     list-style: none;

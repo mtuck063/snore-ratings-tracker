@@ -2799,7 +2799,11 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
     // Debounced a touch: every keystroke rebuilds the table, sparklines and
     // all.
     const search = document.getElementById("kw-search");
-    search.hidden = false;
+    // Search and the English toggle share a row directly above the table, both
+    // being narrowings of what it shows — unlike the market tabs, which choose
+    // what is being looked at in the first place.
+    const translate = document.getElementById("kw-translate");
+    document.getElementById("kw-controls").hidden = false;
     let searchTimer;
     search.addEventListener("input", () => {
         clearTimeout(searchTimer);
@@ -3656,8 +3660,7 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
 
     // One entry point for both switchers (tabs here, the dropdown on the
     // competitor table's App header), so the active tab can never disagree
-    // with what the tables show. The translate button carries no data-cc and
-    // loses its active class in the sweep; render() restores it right after.
+    // with what the tables show.
     const setMarket = (cc) => {
         tabs.querySelectorAll(".kw-tab").forEach((b) => b.classList.toggle("active", b.dataset.cc === cc));
         render(cc);
@@ -3673,13 +3676,10 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
     }
     tabs.firstChild.classList.add("active");
 
-    const translate = document.createElement("button");
-    translate.className = "kw-tab kw-translate";
     translate.addEventListener("click", () => {
         showEnglish = !showEnglish;
         render(currentCc);
     });
-    tabs.appendChild(translate);
 
     const sortHeaders = document.querySelectorAll("#keywords th[data-sort]");
     const updateArrows = () => {
