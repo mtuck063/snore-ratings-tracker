@@ -497,8 +497,10 @@ tr.kw-detail td {
 /* App, Top-5, Top-10, #1, Released, Age, Ratings, Δ 1d, Users, Score. These
    are positional, so inserting a column means renumbering every rule after it
    and updating the min-width above to their sum. Δ 1d is the widest number
-   column because it carries the bracketed user equivalent inline. */
-.kw-comp-table th:nth-child(1), .kw-comp-table td:nth-child(1) { width: 200px; }
+   column because it carries the bracketed user equivalent inline. The name
+   column carries no width: under fixed layout it takes whatever the number
+   columns leave, so wide viewports spend their extra room on the app name.
+   The table min-width keeps that remainder at 200px or more. */
 .kw-comp-table th:nth-child(2), .kw-comp-table td:nth-child(2) { width: 88px; }
 .kw-comp-table th:nth-child(3), .kw-comp-table td:nth-child(3) { width: 92px; }
 .kw-comp-table th:nth-child(4), .kw-comp-table td:nth-child(4) { width: 46px; }
