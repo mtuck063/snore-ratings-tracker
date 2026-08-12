@@ -745,17 +745,34 @@ async function merge(partials) {
   // when it last *changed* — the two look identical from the data alone. Its
   // own file: sharing one status.json with the ratings collector meant two
   // writers on one line of compact JSON, and a rebase that could not resolve.
+  //
+  // Skipped when most markets did not report, which in practice means a local
+  // `--collect <cc>` followed by `--merge`: the merge is still correct — every
+  // absent market carries its previous values forward — but every keyword it
+  // carried counts as a rank failure, and stamping that on the heartbeat put
+  // "Collector erroring" on the dashboard three times while markets were being
+  // added by hand. A CI run always collects every market, and losing one leg to
+  // a bad runner IP still reports, because that failure is real and the
+  // requeue step needs to see it. Half is simply well clear of both cases.
+  const reported = partials.filter(Boolean).length;
+  const total = Object.keys(markets).length;
   const statusFile = path.join(servedDataDir, "status-keywords.json");
   const tracked = Object.keys(markets).reduce((n, cc) => n + kwFor(cc).length, 0);
-  await writeFile(
-    statusFile,
-    JSON.stringify({
-      at: fetchedAt,
-      markets: Object.keys(markets).length,
-      tracked,
-      rankFailures,
-    })
-  );
+  if (reported * 2 < total) {
+    console.log(
+      `partial merge: ${reported}/${total} markets reported, leaving the heartbeat alone`
+    );
+  } else {
+    await writeFile(
+      statusFile,
+      JSON.stringify({
+        at: fetchedAt,
+        markets: total,
+        tracked,
+        rankFailures,
+      })
+    );
+  }
 
   console.log(`${today}: ${Object.keys(markets).length} markets merged`);
   // The workflow greps this to decide whether to requeue on a bad runner IP,
