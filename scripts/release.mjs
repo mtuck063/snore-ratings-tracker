@@ -84,16 +84,60 @@ const stageOf = (days) =>
 
 // --- snapshots ---------------------------------------------------------------
 
-const shotKey = (urls) =>
-  createHash("sha1").update(urls.join("\n")).digest("hex").slice(0, 8);
+// Keyed on the assets, not the URLs that point at them. The storefront page
+// and the lookup API format the same screenshot differently — one templated,
+// one pre-sized — so hashing URL text made a set look changed the moment the
+// source changed. The uuid is the asset's identity in both.
+const assetIds = (urls) =>
+  urls.map((u) => (u.match(/\/v4\/(?:[a-f0-9]{2}\/){3}([a-f0-9-]{36})\//) || [])[1]).filter(Boolean);
+
+const shotKey = (urls) => {
+  const ids = assetIds(urls);
+  // A URL shape this does not recognise still has to key to something stable
+  // rather than collapsing every such market onto one hash.
+  const basis = ids.length ? ids : urls;
+  return createHash("sha1").update(basis.join("\n")).digest("hex").slice(0, 8);
+};
 
 // Screenshots are the one part of a listing that is public, changes on
-// release, and is recorded nowhere: the lookup API returns the live set, and
-// each URL carries the asset's own uuid, so a swapped screenshot is a changed
-// URL. Localized markets have their own sets, which is why this asks per
-// market rather than once — and why identical sets are pooled by hash, so the
-// eight markets sharing one set cost one copy.
+// release, and is recorded nowhere: each URL carries the asset's own uuid, so
+// a swapped screenshot is a changed uuid. Localized markets have their own
+// sets, which is why this asks per market rather than once — and why identical
+// sets are pooled by hash, so the eight markets sharing one set cost one copy.
+//
+// Read from the storefront page, NOT the lookup API. Both serve the same
+// assets, but the lookup API is cached far harder: on 4.14 it went on serving
+// the previous version's screenshots for hours after every storefront page had
+// turned over, and a snapshot taken from it compared the old set against the
+// old set and reported "unchanged" for a release that replaced every
+// screenshot in all fourteen markets. The page is the surface a user sees, so
+// it is the one the release log has to believe. The lookup API stays as a
+// fallback for a market whose page cannot be read at all.
+const UA =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Safari/605.1.15";
+
+async function shotsFromPage(cc) {
+  const res = await fetch(`https://apps.apple.com/${cc}/app/id${appId}`, {
+    headers: { "User-Agent": UA },
+  });
+  if (!res.ok) return null;
+  const html = await res.text();
+  // The embedded product JSON carries one templated URL per screenshot; the
+  // {w}x{h} placeholders differ from the lookup API's sized URLs, which is why
+  // shotKey compares asset uuids rather than URL text.
+  const urls = [...html.matchAll(/"screenshot":\{[\s\S]{0,800}?"template":"([^"]+)"/g)].map(
+    (m) => m[1]
+  );
+  return urls.length ? [...new Set(urls)] : null;
+}
+
 async function liveShots(cc) {
+  try {
+    const fromPage = await shotsFromPage(cc);
+    if (fromPage) return fromPage;
+  } catch {
+    // fall through to the lookup API
+  }
   try {
     const res = await fetch(`https://itunes.apple.com/lookup?id=${appId}&country=${cc}`);
     const app = (await res.json()).results?.[0];
