@@ -947,6 +947,20 @@ function renderEvents(history, events) {
     baseLi.className = "empty";
     baseLi.textContent = `Tracking started with ${fmt(baselineTotal)} lifetime ratings across ${baselineCountries.length} countries.`;
     list.appendChild(baseLi);
+    if (events.length > 0) {
+        list.hidden = true;
+        const btn = document.createElement("button");
+        btn.className = "toggle-unrated";
+        const showLabel = `Show ${fmt(events.length)} event${events.length === 1 ? "" : "s"}`;
+        btn.textContent = showLabel;
+        btn.addEventListener("click", () => {
+            const show = list.hidden;
+            list.hidden = !show;
+            btn.textContent = show ? "Hide events" : showLabel;
+        });
+        list.parentElement.insertBefore(btn, list);
+    }
+
     // Same reason the table waits: the heading and its subtitle are in the
     // markup, so an unhidden section is a title with nothing under it until
     // the fetches land. The baseline lines above mean this always has content.
@@ -3983,7 +3997,7 @@ async function main() {
         })
     );
 
-    const rated = entries.filter((e) => (e.cur?.count ?? 0) > 0 || e.delta);
+    const rated = entries.filter((e) => (e.cur?.count ?? 0) >= 3 || e.delta);
     const unrated = entries.filter((e) => !rated.includes(e));
     const rowByCc = new Map();
 
@@ -4014,13 +4028,13 @@ async function main() {
         td.colSpan = 7;
         const btn = document.createElement("button");
         btn.className = "toggle-unrated";
-        btn.textContent = `Show ${unrated.length} storefronts with no ratings yet`;
+        btn.textContent = `Show ${unrated.length} storefronts with fewer than 3 ratings`;
         btn.addEventListener("click", () => {
             const show = btn.dataset.open !== "1";
             btn.dataset.open = show ? "1" : "";
             btn.textContent = show
-                ? "Hide unrated storefronts"
-                : `Show ${unrated.length} storefronts with no ratings yet`;
+                ? "Hide storefronts with fewer than 3 ratings"
+                : `Show ${unrated.length} storefronts with fewer than 3 ratings`;
             tbody.querySelectorAll("tr.unrated").forEach((tr) => (tr.hidden = !show));
         });
         td.appendChild(btn);
