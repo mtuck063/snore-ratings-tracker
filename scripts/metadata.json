@@ -2,8 +2,8 @@
   "_note": "What the App Store listing claims, per market. title and subtitle are refreshed from the live storefront pages by `node scripts/aso.mjs --fetch`; do not edit them by hand, they will be overwritten. keywordField and screenshots are NOT public anywhere and are maintained here by hand: copy the field out of App Store Connect whenever you change it, and set fieldUpdated to that date. An unrecorded field is not treated as an empty one; coverage simply reports the market as ungraded.",
   "markets": {
     "us": {
-      "keywordField": "free,record,rem,my,monitor,score,cpap,ai,quality,do,i,stop,auto,apnea,detector,king,night,log,2025",
-      "fieldUpdated": "2026-08-06",
+      "keywordField": "free,cpap,monitor,score,rem,apple,watch,clock,breathing,apnea,quality,stop,auto,detector,smart,alarm",
+      "fieldUpdated": "2026-08-12",
       "screenshots": [
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/7a/91/e4/7a91e4b8-4663-271d-22c2-ef7f9f6cd0ae/Slice_1.png/320x480bb.jpg",
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/27/bb/93/27bb93fa-c6d8-1f5b-5545-0174d5fba67b/Slice_2.png/320x480bb.jpg",
@@ -55,13 +55,11 @@
       },
       "version": "4.13",
       "versionAt": "2026-08-06T22:15:32Z",
-      "pendingSubtitle": "Record Snoring & Sleep Talking",
-      "pendingKeywordField": "free,cpap,monitor,score,rem,apple,watch,clock,breathing,apnea,quality,stop,auto,detector,smart,alarm",
-      "pendingSince": "2026-08-11"
+      "pendingSubtitle": "Record Snoring & Sleep Talking"
     },
     "ca": {
-      "keywordField": "free,monitor,my,apnea,do,i,2025,cpap,log,sounds,diary,score,alarm,detector,control,apple,watch,stop",
-      "fieldUpdated": "2026-08-06",
+      "keywordField": "free,monitor,apnea,log,cycle,cpap,diary,sounds,rem,score,alarm,detector,control,apple,watch,stop",
+      "fieldUpdated": "2026-08-12",
       "screenshots": [
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/7a/91/e4/7a91e4b8-4663-271d-22c2-ef7f9f6cd0ae/Slice_1.png/320x480bb.jpg",
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/27/bb/93/27bb93fa-c6d8-1f5b-5545-0174d5fba67b/Slice_2.png/320x480bb.jpg",
@@ -112,13 +110,11 @@
         }
       },
       "version": "4.13",
-      "versionAt": "2026-08-06T22:15:32Z",
-      "pendingKeywordField": "free,monitor,apnea,log,cycle,cpap,diary,sounds,rem,score,alarm,detector,control,apple,watch,stop",
-      "pendingSince": "2026-08-11"
+      "versionAt": "2026-08-06T22:15:32Z"
     },
     "gb": {
-      "keywordField": "record,free,my,monitor,apnea,ai,cpap,do,i,rem,night,2025,log,score,control,sounds,diary,quality,stop",
-      "fieldUpdated": "2026-08-06",
+      "keywordField": "free,monitor,apnea,cpap,rem,score,control,sounds,diary,quality,stop,apple,watch,smart,alarm,detector",
+      "fieldUpdated": "2026-08-12",
       "screenshots": [
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/7a/91/e4/7a91e4b8-4663-271d-22c2-ef7f9f6cd0ae/Slice_1.png/320x480bb.jpg",
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/27/bb/93/27bb93fa-c6d8-1f5b-5545-0174d5fba67b/Slice_2.png/320x480bb.jpg",
@@ -174,13 +170,11 @@
       },
       "version": "4.13",
       "versionAt": "2026-08-06T22:15:32Z",
-      "pendingSubtitle": "Record Snoring & Sleep Talking",
-      "pendingKeywordField": "free,monitor,apnea,cpap,rem,score,control,sounds,diary,quality,stop,apple,watch,smart,alarm,detector",
-      "pendingSince": "2026-08-11"
+      "pendingSubtitle": "Record Snoring & Sleep Talking"
     },
     "au": {
-      "keywordField": "free,record,my,apnea,monitor,cpap,do,i,2025,sounds,log,score,diary,smart,detector,apple,watch,stop",
-      "fieldUpdated": "2026-08-06",
+      "keywordField": "free,record,apnea,monitor,cpap,sounds,log,score,diary,smart,detector,apple,watch,stop,cycle,control",
+      "fieldUpdated": "2026-08-12",
       "screenshots": [
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/7a/91/e4/7a91e4b8-4663-271d-22c2-ef7f9f6cd0ae/Slice_1.png/320x480bb.jpg",
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/27/bb/93/27bb93fa-c6d8-1f5b-5545-0174d5fba67b/Slice_2.png/320x480bb.jpg",
@@ -235,9 +229,7 @@
         }
       },
       "version": "4.13",
-      "versionAt": "2026-08-06T22:15:32Z",
-      "pendingKeywordField": "free,record,apnea,monitor,cpap,sounds,log,score,diary,smart,detector,apple,watch,stop,cycle,control",
-      "pendingSince": "2026-08-11"
+      "versionAt": "2026-08-06T22:15:32Z"
     },
     "fr": {
       "screenshots": [
@@ -295,11 +287,9 @@
       },
       "version": "4.13",
       "versionAt": "2026-08-06T22:15:32Z",
-      "keywordField": "il,enregistre,gratuit,de,apnée,du,nuit,analyse,appli,dormir,application,anti,score,détecteur",
-      "fieldUpdated": "2026-08-06",
-      "pendingSubtitle": "Ronflement, Parole & Réveil",
-      "pendingKeywordField": "enregistre,gratuit,apnée,nuit,analyse,appli,dormir,application,anti,score,détecteur,i,parler,son",
-      "pendingSince": "2026-08-11"
+      "keywordField": "enregistre,gratuit,apnée,nuit,analyse,appli,dormir,application,anti,score,détecteur,i,parler,son",
+      "fieldUpdated": "2026-08-12",
+      "pendingSubtitle": "Ronflement, Parole & Réveil"
     },
     "es": {
       "screenshots": [
@@ -467,12 +457,10 @@
           "at": "2026-08-12T07:57:58.954Z"
         }
       },
-      "keywordField": "ronco,gravador,sono,monitor,detector,controle,apneia,sons,dormir,despertador,gratis,ciclo,melhor,ia",
-      "fieldUpdated": "2026-08-06",
+      "keywordField": "gravar,monitorar,rastreador,detector,ciclo,pontuação,dormir,gratis,cpap,apple,watch,falar,dormindo",
+      "fieldUpdated": "2026-08-12",
       "pendingTitle": "Ronco e Sono - Snore Timeline",
-      "pendingSubtitle": "Gravador de apneia e bruxismo",
-      "pendingKeywordField": "gravar,monitorar,rastreador,detector,ciclo,pontuação,dormir,gratis,cpap,apple,watch,falar,dormindo",
-      "pendingSince": "2026-08-11"
+      "pendingSubtitle": "Gravador de apneia e bruxismo"
     },
     "it": {
       "screenshots": [
@@ -488,8 +476,6 @@
       ],
       "pendingTitle": "Snore Timeline: Russare",
       "pendingSubtitle": "Analisi sonno e apnea notturna",
-      "pendingKeywordField": "gratis,diario,apple,watch,bruxismo,parlare,ciclo,qualità,sveglia,cpap,notte,russamento,registrazione",
-      "pendingSince": "2026-08-11",
       "title": "Snore Timeline: Sleep Tracker",
       "subtitle": "Analisi respiro, russi, sonno",
       "subtitleSet": true,
@@ -529,7 +515,9 @@
           "subtitle": "Registratore di Russamento",
           "at": "2026-08-12T13:55:48.692Z"
         }
-      }
+      },
+      "keywordField": "gratis,diario,apple,watch,bruxismo,parlare,ciclo,qualità,sveglia,cpap,notte,russamento,registrazione",
+      "fieldUpdated": "2026-08-12"
     },
     "de": {
       "screenshots": [
@@ -701,16 +689,14 @@
       },
       "version": "4.13",
       "versionAt": "2026-08-06T22:15:32Z",
-      "keywordField": "アプリ無料,管理,寝息,眠りの質,計測,時無呼吸症候群,歯ぎしり,目覚まし,寝てる間録音,睡眠改善,レコーダー,apple,watch,睡眠分析,睡眠負債,睡眠スコア,いびき対策,睡眠時間記録",
-      "fieldUpdated": "2026-08-06",
+      "keywordField": "アプリ無料,レコーダー,症候群,睡眠時,apple,watch,寝息,寝てる間,対策,防止,検査,原因,治し方,モニター,計測,自動,夜間,スコア,時間,スリープ,バックグラウンド,負債,質,眠り",
+      "fieldUpdated": "2026-08-12",
       "pendingTitle": "いびき・寝言・睡眠録音 - Snore Timeline",
-      "pendingSubtitle": "無呼吸・歯ぎしり記録。睡眠トラッカー＆いびきチェッカー",
-      "pendingKeywordField": "アプリ無料,レコーダー,症候群,睡眠時,apple,watch,寝息,寝てる間,対策,防止,検査,原因,治し方,モニター,計測,自動,夜間,スコア,時間,スリープ,バックグラウンド,負債,質,眠り",
-      "pendingSince": "2026-08-11"
+      "pendingSubtitle": "無呼吸・歯ぎしり記録。睡眠トラッカー＆いびきチェッカー"
     },
     "kr": {
-      "keywordField": "코골이,잠꼬대,수면,녹음기,레코더,분석,기록,측정,패턴,트래커,어플,앱,알람,시계,소리,무료,방지,무호흡,숙면,이갈이,자동,애플워치,스마트,점수,일기,사이클,사운드,백색소음,꿀잠",
-      "fieldUpdated": "2026-08-06",
+      "keywordField": "무료,어플,측정,알람,트래커,사이클,검사,방지,소리,패턴,점수,일기,슬립,스마트,원인,치료,자동,증,그래프,공유,백그라운드,통계,리포트,시간,관리,밤,아침,알림,습관,저장,차트",
+      "fieldUpdated": "2026-08-12",
       "screenshots": [
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/7a/91/e4/7a91e4b8-4663-271d-22c2-ef7f9f6cd0ae/Slice_1.png/320x480bb.jpg",
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/27/bb/93/27bb93fa-c6d8-1f5b-5545-0174d5fba67b/Slice_2.png/320x480bb.jpg",
@@ -767,9 +753,7 @@
         }
       },
       "pendingTitle": "코골이 녹음·수면 분석 - Snore Timeline",
-      "pendingSubtitle": "잠꼬대·이갈이·무호흡·잠버릇 기록. 애플워치 지원",
-      "pendingKeywordField": "무료,어플,측정,알람,트래커,사이클,검사,방지,소리,패턴,점수,일기,슬립,스마트,원인,치료,자동,증,그래프,공유,백그라운드,통계,리포트,시간,관리,밤,아침,알림,습관,저장,차트",
-      "pendingSince": "2026-08-11"
+      "pendingSubtitle": "잠꼬대·이갈이·무호흡·잠버릇 기록. 애플워치 지원"
     },
     "cn": {
       "screenshots": [
