@@ -4083,7 +4083,11 @@ async function main() {
         if (title) span.title = title;
         meta.appendChild(span);
     };
-    addMeta(`Ratings in ${rated.length} of ${entries.filter((e) => e.cur).length} storefronts`);
+    // `rated` gates the table fold (>=3 or movement); this line claims any
+    // ratings at all, so it needs its own count or it undercounts.
+    addMeta(
+        `Ratings in ${entries.filter((e) => (e.cur?.count ?? 0) > 0).length} of ${entries.filter((e) => e.cur).length} storefronts`,
+    );
     addMeta(`Last change ${ago(latest.fetchedAt)}`, stamp(latest.fetchedAt));
 
     // Collector health, in the one place anyone actually looks. Alerting only
