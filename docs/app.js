@@ -1,8 +1,11 @@
 const SPARK_DAYS = 30;
-// How long a newly tracked keyword keeps its NEW chip in the table. Two weeks
-// is long enough to build a visible sparkline, so the chip retires about when
-// the row starts carrying real trend data.
-const NEW_KW_MS = 14 * 24 * 60 * 60 * 1000;
+// How long a newly tracked keyword keeps its NEW chip in the table. A week
+// of daily rows fills the delta columns and gives the sparkline a visible
+// shape, which is the blankness the chip exists to explain. The chip also
+// skips any term whose `since` is the market's own first tracking day: a
+// bulk import is a starting roster, not news, and without that rule a new
+// market opens with NEW stamped on every row of the table.
+const NEW_KW_MS = 7 * 24 * 60 * 60 * 1000;
 const SPARK_W = 100;
 const SPARK_H = 28;
 
@@ -2781,10 +2784,7 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
     // Top-5 lists hold bare app ids; names/icons resolve through the shared
     // apps map (legacy [id, name] pairs still supported). The shared map keeps
     // English names, so passing a market code swaps in that storefront's
-    // localized name where the collector recorded one differing. Our own row
-    // additionally falls back to the aso.mjs listing title, which reads the
-    // storefront page directly and covers markets where we rank too low for
-    // the search results to carry our name.
+    // localized name where the collector recorded one differing.
     const appsMeta = kw.apps ?? {};
     const namesByCc = kw.names ?? {};
     const appEntry = (e, cc) => {
@@ -2792,9 +2792,12 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
         const meta =
             appsMeta[id] ??
             (Array.isArray(e) ? { name: e[1] } : { name: id === "6751759381" ? "Snore Timeline" : `app ${id}` });
+        // For our own app the listing title outranks the collector's name:
+        // the scrape reads the product page, which shows a renamed listing
+        // the same day, while the search API can serve the old name for days.
         const name =
-            (cc && namesByCc[cc]?.[id]) ||
             (cc && id === "6751759381" && plan?.markets?.[cc]?.listing?.title) ||
+            (cc && namesByCc[cc]?.[id]) ||
             meta.name;
         return { id, ...meta, name };
     };
@@ -2893,6 +2896,13 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
         // all diff against the same anchor, so manual runs can't wobble Δ.
         const curDate = (kw.fetchedAt ?? "").slice(0, 10);
         const prevDayRow = [...kw.history].reverse().find((r) => r.date < curDate) ?? null;
+        // The market's own first tracking day, for the NEW chip's bulk-import
+        // exemption. Read off the full market, not the filtered rows, so a
+        // search box narrowed to one late addition cannot shift the baseline.
+        const marketSince = Object.values(kw.latest[cc])
+            .map((e) => e.since)
+            .filter(Boolean)
+            .sort()[0];
 
         for (const [term, cur] of entries) {
             const tr = document.createElement("tr");
@@ -2959,8 +2969,13 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
             }
             // Newly tracked terms have no history yet, so their delta columns
             // and sparkline read as blank rather than as "no movement". The
-            // chip says which blanks are because the keyword is new.
-            if (cur.since && (Date.now() - new Date(`${cur.since}T00:00:00Z`)) < NEW_KW_MS) {
+            // chip says which blanks are because the keyword is new. Terms
+            // from the market's first day are the starting roster, not news.
+            if (
+                cur.since &&
+                cur.since !== marketSince &&
+                Date.now() - new Date(`${cur.since}T00:00:00Z`) < NEW_KW_MS
+            ) {
                 const chip = document.createElement("span");
                 chip.className = "badge new kw-new";
                 chip.textContent = "NEW";
