@@ -4454,7 +4454,21 @@ async function main() {
                         const liveCount = app.userRatingCount ?? 0;
                         if (liveCount !== cur.count) {
                             const d = liveCount - cur.count;
-                            changes.push({ cc, d });
+                            // The lookup API has no histogram, but the shift in
+                            // average pins down the sum of the new stars:
+                            // avg*count before vs after. That names the star
+                            // exactly for a single new rating, and for several
+                            // only when they were all ★5 (or all ★1) — anything
+                            // between is ambiguous (8 could be 5+3 or 4+4), so
+                            // the chip stays silent rather than guess.
+                            let star = null;
+                            if (d > 0 && app.averageUserRating != null && cur.avg != null) {
+                                const sum = Math.round(app.averageUserRating * liveCount - cur.avg * cur.count);
+                                if (d === 1 && sum >= 1 && sum <= 5) star = sum;
+                                else if (sum === 5 * d) star = 5;
+                                else if (sum === d) star = 1;
+                            }
+                            changes.push({ cc, d, star });
                             const tr = rowByCc.get(cc);
                             if (tr) {
                                 tr.children[1].textContent = fmt(liveCount);
@@ -4494,7 +4508,7 @@ async function main() {
             checkBtn.appendChild(span);
         };
         if (rises.length) {
-            say(`Live: ${rises.map((c) => `${flag(c.cc)} +${c.d}`).join(" · ")} — recorded officially next hourly run`);
+            say(`Live: ${rises.map((c) => `${flag(c.cc)} +${c.d}${c.star ? ` ★${c.star}` : ""}`).join(" · ")} — recorded officially next hourly run`);
         }
         if (drops.length) {
             const list = drops.map((c) => `${named(c)} −${Math.abs(c.d)}`).join(" · ");
