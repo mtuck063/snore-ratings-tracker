@@ -404,18 +404,28 @@ if (ratingsChanged && prevLatest) {
       events.push({ at: fetchedAt, cc, type: "first", to: curCount, avg: cur.avg });
     } else if (prevCount != null && curCount !== prevCount) {
       const ev = { at: fetchedAt, cc, type: "delta", from: prevCount, to: curCount };
-      // A single added/removed rating's star value falls out of the two
-      // averages. Only annotate when the arithmetic lands cleanly on an
-      // integer: stored 2-decimal averages from before this feature (and
-      // any same-hour rating edits) fail the tolerance and stay unlabeled.
+      // The shift in average pins down the sum of the added/removed stars:
+      // that names the star exactly for a single rating, and for a batch
+      // only when they were all ★5 or all ★1 (a sum of 8 across two could
+      // be 5+3 or 4+4, so anything between stays unlabeled). Only annotate
+      // when the arithmetic lands cleanly on an integer: stored 2-decimal
+      // averages from before this feature (and any same-hour rating edits)
+      // fail the tolerance. The histogram diff below overrides this when
+      // the page copy has caught up.
       const prevAvg = prevLatest.countries[cc]?.avg;
-      if (Math.abs(curCount - prevCount) === 1 && cur.avg != null && prevAvg != null) {
-        const est =
-          curCount > prevCount
-            ? curCount * cur.avg - prevCount * prevAvg
-            : prevCount * prevAvg - curCount * cur.avg;
-        const star = Math.round(est);
-        if (star >= 1 && star <= 5 && Math.abs(est - star) < 0.25) ev.stars = star;
+      if (cur.avg != null && prevAvg != null) {
+        const n = Math.abs(curCount - prevCount);
+        const est = Math.abs(curCount * cur.avg - prevCount * prevAvg);
+        const star = Math.round(est / n);
+        if (
+          star >= 1 &&
+          star <= 5 &&
+          Math.abs(est - star * n) < 0.25 &&
+          (n === 1 || star === 5 || star === 1)
+        ) {
+          if (n === 1) ev.stars = star;
+          else ev.starsMix = { [star]: curCount - prevCount };
+        }
       }
       events.push(ev);
     }
