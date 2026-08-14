@@ -5,3 +5,9 @@
 # reading the repo your Apple Ads session.
 .env
 .asa-cookie
+
+# App Store Connect analytics stay local. The data is the business ledger
+# (impressions, downloads, deletions by day and country) and the report script
+# carries real figures in its comments; neither belongs in a public repo.
+docs/data/asc/
+scripts/asc-reports.mjs
