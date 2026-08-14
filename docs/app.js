@@ -438,18 +438,27 @@ function fiveStarsToFiveExact(counts) {
 }
 
 // Per-country star additions of the last 24h, from the exactly-attributed
-// delta events: cc -> { star: count }. Only additions; removals stay in the
-// event log.
+// delta and first events: cc -> { star: count }. Only additions; removals
+// stay in the event log.
 function starGains(events) {
     const dayAgo = Date.now() - 864e5;
     const gains = {};
     for (const ev of events) {
-        if (ev.type !== "delta" || new Date(ev.at) < dayAgo) continue;
+        if ((ev.type !== "delta" && ev.type !== "first") || new Date(ev.at) < dayAgo) continue;
         const add = (star, n) => {
             if (n > 0) (gains[ev.cc] ??= {})[star] = (gains[ev.cc]?.[star] ?? 0) + n;
         };
-        if (ev.stars && ev.to > ev.from) add(ev.stars, ev.to - ev.from);
+        if (ev.stars && ev.to > (ev.from ?? 0)) add(ev.stars, ev.to - (ev.from ?? 0));
         if (ev.starsMix) for (const [s, d] of Object.entries(ev.starsMix)) add(s, d);
+        // A first event names no stars, but its average pins down their sum
+        // from zero: exact for a single rating, and for several only when
+        // they were all ★5 (or all ★1) — anything between stays unattributed.
+        if (ev.type === "first" && !ev.stars && !ev.starsMix && ev.to > 0 && ev.avg != null) {
+            const sum = Math.round(ev.avg * ev.to);
+            if (ev.to === 1 && sum >= 1 && sum <= 5) add(sum, 1);
+            else if (sum === 5 * ev.to) add(5, ev.to);
+            else if (sum === ev.to) add(1, ev.to);
+        }
     }
     return gains;
 }
