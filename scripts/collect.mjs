@@ -454,11 +454,26 @@ function applyHistogram(cc, counts) {
   const prevH = histograms.countries[cc];
   if (prevH) {
     const changed = counts.map((n, j) => [5 - j, n - prevH.counts[j]]).filter(([, d]) => d !== 0);
+    const net = changed.reduce((s, [, d]) => s + d, 0);
     const ev = events.find((e) => e.at === fetchedAt && e.cc === cc && e.type === "delta");
     if (ev && changed.length) {
-      if (changed.length === 1 && Math.abs(changed[0][1]) === 1) ev.stars = changed[0][0];
-      else ev.starsMix = Object.fromEntries(changed);
-    } else if (changed.length && changed.reduce((s, [, d]) => s + d, 0) === 0) {
+      // Override only when the snapshot is exactly one run behind — the
+      // diff's net movement matches this event's own count delta. A page
+      // copy that lagged for several runs produces a catch-up diff spanning
+      // events that already carry their own annotation; hanging it here
+      // counted those stars twice. And the override must replace the
+      // average-math field, not sit beside it: an event carrying both
+      // stars and starsMix was summed twice by the dashboard.
+      if (net === ev.to - ev.from) {
+        if (changed.length === 1 && Math.abs(changed[0][1]) === 1) {
+          ev.stars = changed[0][0];
+          delete ev.starsMix;
+        } else {
+          ev.starsMix = Object.fromEntries(changed);
+          delete ev.stars;
+        }
+      }
+    } else if (changed.length && net === 0) {
       // Someone changed the star value of a rating they had already left. The
       // total holds, so there is no delta event to hang the stars on, and the
       // shift used to land nowhere but this file — invisible on the dashboard
