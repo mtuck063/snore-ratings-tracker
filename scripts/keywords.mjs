@@ -114,6 +114,20 @@ const hintsGate = makeGate(16);
 // Growing waits: 429s are refill-rate limits, so patience genuinely helps.
 const BACKOFFS_MS = [15000, 45000, 90000];
 
+// With every search cache-busted to origin, burst rate is what draws 403s:
+// a shard firing four-wide with no spacing pushes well past what Apple
+// tolerates from a shared runner IP. Spacing request starts keeps the shard
+// under ~30/min, which also costs nothing overall — the spacing floor is
+// cheaper than one 15/45/90s retry ladder.
+const SEARCH_PACE_MS = 2000;
+let nextSearchSlot = 0;
+async function pacedSearch() {
+  const now = Date.now();
+  const wait = Math.max(0, nextSearchSlot - now);
+  nextSearchSlot = Math.max(now, nextSearchSlot) + SEARCH_PACE_MS;
+  if (wait) await sleep(wait);
+}
+
 async function readJson(file, fallback) {
   try {
     return JSON.parse(await readFile(file, "utf8"));
@@ -162,6 +176,7 @@ async function fetchRank(kw, cc, attempt = 1) {
   const url = `https://itunes.apple.com/search?term=${encodeURIComponent(kw)}&country=${cc}&entity=software&limit=200${bust}`;
   try {
     const results = await searchGate(async () => {
+      await pacedSearch();
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return (await res.json()).results ?? [];
@@ -192,6 +207,7 @@ async function fetchRank(kw, cc, attempt = 1) {
 async function topNameOf(term, cc) {
   try {
     return await searchGate(async () => {
+      await pacedSearch();
       const res = await fetch(
         `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=${cc}&entity=software&limit=3&t=${Date.now()}`
       );

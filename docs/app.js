@@ -4140,8 +4140,15 @@ async function main() {
         const age = (Date.now() - new Date(at)) / 3600e3;
         if (age > hours) stale.push(`${key}: ${age.toFixed(0)}h ago`);
     }
+    // A handful of carried-forward ranks out of ~900 is degradation that
+    // self-heals on the next run, not an outage, so keyword failures only
+    // turn the badge red past 1% of tracked terms. Ratings failures stay
+    // at zero tolerance: 175 storefronts, so even one is a real gap.
     const failing = Object.entries(health)
-        .filter(([, v]) => (v?.failed ?? v?.rankFailures ?? 0) > 0)
+        .filter(([k, v]) => {
+            const n = v?.failed ?? v?.rankFailures ?? 0;
+            return k === "keywords" ? n > (v?.tracked ?? 0) * 0.01 : n > 0;
+        })
         .map(([k, v]) => `${k}: ${v.failed ?? v.rankFailures} fetch failures`);
     if (health.ratings?.at) {
         addMeta(`Checked ${ago(health.ratings.at)}`, stamp(health.ratings.at));
