@@ -61,8 +61,11 @@ async function fetchCountry(cc, attempt = 1) {
   // itunes.apple.com responses carry cache-control: max-age=86400, so an
   // Akamai edge may serve a copy up to a day old — runs flip-flopped between
   // replicas and counts see-sawed. The CDN keys its cache on the full query
-  // string, so a unique throwaway param forces every request to origin.
-  const url = `https://itunes.apple.com/lookup?id=${APP_ID}&country=${cc}&t=${Date.now()}`;
+  // string, so a unique throwaway param forces every request to origin. The
+  // retry drops the param and takes the CDN copy rather than record an
+  // outage: a possibly stale reading beats "error" here, and the
+  // pending-decrease hold already absorbs a stale copy's lower count.
+  const url = `https://itunes.apple.com/lookup?id=${APP_ID}&country=${cc}${attempt === 1 ? `&t=${Date.now()}` : ""}`;
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);

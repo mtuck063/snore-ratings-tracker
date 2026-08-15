@@ -154,8 +154,12 @@ const describe = (r, withIcon) => ({
 async function fetchRank(kw, cc, attempt = 1) {
   // The unique t param defeats Apple's CDN cache (max-age=86400, keyed on the
   // full query string): without it, runs alternated between edge replicas up
-  // to a day apart and ranks and rating counts see-sawed.
-  const url = `https://itunes.apple.com/search?term=${encodeURIComponent(kw)}&country=${cc}&entity=software&limit=200&t=${Date.now()}`;
+  // to a day apart and ranks and rating counts see-sawed. Forcing origin
+  // also means origin throttling can 403 through every retry, so the final
+  // attempt drops the param and takes the CDN copy: a possibly day-old rank
+  // beats a hole in the data.
+  const bust = attempt <= BACKOFFS_MS.length ? `&t=${Date.now()}` : "";
+  const url = `https://itunes.apple.com/search?term=${encodeURIComponent(kw)}&country=${cc}&entity=software&limit=200${bust}`;
   try {
     const results = await searchGate(async () => {
       const res = await fetch(url);
