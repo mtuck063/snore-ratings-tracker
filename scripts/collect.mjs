@@ -58,7 +58,11 @@ async function readJson(file, fallback) {
 // (network/HTTP failure) so callers can keep the previous value instead of
 // mistaking an outage for a delisting.
 async function fetchCountry(cc, attempt = 1) {
-  const url = `https://itunes.apple.com/lookup?id=${APP_ID}&country=${cc}`;
+  // itunes.apple.com responses carry cache-control: max-age=86400, so an
+  // Akamai edge may serve a copy up to a day old — runs flip-flopped between
+  // replicas and counts see-sawed. The CDN keys its cache on the full query
+  // string, so a unique throwaway param forces every request to origin.
+  const url = `https://itunes.apple.com/lookup?id=${APP_ID}&country=${cc}&t=${Date.now()}`;
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -85,7 +89,7 @@ async function fetchCountry(cc, attempt = 1) {
 // Apple's public customer-reviews RSS: written reviews only (star-only
 // ratings never appear), roughly the 50 most recent per storefront.
 async function fetchReviews(cc) {
-  const url = `https://itunes.apple.com/${cc}/rss/customerreviews/id=${APP_ID}/sortby=mostrecent/json`;
+  const url = `https://itunes.apple.com/${cc}/rss/customerreviews/id=${APP_ID}/sortby=mostrecent/json?t=${Date.now()}`;
   try {
     const res = await fetch(url);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);

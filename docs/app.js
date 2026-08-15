@@ -626,7 +626,9 @@ function jsonpLookup(cc) {
             resolve(data);
         };
         script.onerror = () => fail(new Error("load failed"));
-        script.src = `https://itunes.apple.com/lookup?id=6751759381&country=${cc}&callback=${cb}`;
+        // The t param defeats Apple's CDN cache (max-age=86400, keyed on the
+        // full query string) so a live check never re-reads a day-old copy.
+        script.src = `https://itunes.apple.com/lookup?id=6751759381&country=${cc}&callback=${cb}&t=${Date.now()}`;
         document.head.appendChild(script);
     });
 }
@@ -2521,7 +2523,7 @@ function rivalHeader(id, cc, meta, plan) {
     const key = `${id}:${cc}`;
     const load =
         rivalCache.get(key) ??
-        fetch(`https://itunes.apple.com/lookup?id=${id}&country=${cc}`)
+        fetch(`https://itunes.apple.com/lookup?id=${id}&country=${cc}&t=${Date.now()}`)
             .then((r) => r.json())
             .then((j) => j.results?.[0] ?? null)
             .catch(() => null);
@@ -4428,7 +4430,7 @@ async function main() {
                 .map(async ({ cc }) => {
                     try {
                         const res = await fetch(
-                            `https://itunes.apple.com/${cc}/rss/customerreviews/id=6751759381/sortby=mostrecent/json`
+                            `https://itunes.apple.com/${cc}/rss/customerreviews/id=6751759381/sortby=mostrecent/json?t=${Date.now()}`
                         );
                         let feedEntries = (await res.json()).feed?.entry ?? [];
                         if (!Array.isArray(feedEntries)) feedEntries = [feedEntries];

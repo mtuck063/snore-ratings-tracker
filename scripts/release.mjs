@@ -139,7 +139,7 @@ async function liveShots(cc) {
     // fall through to the lookup API
   }
   try {
-    const res = await fetch(`https://itunes.apple.com/lookup?id=${appId}&country=${cc}`);
+    const res = await fetch(`https://itunes.apple.com/lookup?id=${appId}&country=${cc}&t=${Date.now()}`);
     const app = (await res.json()).results?.[0];
     return app?.screenshotUrls ?? null;
   } catch {
@@ -152,7 +152,7 @@ async function liveShots(cc) {
 
 async function liveVersion() {
   try {
-    const res = await fetch(`https://itunes.apple.com/lookup?id=${appId}&country=us`);
+    const res = await fetch(`https://itunes.apple.com/lookup?id=${appId}&country=us&t=${Date.now()}`);
     const app = (await res.json()).results?.[0];
     return app ? { version: app.version, at: app.currentVersionReleaseDate } : null;
   } catch {

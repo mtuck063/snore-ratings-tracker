@@ -49,7 +49,7 @@ let throttled = 0;
 
 async function search(term, attempt = 1) {
   const u = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}`
-    + `&country=${cc}&entity=software&limit=20`;
+    + `&country=${cc}&entity=software&limit=20&t=${Date.now()}`;
   try {
     const res = await fetch(u);
     if (res.status === 429 || res.status === 403) {

@@ -152,7 +152,10 @@ const describe = (r, withIcon) => ({
   score: r.averageUserRating ?? null,
 });
 async function fetchRank(kw, cc, attempt = 1) {
-  const url = `https://itunes.apple.com/search?term=${encodeURIComponent(kw)}&country=${cc}&entity=software&limit=200`;
+  // The unique t param defeats Apple's CDN cache (max-age=86400, keyed on the
+  // full query string): without it, runs alternated between edge replicas up
+  // to a day apart and ranks and rating counts see-sawed.
+  const url = `https://itunes.apple.com/search?term=${encodeURIComponent(kw)}&country=${cc}&entity=software&limit=200&t=${Date.now()}`;
   try {
     const results = await searchGate(async () => {
       const res = await fetch(url);
@@ -186,7 +189,7 @@ async function topNameOf(term, cc) {
   try {
     return await searchGate(async () => {
       const res = await fetch(
-        `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=${cc}&entity=software&limit=3`
+        `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&country=${cc}&entity=software&limit=3&t=${Date.now()}`
       );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return (await res.json()).results?.[0]?.trackName ?? null;
