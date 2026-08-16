@@ -437,6 +437,19 @@ function fiveStarsToFiveExact(counts) {
     return Math.max(0, 99 * n - 20 * stars);
 }
 
+// A first event names no stars, but its average pins down their sum from
+// zero: exact for a single rating, and for several only when they were all
+// ★5 (or all ★1) — anything between (a sum of 8 across two could be 5+3 or
+// 4+4) stays unattributed. Returns a starsMix-shaped object, or null.
+function firstStars(ev) {
+    if (ev.type !== "first" || ev.stars || ev.starsMix || !(ev.to > 0) || ev.avg == null) return null;
+    const sum = Math.round(ev.avg * ev.to);
+    if (ev.to === 1 && sum >= 1 && sum <= 5) return { [sum]: 1 };
+    if (sum === 5 * ev.to) return { 5: ev.to };
+    if (sum === ev.to) return { 1: ev.to };
+    return null;
+}
+
 // Per-country star additions of the last 24h, from the exactly-attributed
 // delta and first events: cc -> { star: count }. Only additions; removals
 // stay in the event log.
@@ -449,16 +462,8 @@ function starGains(events) {
             if (n > 0) (gains[ev.cc] ??= {})[star] = (gains[ev.cc]?.[star] ?? 0) + n;
         };
         if (ev.stars && ev.to > (ev.from ?? 0)) add(ev.stars, ev.to - (ev.from ?? 0));
-        if (ev.starsMix) for (const [s, d] of Object.entries(ev.starsMix)) add(s, d);
-        // A first event names no stars, but its average pins down their sum
-        // from zero: exact for a single rating, and for several only when
-        // they were all ★5 (or all ★1) — anything between stays unattributed.
-        if (ev.type === "first" && !ev.stars && !ev.starsMix && ev.to > 0 && ev.avg != null) {
-            const sum = Math.round(ev.avg * ev.to);
-            if (ev.to === 1 && sum >= 1 && sum <= 5) add(sum, 1);
-            else if (sum === 5 * ev.to) add(5, ev.to);
-            else if (sum === ev.to) add(1, ev.to);
-        }
+        const mix = ev.starsMix ?? firstStars(ev);
+        if (mix) for (const [s, d] of Object.entries(mix)) add(s, d);
     }
     return gains;
 }
@@ -866,9 +871,10 @@ function renderRecent(events) {
         // the count shown only when a star level has more than one ("★5" for
         // a homogeneous pair since the +2 already carries the quantity).
         let starText = "";
+        const mix = ev.starsMix ?? firstStars(ev);
         if (ev.stars) starText = ` ★${ev.stars}`;
-        else if (ev.starsMix) {
-            const added = Object.entries(ev.starsMix).filter(([, n]) => n > 0).sort((a, b) => b[0] - a[0]);
+        else if (mix) {
+            const added = Object.entries(mix).filter(([, n]) => n > 0).sort((a, b) => b[0] - a[0]);
             if (added.length === 1) starText = ` ★${added[0][0]}`;
             else if (added.length) starText = " " + added.map(([s, n]) => (n > 1 ? `★${s}×${n}` : `★${s}`)).join(" ");
         }
