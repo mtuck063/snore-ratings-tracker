@@ -195,6 +195,13 @@ async function loadRecentKwEvents(want) {
 
 const fmt = (n) => n.toLocaleString("en-US");
 
+// A rating average lands on an exact .x5 tie often: Australia's 17x5 + 3x4
+// over 20 is 4.85 on the nose. toFixed rounds by the double actually stored,
+// and 4.85 is stored as 4.84999...96, so it prints 4.8 while App Store
+// Connect prints 4.9. Scaling to tenths first makes the tie exact and breaks
+// it upward, the way Apple does.
+const avg1 = (n) => (Math.round(n * 10) / 10).toFixed(1);
+
 // "2012-10-26" -> "Oct 2012". Parsed as UTC so the day never shifts backwards
 // in western timezones and lands the label on the previous month.
 const monthYear = (iso) => {
@@ -570,7 +577,7 @@ function row({ name, sub, total, delta, avg, mix, to5, spark, isTotal, title }) 
 
     const tdAvg = document.createElement("td");
     tdAvg.className = "col-num";
-    tdAvg.textContent = avg == null ? "—" : avg.toFixed(1);
+    tdAvg.textContent = avg == null ? "—" : avg1(avg);
     if (avg == null) tdAvg.classList.add("muted");
 
     const tdMix = document.createElement("td");
@@ -919,7 +926,7 @@ function renderEvents(history, events) {
         const name = `${flag(ev.cc)} ${regionNames.of(ev.cc.toUpperCase())}`;
         if (ev.type === "first") {
             li.className = "first-rating";
-            li.innerHTML = `${time}${name} got its first rating${ev.to > 1 ? "s" : ""}<span class="badge first">FIRST</span><span class="event-note">${fmt(ev.to)} total${ev.avg != null ? `, ${ev.avg.toFixed(1)} avg` : ""}</span>`;
+            li.innerHTML = `${time}${name} got its first rating${ev.to > 1 ? "s" : ""}<span class="badge first">FIRST</span><span class="event-note">${fmt(ev.to)} total${ev.avg != null ? `, ${avg1(ev.avg)} avg` : ""}</span>`;
         } else if (ev.type === "tracked") {
             li.className = "tracked";
             li.innerHTML = `${time}${name} added to tracking<span class="badge new">NEW</span><span class="event-note">${fmt(ev.to)} existing rating${ev.to === 1 ? "" : "s"}</span>`;
@@ -4496,7 +4503,7 @@ async function main() {
                             const tr = rowByCc.get(cc);
                             if (tr) {
                                 tr.children[1].textContent = fmt(liveCount);
-                                if (app.averageUserRating != null) tr.children[3].textContent = app.averageUserRating.toFixed(1);
+                                if (app.averageUserRating != null) tr.children[3].textContent = avg1(app.averageUserRating);
                                 tr.classList.add("changed");
                                 tr.hidden = false; // reveal a first rating hiding in the unrated fold
                             }
