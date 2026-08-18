@@ -835,6 +835,15 @@ function scoreOf({ pop, rank, intent, cov, diff, fresh }) {
 // the ranking rather than first entry.
 const LEVERS = { covered: 1, unknown: 1, cheap: 1.25, dear: 0.85, bridged: 0.3 };
 
+// popScore returns 5 for a term autocomplete never surfaces at any prefix of
+// itself, so 5 is a floor sentinel and not a measurement — US values jump
+// straight from 5 to 37 with nothing between. Summing it as demand invents
+// interest out of silence: twelve freshly tracked bruxism terms, none of them
+// measured, added up to "37 demand" and nearly bought AU fifteen characters
+// it had no evidence for. A floor term is worth nothing until Apple says
+// otherwise.
+const POP_FLOOR = 5;
+
 function reasonFor({ pop, rank, cov, intent, fresh = 1, year = null }) {
   const where = rank == null ? "unranked" : `#${rank}`;
   if (fresh < 1) {
@@ -959,7 +968,8 @@ function analyseMarket(cc) {
     // listing. Count those phrases at LEVERS.bridged so the list ranks what
     // a word genuinely unlocks, and carry the granted remainder so the
     // report can show what was priced out.
-    const worth = t.rank == null ? t.pop : Math.round(t.pop * LEVERS.bridged);
+    const worth =
+      t.pop <= POP_FLOOR ? 0 : t.rank == null ? t.pop : Math.round(t.pop * LEVERS.bridged);
     for (const w of t.missing) {
       (blocked[w] ??= { word: w, terms: [], demand: 0, ...(STOPWORD.test(w) && { weak: true }) });
       blocked[w].terms.push(kw);
@@ -967,7 +977,11 @@ function analyseMarket(cc) {
       if (t.rank != null) blocked[w].granted = (blocked[w].granted ?? 0) + (t.pop - worth);
     }
   }
-  const shoppingList = Object.values(blocked).sort((a, b) => b.demand - a.demand);
+  // A word whose every term sits on the floor has no measured demand behind it.
+  // Keep it out of the shopping list rather than ranking it above words that do.
+  const shoppingList = Object.values(blocked)
+    .filter((b) => b.demand > 0)
+    .sort((a, b) => b.demand - a.demand);
 
   // One alternatives model, shared by the recommendation and the builder.
   const model = altsFor(terms, meta, lang, skipFor(cc));
