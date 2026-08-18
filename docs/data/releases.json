@@ -5415,7 +5415,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-08-18T13:06:01.644Z",
+   "computedAt": "2026-08-18T13:12:57.818Z",
    "days": 5,
    "stage": "provisional",
    "baselineDays": 7,
@@ -5736,7 +5736,7 @@
      "noisy": 4,
      "ratings": {
       "before": 0,
-      "after": 0
+      "after": 0.2
      }
     },
     "gb": {
@@ -7318,7 +7318,7 @@
      "noisy": 3,
      "ratings": {
       "before": 0,
-      "after": 0.2
+      "after": 0.3
      }
     },
     "cn": {
