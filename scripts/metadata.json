@@ -2,8 +2,8 @@
   "_note": "What the App Store listing claims, per market. title and subtitle are refreshed from the live storefront pages by `node scripts/aso.mjs --fetch`; do not edit them by hand, they will be overwritten. keywordField and screenshots are NOT public anywhere and are maintained here by hand: copy the field out of App Store Connect whenever you change it, and set fieldUpdated to that date. An unrecorded field is not treated as an empty one; coverage simply reports the market as ungraded.",
   "markets": {
     "us": {
-      "keywordField": "free,cpap,monitor,score,rem,apple,watch,clock,breathing,apnea,quality,stop,auto,detector,smart,alarm",
-      "fieldUpdated": "2026-08-12",
+      "keywordField": "talk,cpap,monitor,score,rem,apple,watch,apnea,quality,stop,auto,detector,alarm,night,teeth,grinding",
+      "fieldUpdated": "2026-08-19",
       "screenshots": [
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/4f/52/c6/4f52c6b6-5e77-78fd-ec84-e7f91a188462/Slice_1.png/320x480bb.jpg",
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/dc/de/61/dcde610d-bfae-b35f-4441-ce7beb5b31a5/Slice_2.png/320x480bb.jpg",
@@ -16,49 +16,49 @@
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/6a/31/70/6a31708f-0e23-3409-998c-fca3b42a49d0/Slice_9.png/320x480bb.jpg"
       ],
       "title": "Snore Timeline: Sleep Tracker",
-      "subtitle": "Record Snoring & Sleep Talking",
-      "fetchedAt": "2026-08-13T03:06:12.606Z",
+      "subtitle": "Free Snore Recorder",
+      "fetchedAt": "2026-08-19T21:41:05.234Z",
       "subtitleSet": true,
       "rivals": {
         "320606217": {
           "subtitle": "Alarm Clock and Tracking App",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "391767653": {
           "subtitle": "Monitor and track your night",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "529443604": {
           "subtitle": "Snore Recorder & Sleep Tracker",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "878691772": {
           "subtitle": "Smart Alarm & Snore Recorder",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "968720724": {
           "subtitle": "Sleep Recorder & Snore Sounds",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1138066420": {
           "subtitle": "Tracker, Sounds, Alarm & Coach",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1490078804": {
           "subtitle": "Snore & Sleeptalk Recorder",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1632947950": {
           "subtitle": "Snoring app - Shut Eye Tracker",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         }
       },
       "version": "4.14",
       "versionAt": "2026-08-12T14:45:00Z"
     },
     "ca": {
-      "keywordField": "free,monitor,apnea,log,cycle,cpap,diary,sounds,rem,score,alarm,detector,control,apple,watch,stop,app",
-      "fieldUpdated": "2026-08-12",
+      "keywordField": "free,monitor,apnea,cycle,cpap,diary,sounds,score,alarm,detector,control,apple,watch,teeth,grinding",
+      "fieldUpdated": "2026-08-19",
       "screenshots": [
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/4f/52/c6/4f52c6b6-5e77-78fd-ec84-e7f91a188462/Slice_1.png/320x480bb.jpg",
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/dc/de/61/dcde610d-bfae-b35f-4441-ce7beb5b31a5/Slice_2.png/320x480bb.jpg",
@@ -77,43 +77,43 @@
       "rivals": {
         "320606217": {
           "subtitle": "Better Alarm Clock & Recorder",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "529443604": {
           "subtitle": "Snore Recorder & Sleep Tracker",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "878691772": {
           "subtitle": "Smart Alarm & Snore Recorder",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "968720724": {
           "subtitle": "Sleep Recorder & Snore Sounds",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1138066420": {
           "subtitle": "Tracker, Sounds, Alarm & Coach",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1490078804": {
           "subtitle": "White Noise & Snore Recorder",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1551928101": {
           "subtitle": "Snore Recorder & Sleep Sounds",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1632947950": {
           "subtitle": "sleep talk recorder, sommeil",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         }
       },
       "version": "4.14",
       "versionAt": "2026-08-12T14:45:00Z"
     },
     "gb": {
-      "keywordField": "free,monitor,apnea,cpap,rem,score,control,sounds,diary,quality,stop,apple,watch,smart,alarm,detector",
-      "fieldUpdated": "2026-08-12",
+      "keywordField": "free,monitor,apnea,cpap,score,control,sounds,diary,quality,apple,watch,alarm,detector,teeth,grinding",
+      "fieldUpdated": "2026-08-19",
       "screenshots": [
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/4f/52/c6/4f52c6b6-5e77-78fd-ec84-e7f91a188462/Slice_1.png/320x480bb.jpg",
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/dc/de/61/dcde610d-bfae-b35f-4441-ce7beb5b31a5/Slice_2.png/320x480bb.jpg",
@@ -132,47 +132,47 @@
       "rivals": {
         "320606217": {
           "subtitle": "Alarm Clock & Snore Recorder",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "391767653": {
           "subtitle": "Monitor and track your night",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "529443604": {
           "subtitle": "Snore Recorder & Sleep Tracker",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "878691772": {
           "subtitle": "Smart Alarm & Snore Recorder",
-          "at": "2026-08-19T13:19:36.421Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "968720724": {
           "subtitle": "Sleep Recorder & Snore Sounds",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1138066420": {
           "subtitle": "Tracker, Sounds, Alarm & Coach",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1490078804": {
           "subtitle": "Snore Recorder, White Noise",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1551928101": {
           "subtitle": "Snore Recorder & Nap Monitor",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T11:52:18.765Z"
         },
         "1632947950": {
           "subtitle": "SLEEP TALK LAB, SNORE MONITOR",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         }
       },
       "version": "4.14",
       "versionAt": "2026-08-12T14:45:00Z"
     },
     "au": {
-      "keywordField": "free,record,apnea,monitor,cpap,sounds,log,score,diary,smart,detector,apple,watch,stop,cycle,control",
-      "fieldUpdated": "2026-08-12",
+      "keywordField": "free,record,apnea,monitor,cpap,sounds,log,score,diary,detector,apple,watch,cycle,teeth,grinding",
+      "fieldUpdated": "2026-08-19",
       "screenshots": [
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/4f/52/c6/4f52c6b6-5e77-78fd-ec84-e7f91a188462/Slice_1.png/320x480bb.jpg",
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/dc/de/61/dcde610d-bfae-b35f-4441-ce7beb5b31a5/Slice_2.png/320x480bb.jpg",
@@ -191,31 +191,31 @@
       "rivals": {
         "320606217": {
           "subtitle": "Alarm Clock & Snore Recorder",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "391767653": {
           "subtitle": "Monitor and track your night",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "529443604": {
           "subtitle": "Snore Recorder & Sleep Tracker",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "878691772": {
           "subtitle": "Alarm, Sounds & Snore Recorder",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "968720724": {
           "subtitle": "Sleep Recorder & Snore Sounds",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1138066420": {
           "subtitle": "Tracker, Sounds, Alarm & Coach",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1490078804": {
           "subtitle": "Snore & Sleeptalk Recorder",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1551928101": {
           "subtitle": "Sleep Cycle Recorder & Alarm",
@@ -223,7 +223,7 @@
         },
         "1632947950": {
           "subtitle": "shut eye - pillow - autosleep",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         }
       },
       "version": "4.14",
@@ -248,11 +248,11 @@
       "rivals": {
         "320606217": {
           "subtitle": "App Alarme, Réveil et Horloge",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "529443604": {
           "subtitle": "Suivi sommeil & ronflements",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "571800810": {
           "subtitle": "Sante, détente, sons, sleep",
@@ -260,7 +260,7 @@
         },
         "968720724": {
           "subtitle": "Sommeil, ronflements, rêves",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1064910141": {
           "subtitle": "Analyse du cycle du sommeil",
@@ -268,15 +268,15 @@
         },
         "1110284050": {
           "subtitle": "Arrêtez le ronflement",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1163786766": {
           "subtitle": "Étude & Suivi du ronflement",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1490078804": {
           "subtitle": "Sons pour dormir & Méditation",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1510325113": {
           "subtitle": "Dream Talk,Sleep Cycle Tracker",
@@ -284,11 +284,11 @@
         },
         "1551928101": {
           "subtitle": "Cycle & Enregistrement Sommeil",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1632947950": {
           "subtitle": "snore control, tracker, apnee",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "6747078368": {
           "subtitle": "Apneal,Apnée du sommeil,ronfle",
@@ -319,7 +319,7 @@
       "rivals": {
         "320606217": {
           "subtitle": "Despertador, Diario & Sonidos",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "391767653": {
           "subtitle": "Monitor and track your night",
@@ -327,19 +327,19 @@
         },
         "529443604": {
           "subtitle": "Grabador de ronquidos y sueño",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "878691772": {
           "subtitle": "Alarma. Sonidos y grabadora",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "968720724": {
           "subtitle": "Ronquidos & Ciclo del sueño",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1064910141": {
           "subtitle": "Control de Ciclo de Sueño",
-          "at": "2026-08-19T13:19:36.421Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1110284050": {
           "subtitle": "Grabadora de ronquidos",
@@ -347,19 +347,19 @@
         },
         "1164801111": {
           "subtitle": "Alarma. Monitor. Dormir. Salud",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-15T18:55:34.205Z"
         },
         "1490078804": {
           "subtitle": "Sonidos y Grabadora, Alarma",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1510325113": {
           "subtitle": "Dream Talk, Analisis del Sueño",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1551928101": {
           "subtitle": "Grabadora, Musicas para Dormir",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         }
       },
       "version": "4.14",
@@ -386,39 +386,39 @@
       "rivals": {
         "320606217": {
           "subtitle": "Alarma y Sonidos Para Dormir",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "529443604": {
           "subtitle": "Grabador de ronquidos y sueño",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "571800810": {
           "subtitle": "Meditación y Sueño",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "968720724": {
           "subtitle": "Ciclo sueño, Alarma, Grabadora",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1064910141": {
           "subtitle": "Despertador para dormir bien",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1490078804": {
           "subtitle": "Grabadora de ronquidos",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1551928101": {
           "subtitle": "Grabadora de Ronquidos, Alarm",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "6514310473": {
           "subtitle": "Grabador de Ronquidos",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         }
       },
-      "version": "4.14",
-      "versionAt": "2026-08-12T14:45:00Z",
+      "version": "4.15",
+      "versionAt": "2026-08-19T21:02:49Z",
       "keywordField": "apnea,gratis,grabar,grabador,seguimiento,roncar,ciclos,medir,diario,ronco,detector,apple,watch",
       "fieldUpdated": "2026-08-12"
     },
@@ -435,31 +435,31 @@
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource211/v4/6a/31/70/6a31708f-0e23-3409-998c-fca3b42a49d0/Slice_9.png/320x480bb.jpg"
       ],
       "title": "Ronco e Sono - Snore Timeline",
-      "subtitle": "Gravador de apneia e bruxismo",
+      "subtitle": "Gravador: ronco, fala e apneia",
       "subtitleSet": true,
       "version": "4.14",
       "versionAt": "2026-08-12T14:45:00Z",
-      "fetchedAt": "2026-08-13T03:06:12.606Z",
+      "fetchedAt": "2026-08-19T21:43:11.962Z",
       "rivals": {
         "320606217": {
           "subtitle": "Rastreador, Despertador e Sons",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "529443604": {
           "subtitle": "Registro de Ressonar e Sono",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "571800810": {
           "subtitle": "Meditação e Sono",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "878691772": {
           "subtitle": "Alarme. Gravação de Ronco Sons",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1490078804": {
           "subtitle": "Gravação de Ronco Sons, Alarme",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1510325113": {
           "subtitle": "Analise do Sono, Sleep Cycle",
@@ -467,7 +467,7 @@
         },
         "1551928101": {
           "subtitle": "Gravação de Ronco Sons & Alarm",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1632947950": {
           "subtitle": "Snoring tracker, sleep noise",
@@ -475,7 +475,7 @@
         },
         "6514310473": {
           "subtitle": "Gravador de Ronco e Voz",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         }
       },
       "keywordField": "gravar,monitorar,rastreador,ciclo,pontuação,alarme,cpap,apple,watch,grátis,detector,falar,dormindo",
@@ -502,35 +502,35 @@
       "rivals": {
         "320606217": {
           "subtitle": "Monitoraggio Sonno & Sveglia",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "529443604": {
           "subtitle": "Registra russamento e sonno",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "878691772": {
           "subtitle": "Sveglia. Registrazione e suoni",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1064910141": {
           "subtitle": "Sveglia per dormire meglio",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1163786766": {
           "subtitle": "Routine & monitor russamento",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1164801111": {
           "subtitle": "Sveglia. Tracker. Dormire",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1510325113": {
           "subtitle": "Analisi Sonno & Sleep Tracker",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1551928101": {
           "subtitle": "Analisi Sonno, Dormire Bene",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1570823441": {
           "subtitle": "Ciclo del Sonno dormir Analisi",
@@ -563,27 +563,27 @@
       "rivals": {
         "320606217": {
           "subtitle": "Wecker & Schlaf Aufnahme",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "391767653": {
           "subtitle": "Monitor and track your night",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "529443604": {
           "subtitle": "Schnarchrekorder+Schlaftracker",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "968720724": {
           "subtitle": "Schlaf aufnehmen & Schnarchen",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1164801111": {
           "subtitle": "Wecker & Schlaf Aufnahme",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1490078804": {
           "subtitle": "Schlaf Analyse & Wecker",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1510325113": {
           "subtitle": "Sleep Cycle Tracker,Dream Talk",
@@ -591,15 +591,15 @@
         },
         "1551928101": {
           "subtitle": "Schlaf Aufnahme & Schnarch App",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1632947950": {
           "subtitle": "schlaf aufnahme, schnarchen",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         }
       },
-      "version": "4.14",
-      "versionAt": "2026-08-12T14:45:00Z",
+      "version": "4.15",
+      "versionAt": "2026-08-19T21:02:49Z",
       "keywordField": "tracker,apnoe,apple,aufnahme,aufnehmen,cpap,watch,kostenlos,schlafanalyse,überwachen,schlafgeräusche",
       "fieldUpdated": "2026-08-12"
     },
@@ -622,11 +622,11 @@
       "rivals": {
         "320606217": {
           "subtitle": "Wekker, Snurk & Slaap Recorder",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "529443604": {
           "subtitle": "Snurkrecorder en slaaptracker",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "530569351": {
           "subtitle": "CPAP-therapie motivatie app",
@@ -634,23 +634,23 @@
         },
         "968720724": {
           "subtitle": null,
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1164801111": {
           "subtitle": "Wekker, Apneu, Slaap Recorder",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1510325113": {
           "subtitle": "Sleep Cycle Tracker,Dream Talk",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1551928101": {
           "subtitle": "Sleep cycle & White noise",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "6782670971": {
           "subtitle": "Snurkrecorder, privé & gratis",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         }
       },
       "version": "4.14",
@@ -677,23 +677,23 @@
       "rivals": {
         "320606217": {
           "subtitle": "寝言録音アプリ & いびき, 睡眠音 & スマートアラーム",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "529443604": {
           "subtitle": "いびき録音＆睡眠トラッカー",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "599456380": {
           "subtitle": "眠りの浅い時に鳴動するアラーム",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "827600695": {
           "subtitle": "睡眠＆いびき計測目覚ましアプリ",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "968720724": {
           "subtitle": "寝言＆いびきレコーダー (Sleep recorder)",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1352785781": {
           "subtitle": "眠りの質を計測・分析、Apple Watch対応",
@@ -705,19 +705,19 @@
         },
         "1551928101": {
           "subtitle": "スマートアラーム、瞑想、睡眠音、 ホワイトノイズ",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1579464667": {
           "subtitle": "ポケモンの寝顔をゲットできる 睡眠アプリ",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1632947950": {
           "subtitle": "いびきらぼ、睡眠記録、ねごと録音、いびき録音アプリ、寝言",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         }
       },
-      "version": "4.14",
-      "versionAt": "2026-08-12T14:45:00Z",
+      "version": "4.15",
+      "versionAt": "2026-08-19T21:02:49Z",
       "keywordField": "アプリ無料,レコーダー,症候群,睡眠時,apple,watch,寝息,寝てる間,対策,防止,検査,原因,治し方,モニター,計測,自動,夜間,スコア,時間,スリープ,バックグラウンド,負債,質,眠り",
       "fieldUpdated": "2026-08-12"
     },
@@ -744,15 +744,15 @@
       "rivals": {
         "320606217": {
           "subtitle": "알람시계 및 코골이 녹음기, 소음측정 및 백색소음.",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "529443604": {
           "subtitle": "코골이 녹음기 및 수면 추적기",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "878691772": {
           "subtitle": "알람, 코골이 녹음기 및 사운드",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "968720724": {
           "subtitle": "잠꼬대 및 코골이 녹음기. Record Snoring",
@@ -760,15 +760,15 @@
         },
         "1064910141": {
           "subtitle": "수면 기록 및 분석을 위한 수면 어플",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1164801111": {
           "subtitle": "알람, 수면트래커, 수면 주기 추적 및 모니터링",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1551928101": {
           "subtitle": "수면주기 & 알람 & 명상 & 소리",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1619362440": {
           "subtitle": "리나잇, 미라클나잇, 미라클모닝, 알라미, 백색소음",
@@ -776,7 +776,7 @@
         },
         "1661990261": {
           "subtitle": "의사가 만든 수면 케어: 코골이, 건강, 음악, 명상",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         }
       }
     },
@@ -799,15 +799,15 @@
       "rivals": {
         "320606217": {
           "subtitle": "助眠及睡眠监测：睡眠检测、梦话录音、噪音监测、睡眠记录",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "529443604": {
           "subtitle": "打鼾记录仪和睡眠追踪器",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1025313530": {
           "subtitle": "助眠 | 呼吸暂停 | 梦话 | 白噪音 | 雨声冥想催眠",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1048518210": {
           "subtitle": "正念｜睡眠｜解压放松｜缓解焦虑｜专注｜情绪管理｜自律｜呼吸法",
@@ -815,19 +815,19 @@
         },
         "1077776989": {
           "subtitle": "睡眠 | 正念 | HRV | 解压 | 专注 | 呼吸法",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1164801111": {
           "subtitle": "闹钟和睡眠分析|睡眠周期跟踪器|助眠及检测睡眠|HRV",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:43:11.962Z"
         },
         "1194338569": {
           "subtitle": "8000万失眠星人口碑之选｜梦话｜鼾声记录｜打呼噜检测｜催眠",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1490078804": {
           "subtitle": "白噪音助眠，睡眠质量监控分析，智能闹钟",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1538111605": {
           "subtitle": "睡眠报告，专家在线指导，专业止鼾好帮手",
@@ -839,7 +839,7 @@
         },
         "6447752327": {
           "subtitle": "助眠｜呼吸暂停｜改善睡眠｜智能闹钟｜宝宝哄睡｜解压放松",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "6794787736": {
           "subtitle": "本地处理睡眠录音，安心回顾昨夜、助眠音乐放松入眠",
@@ -853,7 +853,7 @@
     },
     "sa": {
       "title": "Snore Timeline: تتبع النوم",
-      "subtitle": "الشخير، كلام، الساعات، المنبه",
+      "subtitle": "مسجل الشخير وكلام النوم",
       "subtitleSet": true,
       "screenshots": [
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/4f/52/c6/4f52c6b6-5e77-78fd-ec84-e7f91a188462/Slice_1.png/320x480bb.jpg",
@@ -868,37 +868,37 @@
       ],
       "version": "4.14",
       "versionAt": "2026-08-12T14:45:00Z",
-      "fetchedAt": "2026-08-19T11:52:18.765Z",
-      "keywordField": "نوم,شخير,تسجيل,تتبع,مراقبة,منبه,ذكي,جودة,عميق,مجاني,تنفس,توقف,تحليل,كلام,أصوات,صوت,ساعة,أبل,تطبيق",
+      "fetchedAt": "2026-08-19T21:41:05.234Z",
+      "keywordField": "تسجيل,مراقبة,منبه,ذكي,جودة,عميق,مجاني,تنفس,توقف,تحليل,أصوات,صوت,ساعة,أبل,تطبيق,دورات,قياس,انقطاع",
       "fieldUpdated": "2026-08-19",
       "rivals": {
         "320606217": {
           "subtitle": null,
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "529443604": {
           "subtitle": "Snore Recorder & Sleep Tracker",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "968720724": {
           "subtitle": null,
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1138066420": {
           "subtitle": null,
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1490078804": {
           "subtitle": "Snore Recorder, White Noise",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1551928101": {
           "subtitle": "White Noises, Snore Recorder",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         },
         "1632947950": {
           "subtitle": "NOISE, SNORING, BETTERSLEEP",
-          "at": "2026-08-19T19:01:50.041Z"
+          "at": "2026-08-19T21:45:52.271Z"
         }
       }
     }
