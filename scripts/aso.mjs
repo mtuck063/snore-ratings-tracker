@@ -1113,10 +1113,19 @@ function rivalIds(cc) {
 // "Gesundheit und Fitness" / "Gezondheid en fitness" and would have been
 // graded as if that were the copy. The lookup API's localized `genres[0]` is
 // the same string, which is what tells the two apart.
+// A storefront can serve more than one localization, and the default is not
+// always the one the listing was written for: Saudi Arabia shows the en-US
+// copy unless asked for Arabic, so scraping it bare recorded an English title
+// against an Arabic keyword field and graded every Arabic term as uncovered.
+// `lang` on the market pins both halves — the page and the category name the
+// no-subtitle check depends on — to the localization actually being graded.
 async function fetchListing(cc, appId = config.appId) {
+  const lang = markets[cc]?.lang;
+  const page = `https://apps.apple.com/${cc}/app/id${appId}${lang ? `?l=${lang}` : ""}`;
+  const look = `https://itunes.apple.com/lookup?id=${appId}&country=${cc}${lang ? `&lang=${lang}` : ""}`;
   const [res, lookup] = await Promise.all([
-    fetch(`https://apps.apple.com/${cc}/app/id${appId}`),
-    fetch(`https://itunes.apple.com/lookup?id=${appId}&country=${cc}`)
+    fetch(page),
+    fetch(look)
       .then((r) => r.json())
       .then((j) => j.results?.[0] ?? null)
       .catch(() => null),
