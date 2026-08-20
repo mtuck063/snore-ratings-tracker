@@ -1,0 +1,138 @@
+{
+ "generatedAt": "2026-08-20T19:00:54.736Z",
+ "through": "2026-08-17",
+ "from": "2025-09-03",
+ "recentDays": 30,
+ "total": {
+  "dl": 24635,
+  "redl": 1530,
+  "recent": 4081
+ },
+ "countries": {
+  "us": {
+   "dl": 8407,
+   "redl": 589,
+   "recent": 1341
+  },
+  "ca": {
+   "dl": 1535,
+   "redl": 126,
+   "recent": 195
+  },
+  "de": {
+   "dl": 778,
+   "redl": 59,
+   "recent": 108
+  },
+  "au": {
+   "dl": 1250,
+   "redl": 68,
+   "recent": 315
+  },
+  "cn": {
+   "dl": 1980,
+   "redl": 113,
+   "recent": 304
+  },
+  "nz": {
+   "dl": 185,
+   "redl": 13,
+   "recent": 41
+  },
+  "nl": {
+   "dl": 446,
+   "redl": 18,
+   "recent": 85
+  },
+  "gb": {
+   "dl": 1942,
+   "redl": 96,
+   "recent": 274
+  },
+  "tr": {
+   "dl": 376,
+   "redl": 13,
+   "recent": 38
+  },
+  "zz": {
+   "dl": 3278,
+   "redl": 184,
+   "recent": 509
+  },
+  "pl": {
+   "dl": 320,
+   "redl": 21,
+   "recent": 39
+  },
+  "kr": {
+   "dl": 130,
+   "redl": 7,
+   "recent": 26
+  },
+  "dk": {
+   "dl": 222,
+   "redl": 14,
+   "recent": 45
+  },
+  "no": {
+   "dl": 201,
+   "redl": 7,
+   "recent": 34
+  },
+  "se": {
+   "dl": 287,
+   "redl": 13,
+   "recent": 53
+  },
+  "fr": {
+   "dl": 1179,
+   "redl": 80,
+   "recent": 230
+  },
+  "ru": {
+   "dl": 325,
+   "redl": 11,
+   "recent": 51
+  },
+  "jp": {
+   "dl": 499,
+   "redl": 25,
+   "recent": 194
+  },
+  "ch": {
+   "dl": 170,
+   "redl": 5,
+   "recent": 27
+  },
+  "th": {
+   "dl": 80,
+   "redl": 8,
+   "recent": 14
+  },
+  "mx": {
+   "dl": 110,
+   "redl": 2,
+   "recent": 22
+  },
+  "es": {
+   "dl": 421,
+   "redl": 23,
+   "recent": 55
+  },
+  "in": {
+   "dl": 225,
+   "redl": 12,
+   "recent": 27
+  },
+  "it": {
+   "dl": 187,
+   "redl": 11,
+   "recent": 34
+  },
+  "br": {
+   "dl": 102,
+   "redl": 12,
+   "recent": 20
+  }
+ }
+}

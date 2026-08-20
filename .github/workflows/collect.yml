@@ -37,6 +37,13 @@ jobs:
           GOATCOUNTER_TOKEN: ${{ secrets.GOATCOUNTER_TOKEN }}
         run: node scripts/pageviews.mjs
 
+      # Rolls the committed ASC shards up into the per-country download totals
+      # the ratings table shows. Reads only what is already in the repo, so it
+      # needs no credential -- but it cannot make the figures fresher either:
+      # the shards move only when asc-reports.mjs is run by hand.
+      - name: Roll up downloads
+        run: node scripts/downloads.mjs
+
       - name: Commit data
         run: |
           git config user.name "ratings-bot"

@@ -551,7 +551,7 @@ function mixCell(counts, gains) {
     return wrap;
 }
 
-function row({ name, sub, total, delta, avg, mix, to5, spark, isTotal, title }) {
+function row({ name, sub, total, downloads, delta, avg, mix, to5, spark, isTotal, title }) {
     const tr = document.createElement("tr");
     if (isTotal) tr.className = "total-row";
     else if (delta) tr.className = "changed";
@@ -570,6 +570,21 @@ function row({ name, sub, total, delta, avg, mix, to5, spark, isTotal, title }) 
     tdTotal.className = "col-num";
     tdTotal.textContent = total == null ? "—" : fmt(total);
     if (total == null) tdTotal.classList.add("muted");
+
+    // Sits beside the rating count on purpose: the two together are the
+    // downloads-per-rating ratio, which is the only way to read whether a
+    // storefront rates the app at the rate the others do.
+    const tdDl = document.createElement("td");
+    tdDl.className = "col-num";
+    if (downloads == null) {
+        tdDl.textContent = "\u2014";
+        tdDl.classList.add("muted");
+        // A storefront outside the shards' territory list is not a storefront
+        // with no downloads, and the table must not read as if it were.
+        tdDl.title = "Not counted separately: this storefront folds into the shards' rest-of-world bucket";
+    } else {
+        tdDl.textContent = fmt(downloads);
+    }
 
     const tdDelta = document.createElement("td");
     tdDelta.className = "col-num";
@@ -604,7 +619,7 @@ function row({ name, sub, total, delta, avg, mix, to5, spark, isTotal, title }) 
     tdSpark.className = "col-spark";
     tdSpark.appendChild(spark);
 
-    tr.append(tdCountry, tdTotal, tdDelta, tdAvg, tdMix, tdTo5, tdSpark);
+    tr.append(tdCountry, tdTotal, tdDl, tdDelta, tdAvg, tdMix, tdTo5, tdSpark);
     return tr;
 }
 
@@ -3811,11 +3826,11 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
 
 async function main() {
     const meta = document.getElementById("meta");
-    let latest, history, events, reviews, kwData, hist, glossary, pageviews, plan, applePop, releases;
+    let latest, history, events, reviews, kwData, hist, glossary, pageviews, downloads, plan, applePop, releases;
     try {
         // no-cache: revalidate every load so the data files can't come from
         // differently-aged browser caches and contradict each other.
-        [latest, history, events, reviews, kwData, hist, glossary, pageviews, plan, applePop, releases] = await Promise.all([
+        [latest, history, events, reviews, kwData, hist, glossary, pageviews, downloads, plan, applePop, releases] = await Promise.all([
             fetch("data/latest.json", { cache: "no-cache" }).then((r) => r.json()),
             fetch("data/history.json", { cache: "no-cache" }).then((r) => r.json()),
             fetch("data/events.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => []),
@@ -3826,6 +3841,7 @@ async function main() {
             // absent file just means the table stays in its original language.
             fetch("data/glossary.json").then((r) => r.json()).catch(() => ({})),
             fetch("data/pageviews.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => null),
+            fetch("data/downloads.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => null),
             // Intent, coverage and priority, written by scripts/aso.mjs. Absent
             // on a repo that has never run it, which only costs the extra
             // column and the panel above the table.
@@ -4041,6 +4057,10 @@ async function main() {
             name: "🌍 Worldwide",
             sub: "all storefronts",
             total,
+            // The worldwide figure includes the shards' rest-of-world bucket,
+            // so it is larger than the country rows sum to. That is the honest
+            // way round: the downloads happened, they just have no country.
+            downloads: downloads?.total?.dl ?? null,
             delta: totalDelta,
             avg: worldAvg,
             mix: mixCell(worldCounts, worldGains),
@@ -4061,6 +4081,7 @@ async function main() {
             sub: cc.toUpperCase(),
             title: countryName,
             total: cur?.count ?? null,
+            downloads: downloads?.countries?.[cc]?.dl ?? null,
             delta,
             avg: cur?.avg ?? null,
             mix: mixCell(hist?.countries[cc]?.counts, gains[cc]),
@@ -4078,7 +4099,7 @@ async function main() {
     if (unrated.length) {
         const toggleTr = document.createElement("tr");
         const td = document.createElement("td");
-        td.colSpan = 7;
+        td.colSpan = 8;
         const btn = document.createElement("button");
         btn.className = "toggle-unrated";
         btn.textContent = `Show ${unrated.length} storefronts with fewer than 3 ratings`;
