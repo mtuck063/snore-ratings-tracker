@@ -641,7 +641,11 @@ function row({ name, sub, total, downloads, dlFrom, dlPartial, delta, avg, mix, 
     tdSpark.className = "col-spark";
     tdSpark.appendChild(spark);
 
-    tr.append(tdCountry, tdTotal, tdDl, tdRate, tdDelta, tdAvg, tdMix, tdTo5, tdSpark);
+    // Total and its delta stay adjacent: splitting them left "+8" sitting under
+    // Per rating, reading as a change in that instead of in the rating count.
+    // Grouped by what each column is about -- how many rated, how many
+    // installed, how good the ratings are, where it is heading.
+    tr.append(tdCountry, tdTotal, tdDelta, tdDl, tdRate, tdAvg, tdMix, tdTo5, tdSpark);
     return tr;
 }
 
