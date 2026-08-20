@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-20T21:05:38.861Z",
+ "generatedAt": "2026-08-20T21:23:40.946Z",
  "through": "2026-08-19",
  "from": "2025-09-03",
  "recentDays": 30,
@@ -12,142 +12,173 @@
   "us": {
    "dl": 8545,
    "redl": 597,
-   "recent": 1442
+   "recent": 1442,
+   "from": "2025-09-03"
   },
   "ca": {
    "dl": 1560,
    "redl": 126,
-   "recent": 213
+   "recent": 213,
+   "from": "2025-09-03"
   },
   "de": {
    "dl": 795,
    "redl": 59,
-   "recent": 123
+   "recent": 123,
+   "from": "2025-09-15"
   },
   "au": {
    "dl": 1295,
    "redl": 72,
-   "recent": 353
+   "recent": 353,
+   "from": "2025-09-19"
   },
   "cn": {
    "dl": 2020,
    "redl": 115,
-   "recent": 325
+   "recent": 325,
+   "from": "2025-09-07"
   },
   "nz": {
    "dl": 189,
    "redl": 13,
-   "recent": 44
+   "recent": 44,
+   "from": "2025-09-21"
   },
   "nl": {
    "dl": 457,
    "redl": 18,
-   "recent": 95
+   "recent": 95,
+   "from": "2025-09-07"
   },
   "gb": {
    "dl": 1964,
    "redl": 96,
-   "recent": 284
+   "recent": 284,
+   "from": "2025-09-03"
   },
   "tr": {
    "dl": 379,
    "redl": 13,
-   "recent": 41
+   "recent": 41,
+   "from": "2025-09-21"
   },
   "zz": {
    "dl": 3316,
    "redl": 186,
-   "recent": 528
+   "recent": 528,
+   "from": "2025-09-03"
   },
   "pl": {
    "dl": 324,
    "redl": 21,
-   "recent": 40
+   "recent": 40,
+   "from": "2025-09-20"
   },
   "kr": {
    "dl": 135,
    "redl": 7,
-   "recent": 30
+   "recent": 30,
+   "from": "2025-09-07"
   },
   "dk": {
    "dl": 225,
    "redl": 14,
-   "recent": 45
+   "recent": 45,
+   "from": "2025-09-04"
   },
   "no": {
    "dl": 202,
    "redl": 7,
-   "recent": 34
+   "recent": 34,
+   "from": "2025-09-10"
   },
   "se": {
    "dl": 289,
    "redl": 13,
-   "recent": 51
+   "recent": 51,
+   "from": "2025-09-12"
   },
   "fr": {
    "dl": 1204,
    "redl": 82,
-   "recent": 249
+   "recent": 249,
+   "from": "2025-09-29"
   },
   "ru": {
    "dl": 329,
    "redl": 11,
-   "recent": 54
+   "recent": 54,
+   "from": "2025-09-11"
   },
   "jp": {
    "dl": 543,
    "redl": 25,
-   "recent": 236
+   "recent": 236,
+   "from": "2025-09-03"
   },
   "ch": {
    "dl": 173,
    "redl": 5,
-   "recent": 30
+   "recent": 30,
+   "from": "2025-09-17"
   },
   "th": {
    "dl": 81,
    "redl": 9,
-   "recent": 15
+   "recent": 15,
+   "from": "2025-09-06"
   },
   "mx": {
    "dl": 114,
    "redl": 2,
-   "recent": 26
+   "recent": 26,
+   "from": "2025-09-08"
   },
   "es": {
    "dl": 430,
    "redl": 23,
-   "recent": 64
+   "recent": 64,
+   "from": "2025-10-05"
   },
   "in": {
    "dl": 225,
    "redl": 12,
-   "recent": 26
+   "recent": 26,
+   "from": "2025-10-07"
   },
   "it": {
    "dl": 187,
    "redl": 11,
-   "recent": 32
+   "recent": 32,
+   "from": "2025-10-13"
   },
   "br": {
    "dl": 108,
    "redl": 12,
-   "recent": 25
+   "recent": 25,
+   "from": "2025-10-10"
   },
   "sa": {
    "dl": 3,
    "redl": 0,
-   "recent": 3
+   "recent": 3,
+   "from": "2026-08-17",
+   "partial": true
   },
   "sg": {
    "dl": 1,
    "redl": 0,
-   "recent": 1
+   "recent": 1,
+   "from": "2026-08-19",
+   "partial": true
   },
   "ee": {
    "dl": 2,
    "redl": 0,
-   "recent": 2
+   "recent": 2,
+   "from": "2026-08-17",
+   "partial": true
   }
  }
 }

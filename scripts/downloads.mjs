@@ -50,9 +50,15 @@ for (const f of shardFiles) {
   for (const [key, v] of Object.entries(shard.dl ?? {})) {
     const [date, cc] = key.split("|");
     dates.add(date);
-    const row = (byCc[cc] ??= { dl: 0, redl: 0, recent: 0 });
+    const row = (byCc[cc] ??= { dl: 0, redl: 0, recent: 0, from: date });
     row.dl += v.dl ?? 0;
     row.redl += v.redl ?? 0;
+    // The first day this territory was counted SEPARATELY, which is not the
+    // first day it had downloads. A territory added to KEEP later starts here
+    // with everything before it pooled into ZZ and unrecoverable, so a total
+    // read as lifetime would be a lie -- Singapore showed 1 download against
+    // 5 ratings the day it was added. The table needs to be able to say so.
+    if (date < row.from) row.from = date;
   }
 }
 
@@ -77,8 +83,26 @@ if (cutoff) {
   }
 }
 
+// A territory added to the shards' KEEP list late has everything before that
+// pooled into ZZ and unrecoverable, so its total is a floor. The signal is a
+// first record long after the ledger opens -- but "long after" has to clear
+// the ordinary case of a small market simply not selling on day one, which is
+// why this is a threshold and not a strict inequality. The gap is not close:
+// every organic market here starts within 40 days of the ledger, and every
+// late addition starts 348 days or more in.
+//
+// A first record is the weaker signal, though. asc-reports.mjs is the thing
+// that actually knows when a territory entered KEEP, and recording that in
+// its state file would make this exact rather than inferred. Worth doing the
+// next time that list changes.
+const LATE_ADD_DAYS = 180;
+const opened = new Date(`${allDates[0]}T00:00Z`).getTime();
+
 const countries = {};
-for (const [cc, v] of Object.entries(byCc)) countries[cc.toLowerCase()] = v;
+for (const [cc, v] of Object.entries(byCc)) {
+  const lateBy = (new Date(`${v.from}T00:00Z`).getTime() - opened) / 864e5;
+  countries[cc.toLowerCase()] = { ...v, ...(lateBy > LATE_ADD_DAYS && { partial: true }) };
+}
 
 const total = Object.values(byCc).reduce(
   (s, v) => ({ dl: s.dl + v.dl, redl: s.redl + v.redl, recent: s.recent + v.recent }),

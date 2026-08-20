@@ -551,7 +551,7 @@ function mixCell(counts, gains) {
     return wrap;
 }
 
-function row({ name, sub, total, downloads, delta, avg, mix, to5, spark, isTotal, title }) {
+function row({ name, sub, total, downloads, dlFrom, dlPartial, delta, avg, mix, to5, spark, isTotal, title }) {
     const tr = document.createElement("tr");
     if (isTotal) tr.className = "total-row";
     else if (delta) tr.className = "changed";
@@ -582,8 +582,30 @@ function row({ name, sub, total, downloads, delta, avg, mix, to5, spark, isTotal
         // A storefront outside the shards' territory list is not a storefront
         // with no downloads, and the table must not read as if it were.
         tdDl.title = "Not counted separately: this storefront folds into the shards' rest-of-world bucket";
+    } else if (dlPartial) {
+        // Counted separately only since it was added to the territory list.
+        // Everything before that is pooled and unrecoverable, so the figure is
+        // a floor, not a total: Singapore read 1 download against 5 ratings.
+        tdDl.textContent = `${fmt(downloads)}+`;
+        tdDl.classList.add("muted");
+        tdDl.title = `Counted separately only since ${dlFrom}. Earlier downloads are pooled in the rest-of-world bucket and cannot be split out, so this is a floor rather than a total.`;
     } else {
         tdDl.textContent = fmt(downloads);
+    }
+
+    // Downloads per rating. Suppressed where the download figure is a floor,
+    // because a partial numerator over a lifetime rating count is not a rate
+    // of anything -- Singapore would read 0.2 against a worldwide 63.
+    const tdRate = document.createElement("td");
+    tdRate.className = "col-num";
+    const rate = downloads != null && !dlPartial && total > 0 ? downloads / total : null;
+    if (rate == null) {
+        tdRate.textContent = "\u2014";
+        tdRate.classList.add("muted");
+        if (dlPartial) tdRate.title = "Needs a full download history to mean anything";
+    } else {
+        tdRate.textContent = rate < 10 ? rate.toFixed(1) : fmt(Math.round(rate));
+        tdRate.title = `${fmt(downloads)} downloads / ${fmt(total)} ratings`;
     }
 
     const tdDelta = document.createElement("td");
@@ -619,7 +641,7 @@ function row({ name, sub, total, downloads, delta, avg, mix, to5, spark, isTotal
     tdSpark.className = "col-spark";
     tdSpark.appendChild(spark);
 
-    tr.append(tdCountry, tdTotal, tdDl, tdDelta, tdAvg, tdMix, tdTo5, tdSpark);
+    tr.append(tdCountry, tdTotal, tdDl, tdRate, tdDelta, tdAvg, tdMix, tdTo5, tdSpark);
     return tr;
 }
 
@@ -4082,6 +4104,8 @@ async function main() {
             title: countryName,
             total: cur?.count ?? null,
             downloads: downloads?.countries?.[cc]?.dl ?? null,
+            dlFrom: downloads?.countries?.[cc]?.from ?? null,
+            dlPartial: downloads?.countries?.[cc]?.partial ?? false,
             delta,
             avg: cur?.avg ?? null,
             mix: mixCell(hist?.countries[cc]?.counts, gains[cc]),
@@ -4099,7 +4123,7 @@ async function main() {
     if (unrated.length) {
         const toggleTr = document.createElement("tr");
         const td = document.createElement("td");
-        td.colSpan = 8;
+        td.colSpan = 9;
         const btn = document.createElement("button");
         btn.className = "toggle-unrated";
         btn.textContent = `Show ${unrated.length} storefronts with fewer than 3 ratings`;
