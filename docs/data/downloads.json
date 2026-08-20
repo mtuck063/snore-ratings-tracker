@@ -1,138 +1,153 @@
 {
- "generatedAt": "2026-08-20T21:00:40.635Z",
- "through": "2026-08-17",
+ "generatedAt": "2026-08-20T21:05:38.861Z",
+ "through": "2026-08-19",
  "from": "2025-09-03",
  "recentDays": 30,
  "total": {
-  "dl": 24635,
-  "redl": 1530,
-  "recent": 4081
+  "dl": 25095,
+  "redl": 1549,
+  "recent": 4411
  },
  "countries": {
   "us": {
-   "dl": 8407,
-   "redl": 589,
-   "recent": 1341
+   "dl": 8545,
+   "redl": 597,
+   "recent": 1442
   },
   "ca": {
-   "dl": 1535,
+   "dl": 1560,
    "redl": 126,
-   "recent": 195
+   "recent": 213
   },
   "de": {
-   "dl": 778,
+   "dl": 795,
    "redl": 59,
-   "recent": 108
+   "recent": 123
   },
   "au": {
-   "dl": 1250,
-   "redl": 68,
-   "recent": 315
+   "dl": 1295,
+   "redl": 72,
+   "recent": 353
   },
   "cn": {
-   "dl": 1980,
-   "redl": 113,
-   "recent": 304
+   "dl": 2020,
+   "redl": 115,
+   "recent": 325
   },
   "nz": {
-   "dl": 185,
+   "dl": 189,
+   "redl": 13,
+   "recent": 44
+  },
+  "nl": {
+   "dl": 457,
+   "redl": 18,
+   "recent": 95
+  },
+  "gb": {
+   "dl": 1964,
+   "redl": 96,
+   "recent": 284
+  },
+  "tr": {
+   "dl": 379,
    "redl": 13,
    "recent": 41
   },
-  "nl": {
-   "dl": 446,
-   "redl": 18,
-   "recent": 85
-  },
-  "gb": {
-   "dl": 1942,
-   "redl": 96,
-   "recent": 274
-  },
-  "tr": {
-   "dl": 376,
-   "redl": 13,
-   "recent": 38
-  },
   "zz": {
-   "dl": 3278,
-   "redl": 184,
-   "recent": 509
+   "dl": 3316,
+   "redl": 186,
+   "recent": 528
   },
   "pl": {
-   "dl": 320,
+   "dl": 324,
    "redl": 21,
-   "recent": 39
+   "recent": 40
   },
   "kr": {
-   "dl": 130,
+   "dl": 135,
    "redl": 7,
-   "recent": 26
+   "recent": 30
   },
   "dk": {
-   "dl": 222,
+   "dl": 225,
    "redl": 14,
    "recent": 45
   },
   "no": {
-   "dl": 201,
+   "dl": 202,
    "redl": 7,
    "recent": 34
   },
   "se": {
-   "dl": 287,
+   "dl": 289,
    "redl": 13,
-   "recent": 53
-  },
-  "fr": {
-   "dl": 1179,
-   "redl": 80,
-   "recent": 230
-  },
-  "ru": {
-   "dl": 325,
-   "redl": 11,
    "recent": 51
   },
+  "fr": {
+   "dl": 1204,
+   "redl": 82,
+   "recent": 249
+  },
+  "ru": {
+   "dl": 329,
+   "redl": 11,
+   "recent": 54
+  },
   "jp": {
-   "dl": 499,
+   "dl": 543,
    "redl": 25,
-   "recent": 194
+   "recent": 236
   },
   "ch": {
-   "dl": 170,
+   "dl": 173,
    "redl": 5,
-   "recent": 27
+   "recent": 30
   },
   "th": {
-   "dl": 80,
-   "redl": 8,
-   "recent": 14
+   "dl": 81,
+   "redl": 9,
+   "recent": 15
   },
   "mx": {
-   "dl": 110,
+   "dl": 114,
    "redl": 2,
-   "recent": 22
+   "recent": 26
   },
   "es": {
-   "dl": 421,
+   "dl": 430,
    "redl": 23,
-   "recent": 55
+   "recent": 64
   },
   "in": {
    "dl": 225,
    "redl": 12,
-   "recent": 27
+   "recent": 26
   },
   "it": {
    "dl": 187,
    "redl": 11,
-   "recent": 34
+   "recent": 32
   },
   "br": {
-   "dl": 102,
+   "dl": 108,
    "redl": 12,
-   "recent": 20
+   "recent": 25
+  },
+  "sa": {
+   "dl": 3,
+   "redl": 0,
+   "recent": 3
+  },
+  "sg": {
+   "dl": 1,
+   "redl": 0,
+   "recent": 1
+  },
+  "ee": {
+   "dl": 2,
+   "redl": 0,
+   "recent": 2
   }
  }
 }
