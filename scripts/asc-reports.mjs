@@ -404,6 +404,24 @@ async function report() {
   }
 }
 
+// A repo with no App Store Connect secrets set -- a fork, or this one before
+// they were added -- must not fail the workflow it rides in. Checked here
+// rather than in the step's `if`, because the `secrets` context is not
+// readable from one and referencing it makes the whole file unparseable.
+async function haveCredentials() {
+  if (process.env.ASC_KEY_ID && process.env.ASC_ISSUER_ID && process.env.ASC_PRIVATE_KEY) return true;
+  try {
+    await readFile(configPath, "utf8");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 const mode = process.argv[2];
+if (!(await haveCredentials())) {
+  console.log("no App Store Connect credentials (ASC_KEY_ID/ASC_ISSUER_ID/ASC_PRIVATE_KEY or ~/.config/appstoreconnect); skipping");
+  process.exit(0);
+}
 if (mode === "--report") await report();
 else await ingest({ backfill: mode === "--backfill" });

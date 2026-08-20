@@ -37,14 +37,14 @@ jobs:
           GOATCOUNTER_TOKEN: ${{ secrets.GOATCOUNTER_TOKEN }}
         run: node scripts/pageviews.mjs
 
-      # Pulls new daily instances from App Store Connect. Skips itself rather
-      # than failing when the secrets are absent, so a fork or a repo that has
-      # never set them up still collects ratings. The key is the read-only
+      # Pulls new daily instances from App Store Connect. The script exits 0
+      # when the secrets are absent, so a fork or a repo that has never set
+      # them up still collects ratings -- the `secrets` context cannot be read
+      # from a step `if`, so the check has to live in the script. The key is the read-only
       # reporting one: it can read every analytics report and nothing else,
       # which is the difference between a leaked secret costing you a data
       # feed and costing you the account.
       - name: Ingest App Store Connect analytics
-        if: ${{ secrets.ASC_KEY_ID != '' }}
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
