@@ -37,10 +37,24 @@ jobs:
           GOATCOUNTER_TOKEN: ${{ secrets.GOATCOUNTER_TOKEN }}
         run: node scripts/pageviews.mjs
 
-      # Rolls the committed ASC shards up into the per-country download totals
-      # the ratings table shows. Reads only what is already in the repo, so it
-      # needs no credential -- but it cannot make the figures fresher either:
-      # the shards move only when asc-reports.mjs is run by hand.
+      # Pulls new daily instances from App Store Connect. Skips itself rather
+      # than failing when the secrets are absent, so a fork or a repo that has
+      # never set them up still collects ratings. The key is the read-only
+      # reporting one: it can read every analytics report and nothing else,
+      # which is the difference between a leaked secret costing you a data
+      # feed and costing you the account.
+      - name: Ingest App Store Connect analytics
+        if: ${{ secrets.ASC_KEY_ID != '' }}
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+        run: node scripts/asc-reports.mjs
+
+      # Rolls the shards the step above just refreshed into the per-country
+      # totals the ratings table shows. Reads only the repo, so it needs no
+      # credential and still runs when the ingest above skipped -- it just
+      # re-sums whatever the shards already held.
       - name: Roll up downloads
         run: node scripts/downloads.mjs
 

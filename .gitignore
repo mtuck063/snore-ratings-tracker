@@ -6,8 +6,15 @@
 .env
 .asa-cookie
 
-# App Store Connect analytics stay local. The data is the business ledger
-# (impressions, downloads, deletions by day and country) and the report script
-# carries real figures in its comments; neither belongs in a public repo.
-docs/data/asc/
-scripts/asc-reports.mjs
+# App Store Connect analytics used to stay local, on the grounds that daily
+# impressions, downloads and deletions by country are a business ledger. That
+# is still what they are; publishing them is now a deliberate choice rather
+# than an oversight, taken so the ingest can run in CI at all -- a runner can
+# only aggregate what the repo carries, and the ingest is stateful, so
+# index.json has to persist between runs or overlapping rolling windows get
+# counted twice.
+#
+# What is NOT public, and must not become so: the App Store Connect signing
+# key. It reaches CI as ASC_KEY_ID / ASC_ISSUER_ID / ASC_PRIVATE_KEY, set as
+# repository secrets, and the key used is the read-only reporting key rather
+# than the Admin one.

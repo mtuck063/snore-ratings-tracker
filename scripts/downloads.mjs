@@ -1,13 +1,11 @@
 // Per-country downloads for the ratings table, rolled up from the App Store
 // Connect shards that asc-reports.mjs already writes.
 //
-// Reads only committed data, so unlike asc-reports.mjs this needs no
-// credential and is safe to run from CI. What it cannot do is make the
-// numbers fresher: the shards themselves only move when someone runs
-// asc-reports.mjs by hand, because the Analytics API needs the Admin key and
-// that key deliberately stays off CI. Running here keeps the derived file in
-// step with the shards; `through` is what says how old the shards are, and
-// the table shows it rather than implying the figures are current.
+// Reads only committed data, so it needs no credential of its own and runs
+// in CI straight after the ingest that refreshes those shards. It still works
+// when that ingest is skipped -- it simply re-sums what the shards already
+// held, which is why `through` is recorded: it is the only thing that says
+// how current the figures actually are.
 //
 // Downloads are complete rather than sampled — commerce reports always are —
 // so these need none of the ~3.5x correction the session and deletion figures
