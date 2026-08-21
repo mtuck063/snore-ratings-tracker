@@ -154,7 +154,27 @@ a.run-row:hover { background: var(--bg-raised); }
 .recent-row strong.flat { color: var(--text-secondary); }
 .recent-row .recent-time { margin-left: auto; color: var(--text-secondary); font-size: 0.78rem; }
 
-.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+/* The header row has to stay readable while the body scrolls under it: eleven
+   columns of bare numbers mean nothing once their titles are off screen.
+   Sticky needs a scrollport to stick to, and this wrapper only looks like one.
+   overflow-x: auto already makes it a scroll container on both axes -- a
+   non-visible overflow on one axis computes the other to auto -- but with no
+   height it never actually scrolls vertically, so the header has nothing to
+   pin against and rides the page away with everything else. The max-height is
+   what turns that latent scrollport into a real one.
+
+   The cost is a nested scroll region: the table scrolls first, then the page
+   continues once it reaches the end. That is the trade for keeping horizontal
+   scrolling, which the table needs at this width. */
+.table-wrap { max-height: 82vh; overflow: auto; -webkit-overflow-scrolling: touch; }
+
+thead th {
+    position: sticky;
+    top: 0;
+    /* Opaque, or the rows scroll through the text. */
+    background: var(--bg);
+    z-index: 3;
+}
 
 /* The identity column stays pinned while the rest scrolls sideways. */
 #ratings th:first-child, #ratings td:first-child,
@@ -165,6 +185,10 @@ a.run-row:hover { background: var(--bg-raised); }
     background: var(--bg);
 }
 #ratings tr.total-row td:first-child { background: var(--bg-raised); }
+/* The top-left cell is sticky on both axes at once, so it has to outrank the
+   row it sits in and the column it sits above -- otherwise it slides under one
+   of them at the moment both are pinned. */
+#ratings thead th:first-child, #keywords thead th:first-child { z-index: 4; }
 
 @media (max-width: 640px) {
     th, td { padding: 7px 6px; }
