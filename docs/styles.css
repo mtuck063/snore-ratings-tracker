@@ -154,26 +154,30 @@ a.run-row:hover { background: var(--bg-raised); }
 .recent-row strong.flat { color: var(--text-secondary); }
 .recent-row .recent-time { margin-left: auto; color: var(--text-secondary); font-size: 0.78rem; }
 
-/* The header row has to stay readable while the body scrolls under it: eleven
-   columns of bare numbers mean nothing once their titles are off screen.
-   Sticky needs a scrollport to stick to, and this wrapper only looks like one.
-   overflow-x: auto already makes it a scroll container on both axes -- a
+/* The header row can only stick to a scrollport, and this wrapper only looks
+   like one: overflow-x: auto makes it a scroll container on both axes -- a
    non-visible overflow on one axis computes the other to auto -- but with no
-   height it never actually scrolls vertically, so the header has nothing to
-   pin against and rides the page away with everything else. The max-height is
-   what turns that latent scrollport into a real one.
+   height it never scrolls vertically, so a sticky header has nothing to pin
+   against.
 
-   The cost is a nested scroll region: the table scrolls first, then the page
-   continues once it reaches the end. That is the trade for keeping horizontal
-   scrolling, which the table needs at this width. */
-.table-wrap { max-height: 82vh; overflow: auto; -webkit-overflow-scrolling: touch; }
+   Giving it a max-height does create that scrollport, and sticky then works --
+   but it also traps the page. Every touch over the table scrolls the table,
+   and on a phone a twenty-row table has to be scrolled all the way through
+   before the page moves again. A header you can read is not worth a page you
+   cannot leave, so the height is confined to viewports driven by a wheel,
+   where scroll chaining is not a trap. On a phone the table scrolls with the
+   page as it always did, and the header scrolls away with it. */
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
-thead th {
-    position: sticky;
-    top: 0;
-    /* Opaque, or the rows scroll through the text. */
-    background: var(--bg);
-    z-index: 3;
+@media (hover: hover) and (min-width: 900px) {
+    .table-wrap { max-height: 82vh; overflow: auto; }
+    thead th {
+        position: sticky;
+        top: 0;
+        /* Opaque, or the rows scroll through the text. */
+        background: var(--bg);
+        z-index: 3;
+    }
 }
 
 /* The identity column stays pinned while the rest scrolls sideways. */
@@ -188,7 +192,11 @@ thead th {
 /* The top-left cell is sticky on both axes at once, so it has to outrank the
    row it sits in and the column it sits above -- otherwise it slides under one
    of them at the moment both are pinned. */
-#ratings thead th:first-child, #keywords thead th:first-child { z-index: 4; }
+@media (hover: hover) and (min-width: 900px) {
+    /* Sticky on both axes at once, so it has to outrank the row it sits in and
+       the column it sits above. */
+    #ratings thead th:first-child, #keywords thead th:first-child { z-index: 4; }
+}
 
 /* Eleven columns read as three ideas -- what people rated, what they
    downloaded, and the ratio between them -- so the groups get a rule between
