@@ -551,7 +551,7 @@ function mixCell(counts, gains) {
     return wrap;
 }
 
-function row({ name, sub, total, downloads, dlFrom, dlPartial, delta, avg, mix, to5, spark, isTotal, title }) {
+function row({ name, sub, total, downloads, dl1, dl7, dlSince, dlFrom, dlPartial, delta, avg, mix, to5, spark, isTotal, title }) {
     const tr = document.createElement("tr");
     if (isTotal) tr.className = "total-row";
     else if (delta) tr.className = "changed";
@@ -592,6 +592,27 @@ function row({ name, sub, total, downloads, dlFrom, dlPartial, delta, avg, mix, 
     } else {
         tdDl.textContent = fmt(downloads);
     }
+
+    // Both windows are "the last N days on record", not a rolling wall-clock
+    // span: the shards lag Apple by a day or two, so the dates go in the
+    // tooltip rather than letting "24h" imply something it is not. Rendered as
+    // plain counts, not deltaCell: a download count cannot fall, so the +/-
+    // treatment the rating delta uses would be noise here.
+    const dlWindow = (n, label) => {
+        const td = document.createElement("td");
+        td.className = "col-num";
+        if (n == null) {
+            td.textContent = "\u2014";
+            td.classList.add("muted");
+        } else {
+            td.textContent = fmt(n);
+            if (n === 0) td.classList.add("muted");
+            if (dlSince) td.title = label;
+        }
+        return td;
+    };
+    const td1 = dlWindow(dl1, dlSince?.d1 ? `First-time downloads on ${dlSince.d1.since}, the most recent day on record` : "");
+    const td7 = dlWindow(dl7, dlSince?.d7 ? `First-time downloads from ${dlSince.d7.since} to the most recent day on record` : "");
 
     // Downloads per rating. Suppressed where the download figure is a floor,
     // because a partial numerator over a lifetime rating count is not a rate
@@ -645,7 +666,7 @@ function row({ name, sub, total, downloads, dlFrom, dlPartial, delta, avg, mix, 
     // Per rating, reading as a change in that instead of in the rating count.
     // Grouped by what each column is about -- how many rated, how many
     // installed, how good the ratings are, where it is heading.
-    tr.append(tdCountry, tdTotal, tdDelta, tdDl, tdRate, tdAvg, tdMix, tdTo5, tdSpark);
+    tr.append(tdCountry, tdTotal, tdDelta, tdDl, td1, td7, tdRate, tdAvg, tdMix, tdTo5, tdSpark);
     return tr;
 }
 
@@ -3060,7 +3081,7 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                     const det = document.createElement("tr");
                     det.className = "kw-detail";
                     const td = document.createElement("td");
-                    td.colSpan = 9;
+                    td.colSpan = 11;
                     // The missing words lead, above the competitor list. The
                     // legend told people to tap the row for them and the row
                     // only ever opened the top ten, which made the instruction
@@ -4087,6 +4108,9 @@ async function main() {
             // so it is larger than the country rows sum to. That is the honest
             // way round: the downloads happened, they just have no country.
             downloads: downloads?.total?.dl ?? null,
+            dl1: downloads?.total?.d1 ?? null,
+            dl7: downloads?.total?.d7 ?? null,
+            dlSince: downloads?.windows ?? null,
             delta: totalDelta,
             avg: worldAvg,
             mix: mixCell(worldCounts, worldGains),
@@ -4108,6 +4132,9 @@ async function main() {
             title: countryName,
             total: cur?.count ?? null,
             downloads: downloads?.countries?.[cc]?.dl ?? null,
+            dl1: downloads?.countries?.[cc]?.d1 ?? null,
+            dl7: downloads?.countries?.[cc]?.d7 ?? null,
+            dlSince: downloads?.windows ?? null,
             dlFrom: downloads?.countries?.[cc]?.from ?? null,
             dlPartial: downloads?.countries?.[cc]?.partial ?? false,
             delta,
