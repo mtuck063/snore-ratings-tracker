@@ -666,7 +666,14 @@ function row({ name, sub, total, downloads, dl1, dl7, dlSince, dlFrom, dlPartial
     // Per rating, reading as a change in that instead of in the rating count.
     // Grouped by what each column is about -- how many rated, how many
     // installed, how good the ratings are, where it is heading.
-    tr.append(tdCountry, tdTotal, tdDelta, tdDl, td1, td7, tdRate, tdAvg, tdMix, tdTo5, tdSpark);
+    // Grouped by subject, not by when the column was added: everything about
+    // ratings, then everything about downloads, then Per rating as the bridge
+    // between them. The download block used to sit in the middle of the rating
+    // columns, which is what made eleven columns read as clutter rather than
+    // three ideas.
+    tdDl.classList.add("group-start");
+    tdRate.classList.add("group-start");
+    tr.append(tdCountry, tdTotal, tdDelta, tdAvg, tdMix, tdTo5, tdDl, td1, td7, tdRate, tdSpark);
     return tr;
 }
 
