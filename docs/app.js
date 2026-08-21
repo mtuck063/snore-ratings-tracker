@@ -759,10 +759,30 @@ function floatingHeader(wrap, table) {
 
     // Re-measured on resize because a media query can change every width, and
     // a clone measured at the old width would sit visibly off by a column.
+    // Debounced to a frame: a re-render empties the body and appends rows one
+    // at a time, so the observer below sees one mutation per row and would
+    // otherwise remeasure a hundred times for a single repaint.
+    let pending = false;
     const remeasure = () => {
-        measure();
-        update();
+        if (pending) return;
+        pending = true;
+        requestAnimationFrame(() => {
+            pending = false;
+            measure();
+            update();
+        });
     };
+
+    // A header cell that sorts has to keep sorting from the clone, or the copy
+    // becomes a control that looks live and does nothing. Forwarded to the
+    // real cell rather than reimplemented, so sorting has exactly one owner.
+    scroller.addEventListener("click", (e) => {
+        const th = e.target.closest("th");
+        if (!th || !cloneHead) return;
+        const i = [...cloneHead.querySelectorAll("th")].indexOf(th);
+        const real = head.querySelectorAll("th")[i];
+        if (real) real.click();
+    });
 
     measure();
     addEventListener("scroll", onScroll, { passive: true });
@@ -3934,6 +3954,11 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
     }
     updateArrows();
     render(marketCcs[0]);
+    // After the first render, for the same reason as the ratings table: widths
+    // measured from an empty body line up with nothing. Re-measures itself on
+    // every later render, which here includes switching market, sorting,
+    // filtering and searching.
+    floatingHeader(document.getElementById("keywords").parentElement, document.getElementById("keywords"));
 
     // Movement log: notable rank moves and newly appearing suggestions. Only
     // the newest 30 here — keyword-log.html carries the full history. Events
