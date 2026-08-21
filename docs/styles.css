@@ -189,13 +189,53 @@ a.run-row:hover { background: var(--bg-raised); }
     background: var(--bg);
 }
 #ratings tr.total-row td:first-child { background: var(--bg-raised); }
-/* The top-left cell is sticky on both axes at once, so it has to outrank the
-   row it sits in and the column it sits above -- otherwise it slides under one
-   of them at the moment both are pinned. */
+
 @media (hover: hover) and (min-width: 900px) {
     /* Sticky on both axes at once, so it has to outrank the row it sits in and
        the column it sits above. */
     #ratings thead th:first-child, #keywords thead th:first-child { z-index: 4; }
+}
+
+/* On a phone the header can only stick if the PAGE is the scrollport, and the
+   page can only be the scrollport if this wrapper is not one -- which means
+   the table has to fit without scrolling sideways. So five columns come out
+   at that width. They are the ones that answer a question you can come back
+   to at a desk: the star histogram, the distance to 5.0, the two short
+   download windows, and the sparkline. What is left is the shape of a market
+   -- who rated it, whether that moved today, how good the score is, how many
+   installed, and the ratio between the two.
+
+   Rotating the phone crosses 900px and brings all eleven back. */
+@media (max-width: 899px) {
+    #ratings-wrap { overflow: visible; }
+
+    #ratings th:nth-child(5),  #ratings td:nth-child(5),   /* Stars      */
+    #ratings th:nth-child(6),  #ratings td:nth-child(6),   /* 5★ to 5.0  */
+    #ratings th:nth-child(8),  #ratings td:nth-child(8),   /* DL 1d      */
+    #ratings th:nth-child(9),  #ratings td:nth-child(9),   /* DL 7d      */
+    #ratings th:nth-child(11), #ratings td:nth-child(11) { /* 30 days    */
+        display: none;
+    }
+
+    /* Nothing pans sideways any more, and a left-pinned cell against the page
+       scrollport would pin to the viewport instead of to a column. */
+    #ratings th:first-child, #ratings td:first-child { position: static; }
+
+    #ratings thead th {
+        position: sticky;
+        top: 0;
+        /* Opaque, or the rows scroll through the text. */
+        background: var(--bg);
+        z-index: 3;
+    }
+
+    /* Long names would otherwise push the numbers back off the screen and
+       undo the whole point of dropping the columns. */
+    #ratings td:first-child {
+        max-width: 132px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 }
 
 /* Eleven columns read as three ideas -- what people rated, what they
