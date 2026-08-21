@@ -677,6 +677,105 @@ function row({ name, sub, total, downloads, dl1, dl7, dlSince, dlFrom, dlPartial
     return tr;
 }
 
+// Holds a copy of a table's header row against the top of the viewport while
+// the body is passing it.
+//
+// position: sticky cannot do this. The wrapper pans sideways, which makes it a
+// scroll container on both axes, so the page is not the scrollport and a
+// sticky header has nothing to pin against. Removing the sideways pan would
+// fix that, but only by dropping columns at the width where the header matters
+// most. This is the cost of keeping all of them.
+//
+// The clone is a scroll container in its own right whose scrollLeft is kept
+// equal to the wrapper's. Matching scroll positions rather than transforming
+// the clone is what lets the pinned first column keep working: under a
+// transform it would slide away with everything else.
+function floatingHeader(wrap, table) {
+    const head = table.querySelector("thead");
+    if (!head) return;
+
+    const box = document.createElement("div");
+    box.className = "floating-head";
+    // Decorative: a screen reader already has the real header, and a second
+    // copy of every column name in the tab order is noise.
+    box.setAttribute("aria-hidden", "true");
+    const scroller = document.createElement("div");
+    scroller.className = "floating-head-scroll";
+    const clone = document.createElement("table");
+    scroller.appendChild(clone);
+    box.appendChild(scroller);
+    document.body.appendChild(box);
+
+    let cloneHead = null;
+
+    // Widths come from the live cells rather than from CSS, so the clone stays
+    // aligned no matter what decided them -- content, a media query, or the
+    // table's own layout algorithm.
+    const measure = () => {
+        cloneHead = head.cloneNode(true);
+        clone.replaceChildren(cloneHead);
+        const from = [...head.querySelectorAll("th")];
+        const to = [...cloneHead.querySelectorAll("th")];
+        from.forEach((th, i) => {
+            if (!to[i]) return;
+            const w = th.getBoundingClientRect().width;
+            to[i].style.width = `${w}px`;
+            to[i].style.minWidth = `${w}px`;
+            to[i].style.maxWidth = `${w}px`;
+        });
+        clone.style.width = `${table.getBoundingClientRect().width}px`;
+        clone.style.tableLayout = "fixed";
+    };
+
+    const place = () => {
+        const r = wrap.getBoundingClientRect();
+        box.style.left = `${r.left}px`;
+        box.style.width = `${r.width}px`;
+    };
+
+    const update = () => {
+        const r = wrap.getBoundingClientRect();
+        const h = box.getBoundingClientRect().height || head.getBoundingClientRect().height;
+        // Only while the body is actually behind it: above the table there is
+        // nothing to label, and past the last row it would caption the section
+        // underneath.
+        const on = r.top < 0 && r.bottom > h;
+        box.classList.toggle("on", on);
+        if (on) {
+            place();
+            scroller.scrollLeft = wrap.scrollLeft;
+        }
+    };
+
+    let queued = false;
+    const onScroll = () => {
+        if (queued) return;
+        queued = true;
+        requestAnimationFrame(() => {
+            queued = false;
+            update();
+        });
+    };
+
+    // Re-measured on resize because a media query can change every width, and
+    // a clone measured at the old width would sit visibly off by a column.
+    const remeasure = () => {
+        measure();
+        update();
+    };
+
+    measure();
+    addEventListener("scroll", onScroll, { passive: true });
+    addEventListener("resize", remeasure, { passive: true });
+    wrap.addEventListener("scroll", () => {
+        if (box.classList.contains("on")) scroller.scrollLeft = wrap.scrollLeft;
+    }, { passive: true });
+    // The row count changes when the unrated storefronts are revealed, which
+    // moves the bottom edge this watches for.
+    new MutationObserver(remeasure).observe(table.tBodies[0] ?? table, { childList: true });
+    update();
+}
+
 // "just now" / "14m ago" / "3h ago" / "2d ago"; older than a week: the date.
 function ago(iso) {
     const s = (Date.now() - new Date(iso)) / 1000;
@@ -4184,6 +4283,9 @@ async function main() {
     // at the top of the page for as long as the fetches took, then jumped as
     // the body filled in underneath it.
     document.getElementById("ratings-wrap").hidden = false;
+    // After the reveal, not before: a hidden element measures zero, and a
+    // clone built from those widths lines up with nothing.
+    floatingHeader(document.getElementById("ratings-wrap"), document.getElementById("ratings"));
 
     renderRecent(events);
     // Not awaited: the table paints synchronously and only the movement strip
