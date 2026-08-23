@@ -170,6 +170,21 @@ a.run-row:hover { background: var(--bg-raised); }
    scrollLeft equal to the wrapper's. Matching scroll positions rather than
    transforming the clone is what lets the pinned first column keep working --
    under a transform it would slide away with everything else. */
+/* A breakdown that does not sum to the count beside it is behind, not wrong
+   in shape -- dimmed so it reads as provisional rather than authoritative,
+   with the arithmetic spelled out in the tooltip. */
+.star-bar-wrap.stale { opacity: 0.5; }
+.star-bar-wrap.stale .star-bar { outline: 1px dashed var(--border); outline-offset: 1px; }
+.tip-stale {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    max-width: 230px;
+    white-space: normal;
+}
+
 .floating-head {
     position: fixed;
     top: 0;

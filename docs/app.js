@@ -479,10 +479,20 @@ function starGains(events) {
 // (position carries identity), colored good→bad, 2px gaps, slivers kept
 // visible by a min width. Exact counts live in the hover tooltip; a green +n
 // after the bar marks ratings added in the last 24h.
-function mixCell(counts, gains) {
+// `expected` is the rating count this breakdown is shown beside. The two come
+// from different files and, briefly, from different Apple sources: the count
+// can come from the lookup API when the storefront page is throttled, while
+// the histogram is only ever read from the page. That gap is normally one run
+// wide and self-heals, but while it is open the breakdown is genuinely behind
+// -- China read 21 five-star against a count of 23 -- and rendering it as
+// though it were current is the actual defect. It is marked instead: the
+// shape is still worth seeing, the exact figures are not to be trusted yet.
+function mixCell(counts, gains, expected) {
     if (!counts || !counts.some((c) => c > 0)) return null;
+    const sum = counts.reduce((a, b) => a + b, 0);
+    const behind = typeof expected === "number" && expected !== sum ? expected - sum : 0;
     const wrap = document.createElement("span");
-    wrap.className = "star-bar-wrap";
+    wrap.className = "star-bar-wrap" + (behind ? " stale" : "");
 
     const bar = document.createElement("span");
     bar.className = "star-bar";
@@ -491,7 +501,7 @@ function mixCell(counts, gains) {
         .filter(Boolean)
         .join(" · ");
     bar.setAttribute("role", "img");
-    bar.setAttribute("aria-label", label);
+    bar.setAttribute("aria-label", behind ? `${label} — breakdown is ${Math.abs(behind)} behind the count` : label);
     counts.forEach((c, i) => {
         if (!c) return;
         const seg = document.createElement("span");
@@ -522,6 +532,15 @@ function mixCell(counts, gains) {
             }
             tooltip.appendChild(row);
         });
+        if (behind) {
+            const note = document.createElement("div");
+            note.className = "tip-stale";
+            note.textContent =
+                `Breakdown is ${Math.abs(behind)} rating${Math.abs(behind) === 1 ? "" : "s"} ` +
+                `${behind > 0 ? "behind" : "ahead of"} the count. Apple's page and its API ` +
+                `disagree right now; this settles on the next collection.`;
+            tooltip.appendChild(note);
+        }
         placeTooltip(e);
     };
     bar.addEventListener("pointermove", (e) => {
@@ -4244,7 +4263,7 @@ async function main() {
             dlSince: downloads?.windows ?? null,
             delta: totalDelta,
             avg: worldAvg,
-            mix: mixCell(worldCounts, worldGains),
+            mix: mixCell(worldCounts, worldGains, total),
             to5: fiveStarsToFiveExact(worldCounts) ?? fiveStarsToFive(worldCount, worldAvg),
             spark: sparkline(seriesFor(history, null), "Global total, last 30 days", fmt, 0, releaseDay),
             isTotal: true,
@@ -4270,7 +4289,7 @@ async function main() {
             dlPartial: downloads?.countries?.[cc]?.partial ?? false,
             delta,
             avg: cur?.avg ?? null,
-            mix: mixCell(hist?.countries[cc]?.counts, gains[cc]),
+            mix: mixCell(hist?.countries[cc]?.counts, gains[cc], cur?.count),
             to5: fiveStarsToFiveExact(hist?.countries[cc]?.counts) ?? fiveStarsToFive(cur?.count, cur?.avg),
             spark: sparkline(seriesFor(history, cc), `${countryName} ratings, last 30 days`, fmt, 0, releaseDay),
         });

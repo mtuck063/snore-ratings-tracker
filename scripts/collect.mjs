@@ -353,6 +353,21 @@ await writeFile(
     // Surfaced separately: a page throttle degrades the star breakdown without
     // costing the counts, so it should be visible without reading as an outage.
     histogramFallbacks: histFallbacks,
+    // Storefronts whose stored star breakdown does not sum to their recorded
+    // count. Normally zero, and normally one run wide when it is not: the
+    // count can come from the lookup API while the breakdown only ever comes
+    // from the storefront page, so a throttled page leaves the two briefly out
+    // of step. Counted rather than only warned about, because the warning went
+    // to a log nobody reads while the dashboard drew the stale figure as fact.
+    //
+    // Measured as this run FOUND things, before its own repairs below -- the
+    // status file is written early so it survives the failure exits. So a one
+    // on a single run means "found and fixed"; a one that persists across runs
+    // means the page and the API are genuinely stuck disagreeing.
+    histogramsStale: Object.entries(countries).filter(([cc, c]) => {
+      const h = histograms.countries[cc];
+      return c?.count > 0 && h && sumOf(h.counts) !== c.count;
+    }).length,
     changed: ratingsChanged,
   })
 );
