@@ -17,6 +17,11 @@ import { fileURLToPath } from "node:url";
 
 const APP_ID = "6751759381";
 const RETRY_BACKOFF_MS = 10000;
+// Longer than RETRY_BACKOFF_MS: this one waits out a rate limit rather than a
+// blip, and it is paid once per run for a handful of storefronts, not per
+// fetch. Cheap against the cost of the alternative -- a run that publishes a
+// star breakdown describing a different moment than the count beside it.
+const PAGE_RETRY_MS = 20000;
 
 const repoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const servedDataDir = path.join(repoRoot, "docs", "data");
@@ -204,6 +209,45 @@ async function ratingsPass() {
   const results = await Promise.all(
     COUNTRIES.map((cc) => (ratedSet.has(cc) ? fetchCountryFromPage(cc) : fetchCountry(cc)))
   );
+
+  // A storefront that has ratings but came back without a histogram fell to
+  // the lookup API. That is the whole cause of latest.json and
+  // histograms.json disagreeing: on the page path the count is derived from
+  // the histogram and the two cannot drift, but on this path the count is
+  // read from a different endpoint than the breakdown, and Apple's two
+  // endpoints do not update in lockstep.
+  //
+  // The rule above refuses to retry a 429, which was right for what it was
+  // written against: a burst that hit 49 of 51 storefronts at once, where
+  // waiting only bought the same failure. An isolated 429 is a different
+  // animal -- China hit one while 52 other storefronts answered in the same
+  // sweep -- and there a retry almost always lands. Distinguished by how many
+  // fell, and retried before `countries` is settled so a success re-derives
+  // the count from the histogram and restores the invariant rather than
+  // leaving the pair to be reconciled a run later.
+  const fellBack = COUNTRIES.filter(
+    (cc, i) => ratedSet.has(cc) && results[i] !== "error" && !results[i]?.record
+  );
+  const MASS_THROTTLE = 0.25;
+  if (fellBack.length && fellBack.length <= Math.max(2, ratedSet.size * MASS_THROTTLE)) {
+    await sleep(PAGE_RETRY_MS);
+    // These storefronts are about to be decided again, and fetchCountryFromPage
+    // counts its own failures, so their first-pass tallies come off before the
+    // retry rather than being subtracted after -- a retry that falls back
+    // again would otherwise be counted twice.
+    histogramFallbacks -= fellBack.length;
+    const retried = await Promise.all(fellBack.map((cc) => fetchCountryFromPage(cc)));
+    let healed = 0;
+    fellBack.forEach((cc, i) => {
+      if (!retried[i]?.record) return;
+      results[COUNTRIES.indexOf(cc)] = retried[i];
+      healed++;
+    });
+    if (healed) console.log(`histograms: ${healed}/${fellBack.length} recovered on retry`);
+  } else if (fellBack.length) {
+    console.warn(`${fellBack.length} storefronts fell back at once; not retrying (looks like an IP throttle)`);
+  }
+
   const countries = {}; // built in COUNTRIES order so stringify comparisons stay stable
   const pageCounts = {}; // cc -> [5★..1★] from this run's page fetches
   COUNTRIES.forEach((cc, i) => {
