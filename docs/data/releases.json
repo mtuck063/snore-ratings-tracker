@@ -9566,7 +9566,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-08-24T16:49:48.650Z",
+   "computedAt": "2026-08-24T19:11:34.704Z",
    "days": 4,
    "stage": "provisional",
    "baselineDays": 7,
@@ -9612,14 +9612,14 @@
      },
      "floor": {
       "n": 16,
-      "gain": 1
+      "gain": 1.5
      },
      "lift": -6,
      "appeared": [
       {
        "kw": "snoring monitor-sleep recorder",
        "pop": 78,
-       "rank": 17
+       "rank": 14
       },
       {
        "kw": "teeth grinding",
@@ -9634,7 +9634,7 @@
       {
        "kw": "teeth grinding tracker",
        "pop": 5,
-       "rank": 16
+       "rank": 13
       },
       {
        "kw": "teeth grinding recorder",
@@ -9654,7 +9654,7 @@
       {
        "kw": "grinding teeth in sleep",
        "pop": 5,
-       "rank": 26
+       "rank": 24
       }
      ],
      "vanished": [
@@ -9714,8 +9714,8 @@
        "kw": "cpap tracker",
        "pop": 87,
        "before": 166.5,
-       "after": 83,
-       "gain": 83.5,
+       "after": 79,
+       "gain": 87.5,
        "cohort": "control"
       },
       {
@@ -9738,16 +9738,16 @@
        "kw": "rem sleep",
        "pop": 64,
        "before": 96,
-       "after": 126,
-       "gain": -30,
+       "after": 125,
+       "gain": -29,
        "cohort": "control"
       },
       {
        "kw": "sleep talking tracker",
        "pop": 70,
        "before": 9,
-       "after": 32,
-       "gain": -23,
+       "after": 31,
+       "gain": -22,
        "cohort": "control"
       },
       {
@@ -9922,8 +9922,8 @@
        "kw": "sleep score",
        "pop": 57,
        "before": 38,
-       "after": 90,
-       "gain": -52,
+       "after": 96,
+       "gain": -58,
        "cohort": "control"
       },
       {
@@ -10018,7 +10018,7 @@
      "noisy": 3,
      "ratings": {
       "before": 0.1,
-      "after": 0.4
+      "after": 0.6
      }
     },
     "gb": {
@@ -10280,7 +10280,7 @@
       {
        "kw": "snoring monitor-sleep recorder",
        "pop": 81,
-       "rank": 16
+       "rank": 8
       },
       {
        "kw": "teeth grinding",
@@ -10477,12 +10477,12 @@
       {
        "kw": "snorelab",
        "pop": 78,
-       "rank": 49
+       "rank": 35
       },
       {
        "kw": "sleep recorder",
        "pop": 75,
-       "rank": 46
+       "rank": 27
       },
       {
        "kw": "snore control pro",
@@ -10502,7 +10502,7 @@
       {
        "kw": "sleep talking recorder",
        "pop": 72,
-       "rank": 36
+       "rank": 31
       },
       {
        "kw": "dream talk recorder",
@@ -10512,12 +10512,12 @@
       {
        "kw": "دورات النوم",
        "pop": 71,
-       "rank": 17
+       "rank": 12
       },
       {
        "kw": "sleepwatch",
        "pop": 67,
-       "rank": 132
+       "rank": 105
       },
       {
        "kw": "snoring monitor-sleep recorder",
