@@ -5,6 +5,7 @@
 //   node scripts/asc.mjs '/v1/apps/123/customerReviews?limit=5'
 //   node scripts/asc.mjs --all /v1/apps          # follow pagination links
 //   node scripts/asc.mjs post /v1/analyticsReportRequests '{"data":{...}}'
+//   node scripts/asc.mjs patch /v1/appStoreVersionLocalizations/ID '{"data":{...}}'
 //
 // Credentials live outside the repo in ~/.config/appstoreconnect/config.json
 // ({ default, keys: { name: { keyId, issuerId, keyPath } } }) so no key ever
@@ -14,6 +15,7 @@
 import { createPrivateKey, sign } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { gunzipSync } from "node:zlib";
+import { fileURLToPath } from "node:url";
 import path from "node:path";
 import os from "node:os";
 
@@ -22,7 +24,7 @@ const configPath = path.join(os.homedir(), ".config", "appstoreconnect", "config
 
 const b64url = (buf) => Buffer.from(buf).toString("base64url");
 
-async function makeToken() {
+export async function makeToken() {
   const config = JSON.parse(await readFile(configPath, "utf8"));
   const name = process.env.ASC_KEY ?? config.default;
   const { keyId, issuerId, keyPath } = config.keys[name] ?? {};
@@ -66,32 +68,36 @@ export async function ascFetch(apiPath, token, { method = "GET", body } = {}) {
   return { kind: "json", body: JSON.parse(raw.toString("utf8")) };
 }
 
-const args = process.argv.slice(2);
-const isPost = args[0] === "post";
-const followAll = args[0] === "--all";
-const apiPath = isPost || followAll ? args[1] : args[0];
-if (!apiPath) {
-  console.error("usage: node scripts/asc.mjs [--all|post] </v1/path?query> [json-body]");
-  process.exit(2);
-}
-
-const token = await makeToken();
-let { kind, body } = await ascFetch(
-  apiPath,
-  token,
-  isPost ? { method: "POST", body: args[2] } : {}
-);
-if (kind === "tsv") {
-  process.stdout.write(body);
-} else if (followAll) {
-  const data = body.data ?? [];
-  let next = body.links?.next;
-  while (next) {
-    const page = (await ascFetch(next, token)).body;
-    data.push(...(page.data ?? []));
-    next = page.links?.next;
+// Everything below is the CLI; the guard keeps it inert when another script
+// imports ascFetch or makeToken.
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  const args = process.argv.slice(2);
+  const verb = { post: "POST", patch: "PATCH" }[args[0]];
+  const followAll = args[0] === "--all";
+  const apiPath = verb || followAll ? args[1] : args[0];
+  if (!apiPath) {
+    console.error("usage: node scripts/asc.mjs [--all|post|patch] </v1/path?query> [json-body]");
+    process.exit(2);
   }
-  console.log(JSON.stringify({ data, meta: { total: data.length } }, null, 2));
-} else {
-  console.log(JSON.stringify(body, null, 2));
+
+  const token = await makeToken();
+  let { kind, body } = await ascFetch(
+    apiPath,
+    token,
+    verb ? { method: verb, body: args[2] } : {}
+  );
+  if (kind === "tsv") {
+    process.stdout.write(body);
+  } else if (followAll) {
+    const data = body.data ?? [];
+    let next = body.links?.next;
+    while (next) {
+      const page = (await ascFetch(next, token)).body;
+      data.push(...(page.data ?? []));
+      next = page.links?.next;
+    }
+    console.log(JSON.stringify({ data, meta: { total: data.length } }, null, 2));
+  } else {
+    console.log(JSON.stringify(body, null, 2));
+  }
 }
