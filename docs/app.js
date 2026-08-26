@@ -2201,6 +2201,8 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
     chipHead.className = "fb-label";
     const preview = document.createElement("div");
     preview.className = "fb-preview";
+    const diff = document.createElement("div");
+    diff.className = "fb-diff";
     const chipRow = document.createElement("div");
     chipRow.className = "fb-chips";
     const suggest = document.createElement("div");
@@ -2530,6 +2532,54 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
               ? "your App Store Connect field"
               : "edited by you";
         chipHead.textContent = `Draft keywords \u2014 ${origin}`;
+
+        // Which words the draft actually changes. The two comma strings sit one
+        // above the other, and finding the handful of words that differ means
+        // reading ninety characters against ninety. This row does that reading:
+        // what the draft adds, what it drops, and that everything else matches.
+        diff.replaceChildren();
+        diff.hidden = yourCovers == null;
+        if (!diff.hidden) {
+            const yourOrder = [...new Set(parseField(tidy(input.value)))];
+            const addedU = [...picked].filter((u) => !yourKeys.has(u));
+            const droppedU = yourOrder.filter((u) => !picked.has(u));
+            const dLabel = document.createElement("span");
+            dLabel.className = "fb-label";
+            dLabel.textContent = "vs your keywords";
+            diff.appendChild(dLabel);
+            if (!addedU.length && !droppedU.length) {
+                const same = document.createElement("span");
+                same.className = "fb-diff-keep";
+                same.textContent = "same words \u2014 order does not matter to Apple";
+                diff.appendChild(same);
+            } else {
+                const mark = (u, kind) => {
+                    const c = document.createElement("button");
+                    c.className = `fb-diff-chip ${kind}`;
+                    c.textContent = (kind === "add" ? "+" : "\u2212") + show(u);
+                    c.dataset.tip =
+                        kind === "add"
+                            ? "In the draft, not in your App Store Connect field. Click to take it back out."
+                            : claimedKeys.has(u)
+                              ? "In your field, not in the draft \u2014 and already in your title or subtitle, so dropping it loses nothing."
+                              : "In your App Store Connect field, not in the draft. Click to put it back.";
+                    c.addEventListener("click", () => {
+                        if (kind === "add") picked.delete(u);
+                        else picked.add(u);
+                        draw();
+                    });
+                    diff.appendChild(c);
+                };
+                for (const u of addedU) mark(u, "add");
+                for (const u of droppedU) mark(u, "drop");
+                const kept = [...picked].filter((u) => yourKeys.has(u)).length;
+                const keep = document.createElement("span");
+                keep.className = "fb-diff-keep";
+                keep.textContent = `the other ${kept} word${kept === 1 ? "" : "s"} match`;
+                diff.appendChild(keep);
+            }
+        }
+
         const built = [...picked].map(show).join(",");
         preview.replaceChildren();
         // An empty draft needs an empty state, not the word "empty" sitting
@@ -2697,7 +2747,7 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
     chipHint.className = "fb-hint";
     chipHint.textContent =
         "Click a word to drop it, or add one from the list below. When these cover more than your own keywords, copy them into App Store Connect.";
-    draft.append(chipHead, preview, chipRow, chipHint, buttons);
+    draft.append(chipHead, preview, diff, chipRow, chipHint, buttons);
     host.append(h, context, how, yours, waste, draft, stats, panel, suggest);
     setSummary = makeCollapsible(h, "builder", false);
     draw();

@@ -1173,6 +1173,42 @@ li.log-day {
 .fb-x { color: var(--text-secondary); font-size: 0.9rem; line-height: 1; }
 .fb-chip:hover .fb-x { color: var(--bad); }
 
+/* The saved field and the draft differ by a handful of words buried in two
+   ninety-character strings. This row names them: green added, struck red
+   dropped. */
+.fb-diff {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin: 10px 0 0;
+    font-size: 0.78rem;
+}
+.fb-diff[hidden] { display: none; }
+.fb-diff-chip {
+    font: inherit;
+    font-size: 0.78rem;
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.fb-diff-chip.add {
+    color: var(--good);
+    background: color-mix(in srgb, var(--good) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--good) 35%, transparent);
+}
+.fb-diff-chip.drop {
+    color: var(--bad);
+    background: color-mix(in srgb, var(--bad) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--bad) 30%, transparent);
+    text-decoration: line-through;
+}
+.fb-diff-chip.drop:hover { text-decoration: none; border-color: var(--good); }
+.fb-diff-chip.add:hover { border-color: var(--bad); }
+.fb-diff-keep { color: var(--text-secondary); }
+
 .fb-suggest { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 10px 0 4px; }
 .fb-label { font-size: 0.72rem; color: var(--text-secondary); margin: 0 4px 0 0; }
 .fb-add {
