@@ -58,6 +58,16 @@ const HARVEST = {
       "眠り", "寝息", "寝てる間", "歯ぎしり", "スリープトラッカー", "睡眠負債", "よく眠れる"],
     framings: ["無料", "アプリ", "録音", "apple watch", "人気", "計測"],
   },
+  kr: {
+    // Korean writes "app" two ways and the register matters: 어플 is the older
+    // colloquial borrowing, 앱 the standard one, and they are separate queries
+    // with separate demand. Both are seeded as framings rather than stems.
+    stems: ["코골이", "코골이 녹음", "코골이 측정", "코골이 방지", "수면", "수면 분석",
+      "수면 기록", "수면 트래커", "수면 어플", "수면 패턴", "수면 무호흡", "무호흡",
+      "잠꼬대", "잠꼬대 녹음", "이갈이", "잠버릇", "숙면", "꿀잠", "불면증",
+      "수면의 질", "자면서", "녹음기", "수면 알람", "스노어랩"],
+    framings: ["무료", "앱", "어플", "애플워치", "녹음", "측정"],
+  },
   nl: {
     // Dutch writes the same idea both ways — "slaaptracker" and "slaap tracker"
     // are separate queries with separate demand — so both registers are seeded.
