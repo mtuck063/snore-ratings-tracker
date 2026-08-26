@@ -444,6 +444,26 @@ function fiveStarsToFiveExact(counts) {
     return Math.max(0, 99 * n - 20 * stars);
 }
 
+// How long the run to 5.0 would take at the pace the storefront is already
+// going: `to5` more ratings, all of them ★5, arriving at the rate this
+// storefront's own downloads-per-rating ratio turns its last seven days of
+// downloads into ratings. A distance, not a forecast — it says how far five
+// is in the only unit that compares storefronts, and it moves as the two
+// inputs move.
+function daysToFive(to5, downloadsPerRating, dl7) {
+    if (to5 == null || !downloadsPerRating || !(dl7 > 0)) return null;
+    const ratingsPerDay = dl7 / 7 / downloadsPerRating;
+    return ratingsPerDay > 0 ? to5 / ratingsPerDay : null;
+}
+
+// Days read as days up to a year and as years past it: 792 is a number a
+// reader has to convert, "2.2y" is one they can feel.
+function fmtDays(d) {
+    if (d < 1) return "<1d";
+    if (d < 365) return `${Math.round(d)}d`;
+    return `${(d / 365).toFixed(1)}y`;
+}
+
 // A first event names no stars, but its average pins down their sum from
 // zero: exact for a single rating, and for several only when they were all
 // ★5 (or all ★1) — anything between (a sum of 8 across two could be 5+3 or
@@ -648,6 +668,39 @@ function row({ name, sub, total, downloads, dl1, dl7, dlSince, dlFrom, dlPartial
         tdRate.title = `${fmt(downloads)} downloads / ${fmt(total)} ratings`;
     }
 
+    // Distance to a 5.0 average measured in days rather than in ratings: the
+    // ratings figure beside it says how many are needed, this says how long
+    // the traffic the storefront already has would take to produce them, if
+    // every one of them were ★5. Both inputs are the storefront's own — its
+    // downloads-per-rating ratio, and its download pace over the last seven
+    // days on record — so a storefront that installs well but rates rarely
+    // reads as the long haul it is.
+    const tdEta = document.createElement("td");
+    tdEta.className = "col-num";
+    const days = daysToFive(to5, rate, dl7);
+    if (to5 === 0) {
+        tdEta.textContent = "✓";
+        tdEta.classList.add("at-five");
+        tdEta.title = "Already reads 5.0";
+    } else if (days == null) {
+        tdEta.textContent = "\u2014";
+        tdEta.classList.add("muted");
+        tdEta.title =
+            to5 == null
+                ? "No rating average to measure the distance from yet"
+                : rate == null
+                  ? "Needs a full download history to turn downloads into a rating pace"
+                  : "No downloads in the last seven days on record, so there is no pace to project";
+    } else {
+        tdEta.textContent = fmtDays(days);
+        const perDay = dl7 / 7 / rate;
+        const when = new Date(Date.now() + days * 864e5);
+        tdEta.title =
+            `${fmt(to5)} more ★5 ratings at ~${perDay.toFixed(2)} ratings/day ` +
+            `(${fmt(Math.round(dl7 / 7))} downloads/day ÷ ${rate < 10 ? rate.toFixed(1) : fmt(Math.round(rate))} per rating)` +
+            ` — around ${when.toISOString().slice(0, 10)}, if every new rating is ★5.`;
+    }
+
     const tdDelta = document.createElement("td");
     tdDelta.className = "col-num";
     tdDelta.appendChild(deltaCell(delta));
@@ -692,7 +745,7 @@ function row({ name, sub, total, downloads, dl1, dl7, dlSince, dlFrom, dlPartial
     // three ideas.
     tdDl.classList.add("group-start");
     tdRate.classList.add("group-start");
-    tr.append(tdCountry, tdTotal, tdDelta, tdAvg, tdMix, tdTo5, tdDl, td1, td7, tdRate, tdSpark);
+    tr.append(tdCountry, tdTotal, tdDelta, tdAvg, tdMix, tdTo5, tdDl, td1, td7, tdRate, tdEta, tdSpark);
     return tr;
 }
 
@@ -4354,7 +4407,7 @@ async function main() {
     if (unrated.length) {
         const toggleTr = document.createElement("tr");
         const td = document.createElement("td");
-        td.colSpan = 9;
+        td.colSpan = 12;
         const btn = document.createElement("button");
         btn.className = "toggle-unrated";
         btn.textContent = `Show ${unrated.length} storefronts with fewer than 3 ratings`;
