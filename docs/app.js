@@ -239,6 +239,17 @@ function deltaCell(delta) {
     return span;
 }
 
+// A bare ISO date makes you count back to work out which day of the week you
+// are looking at, and weekday is most of the story in a daily traffic series.
+function tipDate(iso) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(iso ?? "")) return iso ?? "";
+    const wd = new Date(iso + "T00:00:00Z").toLocaleDateString("en-US", {
+        weekday: "short",
+        timeZone: "UTC",
+    });
+    return `${iso} \u00b7 ${wd}`;
+}
+
 function sparkline(points, label, fmtVal = fmt, minSpan = 0, markDate = null, opts = {}) {
     // points: [{date, count}] oldest→newest, nulls already dropped
     // opts.w/opts.h override the tile size; opts.axes adds the furniture a
@@ -390,7 +401,7 @@ function sparkline(points, label, fmtVal = fmt, minSpan = 0, markDate = null, op
         hover.setAttribute("cy", y(points[i].count));
         hover.setAttribute("visibility", "visible");
         tooltip.innerHTML =
-            `<span class="tip-value">${points[i].label ?? fmtVal(points[i].count)}</span><span class="tip-date">${points[i].date}</span>` +
+            `<span class="tip-value">${points[i].label ?? fmtVal(points[i].count)}</span><span class="tip-date">${tipDate(points[i].date)}</span>` +
             (points[i].extra ?? "");
         placeTooltip(e, { x: rect.left + x(i), y: rect.top + y(counts[i]) });
     };
@@ -4506,14 +4517,14 @@ async function main() {
         meta.appendChild(warn);
     }
 
-    // Live recheck: query Apple directly from the browser for the 20 biggest
-    // storefronts. Display-only; the hourly workflow records changes officially.
+    // Live recheck: query Apple directly from the browser for every storefront
+    // on record. Display-only; the hourly workflow records changes officially.
     const checkRow = document.createElement("div");
     checkRow.id = "check-row";
     const checkBtn = document.createElement("button");
     checkBtn.className = "check-now";
-    checkBtn.textContent = "Quick check (live view)";
-    checkBtn.title = "Queries Apple from this browser and shows changes immediately; nothing is saved";
+    checkBtn.textContent = "Check ratings and reviews";
+    checkBtn.title = "Asks Apple for every storefront's rating count and newest reviews, straight from this browser. Shown here only — the hourly run is what records it.";
     checkRow.appendChild(checkBtn);
     meta.insertAdjacentElement("afterend", checkRow);
 
@@ -4523,8 +4534,8 @@ async function main() {
     // repo, where it would be public and auto-revoked.
     const recordBtn = document.createElement("button");
     recordBtn.className = "check-now";
-    recordBtn.textContent = "Full update (~3 min)";
-    recordBtn.title = "Runs the ratings + keywords collectors on GitHub and saves the results (owner token required)";
+    recordBtn.textContent = "Record now (~3 min)";
+    recordBtn.title = "Runs the hourly collectors on GitHub now rather than at the top of the hour: ratings, star histograms, reviews, keyword ranks, downloads and analytics, saved to the repo (owner token required)";
     checkRow.appendChild(recordBtn);
 
     // Live progress for a dispatched update. The old flow said "queued" and
@@ -4761,7 +4772,7 @@ async function main() {
         }
         setTimeout(() => {
             recordBtn.disabled = false;
-            recordBtn.textContent = "Full update (~3 min)";
+            recordBtn.textContent = "Record now (~3 min)";
         }, 8000);
     });
     checkBtn.addEventListener("click", async () => {
@@ -4822,16 +4833,23 @@ async function main() {
                             // avg*count before vs after. That names the star
                             // exactly for a single new rating, and for several
                             // only when they were all ★5 (or all ★1) — anything
-                            // between is ambiguous (8 could be 5+3 or 4+4), so
-                            // the chip stays silent rather than guess.
+                            // between is ambiguous (8 could be 5+3 or 4+4). The
+                            // individual stars stay unattributed there, but the
+                            // sum still divides into an exact mean, so the chip
+                            // reports that instead of showing a bare count.
                             let star = null;
+                            let mean = null;
                             if (d > 0 && app.averageUserRating != null && cur.avg != null) {
                                 const sum = Math.round(app.averageUserRating * liveCount - cur.avg * cur.count);
                                 if (d === 1 && sum >= 1 && sum <= 5) star = sum;
                                 else if (sum === 5 * d) star = 5;
                                 else if (sum === d) star = 1;
+                                // Out of range means the two averages don't
+                                // describe the same set of ratings (a stale
+                                // count, or a change mid-check): no mean either.
+                                else if (sum >= d && sum <= 5 * d) mean = sum / d;
                             }
-                            changes.push({ cc, d, star });
+                            changes.push({ cc, d, star, mean });
                             const tr = rowByCc.get(cc);
                             if (tr) {
                                 tr.children[1].textContent = fmt(liveCount);
@@ -4871,7 +4889,8 @@ async function main() {
             checkBtn.appendChild(span);
         };
         if (rises.length) {
-            say(`Live: ${rises.map((c) => `${flag(c.cc)} +${c.d}${c.star ? ` ★${c.star}` : ""}`).join(" · ")} — recorded officially next hourly run`);
+            const chipStars = (c) => (c.star ? ` ★${c.star}` : c.mean != null ? ` ★${(+c.mean.toFixed(1)).toString()} avg` : "");
+            say(`Live: ${rises.map((c) => `${flag(c.cc)} +${c.d}${chipStars(c)}`).join(" · ")} — recorded officially next hourly run`);
         }
         if (drops.length) {
             const list = drops.map((c) => `${named(c)} −${Math.abs(c.d)}`).join(" · ");
@@ -4884,7 +4903,7 @@ async function main() {
         if (failed) say(` · ${failed} didn't answer, tap again in a minute`);
         setTimeout(() => {
             checkBtn.disabled = false;
-            if (!changes.length && !failed && !newReviews.length) checkBtn.textContent = "Quick check (live view)";
+            if (!changes.length && !failed && !newReviews.length) checkBtn.textContent = "Check ratings and reviews";
         }, 5000);
     });
 
