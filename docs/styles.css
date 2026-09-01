@@ -72,6 +72,16 @@ h1 { font-size: 1.35rem; margin-bottom: 4px; }
     text-align: left;
 }
 .check-now:disabled { color: var(--text-secondary); cursor: default; }
+/* Idle labels are two lines: the name, then what it covers. Only the idle
+   state has the sub-line, so the buttons shrink to one line while a run is
+   reporting progress. */
+.check-now .btn-line { display: block; }
+.check-now .btn-sub {
+    display: block;
+    margin-top: 3px;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+}
 /* A drop is rare, usually Apple's error, and reads as a rise if it is left to
    a minus sign among flags — so it gets the colour and the word. */
 .check-now .drop { color: var(--bad); font-weight: 600; }

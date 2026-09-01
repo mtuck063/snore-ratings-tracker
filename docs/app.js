@@ -4523,7 +4523,23 @@ async function main() {
     checkRow.id = "check-row";
     const checkBtn = document.createElement("button");
     checkBtn.className = "check-now";
-    checkBtn.textContent = "Check ratings and reviews";
+    // Both idle labels carry a second line naming what they cover: "everything"
+    // means nothing unless it says what everything is, and the check button
+    // needs the same shape or the pair reads lopsided. Progress and error
+    // states overwrite the button with a single line, so idle is rebuilt from
+    // a helper rather than assigned as text.
+    const twoLine = (btn, label, sub) => {
+        btn.textContent = "";
+        const a = document.createElement("span");
+        a.className = "btn-line";
+        a.textContent = label;
+        const b = document.createElement("span");
+        b.className = "btn-sub";
+        b.textContent = sub;
+        btn.append(a, b);
+    };
+    const checkIdle = () => twoLine(checkBtn, "Check ratings and reviews", "live from Apple · not saved");
+    checkIdle();
     checkBtn.title = "Asks Apple for every storefront's rating count and newest reviews, straight from this browser. Shown here only — the hourly run is what records it.";
     checkRow.appendChild(checkBtn);
     meta.insertAdjacentElement("afterend", checkRow);
@@ -4534,7 +4550,9 @@ async function main() {
     // repo, where it would be public and auto-revoked.
     const recordBtn = document.createElement("button");
     recordBtn.className = "check-now";
-    recordBtn.textContent = "Record now (~3 min)";
+    const recordIdle = () =>
+        twoLine(recordBtn, "Record everything (~3 min)", "ratings · reviews · keywords · downloads · analytics");
+    recordIdle();
     recordBtn.title = "Runs the hourly collectors on GitHub now rather than at the top of the hour: ratings, star histograms, reviews, keyword ranks, downloads and analytics, saved to the repo (owner token required)";
     checkRow.appendChild(recordBtn);
 
@@ -4772,7 +4790,7 @@ async function main() {
         }
         setTimeout(() => {
             recordBtn.disabled = false;
-            recordBtn.textContent = "Record now (~3 min)";
+            recordIdle();
         }, 8000);
     });
     checkBtn.addEventListener("click", async () => {
@@ -4903,7 +4921,7 @@ async function main() {
         if (failed) say(` · ${failed} didn't answer, tap again in a minute`);
         setTimeout(() => {
             checkBtn.disabled = false;
-            if (!changes.length && !failed && !newReviews.length) checkBtn.textContent = "Check ratings and reviews";
+            if (!changes.length && !failed && !newReviews.length) checkIdle();
         }, 5000);
     });
 
