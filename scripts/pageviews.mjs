@@ -14,7 +14,9 @@ import { fileURLToPath } from "node:url";
 const SITE = "https://snoretimeline.goatcounter.com";
 // Refetch this many trailing days each run. Every young day gets re-asked, so
 // late-arriving hits and skipped runs self-heal without any bookkeeping.
-const WINDOW_DAYS = 14;
+// PAGEVIEWS_WINDOW_DAYS widens it for a one-off repair, from the collect
+// workflow's dispatch input; the schedule always runs on the default.
+const WINDOW_DAYS = Number(process.env.PAGEVIEWS_WINDOW_DAYS) || 14;
 
 const token = process.env.GOATCOUNTER_TOKEN;
 if (!token) {
@@ -55,7 +57,19 @@ try {
   // run where nothing moved rewrites the file byte-identically and git sees
   // no diff (same trick history.json relies on).
   for (const s of body.stats ?? []) {
-    stored.days[String(s.day).slice(0, 10)] = s.daily ?? 0;
+    const day = String(s.day).slice(0, 10);
+    // GoatCounter answers in the site's own timezone, so a UTC start lands
+    // mid-afternoon there and the first row it returns is the last few hours
+    // of the day BEFORE the one asked for. Stored as if it were a whole day,
+    // that clipped row replaced a full count with about a fifth of one, and
+    // since the day then left the window for good, the fifth was what stuck:
+    // every day between 2026-08-03 and 2026-08-17 was rewritten downward at
+    // exactly 15 days old, which is what put a cliff in the chart.
+    if (day < start) continue;
+    // A day's visitor count only accumulates, so a smaller answer is a worse
+    // read of the same day and never news. Taking the larger makes a clipped
+    // or partial response harmless whatever shape the next one arrives in.
+    stored.days[day] = Math.max(stored.days[day] ?? 0, s.daily ?? 0);
   }
 
   // Per-country split for the trailing 30 days, as one aggregate request.

@@ -5,6 +5,11 @@ on:
     # Best-effort: GitHub fires this when it pleases.
     - cron: "9 * * * *"
   workflow_dispatch:
+    inputs:
+      pageviews_window:
+        description: "Days of pageview history to refetch (blank = 14; widen to repair older days)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -35,6 +40,7 @@ jobs:
       - name: Fetch website pageviews
         env:
           GOATCOUNTER_TOKEN: ${{ secrets.GOATCOUNTER_TOKEN }}
+          PAGEVIEWS_WINDOW_DAYS: ${{ github.event.inputs.pageviews_window }}
         run: node scripts/pageviews.mjs
 
       # Pulls new daily instances from App Store Connect. The script exits 0
