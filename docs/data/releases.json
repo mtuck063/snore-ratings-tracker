@@ -17818,7 +17818,7 @@
   },
   "sealedAt": "2026-08-28T05:59:48-04:00",
   "effect": {
-   "computedAt": "2026-09-01T11:52:53.399Z",
+   "computedAt": "2026-09-01T12:05:32.742Z",
    "days": 5,
    "stage": "provisional",
    "baselineDays": 7,
@@ -18097,20 +18097,20 @@
        "cohort": "control"
       },
       {
-       "kw": "sleep recorder",
-       "pop": 72,
-       "before": 36,
-       "after": 43.5,
-       "gain": -7.5,
-       "cohort": "control"
-      },
-      {
        "kw": "app for cpap machine users",
        "pop": 83,
        "before": 28,
        "after": 21,
        "gain": 7,
        "cohort": "floor"
+      },
+      {
+       "kw": "sleep recorder",
+       "pop": 72,
+       "before": 36,
+       "after": 42,
+       "gain": -6,
+       "cohort": "control"
       },
       {
        "kw": "sleep talking recorder",
@@ -18202,7 +18202,7 @@
       {
        "kw": "sleepwatch",
        "pop": 67,
-       "rank": 175
+       "rank": 158
       },
       {
        "kw": "snore clock",
@@ -18756,11 +18756,11 @@
        "cohort": "control"
       },
       {
-       "kw": "sommeil gratuit",
-       "pop": 64,
-       "before": 53,
-       "after": 55.5,
-       "gain": -2.5,
+       "kw": "appli dormir",
+       "pop": 60,
+       "before": 16,
+       "after": 13.5,
+       "gain": 2.5,
        "cohort": "control"
       }
      ],
@@ -18800,7 +18800,7 @@
       {
        "kw": "app sueño",
        "pop": 56,
-       "rank": 70
+       "rank": 66
       }
      ],
      "vanished": [],
@@ -19116,8 +19116,8 @@
        "kw": "gravar dormindo",
        "pop": 5,
        "before": 12,
-       "after": 9.5,
-       "gain": 2.5,
+       "after": 9,
+       "gain": 3,
        "cohort": "control"
       },
       {
@@ -19174,7 +19174,7 @@
      },
      "floor": {
       "n": 7,
-      "gain": 2.5
+      "gain": 2
      },
      "lift": null,
      "appeared": [
@@ -19262,14 +19262,6 @@
        "after": 10,
        "gain": 4,
        "cohort": "control"
-      },
-      {
-       "kw": "cicli del sonno",
-       "pop": 76,
-       "before": 140.5,
-       "after": 138,
-       "gain": 2.5,
-       "cohort": "floor"
       },
       {
        "kw": "app russare",
@@ -19915,7 +19907,7 @@
       {
        "kw": "呼噜检测",
        "pop": 75,
-       "rank": 133
+       "rank": 132
       },
       {
        "kw": "呼噜声检测",
