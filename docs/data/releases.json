@@ -25908,7 +25908,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-09-03T20:35:05.277Z",
+   "computedAt": "2026-09-03T21:13:37.058Z",
    "days": 2,
    "stage": "indexing",
    "baselineDays": 7,
@@ -26074,7 +26074,7 @@
      "noisy": 15,
      "ratings": {
       "before": 1.6,
-      "after": 2
+      "after": 2.5
      }
     },
     "ca": {
@@ -27234,8 +27234,8 @@
        "kw": "diario sonno",
        "pop": 5,
        "before": 86,
-       "after": 59,
-       "gain": 27,
+       "after": 59.5,
+       "gain": 26.5,
        "cohort": "control"
       },
       {
@@ -27304,7 +27304,7 @@
      },
      "control": {
       "n": 16,
-      "gain": -0.5
+      "gain": -0.7
      },
      "floor": {
       "n": 4,
@@ -27664,12 +27664,12 @@
        "cohort": "floor"
       },
       {
-       "kw": "いびきアプリ 無料",
-       "pop": 89,
-       "before": 7,
-       "after": 5,
-       "gain": 2,
-       "cohort": "control"
+       "kw": "睡眠時間",
+       "pop": 49,
+       "before": 88.5,
+       "after": 86,
+       "gain": 2.5,
+       "cohort": "floor"
       }
      ],
      "noisy": 10,
