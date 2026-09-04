@@ -25908,7 +25908,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-09-04T11:34:24.478Z",
+   "computedAt": "2026-09-04T16:33:53.593Z",
    "days": 2,
    "stage": "indexing",
    "baselineDays": 7,
@@ -25948,18 +25948,18 @@
      },
      "control": {
       "n": 48,
-      "gain": 0
+      "gain": 0.5
      },
      "floor": {
       "n": 25,
-      "gain": 0
+      "gain": 0.5
      },
-     "lift": 0,
+     "lift": -0.5,
      "appeared": [
       {
        "kw": "منبه النوم",
        "pop": 69,
-       "rank": 36
+       "rank": 38
       }
      ],
      "vanished": [
@@ -25987,8 +25987,8 @@
        "kw": "noxogy sleep tracker",
        "pop": 93,
        "before": 113,
-       "after": 73,
-       "gain": 40,
+       "after": 65,
+       "gain": 48,
        "cohort": "floor"
       },
       {
@@ -26016,14 +26016,6 @@
        "cohort": "control"
       },
       {
-       "kw": "sleep tracker",
-       "pop": 77,
-       "before": 63,
-       "after": 79,
-       "gain": -16,
-       "cohort": "control"
-      },
-      {
        "kw": "rem sleep tracker",
        "pop": 88,
        "before": 101,
@@ -26032,20 +26024,20 @@
        "cohort": "control"
       },
       {
+       "kw": "sleep tracker",
+       "pop": 77,
+       "before": 63,
+       "after": 74,
+       "gain": -11,
+       "cohort": "control"
+      },
+      {
        "kw": "snore ai",
        "pop": 5,
        "before": 30,
-       "after": 39,
-       "gain": -9,
-       "cohort": "floor"
-      },
-      {
-       "kw": "snore tracker apnea monitor",
-       "pop": 5,
-       "before": 10,
-       "after": 18,
+       "after": 38,
        "gain": -8,
-       "cohort": "control"
+       "cohort": "floor"
       },
       {
        "kw": "snore detection app",
@@ -26056,26 +26048,34 @@
        "cohort": "floor"
       },
       {
-       "kw": "snore recorder for good night",
-       "pop": 5,
-       "before": 6,
-       "after": 14,
-       "gain": -8,
-       "cohort": "floor"
+       "kw": "free snore recorder",
+       "pop": 78,
+       "before": 19,
+       "after": 12,
+       "gain": 7,
+       "cohort": "target"
       },
       {
-       "kw": "do i snore",
+       "kw": "sleep talking recorder free",
        "pop": 75,
-       "before": 23,
-       "after": 30,
-       "gain": -7,
+       "before": 44,
+       "after": 38,
+       "gain": 6,
+       "cohort": "target"
+      },
+      {
+       "kw": "snore tracker apnea monitor",
+       "pop": 5,
+       "before": 10,
+       "after": 16,
+       "gain": -6,
        "cohort": "control"
       }
      ],
      "noisy": 16,
      "ratings": {
       "before": 1.6,
-      "after": 1.7
+      "after": 2
      }
     },
     "ca": {
@@ -26101,7 +26101,7 @@
      },
      "floor": {
       "n": 23,
-      "gain": -3
+      "gain": -4
      },
      "lift": null,
      "appeared": [],
@@ -26130,8 +26130,8 @@
        "kw": "sleep tracking",
        "pop": 52,
        "before": 47,
-       "after": 32,
-       "gain": 15,
+       "after": 29,
+       "gain": 18,
        "cohort": "control"
       },
       {
@@ -26151,11 +26151,19 @@
        "cohort": "control"
       },
       {
+       "kw": "sleep talk ai recorder",
+       "pop": 60,
+       "before": 39,
+       "after": 50,
+       "gain": -11,
+       "cohort": "floor"
+      },
+      {
        "kw": "sleep talking app",
        "pop": 57,
        "before": 18,
-       "after": 29,
-       "gain": -11,
+       "after": 28,
+       "gain": -10,
        "cohort": "control"
       },
       {
@@ -26170,8 +26178,8 @@
        "kw": "sleep tracker and analyzer",
        "pop": 5,
        "before": 41,
-       "after": 49,
-       "gain": -8,
+       "after": 50,
+       "gain": -9,
        "cohort": "floor"
       },
       {
@@ -26183,6 +26191,14 @@
        "cohort": "control"
       },
       {
+       "kw": "sleep talking recorder",
+       "pop": 66,
+       "before": 21,
+       "after": 28,
+       "gain": -7,
+       "cohort": "control"
+      },
+      {
        "kw": "snore lab",
        "pop": 88,
        "before": 16,
@@ -26191,28 +26207,12 @@
        "cohort": "floor"
       },
       {
-       "kw": "anti snore",
+       "kw": "stop snoring app",
        "pop": 5,
-       "before": 22,
-       "after": 29,
+       "before": 34,
+       "after": 41,
        "gain": -7,
        "cohort": "floor"
-      },
-      {
-       "kw": "sleep talking recorder",
-       "pop": 66,
-       "before": 21,
-       "after": 27,
-       "gain": -6,
-       "cohort": "control"
-      },
-      {
-       "kw": "snore control",
-       "pop": 59,
-       "before": 11,
-       "after": 5,
-       "gain": 6,
-       "cohort": "control"
       }
      ],
      "noisy": 5,
@@ -26244,7 +26244,7 @@
      },
      "floor": {
       "n": 25,
-      "gain": 4
+      "gain": 3
      },
      "lift": null,
      "appeared": [],
@@ -26270,11 +26270,11 @@
        "cohort": "floor"
       },
       {
-       "kw": "sleep tracker free",
-       "pop": 69,
-       "before": 46,
-       "after": 28,
-       "gain": 18,
+       "kw": "sleep talking app",
+       "pop": 42,
+       "before": 29,
+       "after": 50,
+       "gain": -21,
        "cohort": "control"
       },
       {
@@ -26286,52 +26286,36 @@
        "cohort": "control"
       },
       {
-       "kw": "sleep talking app",
-       "pop": 42,
-       "before": 29,
-       "after": 46,
-       "gain": -17,
+       "kw": "sleep tracker free",
+       "pop": 69,
+       "before": 46,
+       "after": 29,
+       "gain": 17,
        "cohort": "control"
-      },
-      {
-       "kw": "noxogy sleep tracker",
-       "pop": 74,
-       "before": 39,
-       "after": 56,
-       "gain": -17,
-       "cohort": "floor"
       },
       {
        "kw": "sleep apnea",
        "pop": 40,
        "before": 66,
-       "after": 52,
-       "gain": 14,
+       "after": 53,
+       "gain": 13,
        "cohort": "control"
       },
       {
        "kw": "sleep monitor",
        "pop": 61,
        "before": 54,
-       "after": 66,
-       "gain": -12,
+       "after": 67,
+       "gain": -13,
        "cohort": "control"
       },
       {
-       "kw": "teeth grinding",
-       "pop": 5,
-       "before": 66,
-       "after": 55,
-       "gain": 11,
+       "kw": "snoring app",
+       "pop": 45,
+       "before": 15,
+       "after": 26,
+       "gain": -11,
        "cohort": "control"
-      },
-      {
-       "kw": "sleep tracker and analyzer",
-       "pop": 5,
-       "before": 60,
-       "after": 49,
-       "gain": 11,
-       "cohort": "floor"
       },
       {
        "kw": "teeth grinding app",
@@ -26342,19 +26326,35 @@
        "cohort": "control"
       },
       {
-       "kw": "snoring app",
-       "pop": 45,
-       "before": 15,
-       "after": 25,
-       "gain": -10,
+       "kw": "sleep tracker and analyzer",
+       "pop": 5,
+       "before": 60,
+       "after": 50,
+       "gain": 10,
+       "cohort": "floor"
+      },
+      {
+       "kw": "teeth grinding",
+       "pop": 5,
+       "before": 66,
+       "after": 57,
+       "gain": 9,
        "cohort": "control"
       },
       {
-       "kw": "sleep score",
-       "pop": 60,
-       "before": 52,
-       "after": 43,
-       "gain": 9,
+       "kw": "noxogy sleep tracker",
+       "pop": 74,
+       "before": 39,
+       "after": 48,
+       "gain": -9,
+       "cohort": "floor"
+      },
+      {
+       "kw": "sleep recorder",
+       "pop": 92,
+       "before": 65,
+       "after": 57,
+       "gain": 8,
        "cohort": "control"
       }
      ],
@@ -26387,18 +26387,26 @@
      },
      "floor": {
       "n": 29,
-      "gain": 0
+      "gain": -1
      },
      "lift": null,
      "appeared": [],
      "vanished": [],
      "movers": [
       {
+       "kw": "sleep meister",
+       "pop": 55,
+       "before": 26,
+       "after": 63,
+       "gain": -37,
+       "cohort": "floor"
+      },
+      {
        "kw": "noxogy sleep tracker",
        "pop": 79,
        "before": 22,
-       "after": 40,
-       "gain": -18,
+       "after": 43,
+       "gain": -21,
        "cohort": "floor"
       },
       {
@@ -26418,14 +26426,6 @@
        "cohort": "control"
       },
       {
-       "kw": "sleep meister",
-       "pop": 55,
-       "before": 26,
-       "after": 42,
-       "gain": -16,
-       "cohort": "floor"
-      },
-      {
        "kw": "snorelab",
        "pop": 56,
        "before": 49,
@@ -26437,8 +26437,16 @@
        "kw": "record sleep",
        "pop": 57,
        "before": 30,
-       "after": 42,
-       "gain": -12,
+       "after": 43,
+       "gain": -13,
+       "cohort": "control"
+      },
+      {
+       "kw": "sleep tracking",
+       "pop": 52,
+       "before": 32,
+       "after": 43,
+       "gain": -11,
        "cohort": "control"
       },
       {
@@ -26450,19 +26458,19 @@
        "cohort": "floor"
       },
       {
-       "kw": "sleep tracking",
-       "pop": 52,
-       "before": 32,
-       "after": 41,
-       "gain": -9,
-       "cohort": "control"
-      },
-      {
        "kw": "sleep cycle free",
        "pop": 71,
        "before": 16,
        "after": 8,
        "gain": 8,
+       "cohort": "control"
+      },
+      {
+       "kw": "teeth grinding app",
+       "pop": 5,
+       "before": 67,
+       "after": 74,
+       "gain": -7,
        "cohort": "control"
       },
       {
@@ -26474,19 +26482,11 @@
        "cohort": "control"
       },
       {
-       "kw": "sleep apnea monitor",
-       "pop": 78,
-       "before": 31,
-       "after": 25,
-       "gain": 6,
-       "cohort": "control"
-      },
-      {
-       "kw": "teeth grinding app",
-       "pop": 5,
-       "before": 67,
-       "after": 73,
-       "gain": -6,
+       "kw": "sleep talking app",
+       "pop": 42,
+       "before": 16,
+       "after": 21,
+       "gain": -5,
        "cohort": "control"
       }
      ],
@@ -26529,8 +26529,8 @@
        "kw": "sleep apnea",
        "pop": 5,
        "before": 46,
-       "after": 85,
-       "gain": -39,
+       "after": 86,
+       "gain": -40,
        "cohort": "floor"
       },
       {
@@ -26555,6 +26555,14 @@
        "before": 60,
        "after": 46,
        "gain": 14,
+       "cohort": "floor"
+      },
+      {
+       "kw": "free sleep tracking app",
+       "pop": 5,
+       "before": 27,
+       "after": 36,
+       "gain": -9,
        "cohort": "floor"
       },
       {
@@ -26598,14 +26606,6 @@
        "cohort": "floor"
       },
       {
-       "kw": "free sleep tracking app",
-       "pop": 5,
-       "before": 27,
-       "after": 35,
-       "gain": -8,
-       "cohort": "floor"
-      },
-      {
        "kw": "snoring tracker cycle",
        "pop": 5,
        "before": 24,
@@ -26614,12 +26614,12 @@
        "cohort": "floor"
       },
       {
-       "kw": "sleep apnea monitor",
-       "pop": 5,
-       "before": 17,
-       "after": 12,
-       "gain": 5,
-       "cohort": "floor"
+       "kw": "snore",
+       "pop": 47,
+       "before": 16,
+       "after": 10,
+       "gain": 6,
+       "cohort": "control"
       }
      ],
      "noisy": 3,
@@ -26687,8 +26687,16 @@
        "kw": "suivi sommeil",
        "pop": 67,
        "before": 23,
-       "after": 76,
-       "gain": -53,
+       "after": 84,
+       "gain": -61,
+       "cohort": "control"
+      },
+      {
+       "kw": "apnee du sommeil",
+       "pop": 84,
+       "before": 27,
+       "after": 69,
+       "gain": -42,
        "cohort": "control"
       },
       {
@@ -26753,14 +26761,6 @@
        "before": 55,
        "after": 63,
        "gain": -8,
-       "cohort": "control"
-      },
-      {
-       "kw": "apnee du sommeil",
-       "pop": 84,
-       "before": 27,
-       "after": 34,
-       "gain": -7,
        "cohort": "control"
       },
       {
@@ -26937,11 +26937,11 @@
      },
      "control": {
       "n": 18,
-      "gain": 0
+      "gain": -0.5
      },
      "floor": {
       "n": 2,
-      "gain": -2
+      "gain": -1.7
      },
      "lift": null,
      "appeared": [],
@@ -26956,18 +26956,18 @@
        "cohort": "control"
       },
       {
-       "kw": "sueño apple watch",
-       "pop": 74,
-       "before": 44,
-       "after": 51,
-       "gain": -7,
-       "cohort": "control"
-      },
-      {
        "kw": "grabar ronquidos",
        "pop": 72,
        "before": 17,
        "after": 23,
+       "gain": -6,
+       "cohort": "control"
+      },
+      {
+       "kw": "sueño apple watch",
+       "pop": 74,
+       "before": 44,
+       "after": 50,
        "gain": -6,
        "cohort": "control"
       },
@@ -26980,18 +26980,18 @@
        "cohort": "control"
       },
       {
+       "kw": "seguimiento de sueño",
+       "pop": 60,
+       "before": 13,
+       "after": 8,
+       "gain": 5,
+       "cohort": "control"
+      },
+      {
        "kw": "grabador ronquidos sueño",
        "pop": 76,
        "before": 16,
        "after": 12,
-       "gain": 4,
-       "cohort": "control"
-      },
-      {
-       "kw": "seguimiento de sueño",
-       "pop": 60,
-       "before": 13,
-       "after": 9,
        "gain": 4,
        "cohort": "control"
       },
@@ -27002,14 +27002,6 @@
        "after": 63,
        "gain": -4,
        "cohort": "floor"
-      },
-      {
-       "kw": "apnea",
-       "pop": 66,
-       "before": 45,
-       "after": 48,
-       "gain": -3,
-       "cohort": "control"
       },
       {
        "kw": "ronquidos",
@@ -27024,6 +27016,22 @@
        "pop": 5,
        "before": 31,
        "after": 33,
+       "gain": -2,
+       "cohort": "control"
+      },
+      {
+       "kw": "apnea",
+       "pop": 66,
+       "before": 45,
+       "after": 47,
+       "gain": -2,
+       "cohort": "control"
+      },
+      {
+       "kw": "monitor de sueño gratis",
+       "pop": 61,
+       "before": 52,
+       "after": 54,
        "gain": -2,
        "cohort": "control"
       }
@@ -27057,7 +27065,7 @@
      },
      "floor": {
       "n": 2,
-      "gain": 3.5
+      "gain": 6.5
      },
      "lift": null,
      "appeared": [],
@@ -27072,6 +27080,14 @@
        "cohort": "control"
       },
       {
+       "kw": "ciclo do sono",
+       "pop": 71,
+       "before": 145,
+       "after": 116,
+       "gain": 29,
+       "cohort": "control"
+      },
+      {
        "kw": "gravador de sono",
        "pop": 45,
        "before": 52,
@@ -27083,40 +27099,32 @@
        "kw": "sono grátis",
        "pop": 5,
        "before": 51,
-       "after": 44,
-       "gain": 7,
-       "cohort": "control"
-      },
-      {
-       "kw": "apneia",
-       "pop": 75,
-       "before": 36,
-       "after": 30,
-       "gain": 6,
+       "after": 40,
+       "gain": 11,
        "cohort": "control"
       },
       {
        "kw": "análise do sono",
        "pop": 5,
        "before": 113,
-       "after": 108,
-       "gain": 5,
+       "after": 102,
+       "gain": 11,
        "cohort": "floor"
       },
       {
-       "kw": "ciclo do sono",
-       "pop": 71,
-       "before": 145,
-       "after": 141,
-       "gain": 4,
+       "kw": "apneia",
+       "pop": 75,
+       "before": 36,
+       "after": 31,
+       "gain": 5,
        "cohort": "control"
       },
       {
        "kw": "alarme de ronco",
        "pop": 45,
        "before": 16,
-       "after": 13,
-       "gain": 3,
+       "after": 12,
+       "gain": 4,
        "cohort": "control"
       },
       {
@@ -27327,7 +27335,7 @@
      },
      "floor": {
       "n": 4,
-      "gain": 1
+      "gain": 0.5
      },
      "lift": null,
      "appeared": [],
@@ -27398,6 +27406,14 @@
        "cohort": "control"
       },
       {
+       "kw": "schlaftracker apple watch",
+       "pop": 71,
+       "before": 26,
+       "after": 23,
+       "gain": 3,
+       "cohort": "control"
+      },
+      {
        "kw": "schlafgeräusche aufnehmen",
        "pop": 83,
        "before": 24,
@@ -27406,11 +27422,11 @@
        "cohort": "control"
       },
       {
-       "kw": "schnarchen kostenlos",
-       "pop": 71,
-       "before": 24,
-       "after": 22,
-       "gain": 2,
+       "kw": "schnarchen aufnehmen",
+       "pop": 77,
+       "before": 11,
+       "after": 13,
+       "gain": -2,
        "cohort": "control"
       },
       {
@@ -27418,14 +27434,6 @@
        "pop": 5,
        "before": 49,
        "after": 47,
-       "gain": 2,
-       "cohort": "control"
-      },
-      {
-       "kw": "schlaftracker apple watch",
-       "pop": 71,
-       "before": 26,
-       "after": 24,
        "gain": 2,
        "cohort": "control"
       }
@@ -27485,15 +27493,7 @@
        "kw": "slaap tracker",
        "pop": 88,
        "before": 36,
-       "after": 42,
-       "gain": -6,
-       "cohort": "control"
-      },
-      {
-       "kw": "slaapapp",
-       "pop": 53,
-       "before": 12,
-       "after": 16,
+       "after": 40,
        "gain": -4,
        "cohort": "control"
       },
@@ -27514,10 +27514,10 @@
        "cohort": "control"
       },
       {
-       "kw": "slaap opname",
-       "pop": 61,
-       "before": 15,
-       "after": 18,
+       "kw": "slaap geluiden",
+       "pop": 77,
+       "before": 29,
+       "after": 32,
        "gain": -3,
        "cohort": "control"
       },
@@ -27550,6 +27550,14 @@
        "pop": 67,
        "before": 6,
        "after": 8,
+       "gain": -2,
+       "cohort": "control"
+      },
+      {
+       "kw": "slaapapp",
+       "pop": 53,
+       "before": 12,
+       "after": 14,
        "gain": -2,
        "cohort": "control"
       },
@@ -27587,11 +27595,11 @@
      },
      "control": {
       "n": 35,
-      "gain": 0
+      "gain": 1
      },
      "floor": {
       "n": 8,
-      "gain": -1
+      "gain": -4
      },
      "lift": null,
      "appeared": [],
@@ -27614,20 +27622,36 @@
      ],
      "movers": [
       {
-       "kw": "睡眠記録無料",
-       "pop": 46,
-       "before": 46,
-       "after": 26,
-       "gain": 20,
-       "cohort": "control"
-      },
-      {
        "kw": "睡眠アプリ無呼吸",
        "pop": 45,
        "before": 28,
        "after": 9,
        "gain": 19,
        "cohort": "control"
+      },
+      {
+       "kw": "睡眠記録無料",
+       "pop": 46,
+       "before": 46,
+       "after": 28,
+       "gain": 18,
+       "cohort": "control"
+      },
+      {
+       "kw": "睡眠時間記録",
+       "pop": 62,
+       "before": 71,
+       "after": 83,
+       "gain": -12,
+       "cohort": "floor"
+      },
+      {
+       "kw": "睡眠の質 無料",
+       "pop": 71,
+       "before": 94,
+       "after": 102,
+       "gain": -8,
+       "cohort": "floor"
       },
       {
        "kw": "睡眠分析",
@@ -27649,16 +27673,8 @@
        "kw": "眠りの質",
        "pop": 64,
        "before": 110,
-       "after": 115,
-       "gain": -5,
-       "cohort": "floor"
-      },
-      {
-       "kw": "睡眠時間記録",
-       "pop": 62,
-       "before": 71,
-       "after": 75,
-       "gain": -4,
+       "after": 116,
+       "gain": -6,
        "cohort": "floor"
       },
       {
@@ -27700,14 +27716,6 @@
        "after": 10,
        "gain": -3,
        "cohort": "control"
-      },
-      {
-       "kw": "歯ぎしり",
-       "pop": 75,
-       "before": 27,
-       "after": 24,
-       "gain": 3,
-       "cohort": "control"
       }
      ],
      "noisy": 10,
@@ -27739,7 +27747,7 @@
      },
      "floor": {
       "n": 2,
-      "gain": 5
+      "gain": 4
      },
      "lift": null,
      "appeared": [],
@@ -27749,16 +27757,24 @@
        "kw": "수면 기록",
        "pop": 61,
        "before": 38,
-       "after": 139,
-       "gain": -101,
+       "after": 143,
+       "gain": -105,
        "cohort": "control"
       },
       {
        "kw": "수면 녹음",
        "pop": 91,
        "before": 28,
-       "after": 85,
-       "gain": -57,
+       "after": 71,
+       "gain": -43,
+       "cohort": "control"
+      },
+      {
+       "kw": "수면 일기",
+       "pop": 5,
+       "before": 43,
+       "after": 30,
+       "gain": 13,
        "cohort": "control"
       },
       {
@@ -27770,6 +27786,14 @@
        "cohort": "control"
       },
       {
+       "kw": "수면 어플",
+       "pop": 56,
+       "before": 38,
+       "after": 26,
+       "gain": 12,
+       "cohort": "control"
+      },
+      {
        "kw": "수면 어플 무료",
        "pop": 5,
        "before": 29,
@@ -27778,18 +27802,26 @@
        "cohort": "control"
       },
       {
-       "kw": "애플워치 수면",
-       "pop": 47,
-       "before": 34,
-       "after": 22,
+       "kw": "슬립 트래커",
+       "pop": 5,
+       "before": 30,
+       "after": 18,
        "gain": 12,
        "cohort": "control"
       },
       {
-       "kw": "수면 일기",
-       "pop": 5,
-       "before": 43,
-       "after": 34,
+       "kw": "애플워치 수면",
+       "pop": 47,
+       "before": 34,
+       "after": 23,
+       "gain": 11,
+       "cohort": "control"
+      },
+      {
+       "kw": "수면 코골이",
+       "pop": 67,
+       "before": 24,
+       "after": 15,
        "gain": 9,
        "cohort": "control"
       },
@@ -27797,48 +27829,24 @@
        "kw": "코골이 무료",
        "pop": 89,
        "before": 22,
-       "after": 14,
-       "gain": 8,
+       "after": 17,
+       "gain": 5,
        "cohort": "control"
       },
       {
-       "kw": "수면 어플",
-       "pop": 56,
-       "before": 38,
-       "after": 30,
-       "gain": 8,
-       "cohort": "control"
-      },
-      {
-       "kw": "수면 코골이",
-       "pop": 67,
-       "before": 24,
-       "after": 16,
-       "gain": 8,
-       "cohort": "control"
-      },
-      {
-       "kw": "슬립 트래커",
+       "kw": "무호흡",
        "pop": 5,
-       "before": 30,
-       "after": 23,
-       "gain": 7,
+       "before": 20,
+       "after": 15,
+       "gain": 5,
        "cohort": "control"
       },
       {
-       "kw": "snorelab",
-       "pop": 83,
-       "before": 21,
-       "after": 14,
-       "gain": 7,
-       "cohort": "floor"
-      },
-      {
-       "kw": "잠꼬대 녹음",
+       "kw": "잠버릇",
        "pop": 100,
-       "before": 19,
-       "after": 15,
-       "gain": 4,
+       "before": 17,
+       "after": 12,
+       "gain": 5,
        "cohort": "control"
       }
      ],
@@ -27878,7 +27886,7 @@
       {
        "kw": "睡眠监测免费",
        "pop": 82,
-       "rank": 56
+       "rank": 53
       }
      ],
      "vanished": [
@@ -27913,8 +27921,8 @@
        "kw": "打呼噜监测",
        "pop": 78,
        "before": 33,
-       "after": 39,
-       "gain": -6,
+       "after": 40,
+       "gain": -7,
        "cohort": "control"
       },
       {
@@ -27958,6 +27966,14 @@
        "cohort": "control"
       },
       {
+       "kw": "睡眠监测打呼噜",
+       "pop": 74,
+       "before": 37,
+       "after": 34,
+       "gain": 3,
+       "cohort": "control"
+      },
+      {
        "kw": "睡眠追踪",
        "pop": 54,
        "before": 5,
@@ -27987,14 +28003,6 @@
        "before": 21,
        "after": 19,
        "gain": 2,
-       "cohort": "control"
-      },
-      {
-       "kw": "睡眠监测打呼噜",
-       "pop": 74,
-       "before": 37,
-       "after": 39,
-       "gain": -2,
        "cohort": "control"
       },
       {
