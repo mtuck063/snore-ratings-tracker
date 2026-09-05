@@ -1046,10 +1046,16 @@ const starSide = (mix, sign) =>
         .map(([s, n]) => (Math.abs(n) > 1 ? `★${s}×${Math.abs(n)}` : `★${s}`))
         .join(" ");
 
+// A review Apple no longer serves. The collector flags these rather than
+// deleting them, because the events that announced the review still refer to
+// it; the page is where they drop out of sight, since its star left the count
+// at the same time and a card that stays would contradict the number beside it.
+const isLive = (r) => !r.removed;
+
 // Reviews written in the last 7 days, in a swipeable row at the top.
 function renderWeekReviews(reviews) {
     const fresh = reviews
-        .filter((r) => Date.now() - reviewTime(r) <= 7 * 864e5)
+        .filter((r) => isLive(r) && Date.now() - reviewTime(r) <= 7 * 864e5)
         .sort((a, b) => reviewTime(b) - reviewTime(a));
     if (!fresh.length) return;
     document.getElementById("week-reviews").hidden = false;
@@ -1058,8 +1064,8 @@ function renderWeekReviews(reviews) {
 }
 
 function renderReviews(reviews) {
+    reviews = reviews.filter(isLive).sort((a, b) => reviewTime(b) - reviewTime(a));
     if (!reviews.length) return;
-    reviews = [...reviews].sort((a, b) => reviewTime(b) - reviewTime(a));
     document.getElementById("reviews-section").hidden = false;
     const wrap = document.getElementById("reviews");
     const VISIBLE = 6;
@@ -1159,14 +1165,24 @@ function renderRecent(events) {
         const change =
             ev.type === "review"
                 ? `★${ev.rating} review`
-                : ev.type === "tracked"
+                : ev.type === "review-removed"
+                  ? `★${ev.rating} review removed`
+                  : ev.type === "review-restored"
+                    ? `★${ev.rating} review back`
+                    : ev.type === "tracked"
                   ? "now tracked"
                   : ev.type === "edit"
                     ? `${starSide(ev.starsMix, -1)} → ${starSide(ev.starsMix, 1)}`
                     : (d > 0 ? `+${fmt(d)}` : `−${fmt(Math.abs(d))}`) + starText;
         // An edit is neither a gain nor a loss — the count never moved — so it
         // takes neither the green nor the red the other rows use.
-        const tone = ev.type === "edit" ? ' class="flat"' : d < 0 && ev.type !== "review" ? ' class="down"' : "";
+        // A removed review reads red like the −1 it usually arrives beside.
+        const tone =
+            ev.type === "edit"
+                ? ' class="flat"'
+                : ev.type === "review-removed" || (d < 0 && ev.type !== "review")
+                  ? ' class="down"'
+                  : "";
         item.innerHTML = `<span class="recent-name">${name}</span> <strong${tone}>${change}</strong> <span class="recent-time">${timeText}</span>`;
         list.appendChild(item);
     }
@@ -1208,8 +1224,14 @@ function renderEvents(history, events) {
                 `${time}${name} ${fmt(n)} rating${n === 1 ? "" : "s"} changed star value` +
                 `<span class="badge edit">${starSide(ev.starsMix, -1)} → ${starSide(ev.starsMix, 1)}</span>` +
                 `<span class="event-note">total unchanged</span>`;
-        } else if (ev.type === "review") {
-            li.innerHTML = `${time}${name} new written review<span class="badge review">★${Number(ev.rating) || "?"}</span>`;
+        } else if (ev.type === "review" || ev.type === "review-removed" || ev.type === "review-restored") {
+            // Removed: the review left Apple's feed on two consecutive checks,
+            // so its star has left the count too. Restored: a removed review
+            // came back, which is rare enough to say out loud.
+            const removed = ev.type === "review-removed";
+            const verb = removed ? "written review removed" : ev.type === "review-restored" ? "written review back" : "new written review";
+            if (removed) li.className = "removed";
+            li.innerHTML = `${time}${name} ${verb}<span class="badge ${removed ? "removed" : "review"}">★${Number(ev.rating) || "?"}</span>`;
             if (ev.title) {
                 const note = document.createElement("span");
                 note.className = "event-note";

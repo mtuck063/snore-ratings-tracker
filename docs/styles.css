@@ -773,6 +773,10 @@ li.log-day {
    green of a gain or the red of a loss. */
 #events li.edit { border-left-color: var(--text-secondary); }
 #events .badge.edit { color: var(--text-secondary); background: rgba(154, 160, 166, 0.14); }
+/* A review Apple no longer serves: its star left with it, so it takes the red
+   of a loss rather than the accent of a new review. */
+#events li.removed { border-left-color: var(--bad); }
+#events .badge.removed { color: var(--bad); background: rgba(248, 113, 113, 0.12); }
 
 #tooltip {
     position: fixed;

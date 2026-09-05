@@ -95,7 +95,10 @@ async function fetchCountry(cc, attempt = 1) {
 }
 
 // Apple's public customer-reviews RSS: written reviews only (star-only
-// ratings never appear), roughly the 50 most recent per storefront.
+// ratings never appear), roughly the 50 most recent per storefront. Resolves
+// to the entries, or null on a failed fetch so the caller can tell "the feed
+// answered and this review is not in it" from "the feed did not answer".
+const FEED_PAGE_SIZE = 50;
 async function fetchReviews(cc) {
   const url = `https://itunes.apple.com/${cc}/rss/customerreviews/id=${APP_ID}/sortby=mostrecent/json?t=${Date.now()}`;
   try {
@@ -117,7 +120,7 @@ async function fetchReviews(cc) {
       }));
   } catch (err) {
     console.warn(`${cc} reviews: ${err.message}`);
-    return []; // stored reviews for this storefront are kept regardless
+    return null; // stored reviews for this storefront are kept regardless
   }
 }
 
@@ -273,14 +276,24 @@ async function ratingsPass() {
   return { countries, pageCounts, failed, histogramFallbacks };
 }
 
+// Returns the fetched reviews plus the set of storefronts whose feed answered
+// with a complete listing: fewer entries than a page holds, so a stored review
+// that is not among them has left the feed rather than scrolled off its end.
 async function reviewsPass() {
   const perStorefront = await Promise.all(prevRated.map((cc) => fetchReviews(cc)));
-  console.log(`reviews done (${prevRated.length} storefronts)`);
-  return perStorefront.flat();
+  const complete = new Set();
+  prevRated.forEach((cc, i) => {
+    if (perStorefront[i] && perStorefront[i].length < FEED_PAGE_SIZE) complete.add(cc);
+  });
+  const failed = perStorefront.filter((r) => r === null).length;
+  console.log(`reviews done (${prevRated.length} storefronts${failed ? `, ${failed} failed` : ""})`);
+  return { fetched: perStorefront.filter(Boolean).flat(), complete };
 }
 
-const [{ countries, pageCounts, failed: fetchFailures, histogramFallbacks: histFallbacks }, fetchedReviews] =
-  await Promise.all([ratingsPass(), reviewsPass()]);
+const [
+  { countries, pageCounts, failed: fetchFailures, histogramFallbacks: histFallbacks },
+  { fetched: fetchedReviews, complete: feedComplete },
+] = await Promise.all([ratingsPass(), reviewsPass()]);
 
 // Fold newly fetched reviews into the stored set.
 const reviewsFile = path.join(servedDataDir, "reviews.json");
@@ -295,6 +308,42 @@ for (const r of fetchedReviews) {
   }
 }
 console.log(`${newReviews.length} new written reviews`);
+
+// Reviews that have left Apple's feed. A reviewer can delete their review and
+// Apple can pull one in moderation; either way the star goes with it, so a
+// card that stays on the page forever contradicts the count beside it. But
+// the feed is flaky enough that one empty answer proves nothing, so an absence
+// is only noted on the first run (`missingSince`) and becomes a removal on a
+// later run that still cannot find it. A review that comes back clears both,
+// and says so, since a silent reappearance would be the flakiness winning.
+// Records are flagged, never deleted: the events that announced the review
+// still refer to it, and a removal is a fact worth keeping.
+const fetchedIds = new Set(fetchedReviews.map((r) => r.id));
+const removedReviews = [];
+const restoredReviews = [];
+let markedMissing = 0;
+for (const r of storedReviews) {
+  if (fetchedIds.has(r.id)) {
+    // Back after a confirmed removal is news; back after one missed run is
+    // the flakiness this two-run rule exists to absorb, and only resets it.
+    if (r.removed) restoredReviews.push(r);
+    else if (r.missingSince) markedMissing++;
+    delete r.removed;
+    delete r.missingSince;
+    continue;
+  }
+  if (!feedComplete.has(r.cc) || r.removed) continue;
+  if (!r.missingSince) {
+    r.missingSince = fetchedAt;
+    markedMissing++;
+  } else if (r.missingSince !== fetchedAt) {
+    r.removed = fetchedAt;
+    removedReviews.push(r);
+  }
+}
+const reviewsChanged = newReviews.length + removedReviews.length + restoredReviews.length + markedMissing > 0;
+if (removedReviews.length) console.log(`${removedReviews.length} written review(s) removed from Apple's feed`);
+if (restoredReviews.length) console.log(`${restoredReviews.length} written review(s) back in Apple's feed`);
 
 // The lookup API's CDN can serve a stale, lower count for many hours after a
 // real increase (verified against App Store Connect). Increases record
@@ -387,7 +436,7 @@ const ratingsChanged = !prevLatest || meaningfulChange(prevLatest.countries, cou
 // its whole merge to the conflict. This is now the only category of file the
 // two collectors do not share, and it should stay that way.
 const statusFile = path.join(servedDataDir, "status-ratings.json");
-const anythingChanged = ratingsChanged || newReviews.length > 0 || needHist.length > 0 || pageHistChanged;
+const anythingChanged = ratingsChanged || reviewsChanged || needHist.length > 0 || pageHistChanged;
 await writeFile(
   statusFile,
   JSON.stringify({
@@ -452,7 +501,7 @@ if (!anythingChanged) {
   process.exit(0);
 }
 
-if (newReviews.length) {
+if (reviewsChanged) {
   await writeFile(reviewsFile, JSON.stringify([...newReviews, ...storedReviews]));
 }
 
@@ -503,6 +552,12 @@ if (!isReviewSeed) {
     // list silently. Only reviews actually written recently are news.
     if (r.date && new Date(r.firstSeen) - new Date(r.date) > 7 * 864e5) continue;
     events.push({ at: fetchedAt, cc: r.cc, type: "review", rating: r.rating, title: r.title.slice(0, 80) });
+  }
+  for (const r of removedReviews) {
+    events.push({ at: fetchedAt, cc: r.cc, type: "review-removed", rating: r.rating, title: r.title.slice(0, 80) });
+  }
+  for (const r of restoredReviews) {
+    events.push({ at: fetchedAt, cc: r.cc, type: "review-restored", rating: r.rating, title: r.title.slice(0, 80) });
   }
 }
 // Apply this run's page histograms, then fetch the few remaining (newly
