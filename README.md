@@ -626,7 +626,7 @@ constraint there. Working state that no page reads lives in `scripts/` instead.
 | `events.json` | every rating change the hourly check caught |
 | `histograms.json` | per-star breakdown per storefront |
 | `pending.json` | unconfirmed rating decreases, held 48h before they stick |
-| `reviews.json` | written reviews, kept indefinitely; one that leaves Apple's feed on two consecutive checks is flagged `removed` (never deleted) and hidden from the page |
+| `reviews.json` | written reviews, kept indefinitely; one absent from Apple's feed for a full day of checks is flagged `removed` (never deleted) and hidden from the page |
 | `keywords.json` | current rank and demand per keyword, the apps holding the places above you, top-ten turnover, plus 30-day history |
 | `kw-events/` | rank and autocomplete movements, one shard per month |
 | `aso.json` | intent, coverage and priority per keyword, plus each market's chase list and the characters its field is wasting |

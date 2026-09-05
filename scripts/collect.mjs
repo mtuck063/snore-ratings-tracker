@@ -279,25 +279,38 @@ async function ratingsPass() {
 // Returns the fetched reviews plus the set of storefronts whose feed answered
 // with a complete listing: fewer entries than a page holds, so a stored review
 // that is not among them has left the feed rather than scrolled off its end.
-async function reviewsPass() {
+//
+// An empty answer is not a listing when the storefront has more than one
+// stored review. The feed returns 200 with no entries now and then (the UK's
+// five and Thailand's two all "vanished" in one CI run and were all served
+// again minutes later), and every review on a storefront leaving in the same
+// hour is not a thing that happens. A lone review vanishing is exactly what a real removal
+// looks like, so a single-review storefront's empty answer still counts.
+async function reviewsPass(storedByCc) {
   const perStorefront = await Promise.all(prevRated.map((cc) => fetchReviews(cc)));
   const complete = new Set();
   prevRated.forEach((cc, i) => {
-    if (perStorefront[i] && perStorefront[i].length < FEED_PAGE_SIZE) complete.add(cc);
+    const entries = perStorefront[i];
+    if (!entries || entries.length >= FEED_PAGE_SIZE) return;
+    if (entries.length === 0 && (storedByCc.get(cc) ?? 0) > 1) return;
+    complete.add(cc);
   });
   const failed = perStorefront.filter((r) => r === null).length;
   console.log(`reviews done (${prevRated.length} storefronts${failed ? `, ${failed} failed` : ""})`);
   return { fetched: perStorefront.filter(Boolean).flat(), complete };
 }
 
+const reviewsFile = path.join(servedDataDir, "reviews.json");
+const storedReviews = await readJson(reviewsFile, []);
+const storedByCc = new Map();
+for (const r of storedReviews) if (!r.removed) storedByCc.set(r.cc, (storedByCc.get(r.cc) ?? 0) + 1);
+
 const [
   { countries, pageCounts, failed: fetchFailures, histogramFallbacks: histFallbacks },
   { fetched: fetchedReviews, complete: feedComplete },
-] = await Promise.all([ratingsPass(), reviewsPass()]);
+] = await Promise.all([ratingsPass(), reviewsPass(storedByCc)]);
 
 // Fold newly fetched reviews into the stored set.
-const reviewsFile = path.join(servedDataDir, "reviews.json");
-const storedReviews = await readJson(reviewsFile, []);
 const knownIds = new Set(storedReviews.map((r) => r.id));
 const isReviewSeed = storedReviews.length === 0;
 const newReviews = [];
@@ -312,12 +325,14 @@ console.log(`${newReviews.length} new written reviews`);
 // Reviews that have left Apple's feed. A reviewer can delete their review and
 // Apple can pull one in moderation; either way the star goes with it, so a
 // card that stays on the page forever contradicts the count beside it. But
-// the feed is flaky enough that one empty answer proves nothing, so an absence
-// is only noted on the first run (`missingSince`) and becomes a removal on a
-// later run that still cannot find it. A review that comes back clears both,
-// and says so, since a silent reappearance would be the flakiness winning.
+// the feed is flaky enough that one missed answer proves nothing, so an
+// absence is only noted on the first run (`missingSince`) and becomes a
+// removal once it has held for a day of hourly checks. A review that comes
+// back clears both, and says so, since a silent reappearance would be the
+// flakiness winning.
 // Records are flagged, never deleted: the events that announced the review
 // still refer to it, and a removal is a fact worth keeping.
+const REMOVAL_CONFIRM_MS = 24 * 3600e3;
 const fetchedIds = new Set(fetchedReviews.map((r) => r.id));
 const removedReviews = [];
 const restoredReviews = [];
@@ -336,7 +351,7 @@ for (const r of storedReviews) {
   if (!r.missingSince) {
     r.missingSince = fetchedAt;
     markedMissing++;
-  } else if (r.missingSince !== fetchedAt) {
+  } else if (new Date(fetchedAt) - new Date(r.missingSince) >= REMOVAL_CONFIRM_MS) {
     r.removed = fetchedAt;
     removedReviews.push(r);
   }
