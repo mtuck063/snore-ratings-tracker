@@ -25908,7 +25908,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-09-05T15:26:04.854Z",
+   "computedAt": "2026-09-05T15:51:51.147Z",
    "days": 3,
    "stage": "provisional",
    "baselineDays": 7,
@@ -25995,8 +25995,8 @@
        "kw": "night recorder",
        "pop": 67,
        "before": 37,
-       "after": 58,
-       "gain": -21,
+       "after": 58.5,
+       "gain": -21.5,
        "cohort": "control"
       },
       {
@@ -27203,8 +27203,8 @@
        "kw": "qualità del sonno",
        "pop": 5,
        "before": 123,
-       "after": 77,
-       "gain": 46,
+       "after": 76.5,
+       "gain": 46.5,
        "cohort": "control"
       },
       {
@@ -27227,8 +27227,8 @@
        "kw": "apple watch sonno",
        "pop": 5,
        "before": 65,
-       "after": 52.5,
-       "gain": 12.5,
+       "after": 52,
+       "gain": 13,
        "cohort": "control"
       },
       {
