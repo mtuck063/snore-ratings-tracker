@@ -25908,7 +25908,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-09-07T13:55:54.138Z",
+   "computedAt": "2026-09-07T18:23:46.120Z",
    "days": 5,
    "stage": "provisional",
    "baselineDays": 7,
@@ -25989,8 +25989,8 @@
        "kw": "teeth grinding recorder",
        "pop": 5,
        "before": 100,
-       "after": 173,
-       "gain": -73,
+       "after": 171,
+       "gain": -71,
        "cohort": "control"
       },
       {
@@ -26173,10 +26173,10 @@
       },
       {
        "kw": "snoring app",
-       "pop": 43,
+       "pop": 45,
        "before": 17,
-       "after": 27,
-       "gain": -10,
+       "after": 26.5,
+       "gain": -9.5,
        "cohort": "control"
       },
       {
@@ -26316,20 +26316,20 @@
        "cohort": "floor"
       },
       {
+       "kw": "night recorder",
+       "pop": 69,
+       "before": 177,
+       "after": 161,
+       "gain": 16,
+       "cohort": "floor"
+      },
+      {
        "kw": "sleep tracker free",
        "pop": 69,
        "before": 46,
        "after": 30.5,
        "gain": 15.5,
        "cohort": "control"
-      },
-      {
-       "kw": "night recorder",
-       "pop": 69,
-       "before": 177,
-       "after": 161.5,
-       "gain": 15.5,
-       "cohort": "floor"
       },
       {
        "kw": "teeth grinding app",
@@ -26341,7 +26341,7 @@
       },
       {
        "kw": "snoring app",
-       "pop": 45,
+       "pop": 43,
        "before": 15,
        "after": 25.5,
        "gain": -10.5,
@@ -26438,16 +26438,8 @@
        "kw": "snoring app",
        "pop": 72,
        "before": 12,
-       "after": 25,
-       "gain": -13,
-       "cohort": "control"
-      },
-      {
-       "kw": "snoring tracker",
-       "pop": 85,
-       "before": 25,
-       "after": 12.5,
-       "gain": 12.5,
+       "after": 24.5,
+       "gain": -12.5,
        "cohort": "control"
       },
       {
@@ -26459,11 +26451,19 @@
        "cohort": "floor"
       },
       {
+       "kw": "snoring tracker",
+       "pop": 85,
+       "before": 25,
+       "after": 17,
+       "gain": 8,
+       "cohort": "control"
+      },
+      {
        "kw": "teeth grinding app",
        "pop": 5,
        "before": 67,
-       "after": 75.5,
-       "gain": -8.5,
+       "after": 75,
+       "gain": -8,
        "cohort": "control"
       },
       {
@@ -27250,8 +27250,8 @@
        "kw": "diario sonno",
        "pop": 5,
        "before": 86,
-       "after": 91,
-       "gain": -5,
+       "after": 90.5,
+       "gain": -4.5,
        "cohort": "control"
       },
       {
@@ -27414,7 +27414,7 @@
      "noisy": 9,
      "ratings": {
       "before": 0.1,
-      "after": 0
+      "after": 0.2
      }
     },
     "nl": {
