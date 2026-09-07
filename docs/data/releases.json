@@ -25908,7 +25908,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-09-07T18:23:46.120Z",
+   "computedAt": "2026-09-07T18:33:49.527Z",
    "days": 5,
    "stage": "provisional",
    "baselineDays": 7,
@@ -26748,14 +26748,6 @@
        "cohort": "control"
       },
       {
-       "kw": "sommeil gratuit",
-       "pop": 64,
-       "before": 55,
-       "after": 63,
-       "gain": -8,
-       "cohort": "control"
-      },
-      {
        "kw": "mieux dormir",
        "pop": 71,
        "before": 165,
@@ -26764,19 +26756,27 @@
        "cohort": "floor"
       },
       {
-       "kw": "ronfle",
-       "pop": 58,
-       "before": 42,
-       "after": 48.5,
-       "gain": -6.5,
+       "kw": "sommeil gratuit",
+       "pop": 64,
+       "before": 55,
+       "after": 62.5,
+       "gain": -7.5,
        "cohort": "control"
       },
       {
        "kw": "apnee du sommeil gratuit",
        "pop": 91,
        "before": 29,
-       "after": 33.5,
-       "gain": -4.5,
+       "after": 35.5,
+       "gain": -6.5,
+       "cohort": "control"
+      },
+      {
+       "kw": "ronfle",
+       "pop": 58,
+       "before": 42,
+       "after": 48.5,
+       "gain": -6.5,
        "cohort": "control"
       },
       {
