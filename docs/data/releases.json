@@ -25908,7 +25908,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-09-08T16:49:10.193Z",
+   "computedAt": "2026-09-08T17:05:38.275Z",
    "days": 6,
    "stage": "provisional",
    "baselineDays": 7,
@@ -26175,7 +26175,7 @@
       },
       {
        "kw": "snoring app",
-       "pop": 45,
+       "pop": 43,
        "before": 17,
        "after": 27,
        "gain": -10,
@@ -26413,11 +26413,6 @@
      "lift": null,
      "appeared": [
       {
-       "kw": "sleep quotes-snore recorder",
-       "pop": 87,
-       "rank": 33
-      },
-      {
        "kw": "drift sleep timer",
        "pop": 5,
        "rank": 21
@@ -26426,6 +26421,11 @@
        "kw": "snoring recorder free",
        "pop": 5,
        "rank": 9
+      },
+      {
+       "kw": "sleep quotes-snore recorder",
+       "pop": 5,
+       "rank": 32
       }
      ],
      "vanished": [],
@@ -28010,11 +28010,11 @@
        "cohort": "control"
       },
       {
-       "kw": "打鼾",
-       "pop": 25,
-       "before": 160,
-       "after": 158,
-       "gain": 2,
+       "kw": "梦话监测",
+       "pop": 69,
+       "before": 68,
+       "after": 71,
+       "gain": -3,
        "cohort": "control"
       },
       {
