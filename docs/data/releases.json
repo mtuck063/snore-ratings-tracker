@@ -25908,7 +25908,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-09-09T20:14:30.938Z",
+   "computedAt": "2026-09-09T21:05:37.626Z",
    "days": 8,
    "stage": "settled",
    "baselineDays": 7,
@@ -26085,7 +26085,7 @@
      "noisy": 16,
      "ratings": {
       "before": 1.6,
-      "after": 1.4
+      "after": 1.5
      }
     },
     "ca": {
@@ -26132,8 +26132,8 @@
        "kw": "sleep train",
        "pop": 35,
        "before": 141,
-       "after": 181,
-       "gain": -40,
+       "after": 180.5,
+       "gain": -39.5,
        "cohort": "floor"
       },
       {
@@ -26186,7 +26186,7 @@
       },
       {
        "kw": "snoring app",
-       "pop": 43,
+       "pop": 45,
        "before": 17,
        "after": 26.5,
        "gain": -9.5,
@@ -26706,7 +26706,7 @@
       },
       {
        "kw": "cycle sommeil gratuit",
-       "pop": 65,
+       "pop": 68,
        "was": 22
       }
      ],
