@@ -7,6 +7,10 @@
 //
 //   node asc-reports.mjs            ingest every daily instance not seen yet
 //   node asc-reports.mjs --backfill run the one-time snapshot too (whole history)
+//   node asc-reports.mjs --reingest <family>
+//                                   re-read one family's whole history under a
+//                                   changed folding rule (discovery, downloads,
+//                                   installs, sessions); safe to repeat
 //   node asc-reports.mjs --report   what the numbers say, on stdout
 //
 // Runs locally and by hand, never in CI: the App Store Connect keys live in
@@ -64,9 +68,14 @@ const REPORTS = {
   installs: "r6",
   sessions: "r8",
 };
-// Territories worth keeping a per-day row for. Everything else folds into ZZ,
-// so a long tail of one-download countries cannot triple the file size. The
-// list is the tracked markets plus the next tier by lifetime downloads.
+// Territories worth keeping a per-day row for in the DISCOVERY and SESSIONS
+// families, which multiply territory by source or by day and would triple
+// the file on a long tail of one-impression countries. Everything else folds
+// into ZZ there. Downloads are the exception and keep every territory: one
+// row per date, territory and source is small, and the ratings table shows
+// downloads per storefront — 29 rated storefronts read as blank while their
+// 3,400 lifetime downloads sat pooled in ZZ. The list is the tracked markets
+// plus the next tier by lifetime downloads.
 const KEEP = new Set(
   "US GB CA AU FR DE JP CN KR BR NL ES MX IT SA SE CH TH RU TR PL DK NO NZ IN SG EE".split(" ")
 );
@@ -172,7 +181,8 @@ function foldDownloads(rows, acc) {
   for (const r of rows) {
     const [date, , , type, , , , source, , , territory, counts] = r;
     const n = Number(counts) || 0;
-    const k = `${date}|${terr(territory)}|${source}`;
+    // Every territory, unfolded: see KEEP.
+    const k = `${date}|${territory || "ZZ"}|${source}`;
     if (type === "First-time download") bump(acc, k, "dl", n);
     else if (type === "Redownload") bump(acc, k, "redl", n);
   }
@@ -214,7 +224,12 @@ function foldSessions(rows, acc) {
 }
 
 // --- ingest ------------------------------------------------------------------
-async function ingest({ backfill = false } = {}) {
+// `force` names report families to read again even where every instance has
+// been seen: --reingest <family> re-folds a family's whole history under a
+// changed rule (downloads went from a folded long tail to every territory).
+// Safe to repeat: days overwrite rather than add, and the snapshot and the
+// daily files reconcile by date the same way a first backfill does.
+async function ingest({ backfill = false, force = new Set() } = {}) {
   await mkdir(outDir, { recursive: true });
   const jwt = await token();
   const state = await readJson(stateFile, { seen: [], months: [], cohortsThrough: null });
@@ -232,9 +247,12 @@ async function ingest({ backfill = false } = {}) {
   const claimedDates = {}; // per report: event dates a newer file already gave us
   let ingested = 0;
 
-  const sources = backfill ? ["snapshot", "ongoing"] : ["ongoing"];
+  const sources = backfill || force.size ? ["snapshot", "ongoing"] : ["ongoing"];
   for (const which of sources) {
     for (const [name, rid] of Object.entries(REPORTS)) {
+      // A forced re-read is for the named families only; the rest still run
+      // as an ordinary ingest of whatever is new.
+      if (which === "snapshot" && !backfill && !force.has(name)) continue;
       const id = `${rid}-${REQUESTS[which]}`;
       let list;
       try {
@@ -252,7 +270,7 @@ async function ingest({ backfill = false } = {}) {
         .sort((a, b) => (a.attributes.processingDate < b.attributes.processingDate ? 1 : -1));
       const claimed = claimedDates[name] ??= new Set();
       for (const inst of daily) {
-        if (seen.has(inst.id)) continue;
+        if (seen.has(inst.id) && !force.has(name)) continue;
         const all = await rowsOf(inst.id, jwt);
         const rows = all.filter((r) => !claimed.has(r[0]));
         for (const r of all) claimed.add(r[0]);
@@ -294,6 +312,15 @@ async function ingest({ backfill = false } = {}) {
     // Each family overwrites only its own keys, so a restatement of one report
     // cannot blank the other.
     for (const [k, v] of Object.entries(disc)) if (k.startsWith(month)) shard.disc[k] = v;
+    // Downloads used to fold the long tail into ZZ and now keep every
+    // territory, so a day being re-ingested drops its old ZZ rows first:
+    // left in place they would count the same downloads twice, once pooled
+    // and once by country. A --backfill re-reads the whole history and
+    // clears them everywhere.
+    const dlDays = new Set(Object.keys(dl).map((k) => k.slice(0, 10)));
+    for (const k of Object.keys(shard.dl)) {
+      if (k.split("|")[1] === "ZZ" && dlDays.has(k.slice(0, 10))) delete shard.dl[k];
+    }
     for (const [k, v] of Object.entries(dl)) if (k.startsWith(month)) shard.dl[k] = v;
     for (const [k, v] of Object.entries(sessions)) if (k.startsWith(month)) shard.sessions[k] = v;
     delete shard.funnel; // pre-split layout
@@ -424,4 +451,11 @@ if (!(await haveCredentials())) {
   process.exit(0);
 }
 if (mode === "--report") await report();
-else await ingest({ backfill: mode === "--backfill" });
+else if (mode === "--reingest") {
+  const family = process.argv[3];
+  if (!REPORTS[family]) {
+    console.error(`usage: asc-reports.mjs --reingest <${Object.keys(REPORTS).join("|")}>`);
+    process.exit(1);
+  }
+  await ingest({ force: new Set([family]) });
+} else await ingest({ backfill: mode === "--backfill" });

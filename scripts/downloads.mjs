@@ -13,12 +13,13 @@
 // answers "how many times was this installed", which is not the question the
 // ratings table is asking.
 //
-// Territory granularity is whatever the shards kept. asc-reports.mjs folds
-// everything outside its KEEP list into ZZ to stop a long tail of
-// one-download countries tripling the file size, so a storefront outside that
-// list has no figure here at all. Recorded as absent rather than zero: a
-// market with no downloads and a market nobody counted are different, and the
-// table has to be able to tell them apart.
+// Territory granularity is whatever the shards kept. Downloads keep every
+// territory since the 2026-09-10 re-ingest; before it, asc-reports.mjs folded
+// everything outside its KEEP list into ZZ, and a --backfill re-read the
+// snapshot to split that history back out. A storefront still absent here is
+// one with no download on record at all, and it is recorded as absent rather
+// than zero: a market with no downloads and a market nobody counted are
+// different, and the table has to be able to tell them apart.
 
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -58,11 +59,8 @@ for (const f of shardFiles) {
     const row = (byCc[cc] ??= { dl: 0, redl: 0, recent: 0, d1: 0, d7: 0, from: date });
     row.dl += v.dl ?? 0;
     row.redl += v.redl ?? 0;
-    // The first day this territory was counted SEPARATELY, which is not the
-    // first day it had downloads. A territory added to KEEP later starts here
-    // with everything before it pooled into ZZ and unrecoverable, so a total
-    // read as lifetime would be a lie -- Singapore showed 1 download against
-    // 5 ratings the day it was added. The table needs to be able to say so.
+    // The first day this territory had a download on record. Every territory
+    // is counted separately for the whole history, so this is a first sale.
     if (date < row.from) row.from = date;
   }
 }
@@ -96,26 +94,13 @@ if (cutoff) {
   }
 }
 
-// A territory added to the shards' KEEP list late has everything before that
-// pooled into ZZ and unrecoverable, so its total is a floor. The signal is a
-// first record long after the ledger opens -- but "long after" has to clear
-// the ordinary case of a small market simply not selling on day one, which is
-// why this is a threshold and not a strict inequality. The gap is not close:
-// every organic market here starts within 40 days of the ledger, and every
-// late addition starts 348 days or more in.
-//
-// A first record is the weaker signal, though. asc-reports.mjs is the thing
-// that actually knows when a territory entered KEEP, and recording that in
-// its state file would make this exact rather than inferred. Worth doing the
-// next time that list changes.
-const LATE_ADD_DAYS = 180;
-const opened = new Date(`${allDates[0]}T00:00Z`).getTime();
-
+// Every territory is split out for the whole history since the 2026-09-10
+// re-ingest, so a first record late in the ledger is a late first sale, not
+// a late addition to a keep list. The `partial` floor marker that used to be
+// inferred from that gap is gone with the pooling that made it necessary; a
+// figure here is the whole count on record.
 const countries = {};
-for (const [cc, v] of Object.entries(byCc)) {
-  const lateBy = (new Date(`${v.from}T00:00Z`).getTime() - opened) / 864e5;
-  countries[cc.toLowerCase()] = { ...v, ...(lateBy > LATE_ADD_DAYS && { partial: true }) };
-}
+for (const [cc, v] of Object.entries(byCc)) countries[cc.toLowerCase()] = { ...v };
 
 const total = Object.values(byCc).reduce(
   (s, v) => ({
