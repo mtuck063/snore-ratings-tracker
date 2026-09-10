@@ -2804,6 +2804,9 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
         // recommendation seats these first; the chip says why, so dropping
         // one is a decision rather than an accident.
         const holdingWhat = new Map();
+        // Words pinned for this market in scripts/keywords.json: kept by the
+        // owner's decision, which the numbers do not get to overrule.
+        const pinnedKeys = new Set((b.keep ?? []).map((w) => wordKeys[w] ?? keyOf.get(w) ?? w));
         if (yourCovers != null) {
             for (const t of b.terms) {
                 if (t.rank == null || t.rank > 10) continue;
@@ -2816,7 +2819,8 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
         // Wasted words first: they are the ones to reclaim characters from,
         // then the idle, then the workers, with the ones holding a page-one
         // ranking last — the end of the row is where the eye stops.
-        const chipRank = (u) => (claimedKeys.has(u) ? 0 : !useful.has(u) ? 1 : holdingWhat.has(u) ? 3 : 2);
+        const chipRank = (u) =>
+            claimedKeys.has(u) ? 0 : !useful.has(u) && !pinnedKeys.has(u) ? 1 : holdingWhat.has(u) || pinnedKeys.has(u) ? 3 : 2;
         for (const u of [...picked].sort((x, y) => chipRank(x) - chipRank(y))) {
             // Four states. A word your title or subtitle already carries looks
             // idle here because no phrase needs it *from this field* — but
@@ -2825,12 +2829,16 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
             // opposite of true.
             const duplicate = claimedKeys.has(u);
             const holdingList = holdingWhat.get(u);
+            const pinned = pinnedKeys.has(u);
             const chip = document.createElement("button");
             chip.className =
-                "fb-chip" + (duplicate ? " dupe" : !useful.has(u) ? " idle" : holdingList ? " hold" : "");
+                "fb-chip" +
+                (duplicate ? " dupe" : pinned ? " hold" : !useful.has(u) ? " idle" : holdingList ? " hold" : "");
             chip.dataset.tip = duplicate
                 ? "Already in your title or subtitle. The phrases using it rank either way, so these characters buy nothing here."
-                : holdingList
+                : pinned
+                  ? "Pinned for this market in scripts/keywords.json: kept whatever the numbers say, because the numbers only see tracked phrases and this word buys ones you know are worth it."
+                  : holdingList
                   ? `Holding a page-one ranking today: ${holdingList.slice(0, 3).join(", ")}${holdingList.length > 3 ? ` and ${holdingList.length - 3} more` : ""}. Whether the word is what earns it cannot be known from here, so treat dropping it as a test with a ranking at stake.`
                   : useful.has(u)
                     ? "Carrying at least one covered phrase"

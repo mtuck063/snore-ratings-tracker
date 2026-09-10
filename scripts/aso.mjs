@@ -1304,7 +1304,7 @@ function analyseMarket(cc) {
     // field should say does not depend on anyone having written down what it
     // says now.
     recommended: recommendField(cc, terms, meta, model),
-    builder: builderFor(model, meta, lang, free),
+    builder: builderFor(model, meta, lang, free, cc),
     byIntent,
     shoppingList: shoppingList.slice(0, 12),
     unusedFieldWords: unused,
@@ -1765,20 +1765,32 @@ function recommendField(cc, terms, meta, model) {
   // to be: dropping a page-one ranking to test the point is not the tool's
   // call to make.
   const holding = [];
+  const seat = (key, text, list) => {
+    if (have.has(key)) return;
+    const cost = text.length + (picks.length ? 1 : 0);
+    if (chars + cost > FIELD_LIMIT) return;
+    picks.push(text);
+    have.add(key);
+    chars += cost;
+    list.push(text);
+  };
+  // Pinned words come first of all: `keep` on the market in
+  // scripts/keywords.json is the owner saying a word stays whatever the
+  // numbers say. The numbers only see tracked phrases, and "apple watch" was
+  // dropped while "sleep apnea apple watch" — the highest-demand watch
+  // phrase in the market — was not tracked. A hand pin beats a rule here as
+  // it does for intents.
+  const pinned = [];
+  for (const w of markets[cc]?.keep ?? []) {
+    const key = stem(w, lang);
+    seat(key, label.get(key) ?? w, pinned);
+  }
   if (currentKeys) {
     for (const r of rows) {
       if (r.rank == null || r.rank > 10) continue;
       const alt = r.alts.find((a) => a.length && a.every((u) => satisfies(u, currentKeys)));
       if (!alt) continue;
-      for (const u of alt) {
-        if (have.has(u)) continue;
-        const cost = label.get(u).length + (picks.length ? 1 : 0);
-        if (chars + cost > FIELD_LIMIT) continue;
-        picks.push(label.get(u));
-        have.add(u);
-        chars += cost;
-        holding.push(label.get(u));
-      }
+      for (const u of alt) seat(u, label.get(u), holding);
     }
   }
 
@@ -1830,6 +1842,7 @@ function recommendField(cc, terms, meta, model) {
     covers: covered.length,
     of: rows.length,
     reachable: reachable(have),
+    ...(pinned.length && { pinned }),
     ...(currentKeys && {
       currentCovers: rows.filter(holds).length,
       currentReachable: reachable(currentKeys),
@@ -1858,7 +1871,7 @@ function recommendField(cc, terms, meta, model) {
 // The same model, shipped to the page. The browser needs the label for every
 // unit so a chip reads "talk" rather than its stem, and nothing else: coverage
 // there is the satisfies() rule above, which is set arithmetic over these keys.
-function builderFor(model, meta, lang, free = []) {
+function builderFor(model, meta, lang, free = [], cc = null) {
   return {
     // Where a word already lives, because the three fields do not carry equal
     // weight: a phrase whose words sit only in the keyword field has a wording
@@ -1877,6 +1890,9 @@ function builderFor(model, meta, lang, free = []) {
     // because this one is a note in the repo and App Store Connect is the
     // only place the real value lives.
     current: meta?.keywordField ?? null,
+    // Words the owner has pinned for this market, so the page can say why a
+    // chip stays when the numbers alone would not keep it.
+    keep: [...(markets[cc]?.keep ?? [])],
     terms: model.rows,
   };
 }
@@ -1891,6 +1907,7 @@ function fieldFor(cc) {
     `covers ${r.covers}/${r.of} chaseable terms, ${r.reachable} reachable demand` +
       (r.currentReachable != null ? ` (current field: ${r.currentCovers}/${r.of}, ${r.currentReachable})` : "")
   );
+  if (r.pinned?.length) console.log(`pinned: ${r.pinned.join(", ")}  (keep list in scripts/keywords.json, seated before anything)`);
   if (r.holding?.length) console.log(`holds: ${r.holding.join(", ")}  (carrying a page-one phrase today, seated first)`);
   if (r.adds) console.log(`adds:  ${r.adds.join(", ") || "nothing"}`);
   if (r.drops) console.log(`drops: ${r.drops.join(", ") || "nothing"}`);

@@ -378,6 +378,13 @@ and the builder agree:
   "snore detector" sat at #12 under an open head. Whether the word is
   load-bearing cannot be known from here, so every such word is assumed to be.
 
+And one price the numbers do not set: a `keep` list on a market in
+`scripts/keywords.json` seats those words before anything else. The numbers
+only see tracked phrases, and they dropped "apple watch" from the US field
+while "sleep apnea apple watch", the highest-demand watch phrase in the
+market, was not tracked. A hand pin beats a rule here as it does for intents;
+the fix for the blind spot itself is to track the phrase.
+
 One word is priced at nothing by measurement: "free". After 4.19 removed it
 from the US subtitle, every free phrase ranked as well as or better than its
 base phrase — "snore tracker free" #2 against "snore tracker" #10 — with the

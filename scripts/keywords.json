@@ -3,6 +3,10 @@
   "markets": {
     "us": {
       "storefront": "143441-1,29",
+      "keep": [
+        "apple",
+        "watch"
+      ],
       "extraKeywords": [
         "snore detector",
         "snore diary",
@@ -43,7 +47,10 @@
         "smart sleep alarm",
         "snore recorder app free",
         "free snore recorder",
-        "sleep tracker and sleep recorder"
+        "sleep tracker and sleep recorder",
+        "sleep apnea apple watch",
+        "apple watch sleep tracker free",
+        "sleep tracker for apple watch"
       ]
     },
     "ca": {
