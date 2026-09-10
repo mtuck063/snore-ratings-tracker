@@ -206,14 +206,23 @@ const MARKET_LANG = { us: "en", ca: "en", gb: "en", au: "en", fr: "fr", es: "es"
 // segmentation rather than word membership, and cjkGaps already widens any
 // one-character run back to the phrase it came from, so a bare particle cannot
 // surface as a gap there in the first place.
+// Words Apple matches on the app's price rather than its text. Measured, not
+// assumed: after 4.19 removed "Free" from the US subtitle, every free phrase
+// ranked as well as or better than its base phrase — "snore tracker free" #2
+// against "snore tracker" #10, "free snoring app" #2 against "snoring app"
+// #102 — with the word nowhere in the listing. A field spending five
+// characters on it buys nothing, and a shopping list ranking it first is
+// wrong. English only until another market shows the same.
+const PRICE_WORDS = { en: ["free"] };
 const skipCache = new Map();
 function skipFor(cc) {
   if (!skipCache.has(cc)) {
     const lang = langOf(cc);
     const list = (overrides.functionWords ?? FUNCTION_WORDS)[lang] ?? [];
+    const priced = (overrides.priceWords ?? PRICE_WORDS)[lang] ?? [];
     // The function words are in that language, so they are stemmed under its
     // rules too: German "einen" has to reduce the same way the term does.
-    skipCache.set(cc, new Set([...implicit, ...list.map((w) => stem(w, lang))]));
+    skipCache.set(cc, new Set([...implicit, ...[...list, ...priced].map((w) => stem(w, lang))]));
   }
   return skipCache.get(cc);
 }
@@ -974,6 +983,58 @@ function scoreOf({ pop, rank, intent, cov, diff, fresh, headroom }) {
 // the ranking rather than first entry.
 const LEVERS = { covered: 1, unknown: 1, cheap: 1.25, dear: 0.85, bridged: 0.3 };
 
+// --- reachable demand ------------------------------------------------------
+//
+// Demand is only worth what a word can reach. The slot log says which slots
+// above a phrase are welded shut (see difficulty), and the taps a searcher
+// gives a results page are not spread evenly across it: the top slot takes
+// the lion's share and the tail takes crumbs. So a phrase is worth its demand
+// times the share of page-one taps sitting at or below its ceiling.
+//
+// The shares are an ASSUMPTION, deliberately coarse — Apple publishes no
+// click curve for search — and kept steep at the top because every public
+// estimate of one is. They decide the ratio between an open head and a
+// welded one, not fine differences, and the difficulty discount does the
+// finer work. Change them here and only here.
+const SLOT_SHARE = [0.3, 0.16, 0.11, 0.08, 0.07, 0.06, 0.06, 0.06, 0.05, 0.05];
+// What is left for a phrase whose whole page one is a closed club: the
+// second-page trickle, not zero, because #11 is still a result.
+const BEYOND_PAGE_ONE = 0.05;
+function reachOf(hard) {
+  if (!hard || hard.ceiling == null) return 1; // no head recorded, or we hold #1
+  if (hard.headroom === 0) return 0; // directly under a welded head: nothing above to win
+  if (hard.ceiling > 10) return BEYOND_PAGE_ONE;
+  return Math.round(SLOT_SHARE.slice(hard.ceiling - 1).reduce((a, b) => a + b, 0) * 100) / 100;
+}
+// The head above a phrase, as one word the page can show on a chip.
+function headOf(hard) {
+  if (!hard || hard.ceiling == null) return "open";
+  if (hard.headroom === 0) return "defend";
+  if (hard.ceiling > 10) return "closed";
+  if (hard.club) return "club";
+  return hard.welded?.length ? "welded" : "open";
+}
+// What unlocking a phrase is worth to the field: demand, intent, freshness,
+// the reachable share, the difficulty discount the chase list already
+// applies, and the bridged discount for a phrase Apple ranks without the
+// word. One function, so the recommendation, the shopping list and the page
+// price the same phrase the same way.
+//
+// `held` says the current field already satisfies the phrase. Bridged is for
+// a phrase that ranks WITHOUT its words; one that ranks with them in the
+// field is evidence the words work, and pricing it at 30% made the pack drop
+// "quality" from under "sleep quality tracker" at #17 to buy an unranked
+// phrase half its size.
+const worthOf = (r, held = false) =>
+  r.pop <= POP_FLOOR
+    ? 0
+    : r.pop *
+      FIT[r.intent] *
+      freshness(r.kw) *
+      (r.reach ?? 1) *
+      ease(r.diff ?? null) *
+      (r.rank == null || held ? 1 : LEVERS.bridged);
+
 // popScore returns 5 for a term autocomplete never surfaces at any prefix of
 // itself, so 5 is a floor sentinel and not a measurement — US values jump
 // straight from 5 to 37 with nothing between. Summing it as demand invents
@@ -1077,7 +1138,13 @@ function analyseMarket(cc) {
     // vocabulary. Latin only: an unsegmented CJK phrase is one token and
     // would always read as coined. Hand pins in intents.json still win.
     if (held && !hasCJK(kw) && !overrides.intents?.[kw] && intent !== "brand" && intent !== "mine") {
-      if (coinedWordIn(kw)) intent = "brand";
+      // A phrase of three or more words that is an app's name in full is that
+      // app's name: "cozy sleep time games" and "drift sleep timer" are typed
+      // by people looking for those apps, whatever their words mean apart.
+      // Two-word names keep their generic reading — "snore diary" is both an
+      // app and a thing people want — because there the generic half is most
+      // of the demand.
+      if (coinedWordIn(kw) || tokens(kw).length >= 3) intent = "brand";
     }
     terms[kw] = {
       ...(held && { nameHeld: held }),
@@ -1128,12 +1195,21 @@ function analyseMarket(cc) {
     // listing. Count those phrases at LEVERS.bridged so the list ranks what
     // a word genuinely unlocks, and carry the granted remainder so the
     // report can show what was priced out.
+    // Priced the way the field recommendation prices it: by the demand a word
+    // can actually reach past the welded head, after the difficulty discount.
+    // The raw demand rides along so the report can show what the head ate.
+    const reach = reachOf(t.hard);
+    const head = headOf(t.hard);
     const worth =
-      t.pop <= POP_FLOOR ? 0 : t.rank == null ? t.pop : Math.round(t.pop * LEVERS.bridged);
+      t.pop <= POP_FLOOR
+        ? 0
+        : Math.round(t.pop * reach * ease(t.hard?.score ?? null) * (t.rank == null ? 1 : LEVERS.bridged));
     for (const w of t.missing) {
-      (blocked[w] ??= { word: w, terms: [], demand: 0, ...(STOPWORD.test(w) && { weak: true }) });
+      (blocked[w] ??= { word: w, terms: [], demand: 0, raw: 0, heads: {}, ...(STOPWORD.test(w) && { weak: true }) });
       blocked[w].terms.push(kw);
       blocked[w].demand += worth;
+      blocked[w].raw += t.pop <= POP_FLOOR ? 0 : t.pop;
+      blocked[w].heads[head] = (blocked[w].heads[head] ?? 0) + 1;
       if (t.rank != null) blocked[w].granted = (blocked[w].granted ?? 0) + (t.pop - worth);
     }
   }
@@ -1390,6 +1466,7 @@ async function writeData() {
       // The page rescores against a pasted keyword field, so it needs the same
       // constants rather than a second copy of them.
       discount: MAX_DISCOUNT,
+      fit: FIT,
       markets: all,
     })
   );
@@ -1639,7 +1716,19 @@ function altsFor(terms, meta, lang, free = implicit) {
       unique.push([...a].sort());
       if (unique.length >= MAX_ALTS) break;
     }
-    rows.push({ kw, pop: t.pop, intent: t.intent, rank: t.rank, alts: unique });
+    rows.push({
+      kw,
+      pop: t.pop,
+      intent: t.intent,
+      rank: t.rank,
+      alts: unique,
+      // The head above the phrase and what that leaves reachable, so the
+      // recommendation and the page price a phrase by what a word can win.
+      reach: reachOf(t.hard),
+      head: headOf(t.hard),
+      ...(t.hard?.ceiling != null && { ceiling: t.hard.ceiling }),
+      ...(t.hard?.score != null && { diff: t.hard.score }),
+    });
   }
   const units = [...new Set(rows.flatMap((r) => r.alts.flat()))].sort();
   for (const u of units) if (!label.has(u)) label.set(u, u);
@@ -1664,6 +1753,34 @@ function recommendField(cc, terms, meta, model) {
   const picks = [];
   const have = new Set();
   let chars = 0;
+  const currentKeys = meta?.keywordField ? new Set(words(meta.keywordField, lang)) : null;
+
+  // Holding before gaining. A word in the current field that carries a
+  // page-one phrase is doing a job today, and a pack that scored only what a
+  // newcomer adds would drop it whenever a bigger unranked phrase wanted the
+  // characters — "detector" went, and "snore detector" sat at #12 under an
+  // open head. Those words are seated first, cheapest satisfying set per
+  // phrase, and the greedy pass below competes for what is left. Whether the
+  // word is load-bearing cannot be known from here, so every one is assumed
+  // to be: dropping a page-one ranking to test the point is not the tool's
+  // call to make.
+  const holding = [];
+  if (currentKeys) {
+    for (const r of rows) {
+      if (r.rank == null || r.rank > 10) continue;
+      const alt = r.alts.find((a) => a.length && a.every((u) => satisfies(u, currentKeys)));
+      if (!alt) continue;
+      for (const u of alt) {
+        if (have.has(u)) continue;
+        const cost = label.get(u).length + (picks.length ? 1 : 0);
+        if (chars + cost > FIELD_LIMIT) continue;
+        picks.push(label.get(u));
+        have.add(u);
+        chars += cost;
+        holding.push(label.get(u));
+      }
+    }
+  }
 
   while (true) {
     const unmet = rows.filter((r) => !satisfiedBy(r.alts, have));
@@ -1677,17 +1794,17 @@ function recommendField(cc, terms, meta, model) {
         if (chars + cost > FIELD_LIMIT) continue;
         const next = new Set([...have, ...need]);
         let gain = 0;
-        // Same discounts the score uses. Freshness: without it the pack kept
-        // buying last year's number for as long as anyone still searched it,
-        // while the panel above the builder called the same word waste.
-        // Bridged: a phrase Apple already ranks without its missing words
-        // ("snore diary" sat #5 with no "diary" anywhere) delivers most of
-        // its demand free, so completing it counts at LEVERS.bridged and the
-        // characters go to phrases they genuinely unlock.
+        // Priced by worthOf: the same discounts the chase list applies, plus
+        // the reachable share. Freshness, or the pack kept buying last year's
+        // number for as long as anyone still searched it. Bridged, or a
+        // phrase Apple already ranks without its words ("snore diary" sat #5
+        // with no "diary" anywhere) was valued as if the word unlocked it.
+        // Reach, or three of seven added words were justified by phrases
+        // under welded heads. Difficulty, or the builder and the chase list
+        // disagreed about which phrases were worth characters.
         for (const o of unmet)
           if (satisfiedBy(o.alts, next))
-            gain +=
-              o.pop * FIT[o.intent] * freshness(o.kw) * (o.rank == null ? 1 : LEVERS.bridged);
+            gain += worthOf(o, Boolean(currentKeys && satisfiedBy(o.alts, currentKeys)));
         if (gain > 0 && (!best || gain / cost > best.gain / best.cost)) best = { need, gain, cost };
       }
     }
@@ -1701,17 +1818,28 @@ function recommendField(cc, terms, meta, model) {
 
   const field = picks.join(",");
   const covered = rows.filter((r) => satisfiedBy(r.alts, have));
-  const currentKeys = meta?.keywordField ? new Set(words(meta.keywordField, lang)) : null;
   const holds = (r) => currentKeys && satisfiedBy(r.alts, currentKeys);
+  // What the pack is worth in reachable demand, beside the phrase count: the
+  // count treats a phrase under a five-app club like one with an open head.
+  const reachable = (set) =>
+    Math.round(rows.filter((r) => satisfiedBy(r.alts, set)).reduce((n, r) => n + r.pop * (r.reach ?? 1), 0));
 
   return {
     field,
     chars: field.length,
     covers: covered.length,
     of: rows.length,
+    reachable: reachable(have),
     ...(currentKeys && {
       currentCovers: rows.filter(holds).length,
-      adds: picks.filter((p) => !currentKeys.has(stem(p, lang))),
+      currentReachable: reachable(currentKeys),
+      // Words of the current field seated first because they carry a
+      // page-one phrase today.
+      holding,
+      // Tested with the same containment rule coverage uses, so a Japanese
+      // field entry that already contains a picked piece is not reported as
+      // gaining it — the old exact-key test listed アプリ as both held and added.
+      adds: picks.filter((p) => !satisfies(stem(p, lang), currentKeys)),
       // Read off the field itself, so a dropped word is shown the way it is
       // written there rather than as the stem it matches on.
       // A function word in the current field IS a drop: Apple matches it for
@@ -1759,7 +1887,11 @@ function fieldFor(cc) {
   if (!m.listing) return console.log(`${cc}: no listing recorded; run --fetch first`);
   const r = m.recommended;
   console.log(`${cc}: recommended field (${r.chars}/${FIELD_LIMIT})\n\n${r.field}\n`);
-  console.log(`covers ${r.covers}/${r.of} chaseable terms`);
+  console.log(
+    `covers ${r.covers}/${r.of} chaseable terms, ${r.reachable} reachable demand` +
+      (r.currentReachable != null ? ` (current field: ${r.currentCovers}/${r.of}, ${r.currentReachable})` : "")
+  );
+  if (r.holding?.length) console.log(`holds: ${r.holding.join(", ")}  (carrying a page-one phrase today, seated first)`);
   if (r.adds) console.log(`adds:  ${r.adds.join(", ") || "nothing"}`);
   if (r.drops) console.log(`drops: ${r.drops.join(", ") || "nothing"}`);
   console.log(`\nProposal only. Check it against the shopping list in --report before shipping it.`);

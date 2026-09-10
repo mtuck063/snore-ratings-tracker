@@ -353,10 +353,44 @@ Two of the five need history to say anything. Stasis needs five day-boundaries
 of turnover before it reports, and momentum needs the growth series to span
 twenty hours. Both start empty on a fresh install and fill themselves in.
 
+**What the field recommendation pays for.** A word is worth the phrases it
+unlocks, and a phrase is worth what a word can reach, which is not its demand.
+Four prices apply, all in `worthOf`, so the recommendation, the shopping list
+and the builder agree:
+
+- **Reach.** The slot log says which slots above a phrase are welded shut, and
+  taps are not spread evenly down a results page. A phrase counts its demand
+  times the share of page-one taps at or below its ceiling: an open head keeps
+  all of it, a ceiling of #6 keeps what the tail is worth, a page one that is a
+  closed club keeps the second-page trickle, and a phrase you hold directly
+  under a welded head is worth nothing to add for — it is already ranking. The
+  per-slot shares are an assumption, coarse and steep at the top, kept in one
+  place (`SLOT_SHARE`).
+- **Difficulty.** The same discount the chase list applies, up to 60%, so the
+  builder stops recommending phrases the chase list has already marked as a
+  wall.
+- **Bridged.** A phrase Apple already ranks without the word counts at 30%.
+  Only without: a phrase ranking with the word in your current field is
+  evidence the word works, and counts in full.
+- **Holding before gaining.** A word in your current field that carries a
+  page-one phrase today is seated first and the greedy pass competes for the
+  rest. Before this, "detector" was dropped for a bigger unranked phrase while
+  "snore detector" sat at #12 under an open head. Whether the word is
+  load-bearing cannot be known from here, so every such word is assumed to be.
+
+One word is priced at nothing by measurement: "free". After 4.19 removed it
+from the US subtitle, every free phrase ranked as well as or better than its
+base phrase — "snore tracker free" #2 against "snore tracker" #10 — with the
+word nowhere in the listing. Apple matches it on price. It sits in
+`PRICE_WORDS` beside the function words, English only until another market
+shows the same.
+
 The dashboard turns this into a field builder: start from the recommendation,
 drop a word to see what it was holding up, add one to see what it buys, and
-watch characters, phrases covered, total Pop and the intent mix move as you
-edit.
+watch characters, phrases covered, reachable demand and the intent mix move as
+you edit. Each phrase carries its head — open, welded, club, closed, or a
+defend — so a trade that swaps an open phrase for one under a club reads as
+the loss it is.
 
 It also names the characters that are buying nothing, in four kinds, ordered by
 how sure it is:

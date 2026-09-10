@@ -2537,6 +2537,16 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
 
         const covered = b.terms.filter((t) => holdsIn(t, picked));
         const coveredPop = covered.reduce((n, t) => n + t.pop, 0);
+        // Reachable demand: popularity times the share of page-one taps at or
+        // below the phrase's ceiling, as scripts/aso.mjs prices it. The raw
+        // popularity treats a phrase under a five-app club like one with an
+        // open head; this is the number the recommendation was built on.
+        const reachOf = (t) => t.pop * (t.reach ?? 1);
+        const coveredReach = Math.round(covered.reduce((n, t) => n + reachOf(t), 0));
+        const reachTotal = Math.round(b.terms.reduce((n, t) => n + reachOf(t), 0));
+        const yourReach = input.value.trim()
+            ? Math.round(b.terms.filter((t) => holdsIn(t, yourKeys)).reduce((n, t) => n + reachOf(t), 0))
+            : null;
         const chars = charsOf(picked);
 
         // What the title and subtitle carry on their own. The totals are for
@@ -2555,29 +2565,35 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
                 `${denominatorTip} Of those, title and subtitle cover ${free.length} on their own, so these hundred characters are winning the other ${covered.length - free.length}.`,
                 { key: "phrases" }
             ),
-            tile(coveredPop.toLocaleString("en-US"), `popularity of ${popTotal.toLocaleString("en-US")}`),
-            yourPop == null
-                ? tile("\u2014", "vs your keywords", "", "Paste your keywords above to compare")
+            tile(
+                coveredReach.toLocaleString("en-US"),
+                `reachable demand of ${reachTotal.toLocaleString("en-US")}`,
+                "",
+                `Popularity weighted by what a word can still win: the share of page-one taps at or below each phrase's ceiling. Raw popularity covered is ${coveredPop.toLocaleString("en-US")} of ${popTotal.toLocaleString("en-US")}; the gap is demand sitting under welded heads and closed clubs, which no keyword reaches.`
+            ),
+            yourReach == null
+                ? tile("—", "vs your keywords", "", "Paste your keywords above to compare")
                 : // Which way round, spelled out. "+426 pop vs your field" was
                   // read as your field being ahead by 426, when it is the draft
                   // that is ahead — a sign convention is not an explanation.
                   tile(
-                      (coveredPop - yourPop >= 0 ? "+" : "\u2212") +
-                          Math.abs(coveredPop - yourPop).toLocaleString("en-US"),
+                      (coveredReach - yourReach >= 0 ? "+" : "−") +
+                          Math.abs(coveredReach - yourReach).toLocaleString("en-US"),
                       // Names both sides. "+426 more popularity than your
                       // keywords" left it to the reader to guess what the 426
                       // belonged to.
-                      coveredPop === yourPop
+                      coveredReach === yourReach
                           ? `the draft keywords tie yours (yours cover ${yourCovers})`
-                          : coveredPop > yourPop
-                            ? `more popularity in the draft keywords than in yours (yours cover ${yourCovers})`
-                            : `less popularity in the draft keywords than in yours (yours cover ${yourCovers})`,
-                      coveredPop >= yourPop ? "good" : "bad",
-                      coveredPop > yourPop
+                          : coveredReach > yourReach
+                            ? `more reachable demand in the draft keywords than in yours (yours cover ${yourCovers})`
+                            : `less reachable demand in the draft keywords than in yours (yours cover ${yourCovers})`,
+                      coveredReach >= yourReach ? "good" : "bad",
+                      (coveredReach > yourReach
                           ? "The draft keywords above are ahead. Copying them into App Store Connect is the gain."
-                          : coveredPop < yourPop
+                          : coveredReach < yourReach
                             ? "Your saved keywords are ahead of the draft keywords. Keep what you have, or edit the draft until it wins."
-                            : "Both cover the same demand."
+                            : "Both cover the same demand.") +
+                          ` Raw popularity: draft ${coveredPop.toLocaleString("en-US")}, yours ${yourPop.toLocaleString("en-US")}.`
                   )
         );
 
@@ -2624,9 +2640,34 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
                         note.textContent = t.note;
                         name.appendChild(note);
                     }
+                    // The head above the phrase, so a trade that swaps an open
+                    // phrase for one under a club reads as the loss it is.
+                    if (t.head && t.head !== "open") {
+                        const head = document.createElement("span");
+                        head.className = `badge kw-ceil kw-head-${t.head}`;
+                        head.textContent =
+                            t.head === "defend"
+                                ? "under a welded head"
+                                : t.head === "closed"
+                                  ? "page one is a club"
+                                  : t.head === "club"
+                                    ? `club · ceiling #${t.ceiling}`
+                                    : `ceiling #${t.ceiling}`;
+                        head.dataset.tipTitle = "Welded head";
+                        head.dataset.tip =
+                            t.head === "defend"
+                                ? "You rank directly under slots that have been held on nearly every day. Nothing above you is winnable, so this phrase is worth nothing to add for — it is already yours to keep."
+                                : t.head === "closed"
+                                  ? "The same ten apps have filled page one on nearly every day. A keyword can land you at #11 at best, so only the second-page trickle counts."
+                                  : `Slots #1–#${t.ceiling - 1} have been held on nearly every day. Only the taps at #${t.ceiling} and below count toward this phrase.`;
+                        name.appendChild(head);
+                    }
                     const val = document.createElement("span");
                     val.className = "gap-term-val";
-                    val.textContent = `${t.pop} popularity`;
+                    val.textContent =
+                        t.reach != null && t.reach < 1
+                            ? `${Math.round(t.pop * t.reach)} reachable of ${t.pop}`
+                            : `${t.pop} popularity`;
                     li.className = cls;
                     li.append(name, val);
                     ul.appendChild(li);
@@ -2758,22 +2799,42 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
 
         chipRow.replaceChildren();
         const useful = new Set(covered.flatMap((t) => t.alts.find((a) => a.every((u) => sat(u))) ?? []));
-        // Wasted words first: they are the ones to reclaim characters from.
-        const chipRank = (u) => (claimedKeys.has(u) ? 0 : useful.has(u) ? 2 : 1);
+        // Words holding a page-one ranking today: in your pasted field, and
+        // part of the set that satisfies a phrase ranked in the top ten. The
+        // recommendation seats these first; the chip says why, so dropping
+        // one is a decision rather than an accident.
+        const holdingWhat = new Map();
+        if (yourCovers != null) {
+            for (const t of b.terms) {
+                if (t.rank == null || t.rank > 10) continue;
+                const alt = t.alts.find((a) => a.length && a.every((u) => sat(u, yourKeys)));
+                if (!alt) continue;
+                for (const u of alt)
+                    if (yourKeys.has(u)) (holdingWhat.get(u) ?? holdingWhat.set(u, []).get(u)).push(`${t.kw} #${t.rank}`);
+            }
+        }
+        // Wasted words first: they are the ones to reclaim characters from,
+        // then the idle, then the workers, with the ones holding a page-one
+        // ranking last — the end of the row is where the eye stops.
+        const chipRank = (u) => (claimedKeys.has(u) ? 0 : !useful.has(u) ? 1 : holdingWhat.has(u) ? 3 : 2);
         for (const u of [...picked].sort((x, y) => chipRank(x) - chipRank(y))) {
-            // Three states, not two. A word your title or subtitle already
-            // carries looks idle here because no phrase needs it *from this
-            // field* — but phrases do use it, and they rank. Calling that "not
-            // completing any phrase" reads as "no phrase wants this word",
-            // which is the opposite of true.
+            // Four states. A word your title or subtitle already carries looks
+            // idle here because no phrase needs it *from this field* — but
+            // phrases do use it, and they rank. Calling that "not completing
+            // any phrase" reads as "no phrase wants this word", which is the
+            // opposite of true.
             const duplicate = claimedKeys.has(u);
+            const holdingList = holdingWhat.get(u);
             const chip = document.createElement("button");
-            chip.className = "fb-chip" + (duplicate ? " dupe" : useful.has(u) ? "" : " idle");
+            chip.className =
+                "fb-chip" + (duplicate ? " dupe" : !useful.has(u) ? " idle" : holdingList ? " hold" : "");
             chip.dataset.tip = duplicate
                 ? "Already in your title or subtitle. The phrases using it rank either way, so these characters buy nothing here."
-                : useful.has(u)
-                  ? "Carrying at least one covered phrase"
-                  : "Not completing any phrase right now \u2014 dead characters unless something else joins it";
+                : holdingList
+                  ? `Holding a page-one ranking today: ${holdingList.slice(0, 3).join(", ")}${holdingList.length > 3 ? ` and ${holdingList.length - 3} more` : ""}. Whether the word is what earns it cannot be known from here, so treat dropping it as a test with a ranking at stake.`
+                  : useful.has(u)
+                    ? "Carrying at least one covered phrase"
+                    : "Not completing any phrase right now — dead characters unless something else joins it";
             chip.append(document.createTextNode(show(u)));
             const x = document.createElement("span");
             x.className = "fb-x";
@@ -2802,14 +2863,23 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
                 .sort((a, c) => a.length - c.length || a.join().length - c.join().length)[0];
             if (!need?.length) continue;
             const key = [...need].sort().join("\u0001");
-            const entry = gain.get(key) ?? { pop: 0, granted: 0, terms: [], need };
-            // Same number the script's shopping list uses: a phrase Apple
-            // already ranks without these words counts at levers.bridged,
-            // because that demand arrives free and the characters buy a
-            // firmer grip on it, not first entry.
-            const worth = t.rank == null ? t.pop : Math.round(t.pop * (plan?.levers?.bridged ?? 0.3));
+            const entry = gain.get(key) ?? { pop: 0, raw: 0, granted: 0, terms: [], need };
+            // The same price the recommendation pays (worthOf in
+            // scripts/aso.mjs, constants shipped in aso.json): demand, times
+            // the reachable share below the phrase's ceiling, times the
+            // difficulty discount, times the searcher fit. A phrase Apple
+            // ranks WITHOUT these words counts at levers.bridged — that
+            // demand arrives free — unless your pasted field already carries
+            // them, which is evidence the words work.
+            const discount = plan?.discount ?? 0.6;
+            const ease = t.diff == null ? 1 : 1 - discount * (t.diff / 100);
+            const fit = plan?.fit?.[t.intent] ?? 1;
+            const heldByYours = yourCovers != null && holdsIn(t, yourKeys);
+            const bridged = t.rank == null || heldByYours ? 1 : (plan?.levers?.bridged ?? 0.3);
+            const worth = Math.round(t.pop * (t.reach ?? 1) * ease * fit * bridged);
             entry.pop += worth;
-            if (t.rank != null) entry.granted += t.pop - worth;
+            entry.raw += t.pop;
+            if (t.rank != null && !heldByYours) entry.granted += Math.round(t.pop * (1 - bridged));
             entry.terms.push(t.kw);
             gain.set(key, entry);
         }
@@ -2838,11 +2908,12 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
             });
             const n = document.createElement("span");
             n.className = "fb-add-gain";
-            n.textContent = `${g.terms.length} phrase${g.terms.length === 1 ? "" : "s"} \u00b7 ${g.pop} popularity`;
+            n.textContent = `${g.terms.length} phrase${g.terms.length === 1 ? "" : "s"} \u00b7 ${g.pop} reachable`;
+            n.dataset.tip = `Raw popularity ${g.raw}. Priced down for the slots welded shut above each phrase, the difficulty of the apps in the way, and who the searcher is \u2014 the same price the recommendation pays.`;
             if (g.granted) {
                 n.textContent += ` \u00b7 ${g.granted} already granted`;
-                n.dataset.tip =
-                    "Apple already ranks some of these phrases without the words, so that share of the demand reaches you free and is priced out of the popularity number. The characters buy a firmer grip, not first entry.";
+                n.dataset.tip +=
+                    " Apple already ranks some of these phrases without the words, so that share reaches you free and is priced out. The characters buy a firmer grip, not first entry.";
             }
             sUl.appendChild(expandable([add, n], g.terms));
         }

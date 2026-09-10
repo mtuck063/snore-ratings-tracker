@@ -1712,3 +1712,11 @@ li.log-day {
     background: rgba(253, 230, 138, 0.12);
 }
 .badge.kw-ceil.kw-ceil-under { color: var(--bad); background: rgba(248, 113, 113, 0.13); }
+
+/* A draft chip holding a page-one ranking today: green, the colour the table
+   uses for your own row, because dropping it puts a ranking at stake. */
+.fb-chip.hold { border-color: color-mix(in srgb, var(--good) 45%, transparent); color: var(--good); }
+/* Head chips on the phrase lists: amber for a ceiling, red for a phrase worth
+   nothing to add for — either under a welded head or on a page one that is
+   a closed club. */
+.badge.kw-ceil.kw-head-defend, .badge.kw-ceil.kw-head-closed { color: var(--bad); background: rgba(248, 113, 113, 0.13); }
