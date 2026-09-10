@@ -270,9 +270,15 @@ column beside it reported those phrases as already covered. Eight characters
 per English market, spent on nothing.
 
 **Priority.** Demand alone puts the unwinnable at the top, so the score weights
-it by how much rank is left to win (a phrase at #2 has none), how hard the apps
-in the way are to pass, whether the searcher is one this app converts, and
-whether the words are there at all.
+it by how much rank is left to win, how hard the apps in the way are to pass,
+whether the searcher is one this app converts, and whether the words are there
+at all. "Left to win" is read off the slot log where there is one: the share of
+taps at the ceiling — the first slot not welded shut — minus the share where
+you stand, so a phrase at #20 under an open head outranks one at #20 under a
+nine-app club, and a phrase sitting directly under a welded head is a defend
+rather than a chase. That gain is then scaled by how responsive the band is to
+a wording change at all: the top three move on ratings and conversion, the
+tail moves slowly. Without a slot log the rank bands stand alone.
 
 **Difficulty.** How much rank is left is not the same question as what it would
 cost: #40 is #40 whether the thirty-nine above are dormant hobby projects or

@@ -1650,18 +1650,34 @@ function renderPlan(host, cc, plan, onRefresh) {
             // multiplier cost, not just what the rank is: on a list sorted by
             // score almost every survivor carries the full 1, so a line that
             // only describes the rank reads as a no-op to whoever got here.
+            // With a slot log the factor is the taps gained moving from where
+            // you stand to the ceiling, scaled by how responsive that band is
+            // to a wording change; without one it is the rank band alone.
+            const ceil = termFull.hard?.ceiling ?? null;
             const reachWhy =
-                c.rank == null
-                    ? "unranked, so the demand is real but nothing has proven it can rank"
-                    : c.rank <= 3
-                      ? `#${c.rank} is top three, so the taps are already yours`
-                      : c.rank <= 10
-                        ? `#${c.rank} is page one, so most of the win is banked`
-                        : c.rank <= 50
-                          ? `full weight, #${c.rank} is the band where a metadata edit shows`
-                          : c.rank <= 100
-                            ? `#${c.rank} is past page one, so an edit moves it slower`
-                            : `#${c.rank} is far back, so an edit moves it slowly`;
+                ceil != null
+                    ? c.rank == null
+                        ? ceil > 10
+                            ? "unranked, and page one is a closed club, so at best this lands at #11"
+                            : `unranked, page one open from #${ceil}, at the unproven discount`
+                        : termFull.hard.headroom === 0 || c.rank <= ceil
+                          ? `#${c.rank} sits directly under a welded head, so there is no slot above to win`
+                          : `the taps at #${ceil}, the first slot not welded shut, minus the taps at #${c.rank}, scaled for how fast the ${
+                                c.rank <= 3 ? "top three" : c.rank <= 10 ? "page-one" : c.rank <= 50 ? "#11–#50" : "deep"
+                            } band answers a wording change`
+                    : termFull.hard?.unread
+                      ? `#${c.rank ?? "—"} with under a week of slot record, so the rank band at a discount until the log can read the head above it`
+                      : c.rank == null
+                      ? "unranked, so the demand is real but nothing has proven it can rank"
+                      : c.rank <= 3
+                        ? `#${c.rank} is top three, so the taps are already yours`
+                        : c.rank <= 10
+                          ? `#${c.rank} is page one, so most of the win is banked`
+                          : c.rank <= 50
+                            ? `full weight, #${c.rank} is the band where a metadata edit shows`
+                            : c.rank <= 100
+                              ? `#${c.rank} is past page one, so an edit moves it slower`
+                              : `#${c.rank} is far back, so an edit moves it slowly`;
             // Difficulty grades the apps in the way rather than the distance
             // to them, so it is a separate step from headroom. Terms with no
             // reading (the top slot, or a market with nothing recorded) carry
@@ -1693,16 +1709,31 @@ function renderPlan(host, cc, plan, onRefresh) {
         // Where you stand, in the only unit that matters: how far from the
         // part of the results people actually look at. "Currently #18" reads
         // as an achievement until you know page one ends at ten.
+        // With a slot log the unit is the ceiling: the first slot above you
+        // not welded shut, and the places between it and you are the push.
+        const hardC = m.terms[c.kw]?.hard;
+        const ceilC = hardC?.ceiling ?? null;
+        const places = (n) => `${n} place${n === 1 ? "" : "s"}`;
         const standing =
-            c.rank == null
-                ? "not in the top 200 yet, so this would be starting from nothing"
-                : c.rank <= 3
-                  ? `you are #${c.rank} — most of the taps for this phrase are already yours`
-                  : c.rank <= 10
-                    ? `you are #${c.rank}, on page one, ${c.rank - 3} place${c.rank - 3 === 1 ? "" : "s"} off the top three that take most of the taps`
-                    : c.rank <= 50
-                      ? `you already rank #${c.rank}, ${c.rank - 10} place${c.rank - 10 === 1 ? "" : "s"} below page one`
-                      : `you rank #${c.rank}, well outside page one, but the demand justifies a push`;
+            ceilC != null
+                ? c.rank == null
+                    ? ceilC > 10
+                        ? "not in the top 200, and page one is a closed club that reorders but never opens"
+                        : `not in the top 200 yet; page one is open from #${ceilC}${hardC.club ? ", above that a closed club" : hardC.welded?.length ? ", above that a welded head" : ""}`
+                    : hardC.headroom === 0 || c.rank <= ceilC
+                      ? `you are #${c.rank}, directly under slots held on nearly every day — a defend, not a chase`
+                      : `you are #${c.rank} and the contest starts at #${ceilC}: ${places(c.rank - ceilC)} of open road${
+                            c.rank > 10 ? `, ${places(c.rank - 10)} of it to reach page one` : ""
+                        }`
+                : c.rank == null
+                  ? "not in the top 200 yet, so this would be starting from nothing"
+                  : c.rank <= 3
+                    ? `you are #${c.rank} — most of the taps for this phrase are already yours`
+                    : c.rank <= 10
+                      ? `you are #${c.rank}, on page one, ${places(c.rank - 3)} off the top three that take most of the taps`
+                      : c.rank <= 50
+                        ? `you already rank #${c.rank}, ${places(c.rank - 10)} below page one`
+                        : `you rank #${c.rank}, well outside page one, but the demand justifies a push`;
         why.textContent = `${c.pop} popularity — ${standing}.`;
 
         const term = m.terms[c.kw];

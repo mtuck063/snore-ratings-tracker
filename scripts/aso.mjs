@@ -799,6 +799,11 @@ function difficultyOf(cc, kw, cur, ctx, cov) {
     blockers: allIds.length,
     // Fewer than `blockers` when the welded apps were set aside as a wall.
     ...(ids.length !== allIds.length && { contested: ids.length }),
+    // The market has a slot log but this phrase is too young to read from
+    // it — under a week of closes. Reach falls back to the rank band, at a
+    // discount, so a phrase nobody has measured cannot outrank one the log
+    // has read merely for the absence of a record.
+    ...(!stats && ctx.slots?.days?.length && { unread: true }),
     ...(wall != null && { wall: Math.round(wall) }),
     // The slot log's read, for the page and the report: where the winnable
     // contest starts, how far above us it is, and who is welded above it.
@@ -896,18 +901,47 @@ const difficultyCtx = (cc) => {
 // the list is where the least room is left, and a phrase nothing has ever
 // ranked for is upside without evidence.
 //
-// This is headroom, not difficulty: how much is left to gain, read off the
-// rank alone. What it would cost to gain it is graded separately, above.
-function winnability(rank, headroom = null) {
-  if (rank == null) return 0.45; // outside the top 200: real upside, unproven
-  if (rank <= 3) return 0.1; // already won; this is a defend, not a chase
-  // Directly under a welded head: every slot above is held, so there is no
-  // "up" a wording change can buy. Same reading as a slot already won.
-  if (headroom === 0) return 0.1;
-  if (rank <= 10) return 0.7; // page one, worth finishing
-  if (rank <= 50) return 1.0; // close enough that a metadata change shows up
-  if (rank <= 100) return 0.8;
-  return 0.6;
+// This is headroom, not difficulty: how much is left to gain. What it would
+// cost to gain it is graded separately, above.
+//
+// Read off the slot log where there is one: the gain of a push is the share
+// of taps at the ceiling — the first slot not welded shut — minus the share
+// where we stand now, so #20 under an open head and #20 under a nine-app club
+// stop scoring alike. Normalised so that reaching #2 from nowhere reads as 1:
+// #1 is a slot a wording change rarely buys. Then scaled by how responsive
+// the current band is to a wording change at all — the top three move on
+// ratings and conversion, the tail moves slowly — which is what the old
+// rank-only bands were measuring. Without a slot log the bands stand alone.
+const slotShareAt = (pos) =>
+  pos == null ? 0 : pos <= 10 ? SLOT_SHARE[pos - 1] : pos <= 20 ? BEYOND_PAGE_ONE : pos <= 50 ? 0.01 : 0.002;
+const PACE = (rank) =>
+  rank == null ? 0.45 : rank <= 3 ? 0.3 : rank <= 10 ? 0.7 : rank <= 50 ? 1 : rank <= 100 ? 0.8 : 0.6;
+// A phrase the log has not read yet, in a market it does read, takes the
+// band at this discount: about what a read phrase with a typical head scores,
+// so youth is neither a bonus nor a penalty.
+const UNREAD = 0.6;
+function winnability(rank, hard = null) {
+  const ceiling = hard?.ceiling ?? null;
+  if (ceiling == null) {
+    const band =
+      rank == null
+        ? 0.45 // outside the top 200: real upside, unproven
+        : rank <= 3
+          ? 0.1 // already won; this is a defend, not a chase
+          : rank <= 10
+            ? 0.7 // page one, worth finishing
+            : rank <= 50
+              ? 1.0 // close enough that a metadata change shows up
+              : rank <= 100
+                ? 0.8
+                : 0.6;
+    return hard?.unread ? Math.max(0.05, band * UNREAD) : band;
+  }
+  // Directly under a welded head, or at the ceiling already: every slot above
+  // is held, so there is no "up" a wording change can buy.
+  if (rank != null && (hard.headroom === 0 || rank <= ceiling)) return 0.05;
+  const gain = slotShareAt(ceiling) - slotShareAt(rank);
+  return Math.max(0.05, Math.min(1, (gain / SLOT_SHARE[1]) * PACE(rank)));
 }
 
 // A searcher who names the problem is the one still choosing a category, and
@@ -970,11 +1004,11 @@ const ease = (diff) => (diff == null ? 1 : 1 - MAX_DISCOUNT * (diff / 100));
 // lets you paste your real keyword field, which changes coverage and therefore
 // the score; shipping the whole formula there instead would leave two copies
 // to drift apart.
-const baseOf = ({ pop, rank, intent, diff, fresh = 1, headroom = null }) =>
-  (pop / 100) * winnability(rank, headroom) * ease(diff) * FIT[intent] * fresh;
+const baseOf = ({ pop, rank, intent, diff, fresh = 1, hard = null }) =>
+  (pop / 100) * winnability(rank, hard) * ease(diff) * FIT[intent] * fresh;
 
-function scoreOf({ pop, rank, intent, cov, diff, fresh, headroom }) {
-  return Math.round(100 * baseOf({ pop, rank, intent, diff, fresh, headroom }) * lever(cov));
+function scoreOf({ pop, rank, intent, cov, diff, fresh, hard }) {
+  return Math.round(100 * baseOf({ pop, rank, intent, diff, fresh, hard }) * lever(cov));
 }
 
 // The coverage multipliers by name, so the page applies these same numbers.
@@ -1044,8 +1078,23 @@ const worthOf = (r, held = false) =>
 // otherwise.
 const POP_FLOOR = 5;
 
-function reasonFor({ pop, rank, cov, intent, fresh = 1, year = null }) {
+function reasonFor({ pop, rank, cov, intent, fresh = 1, year = null, hard = null }) {
   const where = rank == null ? "unranked" : `#${rank}`;
+  // The room above, where the slot log has read it: the ceiling is the first
+  // slot not welded shut, and the places between it and us are the push.
+  const ceiling = hard?.ceiling ?? null;
+  const room =
+    ceiling == null
+      ? hard?.unread
+        ? ", no slot record yet"
+        : ""
+      : rank == null
+        ? ceiling > 10
+          ? ", page one is a closed club"
+          : `, page one open from #${ceiling}`
+        : hard.headroom === 0 || rank <= ceiling
+          ? ", directly under a welded head"
+          : `, contest starts at #${ceiling} — ${rank - ceiling} place${rank - ceiling === 1 ? "" : "s"} of room`;
   if (fresh < 1) {
     const covNote = cov && !cov.covered ? ", not covered" : "";
     return `${pop} pop, ${where}${covNote}, but it names ${year} and this is ${thisYear} — demand discounted ${Math.round((1 - fresh) * 100)}%`;
@@ -1053,9 +1102,10 @@ function reasonFor({ pop, rank, cov, intent, fresh = 1, year = null }) {
   if (cov && !cov.covered) {
     const list = cov.missing.map((m) => `"${m}"`).join(", ");
     const where2 = cov.partial ? "title and subtitle have no" : "listing has no";
-    return `${pop} pop, ${where}, ${where2} ${list}`;
+    return `${pop} pop, ${where}${room}, ${where2} ${list}`;
   }
-  if (rank == null) return `${pop} pop, ${where}, words are all in the listing`;
+  if (rank == null) return `${pop} pop, ${where}${room}, words are all in the listing`;
+  if (ceiling != null) return `${pop} pop, ${where}${room}, covered`;
   if (rank <= 10) return `${pop} pop, ${where}, page one already`;
   return `${pop} pop, ${where}, covered — this is a ranking gap, not a wording one`;
 }
@@ -1124,7 +1174,6 @@ function analyseMarket(cc) {
     }
     const hard = graded ? (({ rivals, ...rest }) => rest)(graded) : null;
     const diff = hard?.score ?? null;
-    const headroom = hard?.headroom ?? null;
     // Read off the phrase rather than its English gloss: a year is digits in
     // every market, and the gloss is missing for the phrases nobody translated.
     const year = yearNamed(kw);
@@ -1164,18 +1213,18 @@ function analyseMarket(cc) {
         }),
       }),
       ...(hard && { hard }),
-      score: scoreOf({ pop, rank, intent, cov, diff, fresh, headroom }),
-      base: Math.round(baseOf({ pop, rank, intent, diff, fresh, headroom }) * 1000) / 1000,
+      score: scoreOf({ pop, rank, intent, cov, diff, fresh, hard }),
+      base: Math.round(baseOf({ pop, rank, intent, diff, fresh, hard }) * 1000) / 1000,
       // The score's factors, kept separate so the page can show its working
       // rather than asking anyone to trust a bare number.
       factors: {
-        reach: winnability(rank, headroom),
+        reach: Math.round(winnability(rank, hard) * 100) / 100,
         ease: ease(diff),
         fit: FIT[intent],
         ...(fresh < 1 && { fresh }),
       },
       ...(fresh < 1 && { staleYear: year }),
-      why: reasonFor({ pop, rank, cov, intent, fresh, year }),
+      why: reasonFor({ pop, rank, cov, intent, fresh, year, hard }),
     };
   }
 
