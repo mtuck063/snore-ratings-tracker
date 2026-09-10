@@ -128,6 +128,80 @@ const flag = (cc) =>
 // data files and read by the who-owns table's growth column.
 let rivalHistory = null;
 
+// --- Slot log: who held each search slot, per keyword, per day ---------------
+// One file per market (data/kw-slots/<cc>.json), written by the collector and
+// read here only to draw the rival sparklines in a keyword's detail row. Every
+// judgement about it — welded, locked, contested — arrives precomputed in
+// aso.json, so the thresholds live in scripts/kw-slots.mjs and nowhere else.
+// Fetched on first use per market and kept for the session.
+const slotLogs = new Map(); // cc -> Promise<{ log, rivals } | null>
+const slotData = new Map(); // cc -> resolved { log, rivals }, once it has arrived
+function loadSlots(cc) {
+    if (!slotLogs.has(cc)) {
+        const get = (url) =>
+            fetch(url, { cache: "no-cache" })
+                .then((r) => (r.ok ? r.json() : null))
+                .catch(() => null);
+        // The log itself, and beside it the per-phrase rival readings aso.mjs
+        // derives from it (data/kw-rivals/<cc>.json): kept out of aso.json,
+        // which every visit fetches, because they tripled its size.
+        const p = Promise.all([get(`data/kw-slots/${cc}.json`), get(`data/kw-rivals/${cc}.json`)]).then(
+            ([log, rivals]) => {
+                slotData.set(cc, { log: log?.v === 1 ? log : null, rivals: rivals?.terms ?? {} });
+                return slotData.get(cc);
+            }
+        );
+        slotLogs.set(cc, p);
+    }
+    return slotLogs.get(cc);
+}
+// The last `windowDays` observed days of one keyword, carry-forward filled,
+// as [{ day, rank, top: [id...], near: [id...] }]. A format decoder mirroring
+// daySeries() in scripts/kw-slots.mjs: rows are change-only and index into
+// the file's day and app tables.
+function slotSeries(log, kw, windowDays = 30) {
+    const rows = log?.terms?.[kw];
+    if (!rows?.length || !log.days.length) return [];
+    const last = log.days[log.days.length - 1];
+    const cutoff = new Date(new Date(`${last}T00:00:00Z`) - (windowDays - 1) * 864e5)
+        .toISOString()
+        .slice(0, 10);
+    const out = [];
+    let ri = 0;
+    let cur = null;
+    for (let di = 0; di < log.days.length; di++) {
+        while (ri < rows.length && rows[ri][0] <= di) cur = rows[ri++];
+        if (!cur) continue;
+        const day = log.days[di];
+        if (day < cutoff) continue;
+        out.push({
+            day,
+            rank: cur[1],
+            top: cur[2].map((i) => log.apps[i]),
+            near: cur[3].map((i) => log.apps[i]),
+        });
+    }
+    return out;
+}
+// An app's position on one day of the series: its top-ten slot, or our rank
+// minus its distance above us when it sits in the neighbour list.
+function slotPosOf(d, id) {
+    const i = d.top.indexOf(id);
+    if (i !== -1) return i + 1;
+    const j = d.near.indexOf(id);
+    return j !== -1 && d.rank != null ? d.rank - (d.near.length - j) : null;
+}
+// What each rival state means, for the chip's tooltip.
+const RIVAL_STATE = {
+    welded: ["welded", "Part of the welded head: the same app, or the same group, has filled these slots on nearly every day. Not on the market."],
+    locked: ["holds", "Directly above you and holding its place: the same slot on 90% of days, or a position band two places wide or narrower."],
+    contested: ["contested", "Directly above you and not holding its place. This is where a wording change can show."],
+    unread: ["too few days", "Directly above you, but seen on fewer than seven days, so nothing can be said about its grip yet."],
+    holds: ["holds", "Below you and holding its place on 90% of its days."],
+    drifts: ["drifts", "Below you and moving around: its position band is wider than a couple of places."],
+    visitor: ["visitor", "Seen on fewer than seven of the last thirty days."],
+};
+
 // Ratings gained per day over up to the last `windowDays`, from the sparse
 // per-day series (an entry exists only for days the count changed, so the
 // value in force at a date is the newest entry at or before it). Returns
@@ -3182,6 +3256,173 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
         return frag;
     };
 
+    // The rival list under a tapped keyword: every app on today's result list
+    // with its thirty-day slot line, how firmly it holds its place, and a
+    // divider at the ceiling. The states and numbers come from aso.json; the
+    // slot log is read only for the lines.
+    const renderRivals = (box, term, cur, asoTerm, cc, slots) => {
+        box.replaceChildren();
+        box.className = "kw-rivals";
+        const hard = asoTerm?.hard ?? null;
+        const log = slots?.log ?? null;
+        // [id, pos, state, hold, lo, hi, obs] per app, as aso.mjs writes them.
+        const byId = new Map(
+            (slots?.rivals?.[term] ?? []).map(([id, pos, state, hold, lo, hi, obs]) => [
+                String(id),
+                { id: String(id), pos, state, ...(hold != null && { hold: hold / 100, band: [lo, hi], obs }) },
+            ])
+        );
+        const series = log ? slotSeries(log, term) : [];
+        const days = series.length;
+
+        // One line of reading before the list: the head, then the block.
+        if (hard?.welded?.length || hard?.block) {
+            const lead = document.createElement("div");
+            lead.className = "kw-rivals-lead";
+            const bits = [];
+            if (hard.welded?.length) {
+                const k = hard.welded.length;
+                bits.push(
+                    hard.club
+                        ? `#1–#${k} are a closed club of ${k} that reorders but never opens`
+                        : k === 1
+                          ? "#1 is welded"
+                          : `#1–#${k} are welded`
+                );
+                if (hard.headroom === 0) bits.push("you sit directly under them");
+                else if (hard.ceiling != null) bits.push(`the contest starts at #${hard.ceiling}`);
+            } else if (hard.ceiling === 1) {
+                bits.push("open head: no slot above you has been held on nearly every day");
+            }
+            const b = hard.block;
+            if (b) {
+                bits.push(
+                    b.readable
+                        ? `${b.locked} of the ${b.size} directly above you hold their place`
+                        : `${b.judged} of the ${b.size} directly above you were seen on enough days to judge`
+                );
+                if (b.compared)
+                    bits.push(
+                        `${b.vacancies} vacanc${b.vacancies === 1 ? "y" : "ies"} and ${b.reorders} reorder${b.reorders === 1 ? "" : "s"} across the ${b.compared} day${b.compared === 1 ? "" : "s"} your rank held still`
+                    );
+            }
+            lead.textContent = bits.join(" · ") + (hard.days ? ` · ${hard.days} days on record` : "");
+            box.appendChild(lead);
+        }
+
+        const table = document.createElement("table");
+        const tbodyR = document.createElement("tbody");
+        table.appendChild(tbodyR);
+        const rankLine = (id, isYou) => {
+            const pts = series
+                .map((d) => {
+                    const p = isYou ? d.rank : slotPosOf(d, id);
+                    return p == null ? null : { date: d.day, count: -p, label: `#${p}` };
+                })
+                .filter(Boolean);
+            return pts.length >= 2 ? sparkline(pts, `position, last ${days} days`, (v) => `#${-v}`, 4) : null;
+        };
+        const addRow = (id, pos, opts = {}) => {
+            const entry = appEntry(id, cc);
+            const isYou = entry.id === "6751759381";
+            const r = byId.get(String(id));
+            const trR = document.createElement("tr");
+            if (isYou) trR.classList.add("you");
+            const tdPos = document.createElement("td");
+            tdPos.className = "kw-rv-pos";
+            tdPos.textContent = pos != null ? `#${pos}` : "";
+            const tdApp = document.createElement("td");
+            tdApp.className = "kw-rv-app";
+            tdApp.appendChild(appLabel(entry));
+            const tdSpark = document.createElement("td");
+            tdSpark.className = "kw-rv-spark";
+            const line = rankLine(entry.id, isYou);
+            if (line) tdSpark.appendChild(line);
+            const tdHold = document.createElement("td");
+            tdHold.className = "kw-rv-num";
+            const tdBand = document.createElement("td");
+            tdBand.className = "kw-rv-num";
+            const tdState = document.createElement("td");
+            tdState.className = "kw-rv-state";
+            if (r?.hold != null) {
+                tdHold.textContent = `${Math.round(r.hold * 100)}%`;
+                tdHold.dataset.tip = `Held its usual position on ${Math.round(r.hold * 100)}% of the ${r.obs} days it was seen.`;
+                tdBand.textContent = r.band[0] === r.band[1] ? `#${r.band[0]}` : `#${r.band[0]}–#${r.band[1]}`;
+                tdBand.dataset.tip = "Where it sat on most days: its 10th to 90th percentile position.";
+            } else if (!isYou) {
+                tdHold.textContent = "—";
+                tdHold.classList.add("muted");
+            }
+            if (r && !isYou) {
+                const [label, tip] = RIVAL_STATE[r.state] ?? [r.state, ""];
+                const chip = document.createElement("span");
+                chip.className = `badge kw-state state-${r.state}${r.state === "welded" && hard?.club ? " state-club" : ""}`;
+                chip.textContent = r.state === "welded" && hard?.club ? "club" : label;
+                chip.dataset.tipTitle = "Grip";
+                chip.dataset.tip = tip;
+                tdState.appendChild(chip);
+            }
+            trR.append(tdPos, tdApp, tdSpark, tdHold, tdBand, tdState);
+            if (opts.before) tbodyR.insertBefore(trR, opts.before);
+            else tbodyR.appendChild(trR);
+            return trR;
+        };
+        const divider = (text) => {
+            const trD = document.createElement("tr");
+            trD.className = "kw-rv-ceiling";
+            const tdD = document.createElement("td");
+            tdD.colSpan = 6;
+            tdD.textContent = text;
+            trD.appendChild(tdD);
+            tbodyR.appendChild(trD);
+        };
+
+        const topIds = (cur.top ?? []).map((e) => (Array.isArray(e) ? e[0] : e));
+        const ceiling = hard?.ceiling ?? null;
+        topIds.forEach((id, i) => {
+            if (ceiling != null && ceiling > 1 && ceiling <= 10 && i + 1 === ceiling)
+                divider(`contest starts here — #${ceiling}`);
+            addRow(id, i + 1);
+        });
+        // Past page one: a gap, then the five apps directly above you, then you.
+        if (cur.rank != null && cur.rank > 10) {
+            const near = (cur.near ?? []).map((e) => (Array.isArray(e) ? e[0] : e));
+            const gapTr = document.createElement("tr");
+            gapTr.className = "kw-rv-gap";
+            const gapTd = document.createElement("td");
+            gapTd.colSpan = 6;
+            gapTd.textContent =
+                near.length && cur.rank - near.length > 11
+                    ? `… #11–#${cur.rank - near.length - 1}`
+                    : near.length
+                      ? "…"
+                      : `… you: #${cur.rank}`;
+            gapTr.appendChild(gapTd);
+            tbodyR.appendChild(gapTr);
+            near.forEach((id, j) => addRow(id, cur.rank - (near.length - j)));
+            if (near.length) addRow("6751759381", cur.rank);
+        } else if (cur.rank == null) {
+            const note = document.createElement("div");
+            note.className = "kw-detail-note";
+            note.textContent = "you: not in the top 200";
+            box.appendChild(table);
+            box.appendChild(note);
+            return;
+        }
+        box.appendChild(table);
+        if (!slotData.has(cc)) {
+            const note = document.createElement("div");
+            note.className = "kw-rivals-note";
+            note.textContent = "loading the day-by-day slot record…";
+            box.appendChild(note);
+        } else if (log && !days) {
+            const note = document.createElement("div");
+            note.className = "kw-rivals-note";
+            note.textContent = "no slot record for this phrase yet";
+            box.appendChild(note);
+        }
+    };
+
     // Sortable by demand or by rank; header click toggles direction.
     // Default: rank, best first (unranked keywords sink to the bottom).
     const sort = { key: "rank", dir: 1 };
@@ -3213,6 +3454,9 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
 
     const render = (cc) => {
         currentCc = cc;
+        // Warm the slot log for this market so a tap on a keyword can draw
+        // its rival sparklines without a wait.
+        loadSlots(cc);
         translate.hidden = !translatable(cc);
         translate.textContent = showEnglish ? "Show original" : "Show English";
         translate.classList.toggle("active", showEnglish);
@@ -3333,6 +3577,38 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                         `Apple gives an app the slot its own name earns, so the winnable contest starts at #2.`;
                     tdKw.appendChild(nh);
                 }
+                // Where the winnable contest starts. Read off the slot log:
+                // the slots above the ceiling have been filled by the same
+                // app, or the same closed group, on nearly every day, and no
+                // wording change opens them. Shown only where there is a
+                // head to report; an open head is the default and says so
+                // in the detail row instead of as eighty identical chips.
+                const hardC = asoTerm.hard;
+                if (hardC && (hardC.welded?.length || hardC.headroom === 0)) {
+                    const k = hardC.welded?.length ?? 0;
+                    const ceil = document.createElement("span");
+                    ceil.className = `badge kw-ceil${hardC.headroom === 0 ? " kw-ceil-under" : ""}`;
+                    ceil.textContent =
+                        hardC.headroom === 0
+                            ? "under a welded head"
+                            : hardC.club
+                              ? `club of ${k} · ceiling #${hardC.ceiling}`
+                              : `ceiling #${hardC.ceiling}`;
+                    ceil.dataset.tipTitle = "Welded head";
+                    const names = (hardC.welded ?? [])
+                        .map((id) => appEntry(id, cc).name.split(/\s[:–—-]\s|:/)[0].trim())
+                        .join(", ");
+                    ceil.dataset.tip =
+                        (hardC.club
+                            ? `#1–#${k} are a closed club of ${k} (${names}): the same apps on every day but at most one, reordering among themselves and never opening a slot.`
+                            : k === 1
+                              ? `#1 has been ${names} on 90% of the last ${hardC.days} days.`
+                              : `#1–#${k} have been ${names}, each in its own slot, on 90% of the last ${hardC.days} days.`) +
+                        (hardC.headroom === 0
+                            ? " You sit directly under them, so there is no slot above you that a wording change could win: this phrase is a defend, not a chase."
+                            : ` The winnable contest starts at #${hardC.ceiling}. Tap the phrase for the day-by-day picture.`);
+                    tdKw.appendChild(ceil);
+                }
             }
             // Newly tracked terms have no history yet, so their delta columns
             // and sparkline read as blank rather than as "no movement". The
@@ -3451,21 +3727,15 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                         note.textContent = `#1 here is ${asoTerm.nameHeld.app} — named after the phrase itself, with ${asoTerm.nameHeld.ratings ? fmt(asoTerm.nameHeld.ratings) : "no"} ratings. Apple gives an app the slot its own name earns, so first place is not really open; the winnable contest starts at #2.`;
                         td.appendChild(note);
                     }
-                    const ol = document.createElement("ol");
-                    cur.top.forEach((e) => {
-                        const entry = appEntry(e, cc);
-                        const li = document.createElement("li");
-                        li.appendChild(appLabel(entry));
-                        if (entry.id === "6751759381") li.classList.add("you");
-                        ol.appendChild(li);
-                    });
-                    td.appendChild(ol);
-                    if (cur.rank != null && cur.rank > 5) {
-                        const note = document.createElement("div");
-                        note.className = "kw-detail-note";
-                        note.textContent = `you: #${cur.rank}`;
-                        td.appendChild(note);
-                    }
+                    // Who holds the slots, and how firmly. Rebuilt once the
+                    // market's slot log arrives, so a tap before it has loaded
+                    // still opens the list and the sparklines fill in.
+                    const rivalsBox = document.createElement("div");
+                    td.appendChild(rivalsBox);
+                    const drawRivals = () =>
+                        renderRivals(rivalsBox, term, cur, asoTerm, cc, slotData.get(cc) ?? null);
+                    drawRivals();
+                    if (!slotData.has(cc)) loadSlots(cc).then(() => det.isConnected && drawRivals());
                     det.appendChild(td);
                     tr.after(det);
                 });

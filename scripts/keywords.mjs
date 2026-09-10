@@ -31,6 +31,7 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { readSlots, upsertDay, writeSlots } from "./kw-slots.mjs";
 
 const repoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const servedDataDir = path.join(repoRoot, "docs", "data");
@@ -437,6 +438,9 @@ async function merge(partials) {
     const list = kwFor(cc);
     const part = partials.find((p) => p?.cc === cc) ?? null;
     latest[cc] = {};
+    // Today's closing slot row per keyword, measured runs only: a carried
+    // list would bank a false day of "nothing moved" in the slot log.
+    const slotRows = {};
     const dayAgo = Date.now() - 864e5;
     for (const kw of list) {
       const prevKw = prev?.latest?.[cc]?.[kw];
@@ -506,6 +510,10 @@ async function merge(partials) {
         ...(top && { top }), ...(near?.length && { near }), ...(turn && { turn }),
         ...(daySurf && { daySurf }),
       };
+      if (measuredTop && top?.length) slotRows[kw] = { rank, top, near: near ?? [] };
+    }
+    if (Object.keys(slotRows).length) {
+      await writeSlots(cc, upsertDay(await readSlots(cc), today, slotRows));
     }
     hints[cc] = {};
     for (const p of watchFor(cc)) {

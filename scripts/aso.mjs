@@ -31,9 +31,10 @@
 // per market. Never exits non-zero: a bad fetch keeps the stored value, the
 // same carry-forward rule the collectors use.
 
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { readSlots, daySeries, slotStats, HOLD, MIN_DAYS } from "./kw-slots.mjs";
 
 const repoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const configFile = path.join(repoRoot, "scripts", "keywords.json");
@@ -58,6 +59,17 @@ const kwData = await readJson(kwDataFile, { latest: {}, history: [] });
 const glossary = await readJson(glossaryFile, {});
 const candidates = await readJson(path.join(repoRoot, "scripts", "kw-candidates.json"), {});
 const rivalHistory = await readJson(path.join(repoRoot, "docs", "data", "rival-history.json"), {});
+// Who held each slot, per day: docs/data/kw-slots/<cc>.json, written by the
+// collector and replayable from git (kw-slots.mjs --backfill). A market with
+// no log grades without the grip part rather than guessing it.
+const slotLogs = {};
+for (const cc of Object.keys(config.markets ?? {})) slotLogs[cc] = await readSlots(cc);
+// Per market, per phrase: every app on today's result list with its grip
+// reading, written to docs/data/kw-rivals/<cc>.json beside aso.json. Its own
+// file because it is fetched only when a market's keyword is tapped, and
+// folding it into aso.json — which every visit downloads — tripled that file.
+const rivalsByCc = {};
+const rivalsDir = path.join(repoRoot, "docs", "data", "kw-rivals");
 
 const { markets } = config;
 const kwFor = (cc) =>
@@ -492,12 +504,10 @@ const TENURE_CEIL = 12;
 // raw share is 0 or 1 and reads as certainty about a single coin flip; this
 // pulls a small sample toward the middle and leaves a full page one alone.
 const LEXICAL_PRIOR = 2;
-// Day boundaries the turnover counter needs before its rate is worth reading.
-// Under a working week, one reshuffle reads as a permanent property.
+// The turnover counter, used only where the slot log cannot read the block
+// above us (see grip): day boundaries it needs before its rate means
+// anything, and the entrants-per-day that count as a fully fluid top ten.
 const TURN_MIN_DAYS = 5;
-// Entrants per day that count as a fully fluid top ten. Provisional: no market
-// has been observed long enough yet to place this from data. Once a season of
-// turnover has accumulated, set it from the distribution rather than by guess.
 const TURN_FLUID = 1;
 // Hours the growth series must span before a rate is subtracted from it, the
 // same floor the collector keeps its snapshots against.
@@ -528,10 +538,13 @@ function growthRates(cc) {
 //
 // Momentum alone may run negative, to -0.5: outgrowing the apps in the way is
 // evidence the gap is closing, and a floor at zero threw that away.
-// Resistance took half of stasis's weight because they overlap: stasis says
-// the list does not move for anyone, resistance says it has not moved for us
-// — measured, not inferred, so it gets its own seat.
-const WEIGHTS = { authority: 0.35, lexical: 0.25, entrenchment: 0.15, stasis: 0.1, momentum: 0.1, resistance: 0.1 };
+// Grip and resistance overlap and split the weight between them: grip says
+// the apps above us do not move for anyone, resistance says the rank has not
+// moved for us — measured, not inferred, so each gets its own seat.
+// Grip and stasis share one seat: stasis is the fallback reading of the same
+// question (do the apps in the way move) from the coarser turnover counter,
+// used only where the slot log cannot read the block above us.
+const WEIGHTS = { authority: 0.35, lexical: 0.25, entrenchment: 0.15, grip: 0.1, stasis: 0.1, momentum: 0.1, resistance: 0.1 };
 
 // A number nobody can act on is a number nobody should be shown, so every
 // reading carries the fact that produced it. The sentence names the two
@@ -558,8 +571,33 @@ const SAYS = {
         ? "every one of them names the phrase, so wording is live here"
         : `${unnamed} of ${ids.length} rank without naming the phrase`,
   entrenchment: ({ age }) => (age == null ? null : `they have been on the store ${Math.round(age)} years`),
+  // Named apps, because "three welded slots" is only useful once you know
+  // they are SnoreLab, ShutEye and Snore Recorder.
   stasis: ({ parts }) =>
     parts.stasis > 0.8 ? "the list has not turned over since tracking began" : "the list turns over slowly",
+  grip: ({ stats, block, apps }) => {
+    if (!stats) return null;
+    const nm = (id) => (apps?.[id]?.name ?? String(id)).split(/\s[:–—-]\s|:/)[0].trim();
+    if (stats.welded.length) {
+      const k = stats.welded.length;
+      const head = stats.welded.map((w) => nm(w.id)).join(", ");
+      const span =
+        k === 1
+          ? "#1 is welded"
+          : stats.club
+            ? `#1–#${k} are a closed club of ${k} that reorders but never opens`
+            : `#1–#${k} are welded`;
+      return stats.headroom === 0
+        ? `${span} (${head}) and you sit directly under them`
+        : `${span} (${head}), so the contest starts at #${stats.ceiling}`;
+    }
+    if (!block) return null;
+    const n = block.size;
+    if (block.locked.length === n) return `the ${n} above you have held their places for ${block.days} days`;
+    if (block.vacancies) return `${block.vacancies} vacanc${block.vacancies === 1 ? "y" : "ies"} opened above you in ${block.days} days`;
+    if (block.reorders) return `the ${n} above you reorder but nobody has dropped out in ${block.days} days`;
+    return `${block.contested.length} of the ${n} above you drift rather than hold`;
+  },
   momentum: ({ parts }) =>
     parts.momentum > 0.3
       ? "and they are pulling further ahead by the day"
@@ -603,9 +641,67 @@ function stuckDays(cc, kw) {
 const RESIST_MIN_DAYS = 5;
 const RESIST_SAT_DAYS = 30;
 
+// Every app on the current result list — the top ten, plus the five above us
+// past page one — with its slot-log reading, for the page's rival list. The
+// state is decided here so the thresholds live in one file: the page draws
+// what it is handed and computes nothing.
+//   welded     part of the welded head (single app or closed club)
+//   locked     directly above us and holding its place
+//   contested  directly above us and not holding it
+//   unread     directly above us, seen on too few days to say
+//   holds      below us, holding its place
+//   drifts     below us, not holding it
+//   visitor    seen on too few days to say
+function rivalsOf(stats, cur, block) {
+  const top = bareIds(cur.top);
+  const near = bareIds(cur.near);
+  const welded = new Set(stats.welded.map((w) => w.id));
+  const locked = new Set(block?.locked ?? []);
+  const contested = new Set(block?.contested ?? []);
+  const row = (id, pos) => {
+    const a = stats.apps[id];
+    const known = a && a.obs >= MIN_DAYS;
+    const state = welded.has(id)
+      ? "welded"
+      : locked.has(id)
+        ? "locked"
+        : contested.has(id)
+          ? known
+            ? "contested"
+            : "unread"
+          : !known
+            ? "visitor"
+            : a.hold >= HOLD
+              ? "holds"
+              : "drifts";
+    return {
+      id,
+      pos,
+      state,
+      ...(a && { hold: Math.round(a.hold * 100) / 100, band: a.band, obs: a.obs }),
+    };
+  };
+  const out = top.map((id, i) => row(id, i + 1));
+  if (cur.rank != null && cur.rank > 10)
+    near.forEach((id, j) => out.push(row(id, cur.rank - (near.length - j))));
+  return out;
+}
+
 function difficultyOf(cc, kw, cur, ctx, cov) {
-  const { ids, kind } = blockersOf(cur);
-  if (!ids.length) return null; // held the top slot: there is no "up" to grade
+  const { ids: allIds, kind } = blockersOf(cur);
+  if (!allIds.length) return null; // held the top slot: there is no "up" to grade
+  // The slot log's read on the same block: which of these apps are welded in
+  // place and which change hands. A welded app is a wall, not a competitor,
+  // so the size/relevance/tenure/momentum signals grade the contested ones
+  // when there are any; when every app above is welded, the wall is the whole
+  // story and is graded as such.
+  const stats = ctx.slots ? slotStats(daySeries(ctx.slots, kw), String(config.appId)) : null;
+  // An unreadable block (most of it seen on too few days) is dropped from
+  // every reading below, not scored as open.
+  const block = stats?.block?.readable ? stats.block : null;
+  const lockedSet = new Set(block?.locked ?? []);
+  const ids =
+    block && block.locked.length && block.contested.length ? allIds.filter((id) => !lockedSet.has(id)) : allIds;
   const counts = ids.map((id) => ratingsOf(cc, id)).filter((n) => n > 0);
   const parts = {};
 
@@ -636,12 +732,18 @@ function difficultyOf(cc, kw, cur, ctx, cov) {
     parts.entrenchment = clamp01((age - TENURE_FLOOR) / (TENURE_CEIL - TENURE_FLOOR));
   }
 
-  // Stasis. Always measured on the top ten, which is the blocking set itself
-  // for a page-one term and a read on the whole market's fluidity for one
-  // further down: a head that reshuffles nightly is not a list where positions
-  // further back are welded on either.
-  const [days, entrants] = cur.turn ?? [];
-  if (days >= TURN_MIN_DAYS) parts.stasis = clamp01(1 - entrants / days / TURN_FLUID);
+  // Grip. The share of the apps directly above us that have held their place
+  // for the window: on page one, the same app in the same slot on 90% of
+  // days; past it, the same app still in the five above us. Read off the slot
+  // log, so it needs a week of closes before it says anything.
+  if (block?.size) parts.grip = block.locked.length / block.size;
+  else {
+    // Fallback where the slot log cannot read the block: entrants into the
+    // top ten per day, from the collector's turnover counter. A coarser
+    // answer to the same question, and dropped in turn when too young.
+    const [days, entrants] = cur.turn ?? [];
+    if (days >= TURN_MIN_DAYS) parts.stasis = clamp01(1 - entrants / days / TURN_FLUID);
+  }
 
   // Momentum. Two orders of magnitude between their daily rating gain and ours
   // is a gap widening faster than any wording change closes it — and the same
@@ -673,16 +775,49 @@ function difficultyOf(cc, kw, cur, ctx, cov) {
   if (!have.length) return null;
   const weight = have.reduce((a, k) => a + WEIGHTS[k], 0);
   const score = have.reduce((a, k) => a + parts[k] * WEIGHTS[k], 0) / weight;
+  const facts = { ids, unnamed, wall, mine: ctx.mine, age, streak, stats, block, apps: ctx.apps };
+  let why = hardWhy(parts, facts);
+  // A welded head is the one fact a reader must not miss, whatever the two
+  // heaviest parts happened to be: say it first when the ranking left it out.
+  if (stats?.welded.length && !why.includes("welded")) why = `${SAYS.grip(facts)}, ${why}`;
+  const r2 = (n) => Math.round(n * 100) / 100;
   return {
     score: Math.max(0, Math.round(100 * score)),
     // What was graded, so a reader can tell "the five apps above me are
     // enormous" from "the head of this list is enormous, and I am nowhere
     // near it".
     basis: kind,
-    blockers: ids.length,
+    blockers: allIds.length,
+    // Fewer than `blockers` when the welded apps were set aside as a wall.
+    ...(ids.length !== allIds.length && { contested: ids.length }),
     ...(wall != null && { wall: Math.round(wall) }),
-    why: hardWhy(parts, { ids, unnamed, wall, mine: ctx.mine, age, streak }),
-    parts: Object.fromEntries(have.map((k) => [k, Math.round(parts[k] * 100) / 100])),
+    // The slot log's read, for the page and the report: where the winnable
+    // contest starts, how far above us it is, and who is welded above it.
+    ...(stats && {
+      ceiling: stats.ceiling,
+      headroom: stats.headroom,
+      days: stats.days,
+      ...(stats.club && { club: true }),
+      // Ids only, in slot order: names come from the app map on either side,
+      // and each app's own grip numbers travel in kw-rivals/<cc>.json.
+      welded: stats.welded.map((w) => w.id),
+      ...(stats.welded.length && { weldedHold: r2(stats.welded[0].setHold) }),
+      ...(stats.block && {
+        block: {
+          size: stats.block.size,
+          judged: stats.block.judged,
+          readable: stats.block.readable,
+          locked: stats.block.locked.length,
+          compared: stats.block.compared,
+          vacancies: stats.block.vacancies,
+          reorders: stats.block.reorders,
+          blips: stats.block.blips,
+        },
+      }),
+      rivals: rivalsOf(stats, cur, block),
+    }),
+    why,
+    parts: Object.fromEntries(have.map((k) => [k, r2(parts[k])])),
   };
 }
 
@@ -742,6 +877,7 @@ const difficultyCtx = (cc) => {
     mine: ratingsOf(cc, config.appId),
     rates,
     myRate: rates?.[config.appId] ?? null,
+    slots: slotLogs[cc] ?? null,
   };
 };
 
@@ -753,9 +889,12 @@ const difficultyCtx = (cc) => {
 //
 // This is headroom, not difficulty: how much is left to gain, read off the
 // rank alone. What it would cost to gain it is graded separately, above.
-function winnability(rank) {
+function winnability(rank, headroom = null) {
   if (rank == null) return 0.45; // outside the top 200: real upside, unproven
   if (rank <= 3) return 0.1; // already won; this is a defend, not a chase
+  // Directly under a welded head: every slot above is held, so there is no
+  // "up" a wording change can buy. Same reading as a slot already won.
+  if (headroom === 0) return 0.1;
   if (rank <= 10) return 0.7; // page one, worth finishing
   if (rank <= 50) return 1.0; // close enough that a metadata change shows up
   if (rank <= 100) return 0.8;
@@ -822,11 +961,11 @@ const ease = (diff) => (diff == null ? 1 : 1 - MAX_DISCOUNT * (diff / 100));
 // lets you paste your real keyword field, which changes coverage and therefore
 // the score; shipping the whole formula there instead would leave two copies
 // to drift apart.
-const baseOf = ({ pop, rank, intent, diff, fresh = 1 }) =>
-  (pop / 100) * winnability(rank) * ease(diff) * FIT[intent] * fresh;
+const baseOf = ({ pop, rank, intent, diff, fresh = 1, headroom = null }) =>
+  (pop / 100) * winnability(rank, headroom) * ease(diff) * FIT[intent] * fresh;
 
-function scoreOf({ pop, rank, intent, cov, diff, fresh }) {
-  return Math.round(100 * baseOf({ pop, rank, intent, diff, fresh }) * lever(cov));
+function scoreOf({ pop, rank, intent, cov, diff, fresh, headroom }) {
+  return Math.round(100 * baseOf({ pop, rank, intent, diff, fresh, headroom }) * lever(cov));
 }
 
 // The coverage multipliers by name, so the page applies these same numbers.
@@ -900,6 +1039,7 @@ function analyseMarket(cc) {
 
   const terms = {};
   const dctx = difficultyCtx(cc);
+  rivalsByCc[cc] = {};
   for (const kw of list) {
     const cur = latest[kw] ?? {};
     const pop = cur.pop ?? 5;
@@ -907,8 +1047,23 @@ function analyseMarket(cc) {
     let { intent, english } = classify(kw);
     const cov = coverageOf(kw, pool, skipFor(cc));
     const mods = modsOf(english);
-    const hard = difficultyOf(cc, kw, cur, dctx, cov);
+    const graded = difficultyOf(cc, kw, cur, dctx, cov);
+    // The per-app readings leave for their own file as compact rows:
+    // [id, pos, state, hold 0-100, band lo, band hi, days seen].
+    if (graded?.rivals) {
+      rivalsByCc[cc][kw] = graded.rivals.map((r) => [
+        r.id,
+        r.pos,
+        r.state,
+        r.hold == null ? null : Math.round(r.hold * 100),
+        r.band?.[0] ?? null,
+        r.band?.[1] ?? null,
+        r.obs ?? null,
+      ]);
+    }
+    const hard = graded ? (({ rivals, ...rest }) => rest)(graded) : null;
     const diff = hard?.score ?? null;
+    const headroom = hard?.headroom ?? null;
     // Read off the phrase rather than its English gloss: a year is digits in
     // every market, and the gloss is missing for the phrases nobody translated.
     const year = yearNamed(kw);
@@ -942,11 +1097,16 @@ function analyseMarket(cc) {
         }),
       }),
       ...(hard && { hard }),
-      score: scoreOf({ pop, rank, intent, cov, diff, fresh }),
-      base: Math.round(baseOf({ pop, rank, intent, diff, fresh }) * 1000) / 1000,
+      score: scoreOf({ pop, rank, intent, cov, diff, fresh, headroom }),
+      base: Math.round(baseOf({ pop, rank, intent, diff, fresh, headroom }) * 1000) / 1000,
       // The score's factors, kept separate so the page can show its working
       // rather than asking anyone to trust a bare number.
-      factors: { reach: winnability(rank), ease: ease(diff), fit: FIT[intent], ...(fresh < 1 && { fresh }) },
+      factors: {
+        reach: winnability(rank, headroom),
+        ease: ease(diff),
+        fit: FIT[intent],
+        ...(fresh < 1 && { fresh }),
+      },
       ...(fresh < 1 && { staleYear: year }),
       why: reasonFor({ pop, rank, cov, intent, fresh, year }),
     };
@@ -1221,10 +1381,11 @@ const analyseAll = () =>
 
 async function writeData() {
   const all = analyseAll();
+  const generatedAt = new Date().toISOString();
   await writeFile(
     outFile,
     JSON.stringify({
-      generatedAt: new Date().toISOString(),
+      generatedAt,
       levers: LEVERS,
       // The page rescores against a pasted keyword field, so it needs the same
       // constants rather than a second copy of them.
@@ -1232,6 +1393,13 @@ async function writeData() {
       markets: all,
     })
   );
+  await mkdir(rivalsDir, { recursive: true });
+  for (const cc of Object.keys(all)) {
+    await writeFile(
+      path.join(rivalsDir, `${cc}.json`),
+      JSON.stringify({ generatedAt, terms: rivalsByCc[cc] ?? {} })
+    );
+  }
   const chased = Object.values(all).reduce((n, m) => n + m.chase.length, 0);
   const graded = Object.values(all).filter((m) => m.coverage).length;
   console.log(
@@ -1299,12 +1467,15 @@ function report(only) {
       // beside it already carries the discount, and what the reader needs here
       // is whether a low score means thin demand or a wall of incumbents.
       const hard = m.terms[c.kw]?.hard;
+      // Ceiling beside difficulty: #24 under an open head and #8 under three
+      // welded slots can carry the same score and are opposite propositions.
+      const ceil = hard?.ceiling != null ? `c#${hard.ceiling}` : "";
       console.log(
-        `    ${pad(c.score, 4)} ${pad(hard ? `${hard.score}↑` : "", 5)} ${pad(c.kw, 30)} ${pad(c.intent, 9)} ${c.why}`
+        `    ${pad(c.score, 4)} ${pad(hard ? `${hard.score}↑` : "", 5)} ${pad(ceil, 5)} ${pad(c.kw, 30)} ${pad(c.intent, 9)} ${c.why}`
       );
     }
     if (m.chase.some((c) => m.terms[c.kw]?.hard)) {
-      console.log("    (second column: difficulty of climbing, 0-100)");
+      console.log("    (second column: difficulty of climbing, 0-100; third: ceiling, the first slot not welded shut)");
     }
   }
 }

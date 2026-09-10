@@ -13,7 +13,8 @@ below is the checklist.
 | Pipeline | Script | Runs | Writes |
 | --- | --- | --- | --- |
 | Ratings, star histograms, written reviews | `scripts/collect.mjs` | hourly | `latest.json`, `history.json`, `histograms.json`, `events.json`, `reviews.json` |
-| Search rank and demand per keyword per market | `scripts/keywords.mjs` | 4x daily | `keywords.json`, `kw-events/` |
+| Search rank and demand per keyword per market | `scripts/keywords.mjs` | 4x daily | `keywords.json`, `kw-events/`, `kw-slots/` |
+| Who held each search slot, per day | `scripts/kw-slots.mjs` | inside keywords; `--backfill` by hand | `kw-slots/` |
 | Website visitors, optional | `scripts/pageviews.mjs` | with ratings | `pageviews.json` |
 | Intent, coverage and priority per keyword | `scripts/aso.mjs` | with keywords | `aso.json`, `metadata.json` |
 | What a release changed, and what it did | `scripts/release.mjs` | by hand, then with keywords | `releases.json` |
@@ -72,7 +73,7 @@ forks start with Actions disabled, and their issue notifications route oddly.
 Clear the previous app's data, which is checked in:
 
 ```sh
-rm -rf docs/data/kw-events
+rm -rf docs/data/kw-events docs/data/kw-slots
 rm docs/data/{latest,history,events,reviews,keywords,histograms,pending,pageviews,glossary,aso}.json
 rm docs/data/status-*.json
 ```
@@ -284,7 +285,7 @@ each dropped rather than guessed when its input is missing:
 | Authority | their rating counts against yours, log-scaled | `stats` |
 | Relevance | how many of them rank without naming the phrase | app names |
 | Tenure | how long they have been on the store | release dates |
-| Stasis | how often the top ten turns over | `turn`, per keyword |
+| Grip | how many of the apps directly above you have held their place | `kw-slots/`; falls back to `turn` |
 | Momentum | whether their ratings are growing faster than yours | `statsLog` |
 
 Rating count is the load-bearing proxy, and it earns the position: across the
@@ -293,6 +294,46 @@ ratings in ten cases out of eleven. The exception is "sleep talking tracker",
 where a smaller app outranks larger ones because the phrase names what it does.
 That split is the model — authority sets the wall, relevance is what gets over
 it.
+
+**Grip, and the ceiling.** A rank is a snapshot; whether the apps holding the
+slots above you ever move is only visible over days, and it is the difference
+between a wall and a contest. The collector keeps one row per keyword per day
+of the closing top ten and the five apps directly above you (`kw-slots/`, one
+file per market, replayable from git with `kw-slots.mjs --backfill`). From it,
+each phrase is read three ways over the last thirty days:
+
+- **Welded head.** The deepest k for which the same k apps filled slots #1 to
+  #k, in any order: on 90% of days for a single app, and on every day but one
+  for a group. Set-based on purpose: five apps trading #1 through #5 among
+  themselves are a closed club, and a club is a wall — it reorders without
+  ever opening a slot. The stricter bar for groups is what makes "never
+  opens" mean it: a nine-app head that admitted a newcomer three times in a
+  month is a head with openings. The one tolerated day is for the odd bad
+  close, and is a count rather than a share so an eighteen-day market gets
+  the same tolerance as a thirty-day one. Those slots are not on the market; the
+  winnable contest starts under them, at the **ceiling**. #24 under an open
+  head has more room than #8 under three welded incumbents, and a phrase
+  sitting directly beneath a welded head is scored as a defend, not a chase,
+  whatever its rank.
+- **Grip.** The share of the apps directly above you that have held their
+  place: the same app in the same slot on page one, or a neighbour whose own
+  position band is two places wide or narrower past it. Welded apps are set
+  aside as a wall and the other four signals grade the contested ones.
+- **Reorders and vacancies.** Two kinds of movement, kept apart because only
+  one is a chance: the apps above you swapping order proves Apple still
+  re-ranks the phrase and creates no vacancy; the group's membership changing
+  does. Both are counted only across consecutive days on which your own rank
+  held still, so your movement never reads as theirs, and a change reverted
+  the next day is a blip and counts as neither.
+
+Past page one the record is thin by construction: a rival only enters it
+while it sits within five places of you, and you move. A block where fewer
+than half the apps were seen on seven days is unreadable; grip is then
+replaced by the older, coarser stasis reading (entrants into the top ten per
+day, from the collector's `turn` counter) rather than scored as open — the
+same rule as every other missing input.
+`node scripts/kw-slots.mjs --report us` prints the welded heads, ceilings and
+block counts per phrase.
 
 **Freshness.** A phrase naming a year is demand with an expiry date, and the
 demand score cannot see the cliff coming: Apple's autocomplete reads what is
@@ -629,6 +670,8 @@ constraint there. Working state that no page reads lives in `scripts/` instead.
 | `reviews.json` | written reviews, kept indefinitely; one absent from Apple's feed for a full day of checks is flagged `removed` (never deleted) and hidden from the page |
 | `keywords.json` | current rank and demand per keyword, the apps holding the places above you, top-ten turnover, plus 30-day history |
 | `kw-events/` | rank and autocomplete movements, one shard per month |
+| `kw-slots/` | closing top ten and five-above list per keyword per day, one file per market, 180 days kept |
+| `kw-rivals/` | per phrase, every app on today's result list with its grip reading, one file per market; derived by `aso.mjs` from `kw-slots/` |
 | `aso.json` | intent, coverage and priority per keyword, plus each market's chase list and the characters its field is wasting |
 | `releases.json` | one entry per release: the listing before and after, per market, and the before-and-after read on rank |
 | `popularity.json` | Apple's own 5-100 demand index per keyword, when the optional Apple Ads collector is set up, plus how long each session cookie survived |
