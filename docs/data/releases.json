@@ -25908,7 +25908,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-09-10T11:05:50.758Z",
+   "computedAt": "2026-09-10T11:36:50.385Z",
    "days": 8,
    "stage": "settled",
    "baselineDays": 7,
@@ -26018,6 +26018,14 @@
        "cohort": "floor"
       },
       {
+       "kw": "sleep apple watch",
+       "pop": 69,
+       "before": 177.5,
+       "after": 165,
+       "gain": 12.5,
+       "cohort": "control"
+      },
+      {
        "kw": "sleep tracker",
        "pop": 80,
        "before": 63,
@@ -26072,14 +26080,6 @@
        "after": 31,
        "gain": -7,
        "cohort": "floor"
-      },
-      {
-       "kw": "sleep apple watch",
-       "pop": 69,
-       "before": 177.5,
-       "after": 171,
-       "gain": 6.5,
-       "cohort": "control"
       }
      ],
      "noisy": 16,
@@ -26202,7 +26202,7 @@
       },
       {
        "kw": "sleep apnea",
-       "pop": 49,
+       "pop": 52,
        "before": 34,
        "after": 27,
        "gain": 7,
@@ -26769,7 +26769,7 @@
       },
       {
        "kw": "il ronfle",
-       "pop": 73,
+       "pop": 76,
        "before": 38,
        "after": 30,
        "gain": 8,
@@ -26845,7 +26845,7 @@
      "movers": [
       {
        "kw": "app sueño",
-       "pop": 48,
+       "pop": 51,
        "before": 62,
        "after": 75,
        "gain": -13,
@@ -26933,7 +26933,7 @@
       },
       {
        "kw": "seguimiento del sueño gratis",
-       "pop": 55,
+       "pop": 60,
        "before": 41,
        "after": 43,
        "gain": -2,
@@ -26993,7 +26993,7 @@
       },
       {
        "kw": "sueño apple watch",
-       "pop": 71,
+       "pop": 74,
        "before": 44,
        "after": 50,
        "gain": -6,
@@ -27194,7 +27194,7 @@
       },
       {
        "kw": "cpap",
-       "pop": 47,
+       "pop": 44,
        "before": 26,
        "after": 28,
        "gain": -2,
@@ -27252,7 +27252,7 @@
      "movers": [
       {
        "kw": "app sonno",
-       "pop": 51,
+       "pop": 48,
        "before": 181.5,
        "after": 143.5,
        "gain": 38,
@@ -27961,7 +27961,7 @@
       },
       {
        "kw": "鼾声",
-       "pop": 25,
+       "pop": 22,
        "before": 18,
        "after": 23,
        "gain": -5,
@@ -27993,7 +27993,7 @@
       },
       {
        "kw": "睡眠监测打呼噜",
-       "pop": 74,
+       "pop": 71,
        "before": 37,
        "after": 33,
        "gain": 4,
@@ -28001,7 +28001,7 @@
       },
       {
        "kw": "鼾声护理",
-       "pop": 64,
+       "pop": 67,
        "before": 9,
        "after": 5,
        "gain": 4,
@@ -28041,7 +28041,7 @@
       },
       {
        "kw": "鼾声监测",
-       "pop": 58,
+       "pop": 61,
        "before": 60,
        "after": 62,
        "gain": -2,
