@@ -3495,22 +3495,35 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
             addRow(id, i + 1);
         });
         // Past page one: a gap, then the five apps directly above you, then you.
+        // The collector only drops `near` once we are inside the top ten, so a
+        // rank just past it comes with a window that reaches back over rows
+        // already drawn: at #14 it starts at #9. Keep only the apps below the
+        // last row of the list above, and print the gap row solely for the span
+        // that is genuinely hidden, which for a short reach back is none.
         if (cur.rank != null && cur.rank > 10) {
-            const near = (cur.near ?? []).map((e) => (Array.isArray(e) ? e[0] : e));
-            const gapTr = document.createElement("tr");
-            gapTr.className = "kw-rv-gap";
-            const gapTd = document.createElement("td");
-            gapTd.colSpan = 6;
-            gapTd.textContent =
-                near.length && cur.rank - near.length > 11
-                    ? `… #11–#${cur.rank - near.length - 1}`
-                    : near.length
-                      ? "…"
-                      : `… you: #${cur.rank}`;
-            gapTr.appendChild(gapTd);
-            tbodyR.appendChild(gapTr);
-            near.forEach((id, j) => addRow(id, cur.rank - (near.length - j)));
-            if (near.length) addRow("6751759381", cur.rank);
+            const drawn = topIds.length;
+            const all = (cur.near ?? []).map((e) => (Array.isArray(e) ? e[0] : e));
+            const near = all
+                .map((id, j) => ({ id, pos: cur.rank - (all.length - j) }))
+                .filter((n) => n.pos > drawn);
+            const firstHidden = drawn + 1;
+            const lastHidden = (near.length ? near[0].pos : cur.rank) - 1;
+            const gapText = !all.length
+                ? `… you: #${cur.rank}`
+                : lastHidden >= firstHidden
+                  ? `… #${firstHidden}–#${lastHidden}`
+                  : null;
+            if (gapText) {
+                const gapTr = document.createElement("tr");
+                gapTr.className = "kw-rv-gap";
+                const gapTd = document.createElement("td");
+                gapTd.colSpan = 6;
+                gapTd.textContent = gapText;
+                gapTr.appendChild(gapTd);
+                tbodyR.appendChild(gapTr);
+            }
+            near.forEach((n) => addRow(n.id, n.pos));
+            if (all.length) addRow("6751759381", cur.rank);
         } else if (cur.rank == null) {
             const note = document.createElement("div");
             note.className = "kw-detail-note";
