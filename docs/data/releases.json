@@ -25908,7 +25908,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-09-11T19:44:31.656Z",
+   "computedAt": "2026-09-11T21:09:22.396Z",
    "days": 10,
    "stage": "settled",
    "baselineDays": 7,
@@ -26219,7 +26219,7 @@
       },
       {
        "kw": "snoring app",
-       "pop": 43,
+       "pop": 45,
        "before": 17,
        "after": 26,
        "gain": -9,
@@ -26565,7 +26565,7 @@
      "noisy": 14,
      "ratings": {
       "before": 0.3,
-      "after": 0.4
+      "after": 0.5
      }
     },
     "sa": {
@@ -26603,7 +26603,7 @@
       {
        "kw": "sleep quotes-snore recorder",
        "pop": 5,
-       "rank": 53
+       "rank": 52
       }
      ],
      "vanished": [],
@@ -27603,8 +27603,8 @@
        "kw": "snurk app",
        "pop": 53,
        "before": 21,
-       "after": 24.5,
-       "gain": -3.5,
+       "after": 25,
+       "gain": -4,
        "cohort": "control"
       },
       {
@@ -28110,7 +28110,7 @@
      "noisy": 13,
      "ratings": {
       "before": 0.7,
-      "after": 0.5
+      "after": 0.6
      }
     }
    }
