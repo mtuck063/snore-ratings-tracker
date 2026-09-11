@@ -25908,7 +25908,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-09-11T02:04:13.987Z",
+   "computedAt": "2026-09-11T02:59:34.322Z",
    "days": 9,
    "stage": "settled",
    "baselineDays": 7,
@@ -26219,7 +26219,7 @@
       },
       {
        "kw": "snoring app",
-       "pop": 45,
+       "pop": 43,
        "before": 17,
        "after": 26,
        "gain": -9,
@@ -26560,7 +26560,7 @@
      "noisy": 14,
      "ratings": {
       "before": 0.3,
-      "after": 0.3
+      "after": 0.4
      }
     },
     "sa": {
