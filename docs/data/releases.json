@@ -30081,7 +30081,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-09-12T12:13:19.798Z",
+   "computedAt": "2026-09-12T12:30:21.210Z",
    "days": 0,
    "stage": "indexing",
    "baselineDays": 7,
@@ -30145,14 +30145,6 @@
        "after": 91,
        "gain": -41,
        "cohort": "floor"
-      },
-      {
-       "kw": "record my sleep",
-       "pop": 66,
-       "before": 95,
-       "after": 131,
-       "gain": -36,
-       "cohort": "control"
       },
       {
        "kw": "snoring king",
@@ -30224,6 +30216,14 @@
        "before": 69,
        "after": 82,
        "gain": -13,
+       "cohort": "floor"
+      },
+      {
+       "kw": "snoring tracker cycle",
+       "pop": 5,
+       "before": 10,
+       "after": 21,
+       "gain": -11,
        "cohort": "floor"
       }
      ],
@@ -30708,14 +30708,6 @@
        "cohort": "floor"
       },
       {
-       "kw": "sleep apple watch",
-       "pop": 5,
-       "before": 72,
-       "after": 51,
-       "gain": 21,
-       "cohort": "floor"
-      },
-      {
        "kw": "حساب النوم",
        "pop": 33,
        "before": 39,
@@ -30793,6 +30785,14 @@
        "before": 18,
        "after": 13,
        "gain": 5,
+       "cohort": "floor"
+      },
+      {
+       "kw": "snore monitor app",
+       "pop": 5,
+       "before": 30,
+       "after": 26,
+       "gain": 4,
        "cohort": "floor"
       }
      ],
