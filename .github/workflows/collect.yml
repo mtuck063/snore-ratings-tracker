@@ -64,6 +64,19 @@ jobs:
       - name: Roll up downloads
         run: node scripts/downloads.mjs
 
+      # Folds developer responses into the reviews the first step collected:
+      # the public RSS feed carries the review alone, so a reply written in
+      # App Store Connect reaches the page only through here. Same read-only
+      # reporting key as the analytics ingest, which also reads reviews; the
+      # script exits 0 when the secrets are absent, so it can only ever add to
+      # a run, never take the ratings collection down with it.
+      - name: Pull developer responses to reviews
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+        run: node scripts/review-responses.mjs
+
       - name: Commit data
         run: |
           git config user.name "ratings-bot"

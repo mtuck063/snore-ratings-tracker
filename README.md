@@ -15,6 +15,7 @@ below is the checklist.
 | Ratings, star histograms, written reviews | `scripts/collect.mjs` | hourly | `latest.json`, `history.json`, `histograms.json`, `events.json`, `reviews.json` |
 | Search rank and demand per keyword per market | `scripts/keywords.mjs` | 4x daily | `keywords.json`, `kw-events/`, `kw-slots/` |
 | Who held each search slot, per day | `scripts/kw-slots.mjs` | inside keywords; `--backfill` by hand | `kw-slots/` |
+| Developer responses to reviews | `scripts/review-responses.mjs` | with ratings | `reviews.json` |
 | Website visitors, optional | `scripts/pageviews.mjs` | with ratings | `pageviews.json` |
 | Intent, coverage and priority per keyword | `scripts/aso.mjs` | with keywords | `aso.json`, `metadata.json` |
 | What a release changed, and what it did | `scripts/release.mjs` | by hand, then with keywords | `releases.json` |
@@ -680,6 +681,7 @@ override that.
 
 ```sh
 node scripts/collect.mjs                 # ratings, reviews, histograms
+node scripts/review-responses.mjs        # replies written in App Store Connect
 node scripts/keywords.mjs                # every market in-process
 node scripts/keywords.mjs --collect us   # one market, writes partials/
 node scripts/keywords.mjs --merge        # partials -> data files

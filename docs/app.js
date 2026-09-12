@@ -1031,6 +1031,31 @@ function likelyEnglish(text) {
     return words.filter((w) => FOREIGN_WORDS.has(w)).length < 2;
 }
 
+// The reply written in App Store Connect, which review-responses.mjs folds
+// into reviews.json -- the RSS feed the collector reads carries the review
+// alone, so before that script existed the page showed one side of every
+// conversation. Rendered under the meta line, where the store page puts it.
+function responseBlock(r, compact) {
+    if (!r.response?.body) return null;
+    const box = document.createElement("div");
+    box.className = "review-response";
+
+    const head = document.createElement("div");
+    head.className = "review-response-head";
+    const when = r.response.date
+        ? ` · ${new Date(r.response.date).toLocaleDateString(undefined, { dateStyle: "medium" })}`
+        : "";
+    head.textContent = `Developer response${when}`;
+    box.appendChild(head);
+
+    const body = document.createElement("div");
+    body.className = "review-body";
+    body.textContent =
+        compact && r.response.body.length > 120 ? `${r.response.body.slice(0, 120)}…` : r.response.body;
+    box.appendChild(body);
+    return box;
+}
+
 // Review text is third-party content: build cards with textContent only.
 function reviewCard(r, compact) {
     const card = document.createElement("div");
@@ -1059,9 +1084,12 @@ function reviewCard(r, compact) {
     if (r.version) parts.push(`v${r.version}`);
     metaLine.textContent = parts.join(" · ");
 
+    const response = responseBlock(r, compact);
+
     // On-demand translation, shown below the original so both stay visible.
     if (likelyEnglish(`${r.title} ${r.body}`)) {
         card.appendChild(metaLine);
+        if (response) card.appendChild(response);
         return card;
     }
     const tBtn = document.createElement("button");
@@ -1104,6 +1132,7 @@ function reviewCard(r, compact) {
     metaLine.appendChild(document.createTextNode(" · "));
     metaLine.appendChild(tBtn);
     card.appendChild(metaLine);
+    if (response) card.appendChild(response);
 
     return card;
 }

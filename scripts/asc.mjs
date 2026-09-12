@@ -12,6 +12,11 @@
 // appears in git or in this file. The default "reporting" key (Sales and
 // Reports role) covers reviews and sales reports; ASC_KEY=admin selects the
 // admin key, which the Analytics Reports API requires.
+//
+// A CI runner has no home directory to read from, so ASC_KEY_ID/ASC_ISSUER_ID/
+// ASC_PRIVATE_KEY stand in for the config file when all three are set --
+// createPrivateKey takes PEM text directly, so the .p8 never lands on a disk
+// you do not own. Only ever give a workflow the read-only reporting key.
 import { createPrivateKey, sign } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { gunzipSync } from "node:zlib";
@@ -24,14 +29,41 @@ const configPath = path.join(os.homedir(), ".config", "appstoreconnect", "config
 
 const b64url = (buf) => Buffer.from(buf).toString("base64url");
 
-export async function makeToken() {
-  const config = JSON.parse(await readFile(configPath, "utf8"));
-  const name = process.env.ASC_KEY ?? config.default;
-  const { keyId, issuerId, keyPath } = config.keys[name] ?? {};
-  if (!keyId) {
-    throw new Error(`no key named "${name}" in ${configPath} (have: ${Object.keys(config.keys)})`);
+// True when a token can be built at all, so a caller can skip its work
+// quietly rather than fail on a machine that was never given a key.
+export async function haveCredentials() {
+  if (process.env.ASC_KEY_ID && process.env.ASC_ISSUER_ID && process.env.ASC_PRIVATE_KEY) return true;
+  try {
+    await readFile(configPath, "utf8");
+    return true;
+  } catch {
+    return false;
   }
-  const key = createPrivateKey(await readFile(keyPath, "utf8"));
+}
+
+export async function makeToken() {
+  let keyId, issuerId, pem;
+  const envKey = process.env.ASC_PRIVATE_KEY;
+  if (envKey && process.env.ASC_KEY_ID && process.env.ASC_ISSUER_ID) {
+    keyId = process.env.ASC_KEY_ID;
+    issuerId = process.env.ASC_ISSUER_ID;
+    // A secret pasted through a shell can arrive with its newlines escaped,
+    // and a PEM whose line breaks are the two characters \ and n will not
+    // parse. Both forms have to work or the failure is a bad-key error that
+    // says nothing about what is actually wrong.
+    pem = envKey.includes("\\n") ? envKey.replace(/\\n/g, "\n") : envKey;
+  } else {
+    const config = JSON.parse(await readFile(configPath, "utf8"));
+    const name = process.env.ASC_KEY ?? config.default;
+    const { keyId: id, issuerId: iss, keyPath } = config.keys[name] ?? {};
+    if (!id) {
+      throw new Error(`no key named "${name}" in ${configPath} (have: ${Object.keys(config.keys)})`);
+    }
+    keyId = id;
+    issuerId = iss;
+    pem = await readFile(keyPath, "utf8");
+  }
+  const key = createPrivateKey(pem);
   const now = Math.floor(Date.now() / 1000);
   const header = b64url(JSON.stringify({ alg: "ES256", kid: keyId, typ: "JWT" }));
   // Apple rejects tokens valid longer than 20 minutes; 10 leaves slack for clock skew.
