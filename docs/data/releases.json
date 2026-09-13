@@ -30081,7 +30081,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-09-13T16:33:24.543Z",
+   "computedAt": "2026-09-13T17:38:47.836Z",
    "days": 1,
    "stage": "indexing",
    "baselineDays": 7,
@@ -30225,11 +30225,11 @@
        "cohort": "control"
       },
       {
-       "kw": "snoring monitor",
-       "pop": 68,
-       "before": 9,
-       "after": 16,
-       "gain": -7,
+       "kw": "free sleep tracking app",
+       "pop": 78,
+       "before": 47,
+       "after": 40,
+       "gain": 7,
        "cohort": "control"
       }
      ],
@@ -30326,14 +30326,6 @@
        "cohort": "floor"
       },
       {
-       "kw": "sleep tracking",
-       "pop": 52,
-       "before": 24,
-       "after": 43,
-       "gain": -19,
-       "cohort": "control"
-      },
-      {
        "kw": "snoring detection app",
        "pop": 5,
        "before": 37,
@@ -30355,6 +30347,14 @@
        "before": 26,
        "after": 39,
        "gain": -13,
+       "cohort": "control"
+      },
+      {
+       "kw": "sleep tracking",
+       "pop": 52,
+       "before": 24,
+       "after": 36,
+       "gain": -12,
        "cohort": "control"
       },
       {
