@@ -30081,7 +30081,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-09-14T13:08:55.246Z",
+   "computedAt": "2026-09-14T15:32:05.218Z",
    "days": 2,
    "stage": "indexing",
    "baselineDays": 7,
@@ -30105,7 +30105,7 @@
      "shotsChanged": null,
      "target": {
       "n": 2,
-      "gain": 0
+      "gain": -0.5
      },
      "control": {
       "n": 61,
@@ -30115,7 +30115,7 @@
       "n": 26,
       "gain": -0.5
      },
-     "lift": 0,
+     "lift": -0.5,
      "appeared": [
       {
        "kw": "apple watch sleep tracker",
@@ -30202,7 +30202,7 @@
       },
       {
        "kw": "night recorder",
-       "pop": 61,
+       "pop": 55,
        "before": 38,
        "after": 28,
        "gain": 10,
@@ -30289,8 +30289,8 @@
        "kw": "teeth grinding recorder",
        "pop": 5,
        "before": 150,
-       "after": 100,
-       "gain": 50,
+       "after": 97,
+       "gain": 53,
        "cohort": "control"
       },
       {
@@ -30335,7 +30335,7 @@
       },
       {
        "kw": "sleep tracking",
-       "pop": 52,
+       "pop": 49,
        "before": 24,
        "after": 42,
        "gain": -18,
@@ -30345,8 +30345,8 @@
        "kw": "snoring king",
        "pop": 5,
        "before": 41,
-       "after": 58,
-       "gain": -17,
+       "after": 57,
+       "gain": -16,
        "cohort": "floor"
       },
       {
@@ -30411,14 +30411,14 @@
      },
      "floor": {
       "n": 27,
-      "gain": 2
+      "gain": 1
      },
      "lift": null,
      "appeared": [
       {
        "kw": "sleep talking recorder⁺",
        "pop": 58,
-       "rank": 57
+       "rank": 59
       }
      ],
      "vanished": [
@@ -30436,7 +30436,7 @@
      "movers": [
       {
        "kw": "night recorder",
-       "pop": 69,
+       "pop": 67,
        "before": 177.5,
        "after": 133,
        "gain": 44.5,
@@ -30764,7 +30764,7 @@
       },
       {
        "kw": "snoring monitoring",
-       "pop": 86,
+       "pop": 89,
        "before": 42,
        "after": 52,
        "gain": -10,
@@ -30828,7 +30828,7 @@
       },
       {
        "kw": "حساب النوم",
-       "pop": 39,
+       "pop": 42,
        "before": 39,
        "after": 43,
        "gain": -4,
@@ -31022,8 +31022,8 @@
        "kw": "grabar dormir",
        "pop": 61,
        "before": 32,
-       "after": 61,
-       "gain": -29,
+       "after": 60,
+       "gain": -28,
        "cohort": "control"
       },
       {
@@ -31076,7 +31076,7 @@
       },
       {
        "kw": "apnea",
-       "pop": 58,
+       "pop": 61,
        "before": 35,
        "after": 46,
        "gain": -11,
@@ -31084,7 +31084,7 @@
       },
       {
        "kw": "seguimiento del sueño gratis",
-       "pop": 46,
+       "pop": 55,
        "before": 44,
        "after": 53,
        "gain": -9,
@@ -31609,7 +31609,7 @@
       },
       {
        "kw": "schnarchen kostenlos",
-       "pop": 65,
+       "pop": 68,
        "before": 25,
        "after": 23,
        "gain": 2,
