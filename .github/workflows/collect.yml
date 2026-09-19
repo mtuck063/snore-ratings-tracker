@@ -25,7 +25,12 @@ jobs:
   collect:
     runs-on: ubuntu-latest
     steps:
+      # Branch tip rather than the pinned sha, for the same reason as the
+      # keyword merge job: a run queued behind another in the concurrency
+      # group must commit on top of what that run pushed.
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref }}
 
       - uses: actions/setup-node@v7
         with:

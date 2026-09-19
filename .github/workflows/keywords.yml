@@ -80,7 +80,16 @@ jobs:
     if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
+      # The branch tip, not the sha this run was created on. The concurrency
+      # group queues a scheduled run behind a manual dispatch (or a requeued
+      # attempt 2), and by the time the queued run reaches this job the other
+      # one has pushed. Checkout's default pins github.sha, so the merge then
+      # commits on top of stale data and `git pull --rebase` hits the same
+      # single-line conflict in every compact JSON file. Fetching the branch
+      # means the partials merge into whatever is on main now.
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.ref }}
 
       - uses: actions/setup-node@v7
         with:
