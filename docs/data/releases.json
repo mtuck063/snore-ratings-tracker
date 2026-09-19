@@ -30081,7 +30081,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-09-19T10:44:56.326Z",
+   "computedAt": "2026-09-19T11:18:18.138Z",
    "days": 7,
    "stage": "provisional",
    "baselineDays": 7,
@@ -30140,7 +30140,7 @@
       {
        "kw": "sleep tracking",
        "pop": 47,
-       "rank": 151
+       "rank": 143
       }
      ],
      "vanished": [
@@ -30746,7 +30746,7 @@
       {
        "kw": "sleep tracking",
        "pop": 64,
-       "rank": 160
+       "rank": 118
       },
       {
        "kw": "sleep meister",
@@ -31623,7 +31623,7 @@
      "noisy": 7,
      "ratings": {
       "before": 0.3,
-      "after": 0.1
+      "after": 0.3
      }
     },
     "nl": {
