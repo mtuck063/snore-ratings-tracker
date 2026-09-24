@@ -30081,7 +30081,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-09-24T10:38:00.825Z",
+   "computedAt": "2026-09-24T12:03:43.738Z",
    "days": 12,
    "stage": "settled",
    "baselineDays": 7,
@@ -30130,7 +30130,7 @@
       {
        "kw": "sleep tracking",
        "pop": 50,
-       "rank": 175
+       "rank": 174
       },
       {
        "kw": "sleep talking recorder⁺",
@@ -30488,14 +30488,6 @@
        "cohort": "control"
       },
       {
-       "kw": "sleep diary",
-       "pop": 63,
-       "before": 80,
-       "after": 100,
-       "gain": -20,
-       "cohort": "control"
-      },
-      {
        "kw": "sleep recorder",
        "pop": 94,
        "before": 59,
@@ -30510,6 +30502,14 @@
        "after": 61,
        "gain": -17,
        "cohort": "floor"
+      },
+      {
+       "kw": "sleep diary",
+       "pop": 63,
+       "before": 80,
+       "after": 95,
+       "gain": -15,
+       "cohort": "control"
       },
       {
        "kw": "snore alarm",
@@ -31323,6 +31323,14 @@
        "cohort": "floor"
       },
       {
+       "kw": "sono apple watch",
+       "pop": 80,
+       "before": 46,
+       "after": 62,
+       "gain": -16,
+       "cohort": "control"
+      },
+      {
        "kw": "diário do sono",
        "pop": 5,
        "before": 177,
@@ -31344,14 +31352,6 @@
        "before": 5,
        "after": 9,
        "gain": -4,
-       "cohort": "control"
-      },
-      {
-       "kw": "sono apple watch",
-       "pop": 80,
-       "before": 46,
-       "after": 42,
-       "gain": 4,
        "cohort": "control"
       },
       {
@@ -31471,19 +31471,19 @@
        "cohort": "floor"
       },
       {
+       "kw": "cpap",
+       "pop": 5,
+       "before": 25,
+       "after": 32,
+       "gain": -7,
+       "cohort": "control"
+      },
+      {
        "kw": "sonno apple watch",
        "pop": 71,
        "before": 72,
        "after": 79,
        "gain": -7,
-       "cohort": "control"
-      },
-      {
-       "kw": "cpap",
-       "pop": 5,
-       "before": 25,
-       "after": 31,
-       "gain": -6,
        "cohort": "control"
       },
       {
@@ -31563,7 +31563,7 @@
       {
        "kw": "schlafen",
        "pop": 41,
-       "rank": 155
+       "rank": 159
       }
      ],
      "vanished": [],
