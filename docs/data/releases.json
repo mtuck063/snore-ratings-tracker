@@ -30081,7 +30081,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-09-25T20:20:19.804Z",
+   "computedAt": "2026-09-25T21:46:27.765Z",
    "days": 13,
    "stage": "settled",
    "baselineDays": 7,
@@ -30128,14 +30128,14 @@
        "rank": 61
       },
       {
-       "kw": "sleep tracking",
-       "pop": 50,
-       "rank": 173
-      },
-      {
        "kw": "sleep talking recorder⁺",
        "pop": 49,
        "rank": 33
+      },
+      {
+       "kw": "sleep tracking",
+       "pop": 47,
+       "rank": 173
       },
       {
        "kw": "snoreproof",
@@ -30282,7 +30282,7 @@
      "appeared": [
       {
        "kw": "sleep cycle",
-       "pop": 80,
+       "pop": 83,
        "rank": 61
       },
       {
@@ -30322,7 +30322,7 @@
       },
       {
        "kw": "sleep recorder",
-       "pop": 75,
+       "pop": 77,
        "before": 26,
        "after": 68.5,
        "gain": -42.5,
@@ -30346,7 +30346,7 @@
       },
       {
        "kw": "sleep tracker",
-       "pop": 89,
+       "pop": 86,
        "before": 174.5,
        "after": 149,
        "gain": 25.5,
@@ -30394,7 +30394,7 @@
       },
       {
        "kw": "sleep apnea",
-       "pop": 52,
+       "pop": 55,
        "before": 27,
        "after": 42,
        "gain": -15,
@@ -30641,7 +30641,7 @@
       },
       {
        "kw": "record sleep",
-       "pop": 63,
+       "pop": 54,
        "before": 33,
        "after": 19.5,
        "gain": 13.5,
@@ -30895,7 +30895,7 @@
      },
      "floor": {
       "n": 2,
-      "gain": 15.3
+      "gain": 15
      },
      "lift": -2.5,
      "appeared": [
@@ -30921,8 +30921,8 @@
        "kw": "dream talk recorder",
        "pop": 64,
        "before": 78,
-       "after": 47.5,
-       "gain": 30.5,
+       "after": 48,
+       "gain": 30,
        "cohort": "floor"
       },
       {
@@ -30999,7 +30999,7 @@
       },
       {
        "kw": "il ronfle",
-       "pop": 71,
+       "pop": 76,
        "before": 30,
        "after": 32.5,
        "gain": -2.5,
@@ -31067,7 +31067,7 @@
       },
       {
        "kw": "sueño seguimiento gratis",
-       "pop": 77,
+       "pop": 80,
        "before": 22,
        "after": 27,
        "gain": -5,
@@ -31255,7 +31255,7 @@
       },
       {
        "kw": "roncar",
-       "pop": 66,
+       "pop": 63,
        "before": 4,
        "after": 6.5,
        "gain": -2.5,
@@ -31366,7 +31366,7 @@
       },
       {
        "kw": "ronco",
-       "pop": 55,
+       "pop": 52,
        "before": 7,
        "after": 9,
        "gain": -2,
@@ -31418,13 +31418,13 @@
      },
      "floor": {
       "n": 5,
-      "gain": 2.5
+      "gain": 3
      },
      "lift": null,
      "appeared": [
       {
        "kw": "monitoraggio sonno",
-       "pop": 80,
+       "pop": 77,
        "rank": 153
       },
       {
@@ -31477,7 +31477,7 @@
       },
       {
        "kw": "sonno apple watch",
-       "pop": 71,
+       "pop": 74,
        "before": 72,
        "after": 78,
        "gain": -6,
@@ -31495,8 +31495,8 @@
        "kw": "sveglia sonno",
        "pop": 5,
        "before": 127,
-       "after": 121.5,
-       "gain": 5.5,
+       "after": 122,
+       "gain": 5,
        "cohort": "control"
       },
       {
@@ -31527,8 +31527,8 @@
        "kw": "registrare russare",
        "pop": 5,
        "before": 27,
-       "after": 24.5,
-       "gain": 2.5,
+       "after": 24,
+       "gain": 3,
        "cohort": "floor"
       }
      ],
@@ -31566,14 +31566,14 @@
      "lift": null,
      "appeared": [
       {
-       "kw": "schlaf app",
-       "pop": 47,
-       "rank": 95
+       "kw": "schlaf",
+       "pop": 50,
+       "rank": 63
       },
       {
-       "kw": "schlaf",
+       "kw": "schlaf app",
        "pop": 47,
-       "rank": 63
+       "rank": 96
       },
       {
        "kw": "schlafen",
@@ -31741,7 +31741,7 @@
       },
       {
        "kw": "slaap",
-       "pop": 61,
+       "pop": 64,
        "before": 18,
        "after": 15,
        "gain": 3,
@@ -31765,7 +31765,7 @@
       },
       {
        "kw": "slaap opnemen",
-       "pop": 80,
+       "pop": 83,
        "before": 5,
        "after": 3,
        "gain": 2,
@@ -31807,7 +31807,7 @@
      "appeared": [
       {
        "kw": "寝言 無料",
-       "pop": 61,
+       "pop": 65,
        "rank": 1
       }
      ],
