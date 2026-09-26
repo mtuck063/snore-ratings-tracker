@@ -30081,7 +30081,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-09-26T11:39:56.576Z",
+   "computedAt": "2026-09-26T11:58:55.766Z",
    "days": 14,
    "stage": "settled",
    "baselineDays": 7,
@@ -30404,7 +30404,7 @@
      "noisy": 5,
      "ratings": {
       "before": 0.1,
-      "after": 0.2
+      "after": 0.3
      }
     },
     "gb": {
@@ -30485,18 +30485,18 @@
        "cohort": "floor"
       },
       {
+       "kw": "cpap tracker",
+       "pop": 82,
+       "before": 22,
+       "after": 43,
+       "gain": -21,
+       "cohort": "control"
+      },
+      {
        "kw": "sleep recorder",
        "pop": 94,
        "before": 59,
        "after": 77,
-       "gain": -18,
-       "cohort": "control"
-      },
-      {
-       "kw": "cpap tracker",
-       "pop": 82,
-       "before": 22,
-       "after": 40,
        "gain": -18,
        "cohort": "control"
       },
@@ -31560,12 +31560,12 @@
       {
        "kw": "schlaf app",
        "pop": 47,
-       "rank": 104
+       "rank": 100
       },
       {
        "kw": "schlaf",
        "pop": 47,
-       "rank": 67
+       "rank": 62
       },
       {
        "kw": "schlafen",
@@ -31735,8 +31735,8 @@
        "kw": "slaap tracker",
        "pop": 85,
        "before": 43,
-       "after": 54,
-       "gain": -11,
+       "after": 53,
+       "gain": -10,
        "cohort": "control"
       },
       {
