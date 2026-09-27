@@ -67,7 +67,7 @@ while (next) {
 const ascListed = new Set();
 const responseByReview = new Map();
 for (const r of reviews) {
-  const key = joinKey(r.attributes.createdDate, r.attributes.reviewerNickname);
+  const key = joinKey(r.attributes.createdDate, ISO2[r.attributes.territory], r.attributes.rating);
   ascListed.add(key);
   const attrs = responsesById.get(r.relationships?.response?.data?.id);
   if (!attrs || attrs.state !== "PUBLISHED") continue;
@@ -79,24 +79,26 @@ for (const r of reviews) {
 
 const now = new Date().toISOString();
 const stored = JSON.parse(await readFile(reviewsFile, "utf8"));
-const storedKeys = new Set(stored.map((r) => joinKey(r.date, r.author)));
+const storedKeys = new Set(stored.map((r) => joinKey(r.date, r.cc, r.rating)));
 
 // Reviews the API lists that the feed has not delivered. Stored in the
 // feed's own shape so nothing downstream can tell the sources apart, except
 // the id prefix the collector uses to recognise one when the feed catches up,
 // and an empty version, which the API does not carry. A review the collector
 // has flagged `removed` still has its key in the set, so a deletion the feed
-// confirmed is not undone by an API that is slower to drop it.
+// confirmed is not undone by an API that is slower to drop it. A territory
+// the table does not know is skipped, since without a storefront code the
+// record could neither be keyed nor shown.
 const fromApi = [];
 for (const r of reviews) {
   const a = r.attributes;
-  const key = joinKey(a.createdDate, a.reviewerNickname);
-  if (storedKeys.has(key)) continue;
   const cc = ISO2[a.territory];
   if (!cc) {
     console.warn(`unknown territory ${a.territory}, skipping ${JSON.stringify(a.title)}`);
     continue;
   }
+  const key = joinKey(a.createdDate, cc, a.rating);
+  if (storedKeys.has(key)) continue;
   const rec = {
     id: `${API_ID_PREFIX}${r.id}`,
     cc,
@@ -122,7 +124,7 @@ const removedFromApi = [];
 let markedMissing = 0;
 for (const r of stored) {
   if (!r.id.startsWith(API_ID_PREFIX) || r.removed) continue;
-  if (ascListed.has(joinKey(r.date, r.author))) {
+  if (ascListed.has(joinKey(r.date, r.cc, r.rating))) {
     if (r.missingSince) markedMissing++;
     delete r.missingSince;
   } else if (!r.missingSince) {
@@ -139,7 +141,7 @@ const edited = [];
 const dropped = [];
 let unmatched = 0;
 for (const r of stored) {
-  const key = joinKey(r.date, r.author);
+  const key = joinKey(r.date, r.cc, r.rating);
   const fresh = responseByReview.get(key);
   if (!fresh) {
     // Only a review App Store Connect still lists can lose a response. One it

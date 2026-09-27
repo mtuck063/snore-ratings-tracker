@@ -313,12 +313,12 @@ const [
 
 // Fold newly fetched reviews into the stored set. A review App Store Connect
 // delivered first (review-responses.mjs stores those under an `asc:` id) is
-// matched on the wall clock and nickname the two sources share; the feed's
+// matched on the wall clock, storefront and rating the two sources share; the feed's
 // own id and the version it alone carries are adopted, so from here on the
 // record is indistinguishable from one the feed found itself.
 const knownIds = new Set(storedReviews.map((r) => r.id));
 const viaApi = new Map(
-  storedReviews.filter((r) => r.id.startsWith(API_ID_PREFIX)).map((r) => [joinKey(r.date, r.author), r])
+  storedReviews.filter((r) => r.id.startsWith(API_ID_PREFIX)).map((r) => [joinKey(r.date, r.cc, r.rating), r])
 );
 const isReviewSeed = storedReviews.length === 0;
 const newReviews = [];
@@ -326,7 +326,7 @@ let adopted = 0;
 for (const r of fetchedReviews) {
   if (knownIds.has(r.id)) continue;
   knownIds.add(r.id);
-  const key = joinKey(r.date, r.author);
+  const key = joinKey(r.date, r.cc, r.rating);
   const early = viaApi.get(key);
   if (early) {
     early.id = r.id;
