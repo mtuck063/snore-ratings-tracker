@@ -30081,7 +30081,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-09-27T10:55:12.156Z",
+   "computedAt": "2026-09-27T12:18:59.836Z",
    "days": 15,
    "stage": "settled",
    "baselineDays": 7,
@@ -30286,6 +30286,11 @@
      "lift": null,
      "appeared": [
       {
+       "kw": "ibiki snore logger",
+       "pop": 89,
+       "rank": 16
+      },
+      {
        "kw": "sleep cycle",
        "pop": 77,
        "rank": 61
@@ -30299,11 +30304,6 @@
        "kw": "snoreproof",
        "pop": 5,
        "rank": 26
-      },
-      {
-       "kw": "ibiki snore logger",
-       "pop": 5,
-       "rank": 16
       }
      ],
      "vanished": [
@@ -30445,11 +30445,6 @@
      "lift": null,
      "appeared": [
       {
-       "kw": "ibiki snore logger",
-       "pop": 89,
-       "rank": 12
-      },
-      {
        "kw": "sleep tracker",
        "pop": 77,
        "rank": 52
@@ -30458,6 +30453,11 @@
        "kw": "sleep talking recorder⁺",
        "pop": 58,
        "rank": 59
+      },
+      {
+       "kw": "ibiki snore logger",
+       "pop": 58,
+       "rank": 12
       },
       {
        "kw": "snoreproof",
@@ -31598,7 +31598,7 @@
       {
        "kw": "schlaf app",
        "pop": 44,
-       "rank": 98
+       "rank": 97
       },
       {
        "kw": "schlafen",
