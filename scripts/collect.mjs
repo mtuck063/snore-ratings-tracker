@@ -12,6 +12,7 @@
 // outage or throttle can't fake a delisting.
 
 import { readFile, writeFile } from "node:fs/promises";
+import { API_ID_PREFIX, joinKey } from "./review-key.mjs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -310,17 +311,34 @@ const [
   { fetched: fetchedReviews, complete: feedComplete },
 ] = await Promise.all([ratingsPass(), reviewsPass(storedByCc)]);
 
-// Fold newly fetched reviews into the stored set.
+// Fold newly fetched reviews into the stored set. A review App Store Connect
+// delivered first (review-responses.mjs stores those under an `asc:` id) is
+// matched on the wall clock and nickname the two sources share; the feed's
+// own id and the version it alone carries are adopted, so from here on the
+// record is indistinguishable from one the feed found itself.
 const knownIds = new Set(storedReviews.map((r) => r.id));
+const viaApi = new Map(
+  storedReviews.filter((r) => r.id.startsWith(API_ID_PREFIX)).map((r) => [joinKey(r.date, r.author), r])
+);
 const isReviewSeed = storedReviews.length === 0;
 const newReviews = [];
+let adopted = 0;
 for (const r of fetchedReviews) {
-  if (!knownIds.has(r.id)) {
-    knownIds.add(r.id);
-    newReviews.push({ ...r, firstSeen: fetchedAt });
+  if (knownIds.has(r.id)) continue;
+  knownIds.add(r.id);
+  const key = joinKey(r.date, r.author);
+  const early = viaApi.get(key);
+  if (early) {
+    early.id = r.id;
+    early.version = r.version;
+    delete early.missingSince;
+    viaApi.delete(key);
+    adopted++;
+    continue;
   }
+  newReviews.push({ ...r, firstSeen: fetchedAt });
 }
-console.log(`${newReviews.length} new written reviews`);
+console.log(`${newReviews.length} new written reviews${adopted ? `, ${adopted} caught up with by the feed` : ""}`);
 
 // Reviews that have left Apple's feed. A reviewer can delete their review and
 // Apple can pull one in moderation; either way the star goes with it, so a
@@ -338,6 +356,9 @@ const removedReviews = [];
 const restoredReviews = [];
 let markedMissing = 0;
 for (const r of storedReviews) {
+  // One the feed has never served cannot have left it; review-responses.mjs
+  // runs the same check against App Store Connect's listing for those.
+  if (r.id.startsWith(API_ID_PREFIX)) continue;
   if (fetchedIds.has(r.id)) {
     // Back after a confirmed removal is news; back after one missed run is
     // the flakiness this two-run rule exists to absorb, and only resets it.
@@ -356,7 +377,7 @@ for (const r of storedReviews) {
     removedReviews.push(r);
   }
 }
-const reviewsChanged = newReviews.length + removedReviews.length + restoredReviews.length + markedMissing > 0;
+const reviewsChanged = newReviews.length + adopted + removedReviews.length + restoredReviews.length + markedMissing > 0;
 if (removedReviews.length) console.log(`${removedReviews.length} written review(s) removed from Apple's feed`);
 if (restoredReviews.length) console.log(`${restoredReviews.length} written review(s) back in Apple's feed`);
 

@@ -1,15 +1,26 @@
 #!/usr/bin/env node
-// Developer responses to App Store reviews, folded into reviews.json.
+// App Store Connect's view of the reviews, folded into reviews.json.
 //
-// The public customer-reviews RSS feed that collect.mjs reads carries the
-// review and nothing else: a reply written in App Store Connect never appears
-// in it, so the page showed one half of every conversation. App Store Connect
-// carries both -- `/v1/apps/{id}/customerReviews?include=response` returns the
-// response body and the date it was last edited alongside the review it
-// answers, and the read-only reporting key is allowed to read it, which is
-// what lets this run in CI beside the collector.
+// The public customer-reviews RSS feed that collect.mjs reads has two holes.
+// It carries the review and nothing else: a reply written in App Store Connect
+// never appears in it, so the page showed one half of every conversation. And
+// it is served from edges that disagree with each other: the same storefront
+// answers with its reviews from one edge and with none from the next, and a
+// runner that keeps landing on a stale edge never sees a review at all -- a
+// Japanese review sat on the store page for two days while every hourly run
+// logged "0 new written reviews". App Store Connect has neither problem.
+// `/v1/apps/{id}/customerReviews?include=response` returns every review in
+// every territory with its response body and the date it was last edited,
+// and the read-only reporting key is allowed to read it, which is what lets
+// this run in CI beside the collector.
 //
-//   node scripts/review-responses.mjs            merge responses into reviews.json
+// So this does two things with one download: attaches responses to stored
+// reviews, and stores any review the feed never delivered. The feed stays the
+// primary source -- it is public, needs no credential, and carries the app
+// version, which the API does not -- and when it later catches up with a
+// review stored from here, the collector adopts the feed's id and version.
+//
+//   node scripts/review-responses.mjs            merge into reviews.json
 //   node scripts/review-responses.mjs --dry-run  print the changes, write nothing
 //
 // Credentials come from ASC_KEY_ID/ASC_ISSUER_ID/ASC_PRIVATE_KEY or, locally,
@@ -20,22 +31,15 @@ import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { ascFetch, haveCredentials, makeToken } from "./asc.mjs";
+import { API_ID_PREFIX, joinKey } from "./review-key.mjs";
+import { ISO2 } from "./territories.mjs";
 
 const APP_ID = "6751759381";
 const repoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
-const reviewsFile = path.join(repoRoot, "docs", "data", "reviews.json");
+const dataDir = path.join(repoRoot, "docs", "data");
+const reviewsFile = path.join(dataDir, "reviews.json");
+const eventsFile = path.join(dataDir, "events.json");
 const dryRun = process.argv.includes("--dry-run");
-
-// The two feeds disagree about one thing only: the UTC offset. Both stamp a
-// review with the same Cupertino wall clock, but the RSS feed writes every one
-// of them -07:00 while App Store Connect uses the offset actually in force, so
-// anything written in winter differs by an hour once parsed -- 26 of 88 reviews
-// when this was written, all of them PST. Comparing the first 19 characters
-// compares the wall clock and sidesteps it. The nickname breaks the ties: two
-// reviews sharing a second are possible, two sharing a second and an author
-// are not, and this is the only field besides the text that both feeds carry
-// (the RSS id and the App Store Connect id are unrelated numbers).
-const joinKey = (date, author) => `${String(date).slice(0, 19)}|${author}`;
 
 if (!(await haveCredentials())) {
   console.log("no App Store Connect credentials; skipping review responses");
@@ -73,7 +77,63 @@ for (const r of reviews) {
   });
 }
 
+const now = new Date().toISOString();
 const stored = JSON.parse(await readFile(reviewsFile, "utf8"));
+const storedKeys = new Set(stored.map((r) => joinKey(r.date, r.author)));
+
+// Reviews the API lists that the feed has not delivered. Stored in the
+// feed's own shape so nothing downstream can tell the sources apart, except
+// the id prefix the collector uses to recognise one when the feed catches up,
+// and an empty version, which the API does not carry. A review the collector
+// has flagged `removed` still has its key in the set, so a deletion the feed
+// confirmed is not undone by an API that is slower to drop it.
+const fromApi = [];
+for (const r of reviews) {
+  const a = r.attributes;
+  const key = joinKey(a.createdDate, a.reviewerNickname);
+  if (storedKeys.has(key)) continue;
+  const cc = ISO2[a.territory];
+  if (!cc) {
+    console.warn(`unknown territory ${a.territory}, skipping ${JSON.stringify(a.title)}`);
+    continue;
+  }
+  const rec = {
+    id: `${API_ID_PREFIX}${r.id}`,
+    cc,
+    rating: a.rating,
+    title: a.title ?? "",
+    body: a.body ?? "",
+    author: a.reviewerNickname ?? "",
+    version: "",
+    date: a.createdDate,
+    firstSeen: now,
+  };
+  stored.push(rec);
+  storedKeys.add(key);
+  fromApi.push(rec);
+}
+
+// A review stored from here is invisible to the collector's removal check,
+// which only knows what the feed answered, so the same two-step rule runs
+// against the API's listing instead: noted absent on the first run, removed
+// once the absence has held for a day.
+const REMOVAL_CONFIRM_MS = 24 * 3600e3;
+const removedFromApi = [];
+let markedMissing = 0;
+for (const r of stored) {
+  if (!r.id.startsWith(API_ID_PREFIX) || r.removed) continue;
+  if (ascListed.has(joinKey(r.date, r.author))) {
+    if (r.missingSince) markedMissing++;
+    delete r.missingSince;
+  } else if (!r.missingSince) {
+    r.missingSince = now;
+    markedMissing++;
+  } else if (new Date(now) - new Date(r.missingSince) >= REMOVAL_CONFIRM_MS) {
+    r.removed = now;
+    removedFromApi.push(r);
+  }
+}
+
 const added = [];
 const edited = [];
 const dropped = [];
@@ -101,10 +161,12 @@ for (const r of stored) {
   }
 }
 for (const key of responseByReview.keys()) {
-  if (!stored.some((r) => joinKey(r.date, r.author) === key)) unmatched++;
+  if (!storedKeys.has(key)) unmatched++;
 }
 
 const label = (r) => `${r.cc} ★${r.rating} ${JSON.stringify(r.title)}`;
+for (const r of fromApi) console.log(`+ review the feed never served: ${label(r)}`);
+for (const r of removedFromApi) console.log(`- review gone from App Store Connect: ${label(r)}`);
 for (const r of added) console.log(`+ response: ${label(r)}`);
 for (const r of edited) console.log(`~ response edited: ${label(r)}`);
 for (const r of dropped) console.log(`- response removed: ${label(r)}`);
@@ -113,12 +175,26 @@ for (const r of dropped) console.log(`- response removed: ${label(r)}`);
 // page that simply never shows a reply.
 if (unmatched) console.warn(`${unmatched} response(s) matched no stored review`);
 
-const changed = added.length + edited.length + dropped.length;
+// The same events the collector raises for a review the feed delivered, so
+// the week row and the event log treat the two sources alike. Same seven-day
+// rule too: a review the API surfaces months late joins the list silently.
+const events = JSON.parse(await readFile(eventsFile, "utf8"));
+const recent = (r) => r.date && new Date(r.firstSeen) - new Date(r.date) <= 7 * 864e5;
+for (const r of fromApi) {
+  if (recent(r)) events.push({ at: now, cc: r.cc, type: "review", rating: r.rating, title: r.title.slice(0, 80) });
+}
+for (const r of removedFromApi) {
+  events.push({ at: now, cc: r.cc, type: "review-removed", rating: r.rating, title: r.title.slice(0, 80) });
+}
+
+const changed =
+  fromApi.length + removedFromApi.length + markedMissing + added.length + edited.length + dropped.length;
 if (!changed) {
-  console.log(`no response changes (${responseByReview.size} published)`);
+  console.log(`no review changes (${responseByReview.size} responses published)`);
 } else if (dryRun) {
   console.log(`${changed} change(s); --dry-run, nothing written`);
 } else {
   await writeFile(reviewsFile, JSON.stringify(stored));
+  await writeFile(eventsFile, JSON.stringify(events));
   console.log(`${changed} change(s) written to docs/data/reviews.json`);
 }

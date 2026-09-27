@@ -15,7 +15,7 @@ below is the checklist.
 | Ratings, star histograms, written reviews | `scripts/collect.mjs` | hourly | `latest.json`, `history.json`, `histograms.json`, `events.json`, `reviews.json` |
 | Search rank and demand per keyword per market | `scripts/keywords.mjs` | 4x daily | `keywords.json`, `kw-events/`, `kw-slots/` |
 | Who held each search slot, per day | `scripts/kw-slots.mjs` | inside keywords; `--backfill` by hand | `kw-slots/` |
-| Developer responses to reviews | `scripts/review-responses.mjs` | with ratings | `reviews.json` |
+| Developer responses, and reviews the RSS feed failed to serve | `scripts/review-responses.mjs` | with ratings | `reviews.json`, `events.json` |
 | Website visitors, optional | `scripts/pageviews.mjs` | with ratings | `pageviews.json` |
 | Intent, coverage and priority per keyword | `scripts/aso.mjs` | with keywords | `aso.json`, `metadata.json` |
 | What a release changed, and what it did | `scripts/release.mjs` | by hand, then with keywords | `releases.json` |
@@ -28,8 +28,11 @@ it: `kw-harvest.mjs` pulls candidate phrases out of Apple's autocomplete, and
 
 Every source is public and unauthenticated: the iTunes lookup and search APIs,
 the storefront web page, the search-hints autocomplete endpoint, and the
-customer-reviews RSS feed. The only credential in any scheduled workflow is an
-optional GoatCounter token.
+customer-reviews RSS feed. The scheduled workflows carry two optional
+credentials, and skip the steps that need them when either is absent: a
+GoatCounter token for website traffic, and a read-only App Store Connect
+reporting key, which adds developer responses, the analytics reports, and the
+reviews the RSS feed fails to serve.
 
 One script sits outside that and is run by hand:
 [Apple's popularity index](#apples-own-popularity-index-optional) needs an Apple
@@ -209,7 +212,10 @@ state:
 - Ratings seed silently. No deltas, no events, because there is no previous
   reading to compare against.
 - Written reviews only get fetched for storefronts that already showed a rating
-  in the previous run, so reviews start arriving on the second run.
+  in the previous run, so reviews start arriving on the second run. The RSS
+  feed is also served from edges that disagree with each other, and a runner
+  can keep landing on one that answers with no reviews at all; with the App
+  Store Connect key set, the responses step stores whatever the feed missed.
 - Keywords record rank and demand immediately, but Δ columns, movement events
   and the newly-tracked badge all need a previous run to mean anything.
 - The watchdog fails until both heartbeat files exist. Run both collectors
@@ -716,7 +722,7 @@ constraint there. Working state that no page reads lives in `scripts/` instead.
 | `events.json` | every rating change the hourly check caught |
 | `histograms.json` | per-star breakdown per storefront |
 | `pending.json` | unconfirmed rating decreases, held 48h before they stick |
-| `reviews.json` | written reviews, kept indefinitely; one absent from Apple's feed for a full day of checks is flagged `removed` (never deleted) and hidden from the page |
+| `reviews.json` | written reviews, kept indefinitely; one absent from Apple's feed for a full day of checks is flagged `removed` (never deleted) and hidden from the page. One stored from App Store Connect before the feed served it carries an `asc:` id and no version until the feed catches up |
 | `keywords.json` | current rank and demand per keyword, the apps holding the places above you, top-ten turnover, plus 30-day history |
 | `kw-events/` | rank and autocomplete movements, one shard per month |
 | `kw-slots/` | closing top ten and five-above list per keyword per day, one file per market, 180 days kept |

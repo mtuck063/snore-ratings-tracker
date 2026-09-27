@@ -5247,7 +5247,11 @@ async function main() {
 
         // Review feeds allow CORS, so sweep them too: any review the tracker
         // hasn't stored yet shows up in the week row immediately.
+        // A review the workflow stored from App Store Connect before the feed
+        // served it carries the API's id, so it is matched the way the
+        // collector matches it: on the wall clock and nickname both share.
         const knownIds = new Set(reviews.map((r) => r.id));
+        const knownKeys = new Set(reviews.map((r) => `${String(r.date).slice(0, 19)}|${r.author}`));
         const newReviews = [];
         const reviewSweep = Promise.all(
             entries
@@ -5260,19 +5264,19 @@ async function main() {
                         let feedEntries = (await res.json()).feed?.entry ?? [];
                         if (!Array.isArray(feedEntries)) feedEntries = [feedEntries];
                         for (const e of feedEntries) {
-                            if (e?.id?.label && e?.["im:rating"]?.label && !knownIds.has(e.id.label)) {
-                                knownIds.add(e.id.label);
-                                newReviews.push({
-                                    id: e.id.label,
-                                    cc,
-                                    rating: Number(e["im:rating"].label),
-                                    title: e.title?.label ?? "",
-                                    body: e.content?.label ?? "",
-                                    author: e.author?.name?.label ?? "",
-                                    version: e["im:version"]?.label ?? "",
-                                    date: e.updated?.label ?? null,
-                                });
-                            }
+                            if (!e?.id?.label || !e?.["im:rating"]?.label || knownIds.has(e.id.label)) continue;
+                            if (knownKeys.has(`${String(e.updated?.label).slice(0, 19)}|${e.author?.name?.label ?? ""}`)) continue;
+                            knownIds.add(e.id.label);
+                            newReviews.push({
+                                id: e.id.label,
+                                cc,
+                                rating: Number(e["im:rating"].label),
+                                title: e.title?.label ?? "",
+                                body: e.content?.label ?? "",
+                                author: e.author?.name?.label ?? "",
+                                version: e["im:version"]?.label ?? "",
+                                date: e.updated?.label ?? null,
+                            });
                         }
                     } catch {
                         /* feed flake; the workflow records reviews officially */
