@@ -234,9 +234,18 @@ auto-discovery:
 node scripts/kw-harvest.mjs de nl        # autocomplete -> scripts/kw-candidates.json
 ```
 
-Then run the discovery workflow, which searches each candidate and reports how
-many known category apps its results contain. Terms with three or more are
-worth tracking. It commits nothing; results come back as an artifact.
+Or dispatch the **Keyword harvest** workflow with the market codes, which is
+the only way to harvest more than one market in a sitting. Apple's
+autocomplete limit is per IP and a harvest is several hundred calls: from one
+address a full harvest goes through clean after half an hour idle, and a
+second started within twenty minutes of it is throttled almost entirely. The
+workflow gives each market its own runner, and so its own address, and
+commits the merged candidates file.
+
+Then run the **Keyword discovery** workflow, naming the same markets so it
+does not re-probe every market in the file. It searches each candidate and
+reports how many known category apps its results contain. Terms with three or
+more are worth tracking. It commits nothing; results come back as an artifact.
 
 ## Which keyword to act on
 

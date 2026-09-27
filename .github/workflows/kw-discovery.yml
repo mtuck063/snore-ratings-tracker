@@ -4,6 +4,10 @@ name: Keyword discovery (one-off)
 # It relevance-tests candidate keywords harvested from Apple's autocomplete.
 on:
   workflow_dispatch:
+    inputs:
+      markets:
+        description: "Market codes to probe, space-separated; blank probes every market in kw-candidates.json"
+        default: ""
 
 permissions:
   contents: read
@@ -30,13 +34,15 @@ jobs:
         run: |
           node -e '
             const c = require("./scripts/kw-candidates.json");
+            const only = process.argv[1].trim().split(/\s+/).filter(Boolean);
             const PER = 40, include = [];
             for (const [market, rows] of Object.entries(c)) {
+              if (only.length && !only.includes(market)) continue;
               const chunks = Math.max(1, Math.ceil(rows.length / PER));
               for (let chunk = 0; chunk < chunks; chunk++) include.push({ market, chunk, chunks });
             }
             console.log("matrix=" + JSON.stringify({ include }));
-          ' >> "$GITHUB_OUTPUT"
+          ' "${{ inputs.markets }}" >> "$GITHUB_OUTPUT"
       - run: echo "${{ steps.gen.outputs.matrix }}"
 
   probe:

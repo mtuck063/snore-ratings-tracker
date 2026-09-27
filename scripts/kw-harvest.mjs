@@ -94,6 +94,23 @@ const HARVEST = {
       "geluid opnemen", "slaapkwaliteit", "tandenknarsen"],
     framings: ["gratis", "app", "opnemen", "apple watch", "opname", "test"],
   },
+  es: {
+    // Spanish loses the tilde in a hurry ("sueno", "analisis"), and Apple
+    // keeps the two spellings as separate queries, so the bare register is
+    // seeded next to the accented one. Bare "apnea" belongs to the divers
+    // here as it does in French; the framed forms stay on topic.
+    // Kept to about twenty stems on purpose: Apple's autocomplete budget is a
+    // burst limit over a long window, and a thirty-stem plan blows through it
+    // before the scoring pass. Bare "dormir", "noche" and "sueño" were the
+    // noisiest stems (baby sleep, night lights, werewolf games) and are gone.
+    stems: ["ronquidos", "roncar", "antironquidos", "app ronquidos", "grabar ronquidos",
+      "grabadora de ronquidos", "detector de ronquidos", "monitor de sueño",
+      "seguimiento del sueño", "análisis del sueño", "analisis sueno", "calidad del sueño",
+      "registro de sueño", "diario de sueño", "apnea del sueño", "apnea del sueno",
+      "hablar dormido", "hablar en sueños", "despertador inteligente", "bruxismo",
+      "grabadora nocturna"],
+    framings: ["gratis", "gratuita", "app", "aplicación", "apple watch", "grabar"],
+  },
   cn: {
     stems: ["打鼾", "打呼", "打呼噜", "鼾声", "呼噜", "止鼾", "睡眠", "睡眠监测",
       "睡眠记录", "睡眠追踪", "睡眠质量", "睡眠周期", "梦话", "呼吸暂停", "助眠",
@@ -102,6 +119,10 @@ const HARVEST = {
     framings: ["免费", "软件", "记录", "苹果手表", "监测", "检测"],
   },
 };
+
+// Mexico searches the same Spanish; its storefront is what differs, and the
+// harvest reads that from keywords.json.
+HARVEST.mx = HARVEST.es;
 
 const MIN_PREFIX = 2;
 const PER_MARKET = 150; // matches the scale of the existing us/ca/gb/au batches
@@ -121,7 +142,10 @@ function makeGate(limit) {
     }
   };
 }
-const gate = makeGate(16);
+// Sixteen in flight trips Apple's per-IP limit partway through the scoring
+// pass on a Latin market with thirty stems, and a throttled prefix silently
+// floors the demand of every term it would have scored. Six stays under it.
+const gate = makeGate(6);
 
 async function hints(term, storefront, attempt = 1) {
   const url = `https://search.itunes.apple.com/WebObjects/MZSearchHints.woa/wa/hints?clientApplication=Software&term=${encodeURIComponent(term)}`;
@@ -135,8 +159,10 @@ async function hints(term, storefront, attempt = 1) {
       .map((m) => m[1].replace(/&amp;/g, "&").toLowerCase())
       .filter((s) => !s.startsWith("http") && s !== "suggestions");
   } catch (err) {
-    if (attempt <= 2) {
-      await sleep(3000 * attempt);
+    // A 429 is a wait, not a verdict: back off 5s, 10s, 20s, 40s before
+    // giving the term up, since a skipped prefix is lost demand data.
+    if (attempt <= 4) {
+      await sleep(5000 * 2 ** (attempt - 1));
       return hints(term, storefront, attempt + 1);
     }
     console.warn(`  hints "${term}": ${err.message}, skipping`);

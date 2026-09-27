@@ -1,0 +1,116 @@
+name: Keyword harvest (one-off)
+
+# Manual only. Pulls candidate phrases out of Apple's autocomplete for the
+# markets named, one runner per market, and commits the result to
+# scripts/kw-candidates.json for the discovery workflow to relevance-test.
+#
+# One runner per market because Apple's autocomplete limit is per IP and a
+# harvest is a burst of several hundred calls. Measured from one address:
+# one full harvest goes through clean after half an hour idle, and a second
+# started within twenty minutes of it is throttled almost entirely, whatever
+# the pause. Runners each bring their own address, so markets run side by
+# side without sharing a budget, and a runner that draws a throttled address
+# loses one market, not the batch.
+on:
+  workflow_dispatch:
+    inputs:
+      markets:
+        description: "Market codes to harvest, space-separated; each needs a HARVEST plan in kw-harvest.mjs"
+        default: "es mx"
+        required: true
+
+permissions:
+  contents: write
+
+# Its own group: it pushes one file the collectors never touch, so it need not
+# queue behind them, and two harvests at once would race on the merge.
+concurrency:
+  group: kw-harvest
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.gen.outputs.matrix }}
+    steps:
+      - id: gen
+        run: |
+          node -e '
+            const markets = process.argv[1].trim().split(/\s+/).filter(Boolean);
+            console.log("matrix=" + JSON.stringify({ include: markets.map((market) => ({ market })) }));
+          ' "${{ inputs.markets }}" >> "$GITHUB_OUTPUT"
+      - run: echo "${{ steps.gen.outputs.matrix }}"
+
+  harvest:
+    needs: plan
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix: ${{ fromJson(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - name: Harvest ${{ matrix.market }}
+        run: node scripts/kw-harvest.mjs ${{ matrix.market }} 2>&1 | tee harvest.log
+      # The script merges into the whole candidates file; only this market's
+      # block travels, so the merge job can fold each runner's result in
+      # without one overwriting another's.
+      - name: Extract ${{ matrix.market }}
+        run: |
+          mkdir -p harvest
+          node -e '
+            const c = require("./scripts/kw-candidates.json");
+            const m = process.argv[1];
+            require("fs").writeFileSync(`harvest/${m}.json`, JSON.stringify(c[m] ?? []));
+            const throttled = (require("fs").readFileSync("harvest.log", "utf8").match(/HTTP 429/g) || []).length;
+            console.log(`${m}: ${(c[m] ?? []).length} candidates, ${throttled} prefixes given up after retries`);
+          ' ${{ matrix.market }}
+      - uses: actions/upload-artifact@v7
+        with:
+          name: harvest-${{ matrix.market }}
+          path: harvest/*.json
+
+  merge:
+    needs: harvest
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: harvest-*
+          merge-multiple: true
+          path: harvest
+      - name: Merge into scripts/kw-candidates.json
+        run: |
+          node -e '
+            const fs = require("fs");
+            const file = "scripts/kw-candidates.json";
+            const c = JSON.parse(fs.readFileSync(file, "utf8"));
+            for (const f of fs.readdirSync("harvest")) {
+              const market = f.replace(/\.json$/, "");
+              const rows = JSON.parse(fs.readFileSync(`harvest/${f}`, "utf8"));
+              // An empty result is a throttled runner, not an empty market;
+              // keep whatever the file already held for it.
+              if (!rows.length) { console.log(`${market}: empty, kept previous`); continue; }
+              c[market] = rows;
+              console.log(`${market}: ${rows.length} candidates`);
+            }
+            fs.writeFileSync(file, JSON.stringify(c, null, 1) + "\n");
+          '
+      - name: Commit
+        run: |
+          git config user.name "ratings-bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add scripts/kw-candidates.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "keywords: harvest ${{ inputs.markets }}"
+            git pull --rebase
+            git push
+          fi
