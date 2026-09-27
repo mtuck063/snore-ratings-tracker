@@ -51,6 +51,23 @@ const HARVEST = {
       "schlafgeräusche", "schlafprotokoll", "im schlaf reden", "zähneknirschen"],
     framings: ["kostenlos", "app", "gratis", "apple watch", "aufnehmen", "test"],
   },
+  fr: {
+    // French drops accents as often as it keeps them, and Apple treats the two
+    // spellings as separate queries with separate demand ("apnée du sommeil"
+    // and "apnee du sommeil" rank #13 and #28 for the same app), so both
+    // registers are seeded. "ppc", the French name for a CPAP machine, is not:
+    // as a stem it returns only banks and the health-insurance login. The
+    // divers own bare "apnée"; the discovery probe's FREEDIVE guard throws
+    // those results out, so the harvest can afford to cast wide there.
+    stems: ["ronflement", "ronfler", "je ronfle", "anti ronflement", "appli ronflement",
+      "enregistreur ronflement", "détecteur ronflement", "ronchopathie", "sommeil",
+      "suivi sommeil", "suivi du sommeil", "analyse sommeil", "enregistrement sommeil",
+      "enregistreur sommeil", "qualité sommeil", "journal sommeil", "cycle sommeil",
+      "apnée du sommeil", "apnee du sommeil", "apnée", "parler dans son sommeil",
+      "somniloquie", "dormir", "nuit", "réveil", "réveil intelligent", "sommeil profond",
+      "insomnie", "bruxisme", "grincement des dents", "cpap"],
+    framings: ["gratuit", "gratuite", "app", "appli", "apple watch", "enregistrer"],
+  },
   jp: {
     stems: ["いびき", "いびき録音", "いびきアプリ", "いびき対策", "睡眠", "睡眠アプリ",
       "睡眠記録", "睡眠トラッカー", "睡眠計測", "睡眠管理", "睡眠の質", "寝言", "寝言録音",
