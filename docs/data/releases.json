@@ -30081,7 +30081,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-09-29T05:58:15.034Z",
+   "computedAt": "2026-09-29T06:02:37.121Z",
    "days": 17,
    "stage": "settled",
    "baselineDays": 7,
@@ -30212,8 +30212,8 @@
        "kw": "sleep tracker",
        "pop": 88,
        "before": 75,
-       "after": 99.5,
-       "gain": -24.5,
+       "after": 97,
+       "gain": -22,
        "cohort": "control"
       },
       {
@@ -30292,7 +30292,7 @@
      "appeared": [
       {
        "kw": "ibiki snore logger",
-       "pop": 83,
+       "pop": 89,
        "rank": 12
       },
       {
