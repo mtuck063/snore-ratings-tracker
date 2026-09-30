@@ -498,6 +498,254 @@ function sparkline(points, label, fmtVal = fmt, minSpan = 0, markDate = null, op
     return svg;
 }
 
+// Installed audience: one line per selected country plus the total, over a
+// chosen range, with a crosshair that reads every visible line at once.
+// The data is scripts/audience.mjs's cumulative estimate; the page adds no
+// arithmetic beyond differences between two days of it.
+//
+// Colors follow the country, assigned once in lifetime order on first render
+// and never reassigned when the selection changes. Eight slots; the chips
+// offer the eight largest markets plus the rest-of-world pool, so nothing
+// ever needs a ninth hue.
+const AUDIENCE_HUES = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#008300", "#9085e9", "#e66767"];
+const AUDIENCE_RANGES = [
+    { key: "30", label: "30 days", days: 30 },
+    { key: "90", label: "90 days", days: 90 },
+    { key: "180", label: "180 days", days: 180 },
+    { key: "all", label: "All time", days: null },
+];
+
+function renderAudience(audience) {
+    if (!audience?.dates?.length || !audience.series?.total?.length) return;
+    const { dates, series } = audience;
+    const n = dates.length;
+    const total = series.total;
+    const countries = Object.keys(series).filter((cc) => cc !== "total" && cc !== "zz");
+    // Lifetime order is the file's order: audience.mjs writes the biggest
+    // market first. Eight lines plus the pool is what the palette carries.
+    const offered = countries.slice(0, AUDIENCE_HUES.length - 1);
+    if (series.zz?.some((v) => v > 0)) offered.push("zz");
+    const hue = new Map(offered.map((cc, i) => [cc, AUDIENCE_HUES[i]]));
+    const label = (cc) =>
+        cc === "total" ? "All countries" : cc === "zz" ? "🌐 Rest of world" : `${flag(cc)} ${regionNames.of(cc.toUpperCase())}`;
+
+    // Tiles: where the base stands, and how it moved over the last week and
+    // month of the series. Net figures, so a flat week reads as a flat week
+    // even when downloads and deletions were both busy.
+    const at = (k) => total[Math.max(0, n - 1 - k)];
+    const signed = (v) => (v > 0 ? `+${fmt(v)}` : fmt(v));
+    const tile = (value, text, title) => {
+        const div = document.createElement("div");
+        div.className = "traffic-tile";
+        if (title) div.title = title;
+        const val = document.createElement("div");
+        val.className = "traffic-num";
+        val.textContent = value;
+        const lab = document.createElement("div");
+        lab.className = "traffic-label";
+        lab.textContent = text;
+        div.append(val, lab);
+        return div;
+    };
+    document.getElementById("audience-row").replaceChildren(
+        tile(fmt(at(0)), `installed on ${audience.through}`, "Estimated devices with the app installed on the most recent day both reports cover"),
+        tile(signed(at(0) - at(7)), "net last 7 days", "Installed audience now, minus the figure seven days earlier"),
+        tile(signed(at(0) - at(30)), "net last 30 days", "Installed audience now, minus the figure thirty days earlier"),
+        tile(fmt(audience.lifetime?.downloads ?? 0), "lifetime downloads", "First-time downloads plus redownloads, complete and unsampled"),
+        tile(fmt(audience.lifetime?.deletions ?? 0), "lifetime deletions, est.", `Sampled deletions ÷ ${audience.sampling} opt-in rate`)
+    );
+    document.getElementById("audience-note").textContent =
+        `Deletions are sampled: Apple reports ${fmt(audience.lifetime?.deletionsSampled ?? 0)} from devices sharing analytics, scaled by the measured opt-in rate of ${audience.sampling}` +
+        (audience.samplingBasis?.days ? ` (first-time installs ÷ downloads over ${audience.samplingBasis.days} days)` : "") +
+        (audience.bridge
+            ? ` Before ${audience.bridge.through} Apple's per-country deletion rows are gone, so each day's deletions are pooled and split by each country's share of the base.`
+            : "") +
+        `. Devices wiped or retired without deleting the app leave no event, so the level runs a little high over time. Data through ${audience.through}.`;
+
+    // Selection: the total is always drawn; the four largest markets start on.
+    const selected = new Set(offered.slice(0, 4));
+    let range = "all";
+
+    const ranges = document.getElementById("audience-ranges");
+    const chips = document.getElementById("audience-chips");
+    const chartWrap = document.getElementById("audience-chart");
+
+    const draw = () => {
+        const w = chartWrap.clientWidth;
+        if (!w) return;
+        const days = AUDIENCE_RANGES.find((r) => r.key === range)?.days;
+        const start = days ? Math.max(0, n - days) : 0;
+        const idx = [];
+        for (let i = start; i < n; i++) idx.push(i);
+        const lines = [{ cc: "total", vals: total, color: null }].concat(
+            offered.filter((cc) => selected.has(cc)).map((cc) => ({ cc, vals: series[cc], color: hue.get(cc) }))
+        );
+        chartWrap.replaceChildren(audienceChart(lines, dates, idx, w, label));
+    };
+
+    for (const r of AUDIENCE_RANGES) {
+        const b = document.createElement("button");
+        b.className = "kw-tab" + (r.key === range ? " active" : "");
+        b.textContent = r.label;
+        b.addEventListener("click", () => {
+            range = r.key;
+            ranges.querySelectorAll(".kw-tab").forEach((el) => el.classList.toggle("active", el === b));
+            draw();
+        });
+        ranges.appendChild(b);
+    }
+    for (const cc of offered) {
+        const b = document.createElement("button");
+        b.className = "audience-chip" + (selected.has(cc) ? " active" : "");
+        b.style.setProperty("--chip", hue.get(cc));
+        b.setAttribute("aria-pressed", selected.has(cc));
+        const sw = document.createElement("span");
+        sw.className = "swatch";
+        const t = document.createElement("span");
+        t.textContent = label(cc);
+        b.append(sw, t);
+        b.addEventListener("click", () => {
+            if (selected.has(cc)) selected.delete(cc);
+            else selected.add(cc);
+            b.classList.toggle("active", selected.has(cc));
+            b.setAttribute("aria-pressed", selected.has(cc));
+            draw();
+        });
+        chips.appendChild(b);
+    }
+
+    // Unhide before drawing: the chart is sized from clientWidth, which is 0
+    // while the section is display:none.
+    document.getElementById("audience-section").hidden = false;
+    draw();
+    let lastW = chartWrap.clientWidth;
+    new ResizeObserver(() => {
+        if (chartWrap.clientWidth !== lastW) {
+            lastW = chartWrap.clientWidth;
+            draw();
+        }
+    }).observe(chartWrap);
+}
+
+function audienceChart(lines, dates, idx, w, label) {
+    const NS = "http://www.w3.org/2000/svg";
+    const el = (tag, attrs = {}) => {
+        const node = document.createElementNS(NS, tag);
+        for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+        return node;
+    };
+    const h = 260;
+    // Room on the right for the end-of-line labels, which are the direct
+    // labels a multi-series chart owes its reader; the legend is the chips.
+    const padL = 44, padR = 118, padT = 10, padB = 24;
+    const svg = el("svg", { width: w, height: h, class: "spark", role: "img" });
+    svg.setAttribute("aria-label", "Installed audience over time, by country");
+    if (idx.length < 2) return svg;
+
+    let max = 0;
+    for (const l of lines) for (const i of idx) if (l.vals[i] > max) max = l.vals[i];
+    if (!max) max = 1;
+    const x = (k) => padL + (k / (idx.length - 1)) * (w - padL - padR);
+    const y = (v) => h - padB - (v / max) * (h - padT - padB);
+
+    // Gridlines at clean values from a zero baseline; the tick every fourth of
+    // the span, dates at a spacing that keeps labels apart at any width.
+    const rawStep = max / 4 || 1;
+    const mag = 10 ** Math.floor(Math.log10(rawStep));
+    const step = [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => s >= rawStep);
+    for (let v = 0; v <= max; v += step) {
+        svg.appendChild(el("line", { class: "spark-grid", x1: padL, x2: w - padR, y1: y(v).toFixed(1), y2: y(v).toFixed(1) }));
+        const t = el("text", { class: "spark-tick", x: padL - 6, y: y(v).toFixed(1), "text-anchor": "end", dy: "0.32em" });
+        t.textContent = v >= 1000 ? `${(v / 1000).toFixed(v % 1000 ? 1 : 0)}k` : fmt(v);
+        svg.appendChild(t);
+    }
+    const every = Math.max(1, Math.ceil(idx.length / Math.max(2, Math.floor((w - padL - padR) / 90))));
+    const dateFmt = (iso, withYear) =>
+        new Date(iso + "T00:00:00Z").toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            ...(withYear ? { year: "2-digit" } : {}),
+            timeZone: "UTC",
+        });
+    const spansYears = dates[idx[0]].slice(0, 4) !== dates[idx.at(-1)].slice(0, 4);
+    for (let k = idx.length - 1; k >= 0; k -= every) {
+        const t = el("text", { class: "spark-tick", x: x(k).toFixed(1), y: h - 6, "text-anchor": k === idx.length - 1 ? "end" : k < every / 2 ? "start" : "middle" });
+        t.textContent = dateFmt(dates[idx[k]], spansYears);
+        svg.appendChild(t);
+    }
+
+    // Lines, total first so the country lines draw over it, then the end
+    // labels, nudged apart when two lines finish within a label's height.
+    for (const l of lines) {
+        const d = idx.map((i, k) => `${k ? "L" : "M"}${x(k).toFixed(1)},${y(l.vals[i]).toFixed(1)}`).join("");
+        const p = el("path", { class: "audience-line" + (l.cc === "total" ? " total" : ""), d });
+        if (l.color) p.setAttribute("stroke", l.color);
+        svg.appendChild(p);
+    }
+    const ends = lines
+        .map((l) => ({ l, yy: y(l.vals[idx.at(-1)]), v: l.vals[idx.at(-1)] }))
+        .sort((a, b) => a.yy - b.yy);
+    // Push overlapping labels down, then lift the whole stack back inside
+    // the plot if the last one ran past the baseline.
+    const gap = 12;
+    for (let i = 1; i < ends.length; i++) if (ends[i].yy - ends[i - 1].yy < gap) ends[i].yy = ends[i - 1].yy + gap;
+    if (ends.length && ends.at(-1).yy > h - padB) {
+        ends.at(-1).yy = h - padB;
+        for (let i = ends.length - 2; i >= 0; i--) ends[i].yy = Math.min(ends[i].yy, ends[i + 1].yy - gap);
+    }
+    for (const e of ends) {
+        const t = el("text", { class: "audience-end" + (e.l.cc === "total" ? " total" : ""), x: w - padR + 8, y: e.yy.toFixed(1), dy: "0.32em" });
+        const short = e.l.cc === "total" ? "All" : e.l.cc === "zz" ? "Rest" : e.l.cc.toUpperCase();
+        t.textContent = `${short} ${fmt(e.v)}`;
+        if (e.l.color) t.setAttribute("fill", e.l.color);
+        svg.appendChild(t);
+    }
+
+    // Crosshair and one dot per line, all hidden until the pointer arrives.
+    const cross = el("line", { class: "audience-cross", y1: padT, y2: h - padB, visibility: "hidden" });
+    svg.appendChild(cross);
+    const dots = lines.map((l) => {
+        const c = el("circle", { class: "audience-dot", r: 4, visibility: "hidden" });
+        c.setAttribute("fill", l.color ?? "currentColor");
+        if (!l.color) c.setAttribute("fill", getComputedStyle(document.body).color);
+        svg.appendChild(c);
+        return c;
+    });
+    const showTip = (e) => {
+        const rect = svg.getBoundingClientRect();
+        const rel = (e.clientX - rect.left - padL) / (w - padL - padR);
+        const k = Math.max(0, Math.min(idx.length - 1, Math.round(rel * (idx.length - 1))));
+        const i = idx[k];
+        cross.setAttribute("x1", x(k));
+        cross.setAttribute("x2", x(k));
+        cross.setAttribute("visibility", "visible");
+        lines.forEach((l, j) => {
+            dots[j].setAttribute("cx", x(k));
+            dots[j].setAttribute("cy", y(l.vals[i]));
+            dots[j].setAttribute("visibility", "visible");
+        });
+        const rows = lines
+            .slice(1)
+            .sort((a, b) => b.vals[i] - a.vals[i])
+            .map((l) => `<span class="tip-bd-row"><span><span class="tip-swatch" style="background:${l.color}"></span>${label(l.cc)}</span><span>${fmt(l.vals[i])}</span></span>`);
+        tooltip.innerHTML =
+            `<span class="tip-value">${fmt(lines[0].vals[i])} installed</span><span class="tip-date">${tipDate(dates[i])}</span>` +
+            (rows.length ? `<span class="tip-bd">${rows.join("")}</span>` : "");
+        placeTooltip(e, { x: rect.left + x(k), y: rect.top + y(lines[0].vals[i]) });
+    };
+    svg.addEventListener("pointermove", (e) => {
+        if (e.pointerType !== "touch") showTip(e);
+    });
+    svg.addEventListener("click", showTip);
+    svg.addEventListener("pointerleave", (e) => {
+        if (e.pointerType === "touch") return;
+        cross.setAttribute("visibility", "hidden");
+        for (const d of dots) d.setAttribute("visibility", "hidden");
+        tooltip.hidden = true;
+    });
+    return svg;
+}
+
 function seriesFor(history, cc) {
     return history
         .slice(-SPARK_DAYS)
@@ -4581,11 +4829,11 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
 
 async function main() {
     const meta = document.getElementById("meta");
-    let latest, history, events, reviews, kwData, hist, glossary, pageviews, downloads, plan, applePop, releases;
+    let latest, history, events, reviews, kwData, hist, glossary, pageviews, downloads, plan, applePop, releases, audience;
     try {
         // no-cache: revalidate every load so the data files can't come from
         // differently-aged browser caches and contradict each other.
-        [latest, history, events, reviews, kwData, hist, glossary, pageviews, downloads, plan, applePop, releases] = await Promise.all([
+        [latest, history, events, reviews, kwData, hist, glossary, pageviews, downloads, plan, applePop, releases, audience] = await Promise.all([
             fetch("data/latest.json", { cache: "no-cache" }).then((r) => r.json()),
             fetch("data/history.json", { cache: "no-cache" }).then((r) => r.json()),
             fetch("data/events.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => []),
@@ -4610,6 +4858,10 @@ async function main() {
             // release has been recorded, which costs the panel and the rule on
             // the charts and nothing else.
             fetch("data/releases.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => []),
+            // The installed-audience series, written by scripts/audience.mjs
+            // from the analytics shards. Absent until the installs report has
+            // been ingested per territory, which only costs the section.
+            fetch("data/audience.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => null),
         ]);
         // Long-horizon competitor rating counts, one entry per app per day it
         // changed. Absent until the collector's first write; costs only the
@@ -4889,6 +5141,7 @@ async function main() {
     // clone built from those widths lines up with nothing.
     floatingHeader(document.getElementById("ratings-wrap"), document.getElementById("ratings"));
 
+    renderAudience(audience);
     renderRecent(events);
     // Not awaited: the table paints synchronously and only the movement strip
     // waits on its shard, so blocking the rest of the page on that fetch would

@@ -16,6 +16,7 @@ below is the checklist.
 | Search rank and demand per keyword per market | `scripts/keywords.mjs` | 4x daily | `keywords.json`, `kw-events/`, `kw-slots/` |
 | Who held each search slot, per day | `scripts/kw-slots.mjs` | inside keywords; `--backfill` by hand | `kw-slots/` |
 | Developer responses, and reviews the RSS feed failed to serve | `scripts/review-responses.mjs` | with ratings | `reviews.json`, `events.json` |
+| Installed audience per day and country | `scripts/audience.mjs` | with ratings | `audience.json` |
 | Website visitors, optional | `scripts/pageviews.mjs` | with ratings | `pageviews.json` |
 | Intent, coverage and priority per keyword | `scripts/aso.mjs` | with keywords | `aso.json`, `metadata.json` |
 | What a release changed, and what it did | `scripts/release.mjs` | by hand, then with keywords | `releases.json` |

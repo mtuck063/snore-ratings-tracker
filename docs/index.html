@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0F1419">
     <title>Snore Timeline · Ratings Tracker</title>
-    <link rel="stylesheet" href="styles.css?v=143">
+    <link rel="stylesheet" href="styles.css?v=144">
 </head>
 <body>
     <main>
@@ -41,6 +41,18 @@
                 <tbody></tbody>
             </table>
         </div>
+
+        <section id="audience-section" hidden>
+            <h2>Installed audience</h2>
+            <p class="section-sub">How many devices still have the app, by day and by country: first-time downloads and redownloads to date, minus deletions to date. Apple reports deletions only from devices that share analytics, so they are scaled up by the measured opt-in rate. The shape and the country split are solid; the level is an estimate.</p>
+            <div class="traffic-row" id="audience-row"></div>
+            <div class="audience-controls">
+                <div class="audience-ranges" id="audience-ranges"></div>
+                <div class="audience-chips" id="audience-chips"></div>
+            </div>
+            <div id="audience-chart"></div>
+            <p class="audience-note" id="audience-note"></p>
+        </section>
 
         <section id="events-section" hidden>
             <h2>Rating events</h2>
@@ -123,6 +135,6 @@
 
     </main>
     <div id="tooltip" hidden></div>
-    <script src="app.js?v=239"></script>
+    <script src="app.js?v=240"></script>
 </body>
 </html>

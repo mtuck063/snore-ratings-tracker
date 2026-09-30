@@ -870,6 +870,39 @@ li.log-day {
 .spark-grid { stroke: var(--border); stroke-width: 1; }
 .spark-tick { fill: var(--text-secondary); font-size: 10px; }
 .traffic-breakdowns { display: flex; gap: 28px; flex-wrap: wrap; margin-top: 20px; }
+
+/* Installed audience: stat tiles borrowed from the traffic section, a row of
+   range tabs and country chips, then a multi-line chart drawn at the
+   wrapper's width. Each country keeps its own hue for as long as the page is
+   open, so toggling one off never repaints the rest. */
+#audience-section { margin-top: 28px; }
+.audience-controls { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; margin: 16px 0 12px; }
+.audience-ranges, .audience-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.audience-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 0.8rem;
+    padding: 4px 11px 4px 8px;
+    cursor: pointer;
+}
+.audience-chip.active { color: var(--text); border-color: var(--chip, var(--accent)); }
+.audience-chip .swatch { width: 10px; height: 10px; border-radius: 50%; background: var(--chip, var(--accent)); opacity: 0.35; }
+.audience-chip.active .swatch { opacity: 1; }
+#audience-chart { min-width: 0; }
+.audience-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.audience-line.total { stroke: var(--text); }
+.audience-end { font-size: 10px; fill: var(--text-secondary); }
+.audience-end.total { fill: var(--text); font-weight: 600; }
+.audience-cross { stroke: var(--text-secondary); stroke-width: 1; opacity: 0.6; }
+.audience-dot { stroke: var(--bg); stroke-width: 2; }
+.audience-note { color: var(--text-secondary); font-size: 0.72rem; margin-top: 8px; max-width: 860px; }
+#tooltip .tip-bd-row .tip-swatch { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 0; }
 .traffic-bd { flex: 1 1 240px; min-width: 220px; }
 .traffic-country { padding: 4px 0; }
 .tc-top { display: flex; justify-content: space-between; gap: 8px; font-size: 0.85rem; }

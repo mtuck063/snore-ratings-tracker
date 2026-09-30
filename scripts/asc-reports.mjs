@@ -188,27 +188,35 @@ function foldDownloads(rows, acc) {
   }
 }
 
-// Installs and deletions are kept by cohort rather than by event date: the
-// question they answer is "of the people who arrived on day D, how many left",
-// and that is unanswerable from an event-date total.
+// Installs and deletions are kept two ways. By cohort, because the question
+// "of the people who arrived on day D, how many left" is unanswerable from an
+// event-date total; and by event date and territory, because the installed
+// base on a day is downloads to date minus deletions to date, and that needs
+// every deletion on the day it happened, in the country it happened, whether
+// or not Apple could say when that user first arrived.
 //
 // Keyed cohort|eventDate rather than cohort alone, which costs some rows and
 // buys idempotency: the snapshot and the ongoing files overlap by several days,
 // and a cohort total that summed both counted those days twice. Writing by key
 // means re-ingesting a day restates it instead of adding to it. --report sums
 // the event dates back up.
-function foldInstalls(rows, cohorts) {
-  for (const r of rows) {
-    const [date, , , event, type, , , , , , cohort, territory, counts] = r;
-    const c = cohort || "";
-    if (!c) continue; // download date outside Apple's window; unattributable
-    const n = Number(counts) || 0;
-    const row = (cohorts[`${c}|${date}`] ??= { first: 0, del: 0, redl: 0, restore: 0, auto: 0 });
+function foldInstalls(rows, cohorts, inst) {
+  const add = (row, event, type, n) => {
     if (event === "Delete") row.del += n;
     else if (type === "First-time download") row.first += n;
     else if (type === "Redownload") row.redl += n;
     else if (type === "Restore") row.restore += n;
     else if (type === "Auto-download") row.auto += n;
+  };
+  for (const r of rows) {
+    const [date, , , event, type, , , , , , cohort, territory, counts] = r;
+    const n = Number(counts) || 0;
+    // Every territory, unfolded, like downloads: the installed-audience
+    // chart splits by country and one row per date and territory is small.
+    add((inst[`${date}|${territory || "ZZ"}`] ??= { first: 0, del: 0, redl: 0, restore: 0, auto: 0 }), event, type, n);
+    const c = cohort || "";
+    if (!c) continue; // download date outside Apple's window; unattributable
+    add((cohorts[`${c}|${date}`] ??= { first: 0, del: 0, redl: 0, restore: 0, auto: 0 }), event, type, n);
   }
 }
 
@@ -243,6 +251,7 @@ async function ingest({ backfill = false, force = new Set() } = {}) {
   const disc = {}; // date|territory|source -> impression/tap/page-view counts
   const dl = {}; //   date|territory|source -> download counts
   const sessions = {}; // date|territory -> session counts
+  const installs = {}; // date|territory -> install/delete/return counts by event date
   const cohorts = {}; // download date|event date -> install/delete/return counts
   const claimedDates = {}; // per report: event dates a newer file already gave us
   let ingested = 0;
@@ -276,7 +285,7 @@ async function ingest({ backfill = false, force = new Set() } = {}) {
         for (const r of all) claimed.add(r[0]);
         if (name === "discovery") foldDiscovery(rows, disc);
         else if (name === "downloads") foldDownloads(rows, dl);
-        else if (name === "installs") foldInstalls(rows, cohorts);
+        else if (name === "installs") foldInstalls(rows, cohorts, installs);
         else if (name === "sessions") foldSessions(rows, sessions);
         seen.add(inst.id);
         ingested++;
@@ -302,13 +311,15 @@ async function ingest({ backfill = false, force = new Set() } = {}) {
     ...Object.keys(disc).map((k) => k.slice(0, 7)),
     ...Object.keys(dl).map((k) => k.slice(0, 7)),
     ...Object.keys(sessions).map((k) => k.slice(0, 7)),
+    ...Object.keys(installs).map((k) => k.slice(0, 7)),
   ]);
   for (const month of touched) {
     const file = path.join(outDir, `${month}.json`);
-    const shard = await readJson(file, { disc: {}, dl: {}, sessions: {} });
+    const shard = await readJson(file, { disc: {}, dl: {}, sessions: {}, inst: {} });
     shard.disc ??= {};
     shard.dl ??= {};
     shard.sessions ??= {};
+    shard.inst ??= {};
     // Each family overwrites only its own keys, so a restatement of one report
     // cannot blank the other.
     for (const [k, v] of Object.entries(disc)) if (k.startsWith(month)) shard.disc[k] = v;
@@ -323,6 +334,11 @@ async function ingest({ backfill = false, force = new Set() } = {}) {
     }
     for (const [k, v] of Object.entries(dl)) if (k.startsWith(month)) shard.dl[k] = v;
     for (const [k, v] of Object.entries(sessions)) if (k.startsWith(month)) shard.sessions[k] = v;
+    // A restated day replaces the whole day: a territory that had a deletion
+    // in the older file and none in the newer one would otherwise keep it.
+    const instDays = new Set(Object.keys(installs).map((k) => k.slice(0, 10)));
+    for (const k of Object.keys(shard.inst)) if (instDays.has(k.slice(0, 10))) delete shard.inst[k];
+    for (const [k, v] of Object.entries(installs)) if (k.startsWith(month)) shard.inst[k] = v;
     delete shard.funnel; // pre-split layout
     await writeFile(file, JSON.stringify(shard) + "\n");
     months.add(month);

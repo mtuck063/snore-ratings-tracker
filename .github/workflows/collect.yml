@@ -69,6 +69,11 @@ jobs:
       - name: Roll up downloads
         run: node scripts/downloads.mjs
 
+      # Same idea for the installed-audience series: downloads to date minus
+      # deletions to date, per country, from the shards already on disk.
+      - name: Roll up installed audience
+        run: node scripts/audience.mjs
+
       # Folds App Store Connect's view of the reviews into what the first step
       # collected: the public RSS feed carries the review alone, so a reply
       # written in App Store Connect reaches the page only through here, and
