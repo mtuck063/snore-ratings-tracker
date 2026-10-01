@@ -753,64 +753,29 @@
  ],
  "ca": [
   {
-   "term": "app for cpap machine users",
-   "demand": 100,
+   "term": "ibf breathing app",
+   "demand": 96,
+   "via": "framing"
+  },
+  {
+   "term": "breathing exercises",
+   "demand": 92,
    "via": "root"
   },
   {
-   "term": "philips cpap",
-   "demand": 97,
+   "term": "huckleberry baby sleep tracker",
+   "demand": 92,
    "via": "root"
   },
   {
    "term": "wake up alarm",
-   "demand": 97,
-   "via": "root"
-  },
-  {
-   "term": "apnea trainer",
-   "demand": 95,
-   "via": "root"
-  },
-  {
-   "term": "phillips cpap",
-   "demand": 91,
-   "via": "root"
-  },
-  {
-   "term": "divenamic - buceo y apnea",
-   "demand": 90,
-   "via": "root"
-  },
-  {
-   "term": "insomnia cookies",
-   "demand": 90,
-   "via": "root"
-  },
-  {
-   "term": "do i snore or grind",
-   "demand": 90,
-   "via": "framing"
-  },
-  {
-   "term": "transcend cpap",
-   "demand": 89,
-   "via": "root"
-  },
-  {
-   "term": "insomnia coach",
    "demand": 88,
    "via": "root"
   },
   {
-   "term": "sleep apnea detector",
-   "demand": 87,
-   "via": "both"
-  },
-  {
-   "term": "cpap.com",
-   "demand": 86,
-   "via": "root"
+   "term": "sleepynight-sleep tracker free",
+   "demand": 88,
+   "via": "framing"
   },
   {
    "term": "bruxism + fix teeth grinding",
@@ -818,579 +783,314 @@
    "via": "root"
   },
   {
-   "term": "breathing exercises",
-   "demand": 85,
-   "via": "root"
-  },
-  {
-   "term": "insomniac events",
-   "demand": 85,
-   "via": "root"
-  },
-  {
-   "term": "sleep cycle free",
-   "demand": 83,
-   "via": "root"
-  },
-  {
-   "term": "cbt-i coach for insomnia",
-   "demand": 82,
-   "via": "root"
-  },
-  {
-   "term": "snorelogic",
-   "demand": 80,
-   "via": "root"
-  },
-  {
-   "term": "sleep tracker free app",
-   "demand": 80,
-   "via": "root"
-  },
-  {
-   "term": "insomniac",
-   "demand": 79,
-   "via": "root"
-  },
-  {
-   "term": "freedive apnea breath trainer",
-   "demand": 78,
-   "via": "root"
-  },
-  {
-   "term": "snoregym",
-   "demand": 77,
-   "via": "root"
-  },
-  {
-   "term": "cpap supplies",
-   "demand": 77,
-   "via": "root"
-  },
-  {
-   "term": "tolpie ∙ control bruxism",
-   "demand": 77,
-   "via": "root"
-  },
-  {
-   "term": "insomnia",
-   "demand": 76,
-   "via": "root"
-  },
-  {
-   "term": "anti-snore lab",
-   "demand": 76,
-   "via": "root"
-  },
-  {
-   "term": "airway trainer - stop snoring",
-   "demand": 76,
-   "via": "root"
-  },
-  {
-   "term": "free breathing app",
-   "demand": 76,
-   "via": "root"
-  },
-  {
-   "term": "rem sleep calculator & sounds",
-   "demand": 76,
-   "via": "root"
-  },
-  {
-   "term": "record my sleep",
-   "demand": 76,
-   "via": "framing"
-  },
-  {
-   "term": "freediving apnea trainer",
-   "demand": 75,
-   "via": "root"
-  },
-  {
-   "term": "snore clock",
-   "demand": 74,
-   "via": "root"
-  },
-  {
-   "term": "cpap dash",
-   "demand": 74,
-   "via": "root"
-  },
-  {
-   "term": "insomniac radio",
-   "demand": 73,
-   "via": "root"
-  },
-  {
-   "term": "snoreless - anti snoring",
-   "demand": 73,
-   "via": "root"
-  },
-  {
-   "term": "snore lab - snore tracker app",
-   "demand": 73,
-   "via": "root"
-  },
-  {
-   "term": "stamina apnea trainer",
-   "demand": 72,
-   "via": "root"
-  },
-  {
-   "term": "sleep talk recorder free",
-   "demand": 72,
-   "via": "root"
-  },
-  {
-   "term": "sleep alarm",
-   "demand": 72,
-   "via": "root"
-  },
-  {
-   "term": "prime sleep recorder",
-   "demand": 72,
-   "via": "root"
-  },
-  {
-   "term": "snore control - stop snoring",
-   "demand": 71,
-   "via": "root"
-  },
-  {
-   "term": "breathing exercises free",
-   "demand": 71,
-   "via": "root"
-  },
-  {
-   "term": "snore lab recorder tracker",
-   "demand": 71,
-   "via": "root"
-  },
-  {
-   "term": "snore control",
-   "demand": 70,
-   "via": "root"
-  },
-  {
-   "term": "apnea freedive breath hold",
-   "demand": 70,
-   "via": "root"
-  },
-  {
-   "term": "sleep recorder free",
-   "demand": 68,
-   "via": "both"
-  },
-  {
-   "term": "insomnia cookies llc",
-   "demand": 68,
-   "via": "root"
-  },
-  {
-   "term": "snore gym",
-   "demand": 68,
-   "via": "root"
-  },
-  {
-   "term": "breathing zone",
-   "demand": 68,
-   "via": "root"
-  },
-  {
-   "term": "the insomniacs - stickers",
-   "demand": 68,
-   "via": "root"
-  },
-  {
-   "term": "sleep talk",
-   "demand": 66,
-   "via": "root"
-  },
-  {
-   "term": "sleep cycle alarm",
-   "demand": 66,
-   "via": "root"
-  },
-  {
-   "term": "breathing timer",
-   "demand": 65,
-   "via": "root"
-  },
-  {
-   "term": "cbt insomnia",
-   "demand": 65,
-   "via": "root"
-  },
-  {
-   "term": "sleep score & ai coach",
-   "demand": 64,
-   "via": "root"
-  },
-  {
-   "term": "alarmx - mission & sleep alarm",
-   "demand": 64,
-   "via": "root"
-  },
-  {
-   "term": "snoring analyzer - sleep talk",
-   "demand": 63,
-   "via": "root"
-  },
-  {
-   "term": "sleep tracking",
-   "demand": 63,
-   "via": "root"
-  },
-  {
-   "term": "sleep sound recorder",
-   "demand": 63,
-   "via": "root"
-  },
-  {
-   "term": "sleeptalk sleep talk recorder",
-   "demand": 63,
-   "via": "root"
-  },
-  {
-   "term": "white noise deep sleep sounds",
-   "demand": 63,
-   "via": "root"
-  },
-  {
-   "term": "dotsleep - sleep debt log",
-   "demand": 63,
-   "via": "root"
-  },
-  {
-   "term": "breathing",
-   "demand": 62,
-   "via": "root"
-  },
-  {
-   "term": "snoring monitoring",
-   "demand": 60,
-   "via": "root"
-  },
-  {
-   "term": "sleep cycle - sleep tracker",
-   "demand": 60,
-   "via": "root"
-  },
-  {
-   "term": "deep sleep fan for bedtime",
-   "demand": 60,
-   "via": "root"
-  },
-  {
-   "term": "soluna - sleep debt tracker",
-   "demand": 60,
-   "via": "root"
-  },
-  {
-   "term": "sleep app：sleep tracker, sound",
-   "demand": 59,
-   "via": "root"
-  },
-  {
-   "term": "cpap tracker & journal",
-   "demand": 59,
-   "via": "root"
-  },
-  {
-   "term": "sleep apnea monitor - somnio+",
-   "demand": 58,
-   "via": "root"
-  },
-  {
-   "term": "smart alarm clock - fixsleep",
-   "demand": 58,
-   "via": "root"
-  },
-  {
-   "term": "restx - rest sleep alarm clock",
-   "demand": 58,
-   "via": "root"
-  },
-  {
-   "term": "deep sleep with aj",
-   "demand": 57,
+   "term": "paced breathing exercises zone",
+   "demand": 84,
    "via": "root"
   },
   {
    "term": "sleep quality journal",
-   "demand": 57,
+   "demand": 83,
    "via": "root"
   },
   {
-   "term": "smart alarm-sleep cycle saving",
-   "demand": 55,
-   "via": "root"
-  },
-  {
-   "term": "deep sleep and relaxation",
-   "demand": 54,
-   "via": "root"
-  },
-  {
-   "term": "recordi - sleep talk recorder",
-   "demand": 52,
-   "via": "root"
-  },
-  {
-   "term": "deep sleep, insomnia help",
-   "demand": 52,
-   "via": "root"
-  },
-  {
-   "term": "sleep apnea & snore exercises",
-   "demand": 52,
-   "via": "root"
-  },
-  {
-   "term": "smart alarm clock captain wake",
-   "demand": 52,
-   "via": "root"
-  },
-  {
-   "term": "sleep cycle ab",
-   "demand": 52,
-   "via": "root"
-  },
-  {
-   "term": "snore tracker - plus1health",
-   "demand": 52,
-   "via": "root"
-  },
-  {
-   "term": "snore control pro",
-   "demand": 52,
-   "via": "root"
-  },
-  {
-   "term": "sleep monitoring free",
-   "demand": 52,
-   "via": "root"
-  },
-  {
-   "term": "empirical sleep & apnea care",
-   "demand": 50,
-   "via": "root"
-  },
-  {
-   "term": "sleepzy - sleep cycle tracker",
-   "demand": 50,
-   "via": "root"
-  },
-  {
-   "term": "deep sleep sounds",
-   "demand": 49,
-   "via": "root"
-  },
-  {
-   "term": "snore tracker - sleep recorder",
-   "demand": 49,
-   "via": "root"
-  },
-  {
-   "term": "apnea trainer freedive",
-   "demand": 49,
-   "via": "root"
-  },
-  {
-   "term": "sleep cycle wake up calculator",
-   "demand": 47,
-   "via": "root"
-  },
-  {
-   "term": "sleep time record charts",
-   "demand": 47,
-   "via": "root"
-  },
-  {
-   "term": "snore & sleep talk logger",
-   "demand": 46,
-   "via": "root"
-  },
-  {
-   "term": "deep sleep app",
-   "demand": 46,
-   "via": "root"
-  },
-  {
-   "term": "snore tracker - record snoring",
-   "demand": 46,
-   "via": "root"
-  },
-  {
-   "term": "sleep monitoring 2",
-   "demand": 46,
-   "via": "root"
-  },
-  {
-   "term": "breathing timer - guided calm",
-   "demand": 45,
+   "term": "paced breathing",
+   "demand": 81,
    "via": "root"
   },
   {
    "term": "vitals7-sleep apnea",
-   "demand": 44,
+   "demand": 80,
    "via": "root"
   },
   {
-   "term": "sleep cycle tracker & analyzer",
-   "demand": 44,
+   "term": "breathing exercises free",
+   "demand": 79,
    "via": "root"
   },
   {
-   "term": "sleep recorder plus",
-   "demand": 44,
+   "term": "paced breathing llc",
+   "demand": 77,
    "via": "root"
   },
   {
-   "term": "sleepland - sleep tracking app",
-   "demand": 44,
+   "term": "wake up alarm clock -vamos-",
+   "demand": 76,
    "via": "root"
   },
   {
-   "term": "breathing timer b-mind",
-   "demand": 42,
+   "term": "aida wake-up alarm",
+   "demand": 76,
    "via": "root"
   },
   {
-   "term": "smart alarm clock - wake me up",
-   "demand": 41,
-   "via": "root"
-  },
-  {
-   "term": "sleep cycle tracker wellsleep",
-   "demand": 41,
-   "via": "root"
-  },
-  {
-   "term": "talkry - sleep talk recorder",
-   "demand": 41,
+   "term": "sleep tracker free app",
+   "demand": 75,
    "via": "both"
   },
   {
-   "term": "snore recorder & sleep tracker",
-   "demand": 41,
+   "term": "snore recorder sleep tracker",
+   "demand": 73,
    "via": "root"
   },
   {
-   "term": "sleep recorder - night audio",
-   "demand": 41,
+   "term": "sleeptalk sleep talk recorder",
+   "demand": 73,
    "via": "root"
   },
   {
-   "term": "dozzi - sleep monitor",
-   "demand": 40,
+   "term": "sleep apnea detector",
+   "demand": 73,
    "via": "root"
   },
   {
-   "term": "snoring recorder & detection",
-   "demand": 40,
+   "term": "alarm clock sleep sounds plus",
+   "demand": 73,
    "via": "root"
   },
   {
-   "term": "box breathing timer - helm",
-   "demand": 39,
+   "term": "baby sleep tracker",
+   "demand": 72,
    "via": "root"
   },
   {
-   "term": "snore recorder,sleep tracker",
-   "demand": 38,
+   "term": "consensus sleep diary",
+   "demand": 72,
    "via": "root"
   },
   {
-   "term": "sleep recorder - somnio",
-   "demand": 38,
+   "term": "condor sleep diary",
+   "demand": 72,
    "via": "root"
   },
   {
-   "term": "pasa - sleep & snore tracker",
-   "demand": 37,
+   "term": "the breathing app",
+   "demand": 71,
+   "via": "framing"
+  },
+  {
+   "term": "prime sleep recorder",
+   "demand": 70,
    "via": "root"
   },
   {
-   "term": "sleep tracker & sleep monitor",
-   "demand": 37,
+   "term": "free breathing app",
+   "demand": 68,
+   "via": "both"
+  },
+  {
+   "term": "transcend cpap",
+   "demand": 67,
    "via": "root"
   },
   {
-   "term": "freedive ai - apnea trainer",
-   "demand": 37,
+   "term": "sleep diary by psyktest",
+   "demand": 67,
    "via": "root"
   },
   {
-   "term": "sleep recorder plus pro",
-   "demand": 35,
-   "via": "root"
-  },
-  {
-   "term": "snorelog - snoring recorder",
-   "demand": 34,
-   "via": "root"
-  },
-  {
-   "term": "snore recorder app - snorely",
-   "demand": 33,
-   "via": "root"
-  },
-  {
-   "term": "snoozer - snore tracker",
-   "demand": 32,
-   "via": "root"
-  },
-  {
-   "term": "oxyboost - apnea trainer",
-   "demand": 32,
-   "via": "root"
-  },
-  {
-   "term": "flow breath - breathing timer",
-   "demand": 31,
-   "via": "root"
-  },
-  {
-   "term": "prime sleep recorder pro",
-   "demand": 31,
-   "via": "root"
-  },
-  {
-   "term": "stamina apnea trainer freedive",
-   "demand": 31,
-   "via": "root"
-  },
-  {
-   "term": "snore recorder pro",
-   "demand": 30,
-   "via": "root"
-  },
-  {
-   "term": "sleep cycle & snore recorder",
-   "demand": 22,
+   "term": "anxiety-panic relief breathing",
+   "demand": 67,
    "via": "root"
   },
   {
    "term": "breathing exercises by breeeze",
-   "demand": 19,
+   "demand": 67,
+   "via": "root"
+  },
+  {
+   "term": "smart alarm-sleep cycle saving",
+   "demand": 66,
+   "via": "root"
+  },
+  {
+   "term": "wake up alarm sounds",
+   "demand": 66,
+   "via": "root"
+  },
+  {
+   "term": "phillips cpap",
+   "demand": 65,
+   "via": "root"
+  },
+  {
+   "term": "cpap supplies",
+   "demand": 65,
+   "via": "root"
+  },
+  {
+   "term": "the sleep diary",
+   "demand": 65,
+   "via": "root"
+  },
+  {
+   "term": "deep calm daily breathing app",
+   "demand": 64,
+   "via": "framing"
+  },
+  {
+   "term": "baby sleep tracker + feeding",
+   "demand": 64,
    "via": "root"
   },
   {
    "term": "breathing exercises antistress",
-   "demand": 16,
+   "demand": 64,
    "via": "root"
   },
   {
-   "term": "breathing exercises - breathee",
-   "demand": 14,
+   "term": "smart alarm clock captain wake",
+   "demand": 63,
+   "via": "root"
+  },
+  {
+   "term": "sleep tracker app wellsleep",
+   "demand": 63,
+   "via": "framing"
+  },
+  {
+   "term": "loud alarm clock-sleep,alarmo",
+   "demand": 62,
+   "via": "root"
+  },
+  {
+   "term": "pokemon sleep tracker",
+   "demand": 61,
+   "via": "root"
+  },
+  {
+   "term": "sleep monitoring 2",
+   "demand": 61,
+   "via": "root"
+  },
+  {
+   "term": "cpap.com",
+   "demand": 61,
+   "via": "root"
+  },
+  {
+   "term": "breathing zone",
+   "demand": 61,
+   "via": "root"
+  },
+  {
+   "term": "smart alarm clock control",
+   "demand": 60,
+   "via": "root"
+  },
+  {
+   "term": "breathing timer",
+   "demand": 60,
+   "via": "root"
+  },
+  {
+   "term": "prime sleep recorder pro",
+   "demand": 59,
+   "via": "root"
+  },
+  {
+   "term": "breathing timer b-mind",
+   "demand": 59,
+   "via": "root"
+  },
+  {
+   "term": "sleep diary app",
+   "demand": 57,
+   "via": "both"
+  },
+  {
+   "term": "sleep recorder plus",
+   "demand": 56,
+   "via": "root"
+  },
+  {
+   "term": "smart alarm clock for watch",
+   "demand": 56,
+   "via": "root"
+  },
+  {
+   "term": "sleep tracker, recorder",
+   "demand": 56,
+   "via": "framing"
+  },
+  {
+   "term": "baby sleep tracker by lulla",
+   "demand": 56,
+   "via": "root"
+  },
+  {
+   "term": "cpap dash",
+   "demand": 55,
+   "via": "root"
+  },
+  {
+   "term": "wake up! alarm",
+   "demand": 55,
+   "via": "root"
+  },
+  {
+   "term": "better sleep diary",
+   "demand": 54,
+   "via": "root"
+  },
+  {
+   "term": "cpap",
+   "demand": 53,
+   "via": "root"
+  },
+  {
+   "term": "philips cpap",
+   "demand": 53,
+   "via": "root"
+  },
+  {
+   "term": "breathing",
+   "demand": 53,
+   "via": "root"
+  },
+  {
+   "term": "smart alarm",
+   "demand": 52,
+   "via": "root"
+  },
+  {
+   "term": "baby sleep tracker by domo",
+   "demand": 52,
+   "via": "root"
+  },
+  {
+   "term": "breathing app, llc",
+   "demand": 51,
+   "via": "framing"
+  },
+  {
+   "term": "sleep recorder plus pro",
+   "demand": 49,
    "via": "root"
   },
   {
    "term": "breathing exercises *",
-   "demand": 11,
+   "demand": 49,
    "via": "root"
+  },
+  {
+   "term": "sleep alarm",
+   "demand": 46,
+   "via": "root"
+  },
+  {
+   "term": "breathing exercises to relax",
+   "demand": 31,
+   "via": "root"
+  },
+  {
+   "term": "sleep tracker app",
+   "demand": 28,
+   "via": "framing"
+  },
+  {
+   "term": "breathing app",
+   "demand": 28,
+   "via": "framing"
   }
  ],
  "gb": [
