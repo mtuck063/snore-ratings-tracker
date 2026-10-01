@@ -2,8 +2,8 @@
   "_note": "What the App Store listing claims, per market. title and subtitle are refreshed from the live storefront pages by `node scripts/aso.mjs --fetch`; do not edit them by hand, they will be overwritten. keywordField and screenshots are NOT public anywhere and are maintained here by hand: copy the field out of App Store Connect whenever you change it, and set fieldUpdated to that date. An unrecorded field is not treated as an empty one; coverage simply reports the market as ungraded.",
   "markets": {
     "us": {
-      "keywordField": "recorder,cpap,monitor,score,rem,apple,watch,apnea,stop,auto,detector,alarm,night,teeth,grinding,free",
-      "fieldUpdated": "2026-09-11",
+      "keywordField": "cpap,monitor,score,rem,apple,watch,apnea,stop,auto,detector,alarm,night,teeth,grinding,breathing,log",
+      "fieldUpdated": "2026-10-01",
       "screenshots": [
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/6f/4c/b9/6f4cb908-edf6-6372-3b32-79e08392c950/Slice_1.png/320x480bb.jpg",
         "https://is1-ssl.mzstatic.com/image/thumb/PurpleSource221/v4/d5/70/f4/d570f400-aaa0-d1ea-c549-cf9796269c41/Slice_2.png/320x480bb.jpg",
