@@ -30081,7 +30081,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-10-01T13:39:26.561Z",
+   "computedAt": "2026-10-01T14:01:41.835Z",
    "days": 19,
    "stage": "settled",
    "baselineDays": 7,
@@ -30766,6 +30766,11 @@
        "kw": "sleep talking recorder⁺",
        "pop": 72,
        "rank": 42
+      },
+      {
+       "kw": "autosleep",
+       "pop": 60,
+       "rank": 167
       },
       {
        "kw": "sleep tracking",
@@ -31700,7 +31705,7 @@
       {
        "kw": "schlafen",
        "pop": 39,
-       "rank": 62
+       "rank": 63
       }
      ],
      "vanished": [],
