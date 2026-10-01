@@ -111,6 +111,17 @@ const HARVEST = {
       "grabadora nocturna"],
     framings: ["gratis", "gratuita", "app", "aplicación", "apple watch", "grabar"],
   },
+  ca: {
+    // English markets share one core list, so a phrase only Canada searches
+    // never gets tracked there. The alarm vocabulary is the known hole:
+    // "smart alarm" leads Canadian autocomplete and nothing tracked used it.
+    stems: ["snoring", "snore recorder", "snore tracker", "stop snoring", "sleep talking",
+      "sleep talk recorder", "sleep recorder", "sleep tracker", "sleep monitor",
+      "sleep apnea", "cpap", "sleep diary", "sleep score", "sleep quality",
+      "teeth grinding", "smart alarm", "sleep alarm", "wake up alarm", "alarm clock sleep",
+      "breathing"],
+    framings: ["free", "app", "apple watch", "tracker", "recorder"],
+  },
   it: {
     // Italian searches the verb ("russare") far more than the noun
     // ("russamento"), so both are seeded. A bare "russ" stem is off limits:
