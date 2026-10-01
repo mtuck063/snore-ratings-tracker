@@ -111,6 +111,20 @@ const HARVEST = {
       "grabadora nocturna"],
     framings: ["gratis", "gratuita", "app", "aplicación", "apple watch", "grabar"],
   },
+  it: {
+    // Italian searches the verb ("russare") far more than the noun
+    // ("russamento"), so both are seeded. A bare "russ" stem is off limits:
+    // it returns Russian-language apps and a feed company. Bare "apnea"
+    // belongs to the divers, as in French and Spanish, and the plural
+    // "apnee notturne" is a separate query from the singular.
+    stems: ["russare", "russamento", "app russare", "registrare russare",
+      "registratore russamento", "antirussamento", "smettere di russare",
+      "monitoraggio sonno", "analisi del sonno", "analisi sonno", "tracker sonno",
+      "qualità del sonno", "qualita sonno", "diario del sonno", "ciclo del sonno",
+      "apnea notturna", "apnee notturne", "apnea del sonno", "parlare nel sonno",
+      "sonniloquio", "sveglia intelligente", "bruxismo"],
+    framings: ["gratis", "gratuita", "app", "applicazione", "apple watch", "registrare"],
+  },
   cn: {
     stems: ["打鼾", "打呼", "打呼噜", "鼾声", "呼噜", "止鼾", "睡眠", "睡眠监测",
       "睡眠记录", "睡眠追踪", "睡眠质量", "睡眠周期", "梦话", "呼吸暂停", "助眠",

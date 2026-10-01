@@ -28,7 +28,7 @@ const KNOWN = new Set(Object.keys(kw.apps));
 
 // Anchored so it cannot fire on Reverse/Restaurant/Forest the way a bare
 // "reve"/"rest" fragment does.
-const NAMEY = /(^|[^a-z])(snor|snurk|slaap|ronfl|ronqu|sommeil|sueñ|insomni|bruxis|despertador|réveil|schnarch|schlaf|schlum)/i;
+const NAMEY = /(^|[^a-z])(snor|snurk|slaap|ronfl|ronqu|sommeil|sueñ|insomni|bruxis|despertador|réveil|schnarch|schlaf|schlum|russa|sonno)/i;
 // Kana and han need no such guard: none of these glyphs appear inside an
 // unrelated word the way "rest" hides "rest". They carry the German stems'
 // job for JP and CN, where the Latin regex above matches nothing at all.
