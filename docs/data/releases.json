@@ -34569,7 +34569,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-10-02T12:51:52.633Z",
+   "computedAt": "2026-10-02T12:57:47.929Z",
    "days": 0,
    "stage": "indexing",
    "baselineDays": 7,
@@ -34655,7 +34655,7 @@
      "movers": [],
      "noisy": 0,
      "ratings": {
-      "before": 0.1,
+      "before": 0.3,
       "after": null
      }
     },
