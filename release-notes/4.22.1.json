@@ -1,0 +1,22 @@
+{
+  "_note": "What's New for 4.22.1, one key per App Store locale. \"@xx-XX\" copies that locale's text. Fill every \"\"; the script refuses to apply a partial file.",
+  "ar-SA": "إصلاحات للأخطاء وتحسينات على تفريغ الكلام أثناء النوم نصيًا.",
+  "de-DE": "Fehlerbehebungen und Verbesserungen bei der Transkription des Sprechens im Schlaf.",
+  "en-AU": "@en-US",
+  "en-CA": "@en-US",
+  "en-GB": "@en-US",
+  "en-US": "Bug fixes and improvements to sleep talking transcription.",
+  "es-ES": "Corrección de errores y mejoras en la transcripción de hablar dormido.",
+  "es-MX": "@es-ES",
+  "fr-CA": "@fr-FR",
+  "fr-FR": "Corrections de bugs et améliorations de la transcription de la somniloquie.",
+  "hi": "नींद में बोलने के ट्रांसक्रिप्शन में बग फ़िक्स और सुधार।",
+  "it": "Correzioni di bug e miglioramenti alla trascrizione del sonniloquio.",
+  "ja": "寝言の文字起こしに関するバグ修正と改善。",
+  "ko": "잠꼬대 텍스트 변환의 버그 수정 및 개선.",
+  "nl-NL": "Bugfixes en verbeteringen voor de transcriptie van praten in de slaap.",
+  "pt-BR": "Correções de bugs e melhorias na transcrição da fala durante o sono.",
+  "pt-PT": "@pt-BR",
+  "ru": "Исправления ошибок и улучшения расшифровки разговора во сне.",
+  "zh-Hans": "梦话转写的错误修复与改进。"
+}
