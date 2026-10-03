@@ -5006,7 +5006,7 @@ async function main() {
             document.getElementById("traffic-countries-wrap").hidden = false;
         }
 
-        // Referrers, operating systems, and languages: the collector stores
+        // Pages, referrers, operating systems, and languages: the collector stores
         // each as [label, count] pairs already sorted, so rendering is the
         // same shape as the country panel minus the flags.
         const renderBreakdown = (wrapId, listId, rows) => {
@@ -5017,6 +5017,7 @@ async function main() {
             if (rows.length > 6) bdMore(list, rows.slice(6), most, (label) => label);
             document.getElementById(wrapId).hidden = false;
         };
+        renderBreakdown("traffic-pages-wrap", "traffic-pages", pageviews.extras?.pages);
         renderBreakdown("traffic-refs-wrap", "traffic-refs", pageviews.extras?.refs);
         renderBreakdown("traffic-systems-wrap", "traffic-systems", pageviews.extras?.systems);
         renderBreakdown("traffic-langs-wrap", "traffic-langs", pageviews.extras?.langs);

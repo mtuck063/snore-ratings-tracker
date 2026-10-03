@@ -143,16 +143,20 @@ try {
     console.warn(`pageviews: locations by day ${err.message}; keeping stored splits.`);
   }
 
-  // Referrers, operating systems, and languages over the same trailing 30
-  // days — the rest of who visits and how they arrived. Same treatment as
-  // the country snapshot: one aggregate request each, replaced whole every
-  // run, quiet on failure. Stored as [label, count] pairs already sorted so
-  // the frontend renders them as-is.
+  // Pages, referrers, operating systems, and languages over the same
+  // trailing 30 days — where visitors land, who they are, and how they
+  // arrived. Same treatment as the country snapshot: one aggregate request
+  // each, replaced whole every run, quiet on failure. Stored as [label,
+  // count] pairs already sorted so the frontend renders them as-is.
   try {
     const start30 = fmt(new Date(now.getTime() - 30 * 864e5));
     const headers = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
     const extras = { asOf: today };
+    // Pages come from the hits endpoint, which answers in `hits` rather
+    // than `stats` and labels each row by path. Events share that list, so
+    // they are dropped to leave only real page loads.
     const pages = [
+      ["pages", "hits", "/"],
       ["refs", "toprefs", "Direct / none"],
       ["systems", "systems", "Unknown"],
       ["langs", "languages", "Unknown"],
@@ -170,9 +174,9 @@ try {
         throw new Error(`${page} HTTP ${res.status}${detail ? ` ${detail}` : ""}`);
       }
       const body = await res.json();
-      extras[key] = (body.stats ?? [])
-        .filter((s) => s.count > 0)
-        .map((s) => [s.name || s.id || blank, s.count])
+      extras[key] = (body.stats ?? body.hits ?? [])
+        .filter((s) => s.count > 0 && !s.event)
+        .map((s) => [s.path || s.name || s.id || blank, s.count])
         .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
     }
     stored.extras = extras;
