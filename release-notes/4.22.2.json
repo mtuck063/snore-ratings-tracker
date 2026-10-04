@@ -1,0 +1,22 @@
+{
+  "_note": "What's New for 4.22.2, one key per App Store locale. \"@xx-XX\" copies that locale's text. Fill every \"\"; the script refuses to apply a partial file.",
+  "ar-SA": "- إصلاح التخطيط: أصلحنا اقتطاع ملخص الليلة عند الحافة اليمنى مع أحجام النص الكبيرة أو اللغات الأطول مثل الألمانية.",
+  "de-DE": "- Layout-Korrektur: Die Nachtübersicht wird bei größeren Textgrößen oder längeren Sprachen wie Deutsch nicht mehr am rechten Rand abgeschnitten.",
+  "en-AU": "@en-US",
+  "en-CA": "@en-US",
+  "en-GB": "@en-US",
+  "en-US": "- Layout Fix: Fixed the nightly summary getting cut off on the right edge with larger text sizes or longer languages like German.",
+  "es-ES": "- Corrección de diseño: El resumen nocturno ya no se corta por el borde derecho con tamaños de texto más grandes o idiomas más largos como el alemán.",
+  "es-MX": "@es-ES",
+  "fr-CA": "@fr-FR",
+  "fr-FR": "- Correction de mise en page: Le résumé de la nuit n'est plus coupé sur le bord droit avec les grandes tailles de texte ou les langues plus longues comme l'allemand.",
+  "hi": "- लेआउट सुधार: बड़े टेक्स्ट आकार या जर्मन जैसी लंबी भाषाओं में रात का सारांश अब दाएँ किनारे पर कटता नहीं है।",
+  "it": "- Correzione del layout: Il riepilogo della notte non viene più tagliato sul bordo destro con dimensioni del testo più grandi o lingue più lunghe come il tedesco.",
+  "ja": "- レイアウトの修正: 大きな文字サイズやドイツ語などの長い言語で、夜のサマリーの右端が切れてしまう問題を修正しました。",
+  "ko": "- 레이아웃 수정: 큰 텍스트 크기나 독일어처럼 긴 언어에서 밤 요약의 오른쪽 가장자리가 잘리던 문제를 수정했습니다.",
+  "nl-NL": "- Lay-outcorrectie: Het nachtoverzicht wordt niet meer aan de rechterrand afgekapt bij grotere tekstgroottes of langere talen zoals Duits.",
+  "pt-BR": "- Correção de layout: O resumo da noite não fica mais cortado na borda direita com tamanhos de texto maiores ou idiomas mais longos, como o alemão.",
+  "pt-PT": "@pt-BR",
+  "ru": "- Исправление вёрстки: Ночная сводка больше не обрезается у правого края при крупном размере текста или в более длинных языках, например немецком.",
+  "zh-Hans": "- 布局修复：修复了在较大字号或德语等较长语言下，每晚摘要右侧被截断的问题。"
+}
