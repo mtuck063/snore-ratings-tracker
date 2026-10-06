@@ -34569,7 +34569,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-10-06T06:39:08.317Z",
+   "computedAt": "2026-10-06T06:44:47.806Z",
    "days": 4,
    "stage": "provisional",
    "baselineDays": 7,
@@ -34615,7 +34615,7 @@
       {
        "kw": "sleep breathing",
        "pop": 69,
-       "rank": 92
+       "rank": 114
       },
       {
        "kw": "snoreclock",
@@ -35598,7 +35598,7 @@
       },
       {
        "kw": "grabador de ronquidos",
-       "pop": 56,
+       "pop": 53,
        "before": 12,
        "after": 9,
        "gain": 3,
