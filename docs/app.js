@@ -1249,7 +1249,9 @@ function starsSpan(rating) {
 // Free keyless translate endpoint; returns [segments, ..., srcLang].
 async function translateToEnglish(text) {
     const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(text)}`;
-    const data = await fetch(url).then((r) => r.json());
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
     return {
         text: (data[0] ?? []).map((seg) => seg[0]).join(""),
         src: data[2] ?? "",
@@ -1372,9 +1374,12 @@ function reviewCard(r, compact) {
             }
             card.insertBefore(box, metaLine);
             tBtn.remove();
-        } catch {
+        } catch (err) {
+            // The reason rides along so a failure seen only on one device can
+            // be read off its screen: "Load failed" is a blocked request,
+            // "HTTP 429" Google refusing, anything else a bug on this page.
             tBtn.disabled = false;
-            tBtn.textContent = "Translation failed — tap to retry";
+            tBtn.textContent = `Translation failed (${err?.message || err}) — tap to retry`;
         }
     });
     metaLine.appendChild(document.createTextNode(" · "));
