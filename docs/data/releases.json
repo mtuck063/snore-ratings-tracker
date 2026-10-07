@@ -34569,7 +34569,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-10-07T02:14:03.668Z",
+   "computedAt": "2026-10-07T03:37:17.637Z",
    "days": 5,
    "stage": "provisional",
    "baselineDays": 7,
@@ -34619,7 +34619,7 @@
       },
       {
        "kw": "snoreclock",
-       "pop": 58,
+       "pop": 61,
        "rank": 4
       },
       {
@@ -34746,7 +34746,7 @@
      "noisy": 13,
      "ratings": {
       "before": 0.7,
-      "after": 1.2
+      "after": 1.4
      }
     },
     "ca": {
@@ -34833,7 +34833,7 @@
       },
       {
        "kw": "sleep talk ai recorder",
-       "pop": 60,
+       "pop": 57,
        "before": 47,
        "after": 36,
        "gain": 11,
@@ -34849,7 +34849,7 @@
       },
       {
        "kw": "sleep talking recorder",
-       "pop": 63,
+       "pop": 60,
        "before": 32,
        "after": 23,
        "gain": 9,
@@ -35037,7 +35037,7 @@
      "noisy": 8,
      "ratings": {
       "before": 0.3,
-      "after": 0.2
+      "after": 0.4
      }
     },
     "au": {
@@ -35606,7 +35606,7 @@
       },
       {
        "kw": "grabador de ronquidos",
-       "pop": 56,
+       "pop": 53,
        "before": 12,
        "after": 9,
        "gain": 3,
@@ -35724,7 +35724,7 @@
       },
       {
        "kw": "apnea",
-       "pop": 66,
+       "pop": 64,
        "before": 43,
        "after": 70,
        "gain": -27,
@@ -35782,7 +35782,7 @@
      "noisy": 8,
      "ratings": {
       "before": 0.3,
-      "after": 0
+      "after": 0.4
      }
     },
     "br": {
@@ -36658,7 +36658,7 @@
      "noisy": 4,
      "ratings": {
       "before": 0.1,
-      "after": 0.2
+      "after": 0.4
      }
     },
     "cn": {
@@ -36716,8 +36716,8 @@
        "kw": "睡觉监测",
        "pop": 55,
        "before": 98,
-       "after": 88,
-       "gain": 10,
+       "after": 89,
+       "gain": 9,
        "cohort": "control"
       },
       {
