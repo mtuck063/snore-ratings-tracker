@@ -12,7 +12,7 @@
 // outage or throttle can't fake a delisting.
 
 import { readFile, writeFile } from "node:fs/promises";
-import { API_ID_PREFIX, joinKey } from "./review-key.mjs";
+import { API_ID_PREFIX, findReplacement, isRemovalEventFor, joinKey } from "./review-key.mjs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -365,6 +365,7 @@ for (const r of storedReviews) {
     if (r.removed) restoredReviews.push(r);
     else if (r.missingSince) markedMissing++;
     delete r.removed;
+    delete r.replaced;
     delete r.missingSince;
     continue;
   }
@@ -377,7 +378,22 @@ for (const r of storedReviews) {
     removedReviews.push(r);
   }
 }
-const reviewsChanged = newReviews.length + adopted + removedReviews.length + restoredReviews.length + markedMissing > 0;
+// A review its author rewrote left the feed too, but its star never left the
+// count, so it is flagged `replaced` and raises no removal. When the new
+// review arrives after the removal was confirmed, the logged event goes.
+const allReviews = [...newReviews, ...storedReviews];
+const lateReplaced = [];
+for (const r of storedReviews) {
+  if (!r.removed || r.replaced || !findReplacement(r, allReviews)) continue;
+  r.replaced = fetchedAt;
+  const i = removedReviews.indexOf(r);
+  if (i >= 0) removedReviews.splice(i, 1);
+  else lateReplaced.push(r);
+}
+const replacedCount = allReviews.filter((r) => r.replaced === fetchedAt).length;
+const reviewsChanged =
+  newReviews.length + adopted + removedReviews.length + restoredReviews.length + markedMissing + replacedCount > 0;
+if (replacedCount) console.log(`${replacedCount} written review(s) replaced by their author's newer one`);
 if (removedReviews.length) console.log(`${removedReviews.length} written review(s) removed from Apple's feed`);
 if (restoredReviews.length) console.log(`${restoredReviews.length} written review(s) back in Apple's feed`);
 
@@ -581,6 +597,10 @@ if (ratingsChanged && prevLatest) {
       events.push(ev);
     }
   }
+}
+for (const r of lateReplaced) {
+  const i = events.findLastIndex((ev) => isRemovalEventFor(ev, r));
+  if (i >= 0) events.splice(i, 1);
 }
 if (!isReviewSeed) {
   for (const r of newReviews) {

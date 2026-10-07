@@ -16,3 +16,23 @@ export const joinKey = (date, cc, rating) => `${String(date).slice(0, 19)}|${cc}
 // API's id under this prefix until the feed catches up and the collector
 // swaps in the feed's own id.
 export const API_ID_PREFIX = "asc:";
+
+// Apple keeps one review per reviewer per app, so a reviewer who writes again
+// replaces the earlier review: it leaves the feed and the API listing the way
+// a deleted one does, while its star stays in the count. The nickname is the
+// only thread between the two, so a live review written later in the same
+// storefront under the same nickname marks the earlier one replaced. A
+// reviewer who changes nickname in the same edit breaks the thread, and the
+// old review then reads as removed.
+export const findReplacement = (r, reviews) =>
+  r.author
+    ? reviews.find(
+        (o) => o !== r && !o.removed && o.cc === r.cc && o.author === r.author && new Date(o.date) > new Date(r.date)
+      ) ?? null
+    : null;
+
+// The replacement can reach the store after the old review's removal was
+// already logged. Its event is then withdrawn, matched on the fields the
+// event carries, since events hold no review id.
+export const isRemovalEventFor = (ev, r) =>
+  ev.type === "review-removed" && ev.cc === r.cc && ev.rating === r.rating && ev.title === r.title.slice(0, 80);

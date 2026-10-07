@@ -31,7 +31,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { ascFetch, haveCredentials, makeToken } from "./asc.mjs";
-import { API_ID_PREFIX, joinKey } from "./review-key.mjs";
+import { API_ID_PREFIX, findReplacement, isRemovalEventFor, joinKey } from "./review-key.mjs";
 import { ISO2 } from "./territories.mjs";
 
 const APP_ID = "6751759381";
@@ -136,6 +136,19 @@ for (const r of stored) {
   }
 }
 
+// A review its author rewrote, as in the collector: flagged `replaced`, no
+// removal event, and a removal already logged is withdrawn below.
+const lateReplaced = [];
+let replacedCount = 0;
+for (const r of stored) {
+  if (!r.removed || r.replaced || !findReplacement(r, stored)) continue;
+  r.replaced = now;
+  replacedCount++;
+  const i = removedFromApi.indexOf(r);
+  if (i >= 0) removedFromApi.splice(i, 1);
+  else lateReplaced.push(r);
+}
+
 const added = [];
 const edited = [];
 const dropped = [];
@@ -169,6 +182,7 @@ for (const key of responseByReview.keys()) {
 const label = (r) => `${r.cc} ★${r.rating} ${JSON.stringify(r.title)}`;
 for (const r of fromApi) console.log(`+ review the feed never served: ${label(r)}`);
 for (const r of removedFromApi) console.log(`- review gone from App Store Connect: ${label(r)}`);
+for (const r of stored) if (r.replaced === now) console.log(`~ review replaced by its author's newer one: ${label(r)}`);
 for (const r of added) console.log(`+ response: ${label(r)}`);
 for (const r of edited) console.log(`~ response edited: ${label(r)}`);
 for (const r of dropped) console.log(`- response removed: ${label(r)}`);
@@ -185,12 +199,16 @@ const recent = (r) => r.date && new Date(r.firstSeen) - new Date(r.date) <= 7 * 
 for (const r of fromApi) {
   if (recent(r)) events.push({ at: now, cc: r.cc, type: "review", rating: r.rating, title: r.title.slice(0, 80) });
 }
+for (const r of lateReplaced) {
+  const i = events.findLastIndex((ev) => isRemovalEventFor(ev, r));
+  if (i >= 0) events.splice(i, 1);
+}
 for (const r of removedFromApi) {
   events.push({ at: now, cc: r.cc, type: "review-removed", rating: r.rating, title: r.title.slice(0, 80) });
 }
 
 const changed =
-  fromApi.length + removedFromApi.length + markedMissing + added.length + edited.length + dropped.length;
+  fromApi.length + removedFromApi.length + markedMissing + replacedCount + added.length + edited.length + dropped.length;
 if (!changed) {
   console.log(`no review changes (${responseByReview.size} responses published)`);
 } else if (dryRun) {
