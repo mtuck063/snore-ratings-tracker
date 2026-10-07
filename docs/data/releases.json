@@ -34569,7 +34569,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-10-07T23:04:19.978Z",
+   "computedAt": "2026-10-07T23:17:14.647Z",
    "days": 5,
    "stage": "provisional",
    "baselineDays": 7,
@@ -34625,7 +34625,7 @@
       {
        "kw": "sleep log",
        "pop": 47,
-       "rank": 100
+       "rank": 101
       },
       {
        "kw": "breathing monitor",
@@ -34746,7 +34746,7 @@
      "noisy": 13,
      "ratings": {
       "before": 0.7,
-      "after": 1.4
+      "after": 1.6
      }
     },
     "ca": {
@@ -35078,7 +35078,7 @@
       {
        "kw": "small hours baby sleep tracker",
        "pop": 5,
-       "rank": 54
+       "rank": 55
       }
      ],
      "vanished": [],
