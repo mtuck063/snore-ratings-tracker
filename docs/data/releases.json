@@ -34569,7 +34569,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-10-10T12:50:07.376Z",
+   "computedAt": "2026-10-10T13:06:52.537Z",
    "days": 8,
    "stage": "settled",
    "baselineDays": 7,
@@ -34807,16 +34807,16 @@
        "kw": "sleep tracking",
        "pop": 49,
        "before": 64,
-       "after": 29,
-       "gain": 35,
+       "after": 28.5,
+       "gain": 35.5,
        "cohort": "control"
       },
       {
        "kw": "sleep cycle",
        "pop": 74,
        "before": 86.5,
-       "after": 61,
-       "gain": 25.5,
+       "after": 55,
+       "gain": 31.5,
        "cohort": "control"
       },
       {
@@ -35770,7 +35770,7 @@
       },
       {
        "kw": "diario de ronquidos",
-       "pop": 51,
+       "pop": 48,
        "before": 4,
        "after": 8,
        "gain": -4,
@@ -35837,7 +35837,7 @@
       {
        "kw": "sleep cycle",
        "pop": 94,
-       "rank": 42
+       "rank": 43
       },
       {
        "kw": "monitor de sono",
