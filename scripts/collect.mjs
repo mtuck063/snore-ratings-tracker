@@ -623,6 +623,35 @@ if (!isReviewSeed) {
 // a pending-decrease hold keeps the previous snapshot; and only when the
 // counts actually moved, so quiet runs don't rewrite timestamps.
 let histUpdated = false;
+// A lagging page copy yields a catch-up diff that spans earlier delta events
+// too. Walk back over this storefront's previous deltas until their counts
+// plus this event's account for the diff's net movement; if every one of
+// them already carries exact stars, subtract those and the remainder is this
+// event's own stars. Returns null (leave the event alone) when any earlier
+// event is unlabeled or the remainder doesn't add up cleanly.
+function residualAfterPrior(cc, ev, changed, net) {
+  const own = ev.to - ev.from;
+  const left = Object.fromEntries(changed);
+  let covered = own;
+  for (let i = events.indexOf(ev) - 1; i >= 0 && covered !== net; i--) {
+    const p = events[i];
+    if (p.cc !== cc) continue;
+    if (p.type === "edit" || p.type === "tracked" || p.type === "first") return null;
+    if (p.type !== "delta") continue;
+    const mix = p.stars ? { [p.stars]: p.to - p.from } : p.starsMix;
+    if (!mix) return null;
+    for (const [s, n] of Object.entries(mix)) left[s] = (left[s] ?? 0) - n;
+    covered += p.to - p.from;
+  }
+  if (covered !== net) return null;
+  const rest = Object.entries(left).map(([s, n]) => [Number(s), n]).filter(([, n]) => n !== 0);
+  const restNet = rest.reduce((t, [, n]) => t + n, 0);
+  if (!rest.length || restNet !== own) return null;
+  // Same-sign only: a mix of gains and losses here means the arithmetic
+  // didn't really line up, not that a rating moved.
+  if (!rest.every(([, n]) => Math.sign(n) === Math.sign(own))) return null;
+  return rest.sort((a, b) => b[0] - a[0]);
+}
 function applyHistogram(cc, counts) {
   if (sumOf(counts) !== countries[cc]?.count) {
     console.warn(`${cc} histogram: total disagrees with recorded count, will retry`);
@@ -641,12 +670,14 @@ function applyHistogram(cc, counts) {
       // counted those stars twice. And the override must replace the
       // average-math field, not sit beside it: an event carrying both
       // stars and starsMix was summed twice by the dashboard.
-      if (net === ev.to - ev.from) {
-        if (changed.length === 1 && Math.abs(changed[0][1]) === 1) {
-          ev.stars = changed[0][0];
+      let diff = changed;
+      if (net !== ev.to - ev.from) diff = residualAfterPrior(cc, ev, changed, net);
+      if (diff) {
+        if (diff.length === 1 && Math.abs(diff[0][1]) === 1) {
+          ev.stars = diff[0][0];
           delete ev.starsMix;
         } else {
-          ev.starsMix = Object.fromEntries(changed);
+          ev.starsMix = Object.fromEntries(diff);
           delete ev.stars;
         }
       }
