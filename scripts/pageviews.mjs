@@ -187,14 +187,14 @@ try {
     try {
     const blog = [];
     const seen = [];
-    for (let page = 0; page < 10; page++) {
+    for (let page = 0; page < 20; page++) {
       await sleep(300);
       const ex = seen.length ? `&exclude_paths=${seen.join(",")}` : "";
       const res = await fetch(
-        `${SITE}/api/v0/stats/hits?start=${start30}&end=${end}&filter=blog&limit=100${ex}`,
+        `${SITE}/api/v0/stats/hits?start=${start30}&end=${end}&limit=100${ex}`,
         { headers }
       );
-      if (!res.ok) throw new Error(`blog hits HTTP ${res.status}`);
+      if (!res.ok) throw new Error(`blog hits HTTP ${res.status} ${(await res.text().catch(() => "")).slice(0, 200)}`);
       const body = await res.json();
       for (const h of body.hits ?? []) {
         seen.push(h.path_id);
