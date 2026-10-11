@@ -179,6 +179,43 @@ try {
         .map((s) => [s.path || s.name || s.id || blank, s.count])
         .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
     }
+    // Every blog path, not just the top 20: the posts are judged against
+    // each other, and most of them sit below the sitewide cut. Paged through
+    // the hits endpoint with a path filter; referrers are fetched per post
+    // for the ones with enough traffic to say anything about where it came
+    // from. Rides inside the same try as the other breakdowns.
+    try {
+    const blog = [];
+    const seen = [];
+    for (let page = 0; page < 10; page++) {
+      await sleep(300);
+      const ex = seen.length ? `&exclude_paths=${seen.join(",")}` : "";
+      const res = await fetch(
+        `${SITE}/api/v0/stats/hits?start=${start30}&end=${end}&filter=blog&limit=100${ex}`,
+        { headers }
+      );
+      if (!res.ok) throw new Error(`blog hits HTTP ${res.status}`);
+      const body = await res.json();
+      for (const h of body.hits ?? []) {
+        seen.push(h.path_id);
+        if (!h.event && h.count > 0 && h.path.includes("/blog/")) blog.push({ id: h.path_id, path: h.path, count: h.count });
+      }
+      if (!body.more) break;
+    }
+    for (const b of blog.filter((b) => b.count >= 5)) {
+      await sleep(300);
+      const res = await fetch(`${SITE}/api/v0/stats/hits/${b.id}?start=${start30}&end=${end}&limit=10`, { headers });
+      if (!res.ok) continue;
+      const body = await res.json();
+      b.refs = (body.refs ?? []).filter((r) => r.count > 0).map((r) => [r.name || "Direct / none", r.count]);
+    }
+    extras.blog = blog
+      .sort((a, b) => b.count - a.count || a.path.localeCompare(b.path))
+      .map(({ path, count, refs }) => (refs ? [path, count, refs] : [path, count]));
+    } catch (err) {
+      console.warn(`pageviews: blog ${err.message}; keeping stored blog list.`);
+      if (stored.extras?.blog) extras.blog = stored.extras.blog;
+    }
     stored.extras = extras;
   } catch (err) {
     console.warn(`pageviews: extras ${err.message}; keeping stored breakdowns.`);
