@@ -34569,7 +34569,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-10-11T19:55:27.624Z",
+   "computedAt": "2026-10-11T22:14:00.526Z",
    "days": 9,
    "stage": "settled",
    "baselineDays": 7,
@@ -35004,7 +35004,7 @@
       },
       {
        "kw": "sleep recorder",
-       "pop": 89,
+       "pop": 92,
        "before": 84,
        "after": 94,
        "gain": -10,
@@ -35778,7 +35778,7 @@
       },
       {
        "kw": "diario de ronquidos",
-       "pop": 51,
+       "pop": 48,
        "before": 4,
        "after": 8,
        "gain": -4,
@@ -36159,7 +36159,7 @@
       },
       {
        "kw": "app russare",
-       "pop": 65,
+       "pop": 68,
        "before": 17,
        "after": 13,
        "gain": 4,
@@ -36223,7 +36223,7 @@
      "appeared": [
       {
        "kw": "schlafaufzeichnung",
-       "pop": 74,
+       "pop": 76,
        "rank": 4
       }
      ],
@@ -36287,7 +36287,7 @@
       },
       {
        "kw": "schlafanalyse",
-       "pop": 67,
+       "pop": 61,
        "before": 39,
        "after": 34,
        "gain": 5,
@@ -36626,7 +36626,7 @@
      "vanished": [
       {
        "kw": "수면",
-       "pop": 83,
+       "pop": 86,
        "was": 61
       }
      ],
@@ -36731,7 +36731,7 @@
       },
       {
        "kw": "打呼噜",
-       "pop": 52,
+       "pop": 55,
        "before": 93,
        "after": 99,
        "gain": -6,
