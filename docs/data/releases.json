@@ -34569,7 +34569,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-10-11T11:38:20.919Z",
+   "computedAt": "2026-10-11T13:12:57.811Z",
    "days": 9,
    "stage": "settled",
    "baselineDays": 7,
@@ -34820,19 +34820,19 @@
        "cohort": "floor"
       },
       {
-       "kw": "sleep cycle",
-       "pop": 77,
-       "before": 86.5,
-       "after": 74,
-       "gain": 12.5,
-       "cohort": "control"
-      },
-      {
        "kw": "record sleep talking",
        "pop": 5,
        "before": 32,
        "after": 42,
        "gain": -10,
+       "cohort": "control"
+      },
+      {
+       "kw": "sleep cycle",
+       "pop": 77,
+       "before": 86.5,
+       "after": 77,
+       "gain": 9.5,
        "cohort": "control"
       },
       {
@@ -35802,7 +35802,7 @@
       },
       {
        "kw": "monitor de sueño y ronquidos",
-       "pop": 49,
+       "pop": 52,
        "before": 18,
        "after": 16,
        "gain": 2,
@@ -35850,7 +35850,7 @@
       {
        "kw": "monitor de sono",
        "pop": 65,
-       "rank": 121
+       "rank": 122
       },
       {
        "kw": "aplicativo de sono",
@@ -35878,8 +35878,8 @@
        "kw": "monitoramento do sono",
        "pop": 51,
        "before": 50,
-       "after": 61,
-       "gain": -11,
+       "after": 61.5,
+       "gain": -11.5,
        "cohort": "floor"
       },
       {
