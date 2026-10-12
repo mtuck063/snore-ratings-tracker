@@ -34569,7 +34569,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-10-12T15:31:22.630Z",
+   "computedAt": "2026-10-12T15:51:31.898Z",
    "days": 10,
    "stage": "settled",
    "baselineDays": 7,
@@ -34610,7 +34610,7 @@
       {
        "kw": "sleep cycle",
        "pop": 73,
-       "rank": 66
+       "rank": 68
       },
       {
        "kw": "sleep breathing",
@@ -34992,20 +34992,20 @@
        "cohort": "control"
       },
       {
-       "kw": "rem sleep",
-       "pop": 81,
-       "before": 128,
-       "after": 110,
-       "gain": 18,
-       "cohort": "floor"
-      },
-      {
        "kw": "sleep talking recorder",
        "pop": 60,
        "before": 44,
        "after": 30.5,
        "gain": 13.5,
        "cohort": "control"
+      },
+      {
+       "kw": "rem sleep",
+       "pop": 81,
+       "before": 128,
+       "after": 116.5,
+       "gain": 11.5,
+       "cohort": "floor"
       },
       {
        "kw": "teeth grinding recorder",
