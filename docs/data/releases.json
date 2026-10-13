@@ -34569,7 +34569,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-10-13T11:54:55.134Z",
+   "computedAt": "2026-10-13T12:13:21.430Z",
    "days": 11,
    "stage": "settled",
    "baselineDays": 7,
@@ -34820,8 +34820,8 @@
        "kw": "sleep tracking",
        "pop": 49,
        "before": 64,
-       "after": 39,
-       "gain": 25,
+       "after": 38,
+       "gain": 26,
        "cohort": "control"
       },
       {
@@ -35249,6 +35249,14 @@
        "cohort": "control"
       },
       {
+       "kw": "sleep train",
+       "pop": 5,
+       "before": 76.5,
+       "after": 93,
+       "gain": -16.5,
+       "cohort": "floor"
+      },
+      {
        "kw": "anti snore",
        "pop": 5,
        "before": 39,
@@ -35270,14 +35278,6 @@
        "before": 26,
        "after": 13,
        "gain": 13,
-       "cohort": "floor"
-      },
-      {
-       "kw": "sleep train",
-       "pop": 5,
-       "before": 76.5,
-       "after": 88,
-       "gain": -11.5,
        "cohort": "floor"
       },
       {
@@ -35408,7 +35408,7 @@
       {
        "kw": "enregistreur nuit",
        "pop": 47,
-       "rank": 28
+       "rank": 27
       }
      ],
      "vanished": [
@@ -35835,7 +35835,7 @@
      },
      "floor": {
       "n": 6,
-      "gain": 0.5
+      "gain": -0.7
      },
      "lift": null,
      "appeared": [
@@ -35928,6 +35928,14 @@
        "cohort": "control"
       },
       {
+       "kw": "qualidade do sono",
+       "pop": 65,
+       "before": 174,
+       "after": 176.5,
+       "gain": -2.5,
+       "cohort": "floor"
+      },
+      {
        "kw": "detector de ronco",
        "pop": 43,
        "before": 6,
@@ -35948,14 +35956,6 @@
        "pop": 46,
        "before": 59,
        "after": 61,
-       "gain": -2,
-       "cohort": "control"
-      },
-      {
-       "kw": "apple watch sono",
-       "pop": 5,
-       "before": 20,
-       "after": 22,
        "gain": -2,
        "cohort": "control"
       }
@@ -36448,7 +36448,7 @@
       },
       {
        "kw": "snurk",
-       "pop": 52,
+       "pop": 55,
        "before": 26,
        "after": 24,
        "gain": 2,
@@ -36726,7 +36726,7 @@
       {
        "kw": "梦话",
        "pop": 16,
-       "rank": 185
+       "rank": 186
       }
      ],
      "vanished": [],
