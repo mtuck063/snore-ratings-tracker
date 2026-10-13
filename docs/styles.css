@@ -287,6 +287,7 @@ th {
 td { padding: 8px; border-bottom: 1px solid var(--border); white-space: nowrap; }
 
 th.col-num, td.col-num { text-align: right; }
+td.col-avg { cursor: pointer; }
 th.col-spark, td.col-spark { text-align: right; width: 110px; }
 
 tr.total-row td { font-weight: 600; background: var(--bg-raised); }

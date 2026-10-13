@@ -276,6 +276,24 @@ const fmt = (n) => n.toLocaleString("en-US");
 // it upward, the way Apple does.
 const avg1 = (n) => (Math.round(n * 10) / 10).toFixed(1);
 
+// The AVG column shows one decimal, as the App Store does. Tapping any AVG
+// cell switches every one to three decimals, so two countries both reading
+// 4.9 can be told apart; tapping again switches back. The exact value lives
+// on the cell, so the live refresh and the toggle read the same number.
+let avgPrecise = false;
+function renderAvg(td) {
+    const v = td.dataset.avg;
+    if (v === undefined || v === "") {
+        td.textContent = "—";
+        return;
+    }
+    td.textContent = avgPrecise ? (+v).toFixed(3) : avg1(+v);
+}
+function toggleAvgPrecision() {
+    avgPrecise = !avgPrecise;
+    document.querySelectorAll("td.col-avg").forEach(renderAvg);
+}
+
 // "2012-10-26" -> "Oct 2012". Parsed as UTC so the day never shifts backwards
 // in western timezones and lands the label on the previous month.
 const monthYear = (iso) => {
@@ -974,7 +992,7 @@ function row({ name, sub, total, downloads, dl1, dl7, dlSince, dlFrom, dlPartial
         const td = document.createElement("td");
         td.className = "col-num";
         if (n == null) {
-            td.textContent = "\u2014";
+            td.textContent = "—";
             td.classList.add("muted");
         } else {
             td.textContent = fmt(n);
@@ -1039,9 +1057,12 @@ function row({ name, sub, total, downloads, dl1, dl7, dlSince, dlFrom, dlPartial
     tdDelta.appendChild(deltaCell(delta));
 
     const tdAvg = document.createElement("td");
-    tdAvg.className = "col-num";
-    tdAvg.textContent = avg == null ? "—" : avg1(avg);
-    if (avg == null) tdAvg.classList.add("muted");
+    tdAvg.className = "col-num col-avg";
+    if (avg != null) tdAvg.dataset.avg = avg;
+    else tdAvg.classList.add("muted");
+    renderAvg(tdAvg);
+    tdAvg.title = "Tap to switch between one and three decimals";
+    tdAvg.addEventListener("click", toggleAvgPrecision);
 
     const tdMix = document.createElement("td");
     tdMix.className = "col-num";
@@ -5578,7 +5599,12 @@ async function main() {
                             const tr = rowByCc.get(cc);
                             if (tr) {
                                 tr.children[1].textContent = fmt(liveCount);
-                                if (app.averageUserRating != null) tr.children[3].textContent = avg1(app.averageUserRating);
+                                if (app.averageUserRating != null) {
+                                    const tdAvg = tr.children[3];
+                                    tdAvg.dataset.avg = app.averageUserRating;
+                                    tdAvg.classList.remove("muted");
+                                    renderAvg(tdAvg);
+                                }
                                 tr.classList.add("changed");
                                 tr.hidden = false; // reveal a first rating hiding in the unrated fold
                             }
