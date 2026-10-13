@@ -34569,7 +34569,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-10-13T00:56:36.521Z",
+   "computedAt": "2026-10-13T01:11:19.548Z",
    "days": 11,
    "stage": "settled",
    "baselineDays": 7,
@@ -34740,18 +34740,18 @@
        "cohort": "floor"
       },
       {
-       "kw": "free sleep tracking app",
-       "pop": 73,
-       "before": 51,
-       "after": 64,
-       "gain": -13,
+       "kw": "auto sleep tracker",
+       "pop": 68,
+       "before": 31,
+       "after": 46,
+       "gain": -15,
        "cohort": "control"
       }
      ],
      "noisy": 13,
      "ratings": {
       "before": 0.7,
-      "after": 1.5
+      "after": 1.6
      }
     },
     "ca": {
@@ -34934,7 +34934,7 @@
      },
      "floor": {
       "n": 32,
-      "gain": 1
+      "gain": 1.5
      },
      "lift": null,
      "appeared": [
@@ -35775,7 +35775,7 @@
       },
       {
        "kw": "diario de ronquidos",
-       "pop": 51,
+       "pop": 48,
        "before": 4,
        "after": 8,
        "gain": -4,
@@ -36032,7 +36032,7 @@
       {
        "kw": "monitoraggio del sonno",
        "pop": 5,
-       "rank": 41
+       "rank": 37
       },
       {
        "kw": "russare registratore",
@@ -36270,8 +36270,8 @@
        "kw": "cpap",
        "pop": 67,
        "before": 17,
-       "after": 25,
-       "gain": -8,
+       "after": 24,
+       "gain": -7,
        "cohort": "control"
       },
       {
