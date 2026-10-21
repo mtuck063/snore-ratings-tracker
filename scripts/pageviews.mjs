@@ -179,6 +179,26 @@ try {
         .map((s) => [s.path || s.name || s.id || blank, s.count])
         .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
     }
+    // Pages again over the trailing 7 days and 24 hours, for the dashboard's
+    // range toggle. GoatCounter stores hits by the hour and takes a full
+    // timestamp, so the 24-hour window starts on the hour rather than at a
+    // date boundary. Missing keys fall back to the 30-day list in the page.
+    const hour = new Date(now);
+    hour.setUTCMinutes(0, 0, 0);
+    for (const [key, ms] of [
+      ["pages7", 7 * 864e5],
+      ["pages1", 864e5],
+    ]) {
+      await sleep(300);
+      const s = new Date(hour.getTime() - ms).toISOString().replace(".000", "");
+      const res = await fetch(`${SITE}/api/v0/stats/hits?start=${s}&end=${end}&limit=20`, { headers });
+      if (!res.ok) throw new Error(`${key} HTTP ${res.status} ${(await res.text().catch(() => "")).slice(0, 200)}`);
+      const body = await res.json();
+      extras[key] = (body.hits ?? [])
+        .filter((h) => h.count > 0 && !h.event)
+        .map((h) => [h.path || "/", h.count])
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    }
     // Every blog path, not just the top 20: the posts are judged against
     // each other, and most of them sit below the sitewide cut. Paged through
     // the hits endpoint with a path filter; referrers are fetched per post

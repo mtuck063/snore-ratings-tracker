@@ -5043,7 +5043,46 @@ async function main() {
             if (rows.length > 6) bdMore(list, rows.slice(6), most, (label) => label);
             document.getElementById(wrapId).hidden = false;
         };
-        renderBreakdown("traffic-pages-wrap", "traffic-pages", pageviews.extras?.pages);
+        // Top pages gets a range toggle: the collector stores 24 hours and 7
+        // days beside the 30-day list. A range the data predates is left out
+        // rather than shown empty. The choice is remembered per browser.
+        const pageRanges = [
+            { key: "pages1", tab: "24h", sub: "last 24 hours" },
+            { key: "pages7", tab: "7d", sub: "last 7 days" },
+            { key: "pages", tab: "30d", sub: "last 30 days" },
+        ].filter((r) => pageviews.extras?.[r.key]?.length);
+        if (pageRanges.length) {
+            const rangeBox = document.getElementById("traffic-pages-ranges");
+            let saved = null;
+            try {
+                saved = localStorage.getItem("trafficPagesRange");
+            } catch {}
+            let current = pageRanges.find((r) => r.key === saved) ?? pageRanges[pageRanges.length - 1];
+            const showPages = () => {
+                document.getElementById("traffic-pages").replaceChildren();
+                document.getElementById("traffic-pages-sub").textContent = `Top pages, ${current.sub}`;
+                renderBreakdown("traffic-pages-wrap", "traffic-pages", pageviews.extras[current.key]);
+                rangeBox.querySelectorAll(".kw-tab").forEach((el) => el.classList.toggle("active", el.dataset.key === current.key));
+            };
+            if (pageRanges.length > 1) {
+                for (const r of pageRanges) {
+                    const b = document.createElement("button");
+                    b.type = "button";
+                    b.className = "kw-tab";
+                    b.dataset.key = r.key;
+                    b.textContent = r.tab;
+                    b.addEventListener("click", () => {
+                        current = r;
+                        try {
+                            localStorage.setItem("trafficPagesRange", r.key);
+                        } catch {}
+                        showPages();
+                    });
+                    rangeBox.appendChild(b);
+                }
+            }
+            showPages();
+        }
         renderBreakdown("traffic-refs-wrap", "traffic-refs", pageviews.extras?.refs);
         renderBreakdown("traffic-systems-wrap", "traffic-systems", pageviews.extras?.systems);
         renderBreakdown("traffic-langs-wrap", "traffic-langs", pageviews.extras?.langs);

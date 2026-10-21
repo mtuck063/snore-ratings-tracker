@@ -905,6 +905,10 @@ li.log-day {
 .audience-note { color: var(--text-secondary); font-size: 0.72rem; margin-top: 8px; max-width: 860px; }
 #tooltip .tip-bd-row .tip-swatch { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 0; }
 .traffic-bd { flex: 1 1 240px; min-width: 220px; }
+.traffic-bd-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+.traffic-bd-head .traffic-sub { margin-bottom: 0; }
+.traffic-ranges { display: flex; gap: 4px; }
+.traffic-ranges .kw-tab { font-size: 0.72rem; padding: 2px 8px; border-radius: 6px; }
 .traffic-country { padding: 4px 0; }
 .tc-top { display: flex; justify-content: space-between; gap: 8px; font-size: 0.85rem; }
 .tc-top span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
