@@ -39007,7 +39007,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-10-21T20:19:22.011Z",
+   "computedAt": "2026-10-21T21:55:50.275Z",
    "days": 7,
    "stage": "provisional",
    "baselineDays": 7,
@@ -39164,7 +39164,7 @@
      "noisy": 24,
      "ratings": {
       "before": 2,
-      "after": 1.7
+      "after": 2.1
      }
     },
     "ca": {
@@ -39216,14 +39216,14 @@
      ],
      "vanished": [
       {
-       "kw": "sleep cycle",
-       "pop": 86,
-       "was": 77
-      },
-      {
        "kw": "app for cpap machine users",
        "pop": 80,
        "was": 28
+      },
+      {
+       "kw": "sleep cycle",
+       "pop": 74,
+       "was": 77
       },
       {
        "kw": "sleep talk ai recorder",
@@ -39252,7 +39252,7 @@
       },
       {
        "kw": "sleep tracker",
-       "pop": 74,
+       "pop": 77,
        "before": 91,
        "after": 65,
        "gain": 26,
@@ -39590,7 +39590,7 @@
       },
       {
        "kw": "record sleep",
-       "pop": 60,
+       "pop": 54,
        "before": 30,
        "after": 48,
        "gain": -18,
@@ -39606,7 +39606,7 @@
       },
       {
        "kw": "sleep recorder",
-       "pop": 80,
+       "pop": 83,
        "before": 27,
        "after": 41,
        "gain": -14,
@@ -39900,7 +39900,7 @@
       },
       {
        "kw": "analyse sommeil",
-       "pop": 69,
+       "pop": 72,
        "before": 48,
        "after": 55,
        "gain": -7,
@@ -40085,7 +40085,7 @@
      "noisy": 2,
      "ratings": {
       "before": 0,
-      "after": 0.3
+      "after": 0.4
      }
     },
     "mx": {
@@ -40220,7 +40220,7 @@
      "noisy": 6,
      "ratings": {
       "before": 0,
-      "after": 0
+      "after": 0.1
      }
     },
     "br": {
@@ -40446,7 +40446,7 @@
       },
       {
        "kw": "registratore russare sonno",
-       "pop": 61,
+       "pop": 55,
        "before": 16,
        "after": 14,
        "gain": 2,
@@ -40578,7 +40578,7 @@
       },
       {
        "kw": "apnoe",
-       "pop": 61,
+       "pop": 58,
        "before": 50,
        "after": 46,
        "gain": 4,
@@ -40893,7 +40893,7 @@
      "noisy": 7,
      "ratings": {
       "before": 1.1,
-      "after": 1.1
+      "after": 1.3
      }
     },
     "kr": {
