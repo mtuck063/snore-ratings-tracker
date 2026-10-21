@@ -39007,7 +39007,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-10-21T17:29:23.284Z",
+   "computedAt": "2026-10-21T20:19:22.011Z",
    "days": 7,
    "stage": "provisional",
    "baselineDays": 7,
@@ -39032,7 +39032,7 @@
      },
      "control": {
       "n": 60,
-      "gain": 0.5
+      "gain": 0
      },
      "floor": {
       "n": 31,
@@ -39043,17 +39043,17 @@
       {
        "kw": "bruxism",
        "pop": 5,
-       "rank": 45
+       "rank": 44
       },
       {
        "kw": "bruxism app",
        "pop": 5,
-       "rank": 161
+       "rank": 163
       },
       {
        "kw": "sleep bruxism",
        "pop": 5,
-       "rank": 121
+       "rank": 124
       }
      ],
      "vanished": [
@@ -39362,7 +39362,7 @@
      "shotsChanged": false,
      "target": {
       "n": 1,
-      "gain": -5
+      "gain": -3
      },
      "control": {
       "n": 62,
@@ -39372,7 +39372,7 @@
       "n": 24,
       "gain": 4
      },
-     "lift": -6,
+     "lift": -4,
      "appeared": [
       {
        "kw": "autosleep",
@@ -39576,15 +39576,7 @@
        "kw": "teeth grinding",
        "pop": 5,
        "before": 75,
-       "after": 97,
-       "gain": -22,
-       "cohort": "control"
-      },
-      {
-       "kw": "record sleep",
-       "pop": 60,
-       "before": 30,
-       "after": 50,
+       "after": 95,
        "gain": -20,
        "cohort": "control"
       },
@@ -39594,6 +39586,14 @@
        "before": 25,
        "after": 44,
        "gain": -19,
+       "cohort": "control"
+      },
+      {
+       "kw": "record sleep",
+       "pop": 60,
+       "before": 30,
+       "after": 48,
+       "gain": -18,
        "cohort": "control"
       },
       {
@@ -39719,6 +39719,14 @@
        "cohort": "floor"
       },
       {
+       "kw": "free sleep tracking app",
+       "pop": 5,
+       "before": 28,
+       "after": 55,
+       "gain": -27,
+       "cohort": "floor"
+      },
+      {
        "kw": "snorelab",
        "pop": 75,
        "before": 41,
@@ -39738,16 +39746,8 @@
        "kw": "dream talk recorder",
        "pop": 78,
        "before": 112,
-       "after": 92,
-       "gain": 20,
-       "cohort": "floor"
-      },
-      {
-       "kw": "free sleep tracking app",
-       "pop": 5,
-       "before": 28,
-       "after": 45,
-       "gain": -17,
+       "after": 91.5,
+       "gain": 20.5,
        "cohort": "floor"
       },
       {
@@ -39899,11 +39899,11 @@
        "cohort": "control"
       },
       {
-       "kw": "apnée sommeil",
-       "pop": 83,
-       "before": 24,
-       "after": 17,
-       "gain": 7,
+       "kw": "analyse sommeil",
+       "pop": 69,
+       "before": 48,
+       "after": 55,
+       "gain": -7,
        "cohort": "control"
       },
       {
@@ -39915,19 +39915,19 @@
        "cohort": "control"
       },
       {
+       "kw": "apnée sommeil",
+       "pop": 83,
+       "before": 24,
+       "after": 18,
+       "gain": 6,
+       "cohort": "control"
+      },
+      {
        "kw": "anti ronflement",
        "pop": 77,
        "before": 20,
        "after": 15,
        "gain": 5,
-       "cohort": "control"
-      },
-      {
-       "kw": "analyse sommeil",
-       "pop": 69,
-       "before": 48,
-       "after": 52,
-       "gain": -4,
        "cohort": "control"
       },
       {
@@ -39980,7 +39980,7 @@
       {
        "kw": "grabadora nocturna",
        "pop": 63,
-       "rank": 146
+       "rank": 152
       }
      ],
      "vanished": [],
@@ -40394,7 +40394,7 @@
       {
        "kw": "parlare nel sonno",
        "pop": 65,
-       "rank": 26
+       "rank": 27
       },
       {
        "kw": "contro il russare",
@@ -40656,8 +40656,8 @@
        "kw": "slaap geluiden",
        "pop": 77,
        "before": 24,
-       "after": 53,
-       "gain": -29,
+       "after": 55,
+       "gain": -31,
        "cohort": "control"
       },
       {
@@ -40733,11 +40733,11 @@
        "cohort": "control"
       },
       {
-       "kw": "geluid opnemen",
-       "pop": 83,
-       "before": 26,
-       "after": 29,
-       "gain": -3,
+       "kw": "snurken opnemen",
+       "pop": 5,
+       "before": 7,
+       "after": 9,
+       "gain": -2,
        "cohort": "control"
       }
      ],
