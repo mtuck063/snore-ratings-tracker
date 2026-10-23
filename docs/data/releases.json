@@ -39007,7 +39007,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-10-23T05:09:17.928Z",
+   "computedAt": "2026-10-23T07:08:58.102Z",
    "days": 8,
    "stage": "settled",
    "baselineDays": 7,
@@ -39048,7 +39048,7 @@
       {
        "kw": "bruxism",
        "pop": 5,
-       "rank": 46
+       "rank": 57
       },
       {
        "kw": "bruxism app",
@@ -39567,7 +39567,7 @@
       },
       {
        "kw": "easy baby sleep tracker",
-       "pop": 70,
+       "pop": 67,
        "was": 74.5
       },
       {
@@ -39667,7 +39667,7 @@
       },
       {
        "kw": "my sleep talks",
-       "pop": 66,
+       "pop": 61,
        "before": 22,
        "after": 15,
        "gain": 7,
@@ -39914,16 +39914,8 @@
        "kw": "analyse sommeil",
        "pop": 69,
        "before": 48,
-       "after": 56,
-       "gain": -8,
-       "cohort": "control"
-      },
-      {
-       "kw": "enregistrer sommeil",
-       "pop": 48,
-       "before": 39,
-       "after": 33,
-       "gain": 6,
+       "after": 55,
+       "gain": -7,
        "cohort": "control"
       },
       {
@@ -39939,6 +39931,14 @@
        "pop": 77,
        "before": 20,
        "after": 15,
+       "gain": 5,
+       "cohort": "control"
+      },
+      {
+       "kw": "enregistrer sommeil",
+       "pop": 48,
+       "before": 39,
+       "after": 34,
        "gain": 5,
        "cohort": "control"
       },
@@ -40422,7 +40422,7 @@
       {
        "kw": "parlare nel sonno",
        "pop": 65,
-       "rank": 32
+       "rank": 33
       },
       {
        "kw": "contro il russare",
@@ -40613,19 +40613,19 @@
        "cohort": "floor"
       },
       {
+       "kw": "schlaf tracker kostenlos",
+       "pop": 73,
+       "before": 71,
+       "after": 77,
+       "gain": -6,
+       "cohort": "control"
+      },
+      {
        "kw": "schlafgeräusche",
        "pop": 74,
        "before": 74,
        "after": 80,
        "gain": -6,
-       "cohort": "control"
-      },
-      {
-       "kw": "schlaf tracker kostenlos",
-       "pop": 73,
-       "before": 71,
-       "after": 76,
-       "gain": -5,
        "cohort": "control"
       },
       {
