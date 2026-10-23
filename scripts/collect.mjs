@@ -381,11 +381,17 @@ for (const r of storedReviews) {
 // A review its author rewrote left the feed too, but its star never left the
 // count, so it is flagged `replaced` and raises no removal. When the new
 // review arrives after the removal was confirmed, the logged event goes.
+// The newer review is itself the proof, so one merely missing is retired at
+// once rather than shown beside its replacement until the day-long wait ends.
 const allReviews = [...newReviews, ...storedReviews];
 const lateReplaced = [];
 for (const r of storedReviews) {
-  if (!r.removed || r.replaced || !findReplacement(r, allReviews)) continue;
+  if ((!r.removed && !r.missingSince) || r.replaced || !findReplacement(r, allReviews)) continue;
   r.replaced = fetchedAt;
+  if (!r.removed) {
+    r.removed = fetchedAt;
+    continue;
+  }
   const i = removedReviews.indexOf(r);
   if (i >= 0) removedReviews.splice(i, 1);
   else lateReplaced.push(r);

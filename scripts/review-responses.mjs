@@ -137,13 +137,18 @@ for (const r of stored) {
 }
 
 // A review its author rewrote, as in the collector: flagged `replaced`, no
-// removal event, and a removal already logged is withdrawn below.
+// removal event, and a removal already logged is withdrawn below. One merely
+// missing is retired at once, since the newer review is the proof.
 const lateReplaced = [];
 let replacedCount = 0;
 for (const r of stored) {
-  if (!r.removed || r.replaced || !findReplacement(r, stored)) continue;
+  if ((!r.removed && !r.missingSince) || r.replaced || !findReplacement(r, stored)) continue;
   r.replaced = now;
   replacedCount++;
+  if (!r.removed) {
+    r.removed = now;
+    continue;
+  }
   const i = removedFromApi.indexOf(r);
   if (i >= 0) removedFromApi.splice(i, 1);
   else lateReplaced.push(r);
