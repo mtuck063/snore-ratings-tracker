@@ -39007,7 +39007,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-10-25T20:04:20.266Z",
+   "computedAt": "2026-10-25T21:03:58.507Z",
    "days": 11,
    "stage": "settled",
    "baselineDays": 7,
@@ -39417,7 +39417,7 @@
       {
        "kw": "sleep score",
        "pop": 60,
-       "rank": 148
+       "rank": 149
       },
       {
        "kw": "‏تطبيق النوم",
@@ -40630,6 +40630,14 @@
        "cohort": "control"
       },
       {
+       "kw": "schlaf tracker kostenlos",
+       "pop": 73,
+       "before": 71,
+       "after": 78,
+       "gain": -7,
+       "cohort": "control"
+      },
+      {
        "kw": "schlafgeräusche",
        "pop": 74,
        "before": 74,
@@ -40644,14 +40652,6 @@
        "after": 58,
        "gain": 7,
        "cohort": "floor"
-      },
-      {
-       "kw": "schlaf tracker kostenlos",
-       "pop": 73,
-       "before": 71,
-       "after": 77,
-       "gain": -6,
-       "cohort": "control"
       },
       {
        "kw": "snorelab",
@@ -40747,7 +40747,7 @@
       },
       {
        "kw": "snurken",
-       "pop": 67,
+       "pop": 64,
        "before": 22,
        "after": 18,
        "gain": 4,
@@ -40850,7 +40850,7 @@
       },
       {
        "kw": "睡眠トラッカー",
-       "pop": 67,
+       "pop": 64,
        "rank": 22
       }
      ],
