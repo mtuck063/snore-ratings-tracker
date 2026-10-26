@@ -39007,7 +39007,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-10-26T13:25:33.641Z",
+   "computedAt": "2026-10-26T14:19:54.612Z",
    "days": 12,
    "stage": "settled",
    "baselineDays": 7,
@@ -39048,12 +39048,12 @@
       {
        "kw": "sleep score free",
        "pop": 69,
-       "rank": 76
+       "rank": 77
       },
       {
        "kw": "bruxism",
        "pop": 5,
-       "rank": 39
+       "rank": 38
       },
       {
        "kw": "bruxism app",
@@ -39204,7 +39204,7 @@
      },
      "floor": {
       "n": 22,
-      "gain": 6.8
+      "gain": 6.5
      },
      "lift": null,
      "appeared": [
@@ -39226,7 +39226,7 @@
       {
        "kw": "sleep diary",
        "pop": 63,
-       "rank": 43
+       "rank": 83
       },
       {
        "kw": "sleep diary app",
@@ -39334,6 +39334,14 @@
        "cohort": "control"
       },
       {
+       "kw": "snoring king",
+       "pop": 5,
+       "before": 59,
+       "after": 43,
+       "gain": 16,
+       "cohort": "floor"
+      },
+      {
        "kw": "sleep apnea",
        "pop": 52,
        "before": 67,
@@ -39348,14 +39356,6 @@
        "after": 33.5,
        "gain": 14.5,
        "cohort": "control"
-      },
-      {
-       "kw": "snoring king",
-       "pop": 5,
-       "before": 59,
-       "after": 44.5,
-       "gain": 14.5,
-       "cohort": "floor"
       },
       {
        "kw": "record sleep talking",
@@ -39422,7 +39422,7 @@
       {
        "kw": "sleep apnea, snore detector",
        "pop": 59,
-       "rank": 13
+       "rank": 12
       },
       {
        "kw": "‏تطبيق النوم",
@@ -39489,8 +39489,8 @@
        "kw": "snore ai",
        "pop": 52,
        "before": 41,
-       "after": 24,
-       "gain": 17,
+       "after": 23,
+       "gain": 18,
        "cohort": "floor"
       },
       {
@@ -39596,7 +39596,7 @@
       {
        "kw": "sleep apnea, snore detector",
        "pop": 5,
-       "rank": 10
+       "rank": 9
       }
      ],
      "vanished": [
@@ -39619,8 +39619,8 @@
        "kw": "teeth grinding",
        "pop": 5,
        "before": 75,
-       "after": 95,
-       "gain": -20,
+       "after": 94,
+       "gain": -19,
        "cohort": "control"
       },
       {
@@ -39640,20 +39640,20 @@
        "cohort": "control"
       },
       {
-       "kw": "sleep bruxism",
-       "pop": 5,
-       "before": 18,
-       "after": 31.5,
-       "gain": -13.5,
-       "cohort": "floor"
-      },
-      {
        "kw": "teeth grinding detector",
        "pop": 5,
        "before": 25,
        "after": 38,
        "gain": -13,
        "cohort": "control"
+      },
+      {
+       "kw": "sleep bruxism",
+       "pop": 5,
+       "before": 18,
+       "after": 30.5,
+       "gain": -12.5,
+       "cohort": "floor"
       },
       {
        "kw": "record sleep",
@@ -39740,7 +39740,7 @@
       {
        "kw": "نوم",
        "pop": 31,
-       "rank": 51
+       "rank": 52
       },
       {
        "kw": "snore recorder for good night",
@@ -39793,14 +39793,6 @@
        "cohort": "control"
       },
       {
-       "kw": "snoring monitor-sleep recorder",
-       "pop": 70,
-       "before": 19,
-       "after": 9,
-       "gain": 10,
-       "cohort": "floor"
-      },
-      {
        "kw": "sleep talking recorder",
        "pop": 72,
        "before": 32,
@@ -39813,6 +39805,14 @@
        "pop": 5,
        "before": 24,
        "after": 14.5,
+       "gain": 9.5,
+       "cohort": "floor"
+      },
+      {
+       "kw": "snoring monitor-sleep recorder",
+       "pop": 70,
+       "before": 19,
+       "after": 9.5,
        "gain": 9.5,
        "cohort": "floor"
       },
@@ -39893,7 +39893,7 @@
       {
        "kw": "cycle sommeil gratuit",
        "pop": 77,
-       "rank": 75
+       "rank": 76
       }
      ],
      "vanished": [],
@@ -40036,7 +40036,7 @@
       {
        "kw": "grabadora nocturna",
        "pop": 63,
-       "rank": 177
+       "rank": 153
       }
      ],
      "vanished": [],
@@ -40750,7 +40750,7 @@
       },
       {
        "kw": "snurken",
-       "pop": 70,
+       "pop": 67,
        "before": 22,
        "after": 15.5,
        "gain": 6.5,
