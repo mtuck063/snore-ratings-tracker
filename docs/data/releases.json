@@ -39007,7 +39007,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-10-27T08:36:43.404Z",
+   "computedAt": "2026-10-27T09:02:44.097Z",
    "days": 12,
    "stage": "settled",
    "baselineDays": 7,
@@ -40276,7 +40276,7 @@
      "noisy": 6,
      "ratings": {
       "before": 0,
-      "after": 0.2
+      "after": 0.3
      }
     },
     "br": {
@@ -41172,7 +41172,7 @@
       {
        "kw": "睡眠周期",
        "pop": 54,
-       "rank": 178
+       "rank": 180
       }
      ],
      "vanished": [],
