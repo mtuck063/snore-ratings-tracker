@@ -39007,7 +39007,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-10-28T22:26:09.479Z",
+   "computedAt": "2026-10-28T22:47:40.407Z",
    "days": 14,
    "stage": "settled",
    "baselineDays": 7,
@@ -39053,7 +39053,7 @@
       {
        "kw": "apple watch sleep tracker",
        "pop": 63,
-       "rank": 138
+       "rank": 124
       },
       {
        "kw": "bruxism",
@@ -39068,7 +39068,7 @@
       {
        "kw": "sleep bruxism",
        "pop": 5,
-       "rank": 102
+       "rank": 103
       }
      ],
      "vanished": [
@@ -39136,6 +39136,14 @@
        "cohort": "control"
       },
       {
+       "kw": "sleep cycle",
+       "pop": 76,
+       "before": 74.5,
+       "after": 58.5,
+       "gain": 16,
+       "cohort": "floor"
+      },
+      {
        "kw": "mad snoring app",
        "pop": 5,
        "before": 80,
@@ -39160,14 +39168,6 @@
        "cohort": "floor"
       },
       {
-       "kw": "sleep cycle",
-       "pop": 76,
-       "before": 74.5,
-       "after": 61.5,
-       "gain": 13,
-       "cohort": "floor"
-      },
-      {
        "kw": "sleep talking recorder⁺",
        "pop": 49,
        "before": 59,
@@ -39179,7 +39179,7 @@
      "noisy": 24,
      "ratings": {
       "before": 2,
-      "after": 2.1
+      "after": 2.2
      }
     },
     "ca": {
@@ -39231,11 +39231,11 @@
       {
        "kw": "sleep diary",
        "pop": 63,
-       "rank": 50
+       "rank": 49
       },
       {
        "kw": "sleep diary app",
-       "pop": 60,
+       "pop": 57,
        "rank": 35
       },
       {
@@ -39289,8 +39289,8 @@
        "kw": "sleep cycle",
        "pop": 77,
        "before": 77,
-       "after": 39,
-       "gain": 38,
+       "after": 40,
+       "gain": 37,
        "cohort": "control"
       },
       {
@@ -39326,18 +39326,18 @@
        "cohort": "control"
       },
       {
+       "kw": "sleep talking recorder⁺",
+       "pop": 64,
+       "before": 52,
+       "after": 36.5,
+       "gain": 15.5,
+       "cohort": "control"
+      },
+      {
        "kw": "sleep apnea",
        "pop": 55,
        "before": 67,
        "after": 52,
-       "gain": 15,
-       "cohort": "control"
-      },
-      {
-       "kw": "sleep talking recorder⁺",
-       "pop": 64,
-       "before": 52,
-       "after": 37,
        "gain": 15,
        "cohort": "control"
       },
@@ -39377,7 +39377,7 @@
      "noisy": 10,
      "ratings": {
       "before": 0.3,
-      "after": 0.4
+      "after": 0.5
      }
     },
     "gb": {
@@ -39591,7 +39591,7 @@
       {
        "kw": "sleep apnea, snore detector",
        "pop": 5,
-       "rank": 5
+       "rank": 6
       },
       {
        "kw": "sleep to pause",
@@ -39635,8 +39635,8 @@
        "kw": "teeth grinding app",
        "pop": 5,
        "before": 66,
-       "after": 79.5,
-       "gain": -13.5,
+       "after": 79,
+       "gain": -13,
        "cohort": "control"
       },
       {
@@ -39646,14 +39646,6 @@
        "after": 37.5,
        "gain": -12.5,
        "cohort": "control"
-      },
-      {
-       "kw": "drift sleep timer",
-       "pop": 5,
-       "before": 21,
-       "after": 31,
-       "gain": -10,
-       "cohort": "floor"
       },
       {
        "kw": "sleep recorder",
@@ -39680,11 +39672,11 @@
        "cohort": "floor"
       },
       {
-       "kw": "snorelab",
-       "pop": 56,
-       "before": 33,
-       "after": 24.5,
-       "gain": 8.5,
+       "kw": "drift sleep timer",
+       "pop": 5,
+       "before": 21,
+       "after": 30,
+       "gain": -9,
        "cohort": "floor"
       },
       {
@@ -39693,6 +39685,14 @@
        "before": 33,
        "after": 40,
        "gain": -7,
+       "cohort": "floor"
+      },
+      {
+       "kw": "snorelab",
+       "pop": 56,
+       "before": 33,
+       "after": 26.5,
+       "gain": 6.5,
        "cohort": "floor"
       },
       {
@@ -40041,7 +40041,7 @@
       {
        "kw": "grabadora nocturna",
        "pop": 63,
-       "rank": 159
+       "rank": 161
       }
      ],
      "vanished": [],
@@ -40455,7 +40455,7 @@
       {
        "kw": "parlare nel sonno",
        "pop": 68,
-       "rank": 28
+       "rank": 31
       },
       {
        "kw": "contro il russare",
@@ -40883,7 +40883,7 @@
       {
        "kw": "睡眠トラッカー",
        "pop": 61,
-       "rank": 84
+       "rank": 85
       }
      ],
      "vanished": [],
@@ -40964,8 +40964,8 @@
        "kw": "睡眠分析",
        "pop": 54,
        "before": 133,
-       "after": 130,
-       "gain": 3,
+       "after": 129,
+       "gain": 4,
        "cohort": "floor"
       },
       {
