@@ -39007,7 +39007,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-10-31T17:01:02.203Z",
+   "computedAt": "2026-10-31T17:42:02.791Z",
    "days": 17,
    "stage": "settled",
    "baselineDays": 7,
@@ -39048,7 +39048,7 @@
       {
        "kw": "sleep score free",
        "pop": 69,
-       "rank": 72
+       "rank": 71
       },
       {
        "kw": "sleepwatch",
@@ -39058,7 +39058,7 @@
       {
        "kw": "apple watch sleep tracker",
        "pop": 63,
-       "rank": 143
+       "rank": 135
       },
       {
        "kw": "sleepzy",
@@ -39246,7 +39246,7 @@
       {
        "kw": "sleep diary",
        "pop": 63,
-       "rank": 44
+       "rank": 45
       },
       {
        "kw": "smart alarm",
@@ -39277,7 +39277,7 @@
       },
       {
        "kw": "sleep talk ai recorder",
-       "pop": 57,
+       "pop": 60,
        "was": 40
       },
       {
@@ -39296,8 +39296,8 @@
        "kw": "sleepwatch",
        "pop": 67,
        "before": 173,
-       "after": 59,
-       "gain": 114,
+       "after": 58,
+       "gain": 115,
        "cohort": "floor"
       },
       {
@@ -39358,7 +39358,7 @@
       },
       {
        "kw": "sleep talking recorder⁺",
-       "pop": 61,
+       "pop": 64,
        "before": 52,
        "after": 36,
        "gain": 16,
@@ -39760,7 +39760,7 @@
       {
        "kw": "نوم",
        "pop": 31,
-       "rank": 50
+       "rank": 49
       },
       {
        "kw": "snore recorder for good night",
@@ -40023,7 +40023,7 @@
      "noisy": 13,
      "ratings": {
       "before": 0.3,
-      "after": 0.5
+      "after": 0.6
      }
     },
     "es": {
@@ -40243,7 +40243,7 @@
       },
       {
        "kw": "diario de ronquidos",
-       "pop": 56,
+       "pop": 53,
        "before": 8,
        "after": 4,
        "gain": 4,
@@ -41054,7 +41054,7 @@
       {
        "kw": "수면앱",
        "pop": 34,
-       "rank": 40
+       "rank": 62
       }
      ],
      "vanished": [],
