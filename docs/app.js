@@ -1751,6 +1751,12 @@ const INTENT_HELP = {
     mine: "Your own app's name. Ranking first here is expected rather than an opportunity.",
 };
 
+// "Where to push next" and the keyword field builder are parked. The keyword
+// review is done in conversation now, with the scripts as the measurement
+// layer, so the two cards only took up the page. Flip this to bring them back;
+// their hosts (#kw-plan, #kw-builder) stay in index.html.
+const SHOW_PLANNER = false;
+
 // The chase list: which phrases are worth the next move. Kept separate from
 // the field card because it answers a different question — what to aim at,
 // rather than what to write.
@@ -3888,9 +3894,9 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
         translate.classList.toggle("active", showEnglish);
         const refreshPlan = () =>
             renderPlan(document.getElementById("kw-plan"), cc, plan, () => render(currentCc));
-        refreshPlan();
+        if (SHOW_PLANNER) refreshPlan();
         renderRelease(document.getElementById("kw-release"), cc, release, kw);
-        renderBuilder(document.getElementById("kw-builder"), cc, plan, () => render(currentCc), refreshPlan);
+        if (SHOW_PLANNER) renderBuilder(document.getElementById("kw-builder"), cc, plan, () => render(currentCc), refreshPlan);
         tbody.replaceChildren();
         const rescored = rescoreFor(cc, plan);
         const shipped = plan?.markets?.[cc]?.terms ?? {};
