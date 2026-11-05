@@ -1760,6 +1760,10 @@ const SHOW_PLANNER = false;
 // filter state is only ever set from inside it, so not drawing it also turns
 // the filtering off. The badges on the rows themselves stay.
 const SHOW_LEGEND = false;
+// And the movement log under the table (rank moves, new autocomplete hints).
+// keyword-log.html still carries the full history; this only skips the
+// 30-row excerpt and the link to it on the dashboard.
+const SHOW_KW_LOG = false;
 
 // The chase list: which phrases are worth the next move. Kept separate from
 // the field card because it answers a different question — what to aim at,
@@ -4828,6 +4832,7 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
     // as soon as it has enough, which is one fetch except in a month's first
     // days. The index carries the full total so the link can name it without
     // loading anything else.
+    if (!SHOW_KW_LOG) return;
     const { events: recentKwEvents, total: kwEventTotal } = await loadRecentKwEvents(30);
     const kwEvents = recentKwEvents.slice(-30).reverse();
     if (kwEventTotal > kwEvents.length) {
