@@ -1756,6 +1756,10 @@ const INTENT_HELP = {
 // layer, so the two cards only took up the page. Flip this to bring them back;
 // their hosts (#kw-plan, #kw-builder) stay in index.html.
 const SHOW_PLANNER = false;
+// Same for the tag legend above the table, whose rows double as filters. The
+// filter state is only ever set from inside it, so not drawing it also turns
+// the filtering off. The badges on the rows themselves stay.
+const SHOW_LEGEND = false;
 
 // The chase list: which phrases are worth the next move. Kept separate from
 // the field card because it answers a different question — what to aim at,
@@ -3931,10 +3935,11 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                 return true;
             })
             .sort((a, b) => (val(a) - val(b)) * sort.dir || (a[1].rank ?? 999) - (b[1].rank ?? 999));
-        renderLegend(document.getElementById("kw-legend"), cc, plan, filter, () => render(currentCc), {
-            shown: entries.length,
-            total: Object.keys(kw.latest[cc]).length,
-        });
+        if (SHOW_LEGEND)
+            renderLegend(document.getElementById("kw-legend"), cc, plan, filter, () => render(currentCc), {
+                shown: entries.length,
+                total: Object.keys(kw.latest[cc]).length,
+            });
         // Yesterday's row: the stable comparison baseline. Runs minutes apart
         // all diff against the same anchor, so manual runs can't wobble Δ.
         const curDate = (kw.fetchedAt ?? "").slice(0, 10);
