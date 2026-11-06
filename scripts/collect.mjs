@@ -154,8 +154,12 @@ async function fetchHistogram(cc, attempt = 1) {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       return res.text();
     });
-    const m = html.match(/"ratingCounts":\[([0-9,]+)\]/);
-    return m ? m[1].split(",").map(Number) : null;
+    // Apple sometimes serialises a bucket with floating-point noise
+    // (55.00000000000001 on the JP page, 2026-11-06), so the match accepts
+    // decimals and rounds; an integer-only pattern read that page as having
+    // no histogram at all, and the storefront's star breakdown froze.
+    const m = html.match(/"ratingCounts":\[([0-9.,]+)\]/);
+    return m ? m[1].split(",").map((n) => Math.round(Number(n))) : null;
   } catch (err) {
     // A 429 is an IP-level throttle, not a blip: retrying ten seconds later
     // failed for all 49 storefronts that hit it, so go straight to the lookup
@@ -667,7 +671,16 @@ function applyHistogram(cc, counts) {
   if (prevH) {
     const changed = counts.map((n, j) => [5 - j, n - prevH.counts[j]]).filter(([, d]) => d !== 0);
     const net = changed.reduce((s, [, d]) => s + d, 0);
-    const ev = events.find((e) => e.at === fetchedAt && e.cc === cc && e.type === "delta");
+    // Normally the event is this run's own. When the page copy lagged (or
+    // failed to parse) through the run that logged the move and has caught up
+    // on a quiet run, there is no event of this run to hang the diff on; the
+    // storefront's newest delta is then the anchor if it is still unlabeled,
+    // and residualAfterPrior checks that the arithmetic lands on it exactly.
+    let ev = events.find((e) => e.at === fetchedAt && e.cc === cc && e.type === "delta");
+    if (!ev && net !== 0) {
+      const newest = events.findLast((e) => e.cc === cc && e.type === "delta");
+      if (newest && !newest.stars && !newest.starsMix) ev = newest;
+    }
     if (ev && changed.length) {
       // Override only when the snapshot is exactly one run behind — the
       // diff's net movement matches this event's own count delta. A page
