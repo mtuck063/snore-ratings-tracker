@@ -39007,7 +39007,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-11-07T21:10:12.750Z",
+   "computedAt": "2026-11-07T22:08:57.954Z",
    "days": 24,
    "stage": "settled",
    "baselineDays": 7,
@@ -39132,7 +39132,7 @@
       },
       {
        "kw": "sleep apnea",
-       "pop": 52,
+       "pop": 55,
        "before": 136,
        "after": 109,
        "gain": 27,
@@ -39156,7 +39156,7 @@
       },
       {
        "kw": "sleep cycle",
-       "pop": 73,
+       "pop": 76,
        "before": 74.5,
        "after": 56.5,
        "gain": 18,
@@ -39198,7 +39198,7 @@
      "noisy": 24,
      "ratings": {
       "before": 2,
-      "after": 2.2
+      "after": 2.3
      }
     },
     "ca": {
@@ -39321,7 +39321,7 @@
       },
       {
        "kw": "sleep tracker",
-       "pop": 86,
+       "pop": 77,
        "before": 91,
        "after": 54,
        "gain": 37,
@@ -39329,7 +39329,7 @@
       },
       {
        "kw": "sleep cycle",
-       "pop": 80,
+       "pop": 83,
        "before": 77,
        "after": 40,
        "gain": 37,
@@ -39518,7 +39518,7 @@
       },
       {
        "kw": "sleep talk",
-       "pop": 50,
+       "pop": 53,
        "before": 119,
        "after": 84.5,
        "gain": 34.5,
@@ -39834,7 +39834,7 @@
       },
       {
        "kw": "snorelab",
-       "pop": 78,
+       "pop": 75,
        "before": 41,
        "after": 21.5,
        "gain": 19.5,
@@ -39977,7 +39977,7 @@
       },
       {
        "kw": "analyse sommeil",
-       "pop": 69,
+       "pop": 72,
        "before": 48,
        "after": 56,
        "gain": -8,
@@ -39993,7 +39993,7 @@
       },
       {
        "kw": "ronfle",
-       "pop": 61,
+       "pop": 63,
        "before": 50,
        "after": 43,
        "gain": 7,
@@ -40009,7 +40009,7 @@
       },
       {
        "kw": "enregistrer sommeil",
-       "pop": 51,
+       "pop": 53,
        "before": 39,
        "after": 35,
        "gain": 4,
@@ -40474,7 +40474,7 @@
       },
       {
        "kw": "monitorar sono",
-       "pop": 78,
+       "pop": 75,
        "before": 7,
        "after": 4.5,
        "gain": 2.5,
@@ -40557,7 +40557,7 @@
       },
       {
        "kw": "registratore russare sonno",
-       "pop": 55,
+       "pop": 58,
        "before": 16,
        "after": 5,
        "gain": 11,
@@ -40581,7 +40581,7 @@
       },
       {
        "kw": "sleep talk recorder",
-       "pop": 73,
+       "pop": 76,
        "before": 24,
        "after": 18.5,
        "gain": 5.5,
@@ -40777,7 +40777,7 @@
       },
       {
        "kw": "schlaftracker kostenlos",
-       "pop": 65,
+       "pop": 67,
        "before": 17,
        "after": 14.5,
        "gain": 2.5,
@@ -40837,7 +40837,7 @@
       },
       {
        "kw": "slaap geluiden",
-       "pop": 80,
+       "pop": 77,
        "before": 24,
        "after": 44.5,
        "gain": -20.5,
@@ -41133,7 +41133,7 @@
       },
       {
        "kw": "수면 사이클",
-       "pop": 72,
+       "pop": 75,
        "before": 36,
        "after": 60,
        "gain": -24,
