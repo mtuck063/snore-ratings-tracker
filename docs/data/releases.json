@@ -39007,7 +39007,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-11-07T08:03:19.282Z",
+   "computedAt": "2026-11-07T08:36:06.803Z",
    "days": 23,
    "stage": "settled",
    "baselineDays": 7,
@@ -39198,7 +39198,7 @@
      "noisy": 24,
      "ratings": {
       "before": 2,
-      "after": 2.1
+      "after": 2.2
      }
     },
     "ca": {
@@ -40332,7 +40332,7 @@
       },
       {
        "kw": "alarma de ronquidos",
-       "pop": 62,
+       "pop": 59,
        "before": 19,
        "after": 17,
        "gain": 2,
@@ -40710,7 +40710,7 @@
       },
       {
        "kw": "schnarchen kostenlos",
-       "pop": 65,
+       "pop": 68,
        "before": 22,
        "after": 3,
        "gain": 19,
@@ -40922,7 +40922,7 @@
       },
       {
        "kw": "snurk",
-       "pop": 41,
+       "pop": 44,
        "before": 22,
        "after": 24,
        "gain": -2,
@@ -41085,7 +41085,7 @@
      "noisy": 7,
      "ratings": {
       "before": 1.1,
-      "after": 1.5
+      "after": 1.7
      }
     },
     "kr": {
@@ -41376,7 +41376,7 @@
      "noisy": 7,
      "ratings": {
       "before": 0.4,
-      "after": 0.5
+      "after": 0.6
      }
     }
    }
