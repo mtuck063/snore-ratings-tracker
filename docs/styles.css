@@ -724,11 +724,89 @@ tr.kw-detail td {
    (top 10 includes the top 5), matching how a rank target is usually read. */
 #kw-stats {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 6px;
     margin: -4px 0 12px;
 }
 #kw-stats[hidden] { display: none; }
+.kw-stats-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+.kw-compare { padding: 4px 10px; font-size: 0.8rem; }
+.kw-compare:disabled { opacity: 0.5; cursor: default; }
+/* Pinned filters, one per row, so the same bucket lines up down a column. */
+.kw-compare-wrap { overflow-x: auto; }
+.kw-compare-table {
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+}
+.kw-compare-table th,
+.kw-compare-table td {
+    padding: 4px 10px;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+.kw-compare-table th { color: var(--text-secondary); font-weight: 500; }
+.kw-compare-table th:first-child,
+.kw-compare-table td:first-child { text-align: left; max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
+.kw-compare-live td { color: var(--accent); }
+.kw-unpin {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 2px;
+}
+.kw-unpin:hover { color: var(--bad); }
+#kw-stats > .kw-compare { align-self: flex-start; }
+/* Keyword and rank per filter, columns side by side. Each column scrolls on
+   its own so a 160-phrase filter does not push the table off screen. */
+.kw-side {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(200px, 1fr);
+    gap: 8px;
+    overflow-x: auto;
+}
+.kw-side-col {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    min-width: 0;
+}
+.kw-side-head {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.kw-side-col ol {
+    list-style: none;
+    margin: 0;
+    padding: 4px 0;
+    max-height: 420px;
+    overflow-y: auto;
+}
+.kw-side-col li {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 2px 10px;
+    font-size: 0.8rem;
+}
+.kw-side-col li span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kw-side-rank { color: var(--text-secondary); font-variant-numeric: tabular-nums; flex: none; }
 .kw-stat {
     background: var(--bg-raised);
     border: 1px solid var(--border);
@@ -1792,3 +1870,18 @@ li.log-day {
    nothing to add for — either under a welded head or on a page one that is
    a closed club. */
 .badge.kw-ceil.kw-head-defend, .badge.kw-ceil.kw-head-closed { color: var(--bad); background: rgba(248, 113, 113, 0.13); }
+/* Title and subtitle scratchpad above the keyword field. */
+.fb-listing { margin-bottom: 10px; }
+.fb-listing .fb-label { display: block; margin: 0 0 4px; }
+.fb-listing-input { line-height: 1.5; }
+.fb-reset {
+    margin-left: 8px;
+    padding: 0;
+    font: inherit;
+    font-size: 0.72rem;
+    color: var(--accent);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+}

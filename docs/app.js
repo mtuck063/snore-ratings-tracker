@@ -1756,6 +1756,9 @@ const INTENT_HELP = {
 // layer, so the two cards only took up the page. Flip this to bring them back;
 // their hosts (#kw-plan, #kw-builder) stay in index.html.
 const SHOW_PLANNER = false;
+// The field builder came back on its own for its title and subtitle
+// scratchpad. The chase list stays parked behind SHOW_PLANNER.
+const SHOW_BUILDER = true;
 // Same for the tag legend above the table, whose rows double as filters. The
 // filter state is only ever set from inside it, so not drawing it also turns
 // the filtering off. The badges on the rows themselves stay.
@@ -2588,20 +2591,104 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
     how.textContent =
         "Your keywords are a 100-character field of their own, on top of those. Paste what you have now, try changes against it, and copy the result back when it wins more than it gives up.";
 
-    // Listing context: the two fields Apple pools with the keyword field, which
-    // you cannot edit here but which decide what the field still has to carry.
+    // Listing context: the two fields Apple pools with the keyword field. Both
+    // are editable here as a scratchpad for trying a new title or subtitle
+    // against the 30-character limit. Edits stay in this browser and never
+    // touch App Store Connect; the coverage line below still describes the
+    // listing as tracked.
     const context = document.createElement("div");
     context.className = "fb-context";
     const l = m.listing;
+    // Duplicate check input: the keys the title and subtitle claim. Seeded
+    // from aso.json, then recomputed from the boxes once you edit them.
+    let claimedKeys = new Set(b.claimed ?? []);
+    let onListingEdit = () => {};
     if (l) {
-        context.appendChild(
-            line("Title", l.title ? `${l.title}  (${l.title.length}/30)` : "\u2014")
-        );
-        context.appendChild(
-            l.subtitle
-                ? line("Subtitle", `${l.subtitle}  (${l.subtitleChars}/30)`)
-                : line("Subtitle", "none set \u2014 Apple fills the slot with your category, and 30 indexed characters go unspent", "warn")
-        );
+        const LISTING_MAX = 30;
+        const listingKey = `asoListing:${cc}`;
+        let edits = {};
+        try {
+            edits = JSON.parse(localStorage.getItem(listingKey) ?? "{}") ?? {};
+        } catch {
+            edits = {};
+        }
+        const live = { title: l.title ?? "", subtitle: l.subtitle ?? "" };
+        const val = { title: edits.title ?? live.title, subtitle: edits.subtitle ?? live.subtitle };
+        // Code points, not UTF-16 units, so an emoji or a rare CJK character
+        // counts once, the way App Store Connect counts it.
+        const lenOf = (s) => [...s].length;
+        const keyFor = (w) => wordKeys[w] ?? keyOf.get(w) ?? w;
+        const recomputeClaimed = () => {
+            const edited = val.title !== live.title || val.subtitle !== live.subtitle;
+            claimedKeys = edited
+                ? new Set(
+                      `${val.title} ${val.subtitle}`
+                          .toLowerCase()
+                          .split(/[^\p{L}\p{N}]+/u)
+                          .filter(Boolean)
+                          .map(keyFor)
+                  )
+                : new Set(b.claimed ?? []);
+        };
+        recomputeClaimed();
+
+        const field = (name, label) => {
+            const wrap = document.createElement("div");
+            wrap.className = "fb-listing";
+            const lab = document.createElement("label");
+            lab.className = "fb-label";
+            lab.htmlFor = `fb-${name}-${cc}`;
+            lab.textContent = label;
+            const inp = document.createElement("input");
+            inp.type = "text";
+            inp.id = `fb-${name}-${cc}`;
+            inp.className = "fb-input fb-listing-input";
+            inp.value = val[name];
+            inp.spellcheck = false;
+            inp.autocomplete = "off";
+            if (!live[name]) inp.placeholder = "none set \u2014 Apple fills the slot with your category";
+            const note = document.createElement("span");
+            note.className = "fb-yours-note";
+            const count = document.createElement("span");
+            const reset = document.createElement("button");
+            reset.type = "button";
+            reset.className = "fb-reset";
+            reset.textContent = "reset to live";
+            const draw = () => {
+                const n = lenOf(inp.value);
+                const changed = inp.value !== live[name];
+                note.classList.toggle("over", n > LISTING_MAX);
+                count.textContent =
+                    `${n}/${LISTING_MAX} characters` +
+                    (n > LISTING_MAX ? ` \u00b7 ${n - LISTING_MAX} over the limit` : ` \u00b7 ${LISTING_MAX - n} left`) +
+                    (changed ? " \u00b7 edited, not live" : "");
+                reset.hidden = !changed;
+            };
+            const save = () => {
+                const out = {};
+                for (const k of ["title", "subtitle"]) if (val[k] !== live[k]) out[k] = val[k];
+                try {
+                    if (Object.keys(out).length) localStorage.setItem(listingKey, JSON.stringify(out));
+                    else localStorage.removeItem(listingKey);
+                } catch {}
+            };
+            inp.addEventListener("input", () => {
+                val[name] = inp.value;
+                draw();
+                save();
+                recomputeClaimed();
+                onListingEdit();
+            });
+            reset.addEventListener("click", () => {
+                inp.value = live[name];
+                inp.dispatchEvent(new Event("input"));
+            });
+            draw();
+            note.append(count, reset);
+            wrap.append(lab, inp, note);
+            return wrap;
+        };
+        context.append(field("title", "Title"), field("subtitle", "Subtitle"));
         // How much the other two fields already do. "16 of 73 covered" with an
         // empty keyword field looks broken until you know the title and
         // subtitle are indexed too and are carrying those phrases on their own.
@@ -2655,7 +2742,6 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
     // without saying which field carried it.
     const yoursWaste = document.createElement("span");
     yoursWaste.className = "fb-yours-waste";
-    const claimedKeys = new Set(b.claimed ?? []);
     const refreshNote = () => {
         const clean = tidy(input.value);
         const keys = new Set(parseField(clean));
@@ -3317,6 +3403,13 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
         }, 1200);
     });
 
+    // A title or subtitle edit changes which keyword-field words are
+    // duplicates, so the note under the field and the waste list follow it.
+    onListingEdit = () => {
+        refreshNote();
+        draw();
+    };
+
     act("Reset to recommended", () => {
         picked = new Set(recommended);
         draw();
@@ -3873,6 +3966,33 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
     // Which tags the table is limited to. Intents are OR'd with each other;
     // gapOnly and titleOnly narrow whatever that leaves.
     const filter = { intents: new Set(), gapOnly: false, titleOnly: false, heldOnly: false };
+    // The search text plus the tag filters, copied so a saved view does not
+    // follow later edits.
+    const currentView = () => ({
+        q: search.value.trim().toLowerCase(),
+        intents: new Set(filter.intents),
+        gapOnly: filter.gapOnly,
+        titleOnly: filter.titleOnly,
+        heldOnly: filter.heldOnly,
+    });
+    const viewLabel = (v) => {
+        const parts = [
+            ...(v.q ? [`"${v.q}"`] : []),
+            ...[...v.intents].map(intentLabel),
+            ...(v.gapOnly ? ["words missing"] : []),
+            ...(v.titleOnly ? ["in title"] : []),
+            ...(v.heldOnly ? ["#1 name-held"] : []),
+        ];
+        return parts.length ? parts.join(" + ") : "all keywords";
+    };
+    // Filters pinned by the Compare button, up to MAX_PINS. Stored as the
+    // filter rather than its counts, so they recount against whichever market
+    // is open.
+    const MAX_PINS = 5;
+    const pins = [];
+    // Whether the compare table also lists each filter's keywords and ranks
+    // in columns beside each other.
+    let sideBySide = false;
     // Free-text narrowing on top of whatever tags are active. Matches the
     // phrase and its English gloss, so a Latin query finds CJK rows too.
     // Debounced a touch: every keystroke rebuilds the table, sparklines and
@@ -3904,7 +4024,14 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
             renderPlan(document.getElementById("kw-plan"), cc, plan, () => render(currentCc));
         if (SHOW_PLANNER) refreshPlan();
         renderRelease(document.getElementById("kw-release"), cc, release, kw);
-        if (SHOW_PLANNER) renderBuilder(document.getElementById("kw-builder"), cc, plan, () => render(currentCc), refreshPlan);
+        if (SHOW_PLANNER || SHOW_BUILDER)
+            renderBuilder(
+                document.getElementById("kw-builder"),
+                cc,
+                plan,
+                () => render(currentCc),
+                SHOW_PLANNER ? refreshPlan : () => {}
+            );
         tbody.replaceChildren();
         const rescored = rescoreFor(cc, plan);
         const shipped = plan?.markets?.[cc]?.terms ?? {};
@@ -3914,6 +4041,22 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
         // may be sitting in the keyword field and must not be reported as
         // missing from it.
         const fieldKnown = rescored != null || !plan?.markets?.[cc]?.coverage?.partial;
+        // One predicate for the table and for the saved comparison, so the
+        // two rows of counts can never disagree about what a filter means.
+        const matches = (term, v) => {
+            if (
+                v.q &&
+                !term.toLowerCase().includes(v.q) &&
+                !(glossary[term] ?? "").toLowerCase().includes(v.q)
+            )
+                return false;
+            const t = aso[term];
+            if (v.intents.size && !v.intents.has(t?.intent)) return false;
+            if (v.gapOnly && t?.covered !== false) return false;
+            if (v.titleOnly && !titleHeld(t)) return false;
+            if (v.heldOnly && !t?.nameHeld) return false;
+            return true;
+        };
         const val = ([term, e]) =>
             sort.key === "rank"
                 ? (e.rank ?? Infinity)
@@ -3921,23 +4064,7 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                   ? (aso[term]?.hard?.score ?? Infinity)
                   : e.pop;
         const entries = Object.entries(kw.latest[cc])
-            .filter(([term]) => {
-                const q = search.value.trim().toLowerCase();
-                if (
-                    q &&
-                    !term.toLowerCase().includes(q) &&
-                    !(glossary[term] ?? "").toLowerCase().includes(q)
-                )
-                    return false;
-                if (!filter.intents.size && !filter.gapOnly && !filter.titleOnly && !filter.heldOnly)
-                    return true;
-                const t = aso[term];
-                if (filter.intents.size && !filter.intents.has(t?.intent)) return false;
-                if (filter.gapOnly && t?.covered !== false) return false;
-                if (filter.titleOnly && !titleHeld(t)) return false;
-                if (filter.heldOnly && !t?.nameHeld) return false;
-                return true;
-            })
+            .filter(([term]) => matches(term, currentView()))
             .sort((a, b) => (val(a) - val(b)) * sort.dir || (a[1].rank ?? 999) - (b[1].rank ?? 999));
         if (SHOW_LEGEND)
             renderLegend(document.getElementById("kw-legend"), cc, plan, filter, () => render(currentCc), {
@@ -3945,13 +4072,19 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                 total: Object.keys(kw.latest[cc]).length,
             });
         // Rank spread of the rows on screen, so a filter or search reads as
-        // a count before anyone scrolls the table.
+        // a count before anyone scrolls the table. Pinned filters get a table
+        // underneath with the live filter as its last row, columns aligned so
+        // the counts compare at a glance.
         {
             const box = document.getElementById("kw-stats");
-            const total = Object.keys(kw.latest[cc]).length;
-            const ranks = entries.map(([, e]) => e.rank).filter((r) => r != null);
-            const within = (n) => ranks.filter((r) => r <= n).length;
-            const unranked = entries.length - ranks.length;
+            const all = Object.entries(kw.latest[cc]);
+            const total = all.length;
+            const tally = (list) => {
+                const ranks = list.map(([, e]) => e.rank).filter((r) => r != null);
+                const within = (n) => ranks.filter((r) => r <= n).length;
+                return [list.length, within(5), within(10), within(20), within(50), ranks.length - within(50), list.length - ranks.length];
+            };
+            const live = tally(entries);
             const stat = (n, label) => {
                 const el = document.createElement("span");
                 el.className = "kw-stat";
@@ -3960,15 +4093,134 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                 el.append(b, label);
                 return el;
             };
-            box.replaceChildren(
-                stat(entries.length, entries.length === total ? "keywords" : `of ${fmt(total)} shown`),
-                stat(within(5), "top 5"),
-                stat(within(10), "top 10"),
-                stat(within(20), "top 20"),
-                stat(within(50), "top 50"),
-                stat(ranks.length - within(50), "over 50"),
-                ...(unranked ? [stat(unranked, "unranked")] : []),
+            const btn = document.createElement("button");
+            btn.className = "kw-translate kw-compare";
+            btn.textContent = pins.length ? "Pin another" : "Compare";
+            const view = currentView();
+            const label = viewLabel(view);
+            const dupe = pins.some((p) => viewLabel(p) === label);
+            btn.disabled = pins.length >= MAX_PINS || dupe;
+            btn.title =
+                pins.length >= MAX_PINS
+                    ? `Up to ${MAX_PINS} pinned filters; remove one to pin this`
+                    : dupe
+                      ? "This filter is already pinned"
+                      : "Pin these counts, then change the search or tags to compare against them";
+            btn.addEventListener("click", () => {
+                pins.push(view);
+                render(currentCc);
+            });
+            const chips = document.createElement("div");
+            chips.className = "kw-stats-row";
+            chips.append(
+                stat(live[0], live[0] === total ? "keywords" : `of ${fmt(total)} shown`),
+                stat(live[1], "top 5"),
+                stat(live[2], "top 10"),
+                stat(live[3], "top 20"),
+                stat(live[4], "top 50"),
+                stat(live[5], "over 50"),
+                ...(live[6] ? [stat(live[6], "unranked")] : []),
+                btn
             );
+            const parts = [chips];
+            if (pins.length) {
+                const table = document.createElement("table");
+                table.className = "kw-compare-table";
+                const head = document.createElement("tr");
+                for (const h of ["Filter", "Shown", "Top 5", "Top 10", "Top 20", "Top 50", "Over 50", "Unranked", ""]) {
+                    const th = document.createElement("th");
+                    th.textContent = h;
+                    head.appendChild(th);
+                }
+                const thead = document.createElement("thead");
+                thead.appendChild(head);
+                const body = document.createElement("tbody");
+                const line = (name, counts, onRemove) => {
+                    const tr = document.createElement("tr");
+                    const tdName = document.createElement("td");
+                    tdName.textContent = name;
+                    tr.appendChild(tdName);
+                    for (const n of counts) {
+                        const td = document.createElement("td");
+                        td.textContent = fmt(n);
+                        tr.appendChild(td);
+                    }
+                    const tdX = document.createElement("td");
+                    if (onRemove) {
+                        const x = document.createElement("button");
+                        x.className = "kw-unpin";
+                        x.textContent = "×";
+                        x.title = "Remove this filter";
+                        x.addEventListener("click", onRemove);
+                        tdX.appendChild(x);
+                    }
+                    tr.appendChild(tdX);
+                    return tr;
+                };
+                pins.forEach((p, i) =>
+                    body.appendChild(
+                        line(viewLabel(p), tally(all.filter(([term]) => matches(term, p))), () => {
+                            pins.splice(i, 1);
+                            render(currentCc);
+                        })
+                    )
+                );
+                if (!dupe) {
+                    const now = line(`${label} (current)`, live, null);
+                    now.className = "kw-compare-live";
+                    body.appendChild(now);
+                }
+                table.append(thead, body);
+                const wrap = document.createElement("div");
+                wrap.className = "kw-compare-wrap";
+                wrap.appendChild(table);
+                parts.push(wrap);
+
+                const toggle = document.createElement("button");
+                toggle.className = "kw-translate kw-compare";
+                toggle.textContent = sideBySide ? "Hide keywords" : "Show keywords side by side";
+                toggle.classList.toggle("active", sideBySide);
+                toggle.addEventListener("click", () => {
+                    sideBySide = !sideBySide;
+                    render(currentCc);
+                });
+                parts.push(toggle);
+
+                if (sideBySide) {
+                    // One column per filter: keyword and rank only, best rank
+                    // first, so the same phrase can be found across columns.
+                    const cols = document.createElement("div");
+                    cols.className = "kw-side";
+                    const views = [...pins.map((p) => [viewLabel(p), p]), ...(dupe ? [] : [[`${label} (current)`, view]])];
+                    for (const [name, v] of views) {
+                        const col = document.createElement("div");
+                        col.className = "kw-side-col";
+                        const rows = all
+                            .filter(([term]) => matches(term, v))
+                            .sort((a, b) => (a[1].rank ?? Infinity) - (b[1].rank ?? Infinity) || a[0].localeCompare(b[0]));
+                        const h = document.createElement("div");
+                        h.className = "kw-side-head";
+                        h.textContent = `${name} · ${fmt(rows.length)}`;
+                        h.title = name;
+                        const list = document.createElement("ol");
+                        for (const [term, e] of rows) {
+                            const li = document.createElement("li");
+                            const t = document.createElement("span");
+                            t.textContent = (showEnglish && glossary[term]) || term;
+                            t.title = term;
+                            const r = document.createElement("span");
+                            r.className = "kw-side-rank";
+                            r.textContent = e.rank != null ? `#${e.rank}` : "—";
+                            li.append(t, r);
+                            list.appendChild(li);
+                        }
+                        col.append(h, list);
+                        cols.appendChild(col);
+                    }
+                    parts.push(cols);
+                }
+            }
+            box.replaceChildren(...parts);
             box.hidden = false;
         }
         // Yesterday's row: the stable comparison baseline. Runs minutes apart
