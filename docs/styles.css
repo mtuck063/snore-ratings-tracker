@@ -729,6 +729,10 @@ tr.kw-detail td {
     margin: -4px 0 12px;
 }
 #kw-stats[hidden] { display: none; }
+/* Flex items default to min-width: auto, which lets the side-by-side grid and
+   the compare table set the box's width and push the page past a phone
+   screen. Zero lets them scroll inside it instead. */
+#kw-stats > * { min-width: 0; max-width: 100%; }
 .kw-stats-row {
     display: flex;
     flex-wrap: wrap;

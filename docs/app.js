@@ -3983,7 +3983,7 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
             ...(v.titleOnly ? ["in title"] : []),
             ...(v.heldOnly ? ["#1 name-held"] : []),
         ];
-        return parts.length ? parts.join(" + ") : "all keywords";
+        return parts.length ? parts.join(" + ") : "No filter (all keywords)";
     };
     // Filters pinned by the Compare button, up to MAX_PINS. Stored as the
     // filter rather than its counts, so they recount against whichever market
