@@ -720,6 +720,25 @@ tr.kw-detail td {
 .kw-translate:hover { color: var(--text); }
 .kw-translate.active { color: var(--text); border-color: var(--accent); }
 .kw-translate[hidden] { display: none; }
+/* Rank spread of whatever rows the table is showing. Buckets are cumulative
+   (top 10 includes the top 5), matching how a rank target is usually read. */
+#kw-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: -4px 0 12px;
+}
+#kw-stats[hidden] { display: none; }
+.kw-stat {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+.kw-stat b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; margin-right: 4px; }
 /* Day separator: hundreds of rows otherwise blur into one column of times. */
 li.log-day {
     list-style: none;

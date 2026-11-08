@@ -3944,6 +3944,33 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
                 shown: entries.length,
                 total: Object.keys(kw.latest[cc]).length,
             });
+        // Rank spread of the rows on screen, so a filter or search reads as
+        // a count before anyone scrolls the table.
+        {
+            const box = document.getElementById("kw-stats");
+            const total = Object.keys(kw.latest[cc]).length;
+            const ranks = entries.map(([, e]) => e.rank).filter((r) => r != null);
+            const within = (n) => ranks.filter((r) => r <= n).length;
+            const unranked = entries.length - ranks.length;
+            const stat = (n, label) => {
+                const el = document.createElement("span");
+                el.className = "kw-stat";
+                const b = document.createElement("b");
+                b.textContent = fmt(n);
+                el.append(b, label);
+                return el;
+            };
+            box.replaceChildren(
+                stat(entries.length, entries.length === total ? "keywords" : `of ${fmt(total)} shown`),
+                stat(within(5), "top 5"),
+                stat(within(10), "top 10"),
+                stat(within(20), "top 20"),
+                stat(within(50), "top 50"),
+                stat(ranks.length - within(50), "over 50"),
+                ...(unranked ? [stat(unranked, "unranked")] : []),
+            );
+            box.hidden = false;
+        }
         // Yesterday's row: the stable comparison baseline. Runs minutes apart
         // all diff against the same anchor, so manual runs can't wobble Δ.
         const curDate = (kw.fetchedAt ?? "").slice(0, 10);
@@ -5720,18 +5747,3 @@ async function main() {
 }
 
 main();
-
-// Returning to a tab that has sat in the background (Safari restores it
-// without reloading): if the page is stale, reload so the visible data,
-// "Data updated", and "Page loaded" times are all current.
-const loadedAt = Date.now();
-const STALE_MS = 10 * 60e3;
-function refreshIfStale() {
-    if (document.visibilityState === "visible" && Date.now() - loadedAt > STALE_MS) {
-        location.reload();
-    }
-}
-document.addEventListener("visibilitychange", refreshIfStale);
-window.addEventListener("pageshow", (e) => {
-    if (e.persisted) refreshIfStale();
-});
