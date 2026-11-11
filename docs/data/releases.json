@@ -39007,7 +39007,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-11-11T05:39:56.794Z",
+   "computedAt": "2026-11-11T06:53:15.383Z",
    "days": 27,
    "stage": "settled",
    "baselineDays": 7,
@@ -39041,6 +39041,11 @@
      "lift": null,
      "appeared": [
       {
+       "kw": "sleep apnea, snore detector",
+       "pop": 73,
+       "rank": 5
+      },
+      {
        "kw": "snorebusters",
        "pop": 73,
        "rank": 51
@@ -39063,7 +39068,7 @@
       {
        "kw": "apple watch sleep tracker",
        "pop": 63,
-       "rank": 86
+       "rank": 83
       },
       {
        "kw": "snorestudy",
@@ -39074,11 +39079,6 @@
        "kw": "snoreping",
        "pop": 59,
        "rank": 44
-      },
-      {
-       "kw": "sleep apnea, snore detector",
-       "pop": 58,
-       "rank": 5
       },
       {
        "kw": "shuteye",
@@ -39093,7 +39093,7 @@
       {
        "kw": "sleep meister",
        "pop": 52,
-       "rank": 40
+       "rank": 41
       },
       {
        "kw": "sleepzy",
@@ -39203,7 +39203,7 @@
      "noisy": 24,
      "ratings": {
       "before": 2,
-      "after": 2.3
+      "after": 2.2
      }
     },
     "ca": {
@@ -39268,14 +39268,14 @@
        "rank": 77
       },
       {
-       "kw": "sleep diary app",
-       "pop": 63,
-       "rank": 49
-      },
-      {
        "kw": "snorestudy",
        "pop": 61,
        "rank": 25
+      },
+      {
+       "kw": "sleep diary app",
+       "pop": 60,
+       "rank": 49
       },
       {
        "kw": "snoreping",
@@ -39421,7 +39421,7 @@
      "noisy": 10,
      "ratings": {
       "before": 0.3,
-      "after": 0.6
+      "after": 0.5
      }
     },
     "gb": {
@@ -39716,7 +39716,7 @@
      "vanished": [
       {
        "kw": "easy baby sleep tracker",
-       "pop": 70,
+       "pop": 67,
        "was": 74.5
       }
      ],
@@ -40272,7 +40272,7 @@
       },
       {
        "kw": "alarma de ronquidos",
-       "pop": 56,
+       "pop": 59,
        "before": 13,
        "after": 16,
        "gain": -3,
@@ -40421,7 +40421,7 @@
       },
       {
        "kw": "alarma de ronquidos",
-       "pop": 62,
+       "pop": 59,
        "before": 19,
        "after": 17,
        "gain": 2,
@@ -41197,7 +41197,7 @@
      "noisy": 7,
      "ratings": {
       "before": 1.1,
-      "after": 1.6
+      "after": 1.5
      }
     },
     "kr": {
