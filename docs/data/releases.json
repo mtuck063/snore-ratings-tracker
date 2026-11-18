@@ -43651,7 +43651,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-11-18T16:46:34.866Z",
+   "computedAt": "2026-11-18T17:53:13.733Z",
    "days": 1,
    "stage": "indexing",
    "baselineDays": 7,
@@ -43709,8 +43709,8 @@
        "kw": "sleepwatch",
        "pop": 67,
        "before": 27,
-       "after": 138,
-       "gain": -111,
+       "after": 137.5,
+       "gain": -110.5,
        "cohort": "floor"
       },
       {
@@ -43723,7 +43723,7 @@
       },
       {
        "kw": "record sleep talking",
-       "pop": 55,
+       "pop": 52,
        "before": 55,
        "after": 27.5,
        "gain": 27.5,
@@ -43848,7 +43848,7 @@
       },
       {
        "kw": "sleep tracker free app",
-       "pop": 72,
+       "pop": 75,
        "was": 170
       },
       {
@@ -43880,7 +43880,7 @@
      "movers": [
       {
        "kw": "sleep cycle tracker",
-       "pop": 66,
+       "pop": 69,
        "before": 28,
        "after": 74.5,
        "gain": -46.5,
@@ -43922,8 +43922,8 @@
        "kw": "sleep apple watch",
        "pop": 69,
        "before": 134.5,
-       "after": 153,
-       "gain": -18.5,
+       "after": 152.5,
+       "gain": -18,
        "cohort": "control"
       },
       {
@@ -44057,8 +44057,8 @@
        "kw": "sleep cycle",
        "pop": 77,
        "before": 60,
-       "after": 80.5,
-       "gain": -20.5,
+       "after": 80,
+       "gain": -20,
        "cohort": "floor"
       },
       {
@@ -44245,16 +44245,16 @@
        "kw": "sleepwatch",
        "pop": 64,
        "before": 32,
-       "after": 90,
-       "gain": -58,
+       "after": 94,
+       "gain": -62,
        "cohort": "floor"
       },
       {
        "kw": "sleep tracker",
        "pop": 89,
        "before": 34,
-       "after": 77.5,
-       "gain": -43.5,
+       "after": 77,
+       "gain": -43,
        "cohort": "control"
       },
       {
@@ -44383,7 +44383,7 @@
       },
       {
        "kw": "sleep tracking",
-       "pop": 61,
+       "pop": 52,
        "before": 48,
        "after": 26.5,
        "gain": 21.5,
@@ -44527,7 +44527,7 @@
       },
       {
        "kw": "score sommeil",
-       "pop": 58,
+       "pop": 56,
        "before": 29,
        "after": 44,
        "gain": -15,
@@ -44543,7 +44543,7 @@
       },
       {
        "kw": "sommeil enregistre",
-       "pop": 84,
+       "pop": 82,
        "before": 26,
        "after": 39.5,
        "gain": -13.5,
@@ -44599,7 +44599,7 @@
       },
       {
        "kw": "suivi de sommeil gratuit",
-       "pop": 68,
+       "pop": 65,
        "before": 4,
        "after": 8,
        "gain": -4,
@@ -44675,7 +44675,7 @@
       },
       {
        "kw": "calidad del sueño",
-       "pop": 57,
+       "pop": 59,
        "before": 32,
        "after": 42,
        "gain": -10,
@@ -44691,7 +44691,7 @@
       },
       {
        "kw": "seguimiento del sueño gratis",
-       "pop": 60,
+       "pop": 63,
        "before": 19,
        "after": 24.5,
        "gain": -5.5,
@@ -44699,7 +44699,7 @@
       },
       {
        "kw": "medir sueño",
-       "pop": 60,
+       "pop": 63,
        "before": 30,
        "after": 24.5,
        "gain": 5.5,
@@ -44723,7 +44723,7 @@
       },
       {
        "kw": "sueño gratis",
-       "pop": 63,
+       "pop": 72,
        "before": 23,
        "after": 20,
        "gain": 3,
@@ -44867,7 +44867,7 @@
       },
       {
        "kw": "sueño seguimiento",
-       "pop": 73,
+       "pop": 76,
        "before": 16,
        "after": 18,
        "gain": -2,
@@ -44940,16 +44940,8 @@
        "cohort": "floor"
       },
       {
-       "kw": "gravar sono",
-       "pop": 56,
-       "before": 58,
-       "after": 40.5,
-       "gain": 17.5,
-       "cohort": "control"
-      },
-      {
        "kw": "sono apple watch",
-       "pop": 77,
+       "pop": 74,
        "before": 43,
        "after": 28.5,
        "gain": 14.5,
@@ -44964,6 +44956,14 @@
        "cohort": "control"
       },
       {
+       "kw": "gravar sono",
+       "pop": 56,
+       "before": 58,
+       "after": 46.5,
+       "gain": 11.5,
+       "cohort": "control"
+      },
+      {
        "kw": "sono grátis",
        "pop": 5,
        "before": 11,
@@ -44973,7 +44973,7 @@
       },
       {
        "kw": "gravador de sono",
-       "pop": 48,
+       "pop": 45,
        "before": 22,
        "after": 31,
        "gain": -9,
@@ -45005,7 +45005,7 @@
       },
       {
        "kw": "cpap",
-       "pop": 55,
+       "pop": 44,
        "before": 36,
        "after": 32.5,
        "gain": 3.5,
@@ -45055,7 +45055,7 @@
      "movers": [
       {
        "kw": "apnea notturna",
-       "pop": 94,
+       "pop": 92,
        "before": 29,
        "after": 43,
        "gain": -14,
@@ -45065,8 +45065,8 @@
        "kw": "traccia sonno",
        "pop": 76,
        "before": 30,
-       "after": 16.5,
-       "gain": 13.5,
+       "after": 17,
+       "gain": 13,
        "cohort": "control"
       },
       {
@@ -45095,7 +45095,7 @@
       },
       {
        "kw": "cicli del sonno",
-       "pop": 79,
+       "pop": 76,
        "before": 15,
        "after": 19.5,
        "gain": -4.5,
@@ -45111,7 +45111,7 @@
       },
       {
        "kw": "monitoraggio sonno gratis",
-       "pop": 66,
+       "pop": 57,
        "before": 12,
        "after": 9.5,
        "gain": 2.5,
@@ -45122,6 +45122,14 @@
        "pop": 46,
        "before": 23,
        "after": 20.5,
+       "gain": 2.5,
+       "cohort": "floor"
+      },
+      {
+       "kw": "sleep monitor",
+       "pop": 74,
+       "before": 16,
+       "after": 13.5,
        "gain": 2.5,
        "cohort": "floor"
       },
@@ -45182,20 +45190,20 @@
        "was": 29
       },
       {
+       "kw": "schlaf aufnahme kostenlos",
+       "pop": 68,
+       "was": 37
+      },
+      {
        "kw": "schlafmonitor",
        "pop": 64,
        "was": 13
-      },
-      {
-       "kw": "schlaf aufnahme kostenlos",
-       "pop": 63,
-       "was": 37
       }
      ],
      "movers": [
       {
        "kw": "apnoe",
-       "pop": 66,
+       "pop": 61,
        "before": 44,
        "after": 77.5,
        "gain": -33.5,
@@ -45227,7 +45235,7 @@
       },
       {
        "kw": "shuteye",
-       "pop": 70,
+       "pop": 72,
        "before": 19,
        "after": 13,
        "gain": 6,
@@ -45267,7 +45275,7 @@
       },
       {
        "kw": "schlaf tracker kostenlos",
-       "pop": 73,
+       "pop": 71,
        "before": 60,
        "after": 57.5,
        "gain": 2.5,
@@ -45327,7 +45335,7 @@
      "movers": [
       {
        "kw": "slaap geluiden",
-       "pop": 77,
+       "pop": 75,
        "before": 51,
        "after": 33.5,
        "gain": 17.5,
@@ -45335,7 +45343,7 @@
       },
       {
        "kw": "snurk",
-       "pop": 41,
+       "pop": 64,
        "before": 22,
        "after": 7,
        "gain": 15,
@@ -45383,7 +45391,7 @@
       },
       {
        "kw": "slaap",
-       "pop": 58,
+       "pop": 55,
        "before": 10,
        "after": 14,
        "gain": -4,
@@ -45491,7 +45499,7 @@
       },
       {
        "kw": "眠りの質",
-       "pop": 64,
+       "pop": 61,
        "before": 86,
        "after": 68.5,
        "gain": 17.5,
