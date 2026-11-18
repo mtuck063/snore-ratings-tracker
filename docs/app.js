@@ -3956,8 +3956,9 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
         }
     };
 
-    // Sortable by demand or by rank; header click toggles direction.
-    // Default: rank, best first (unranked keywords sink to the bottom).
+    // Every column sorts; header click toggles direction. Default: rank,
+    // best first. A row with nothing to sort on sinks to the bottom in either
+    // direction, so reversing a column never leads with its blanks.
     const sort = { key: "rank", dir: 1 };
     let currentCc = marketCcs[0];
     // Sticky across market switches: someone who cannot read the CN column
@@ -4057,15 +4058,68 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
             if (v.heldOnly && !t?.nameHeld) return false;
             return true;
         };
-        const val = ([term, e]) =>
-            sort.key === "rank"
-                ? (e.rank ?? Infinity)
-                : sort.key === "hard"
-                  ? (aso[term]?.hard?.score ?? Infinity)
-                  : e.pop;
+        const curDate = (kw.fetchedAt ?? "").slice(0, 10);
+        const prevDayRow = [...kw.history].reverse().find((r) => r.date < curDate) ?? null;
+        // The quantities the Δ, 24h and 7d cells print, lifted out of the row
+        // so the sort orders by exactly what the cell shows.
+        const closes = (term, cur) => {
+            const todayRow = kw.history.at(-1);
+            const todayClose =
+                (todayRow?.date === curDate ? todayRow.markets?.[cc]?.[term]?.[0] : null) ?? cur.rank;
+            let baseClose = prevDayRow?.markets?.[cc]?.[term]?.[0];
+            if (baseClose == null) baseClose = (cur.recent ?? []).find(([, r]) => r != null)?.[1];
+            return { todayClose, baseClose };
+        };
+        const ranks24 = (cur) => (cur.recent ?? []).map(([, r]) => r).filter((r) => r != null);
+        const ranks7d = (term) => {
+            const week = [];
+            for (const hrow of kw.history.slice(-7)) {
+                const v = hrow.markets?.[cc]?.[term];
+                if (!v || v[0] == null) continue;
+                week.push(Math.round(v[2] ?? v[0]), Math.round(v[3] ?? v[0]));
+            }
+            return week;
+        };
+        // A range sorts by its best end, then by its worst.
+        const rangeVal = (ranks) => (ranks.length ? Math.min(...ranks) * 1000 + Math.max(...ranks) : null);
+        const sortVals = {
+            term: ([term]) => ((showEnglish && glossary[term]) || term).toLowerCase(),
+            pop: ([, e]) => e.pop,
+            hard: ([term]) => aso[term]?.hard?.score,
+            rank: ([, e]) => e.rank,
+            // Places moved since yesterday's close; negative is a climb, so
+            // ascending leads with the biggest gains.
+            delta: ([term, e]) => {
+                const { todayClose, baseClose } = closes(term, e);
+                return todayClose == null || baseClose == null ? null : Math.round(todayClose - baseClose);
+            },
+            d1: ([, e]) => rangeVal(ranks24(e)),
+            d7: ([term]) => rangeVal(ranks7d(term)),
+            // Best rank, then how far the current rank trails it.
+            best: ([term, e]) => {
+                const best = bestRank[cc]?.[term];
+                return best == null ? null : best * 1000 + (e.rank == null ? 999 : e.rank - best);
+            },
+            // Net move across the sparkline: last close minus first.
+            trend: ([term]) => {
+                const pts = kw.history
+                    .slice(-SPARK_DAYS)
+                    .map((row) => row.markets?.[cc]?.[term]?.[0])
+                    .filter((r) => r != null);
+                return pts.length > 1 ? pts.at(-1) - pts[0] : null;
+            },
+        };
+        const val = sortVals[sort.key] ?? sortVals.rank;
         const entries = Object.entries(kw.latest[cc])
             .filter(([term]) => matches(term, currentView()))
-            .sort((a, b) => (val(a) - val(b)) * sort.dir || (a[1].rank ?? 999) - (b[1].rank ?? 999));
+            .map((entry) => ({ entry, v: val(entry) ?? null }))
+            .sort((a, b) => {
+                const rankTie = (a.entry[1].rank ?? 999) - (b.entry[1].rank ?? 999);
+                if (a.v == null || b.v == null) return (a.v == null) - (b.v == null) || rankTie;
+                const d = typeof a.v === "string" ? a.v.localeCompare(b.v) : a.v - b.v;
+                return d * sort.dir || rankTie;
+            })
+            .map(({ entry }) => entry);
         if (SHOW_LEGEND)
             renderLegend(document.getElementById("kw-legend"), cc, plan, filter, () => render(currentCc), {
                 shown: entries.length,
@@ -4225,8 +4279,6 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
         }
         // Yesterday's row: the stable comparison baseline. Runs minutes apart
         // all diff against the same anchor, so manual runs can't wobble Δ.
-        const curDate = (kw.fetchedAt ?? "").slice(0, 10);
-        const prevDayRow = [...kw.history].reverse().find((r) => r.date < curDate) ?? null;
         // The market's own first tracking day, for the NEW chip's bulk-import
         // exemption. Read off the full market, not the filtered rows, so a
         // search box narrowed to one late addition cannot shift the baseline.
@@ -4592,11 +4644,7 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
             // never contradict the trend line. Today's stored close is the
             // latest rank while the day is still running, so this reads as the
             // live move rather than a partial day's mean.
-            const todayRow = kw.history.at(-1);
-            const todayClose =
-                (todayRow?.date === curDate ? todayRow.markets?.[cc]?.[term]?.[0] : null) ?? cur.rank;
-            let baseClose = prevDayVals?.[0];
-            if (baseClose == null) baseClose = (cur.recent ?? []).find(([, r]) => r != null)?.[1];
+            const { todayClose, baseClose } = closes(term, cur);
             const span = document.createElement("span");
             span.className = "delta";
             if (todayClose == null || baseClose == null) {
@@ -4629,18 +4677,12 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
 
             const td24 = document.createElement("td");
             td24.className = "col-num muted";
-            td24.textContent = rangeText((cur.recent ?? []).map(([, r]) => r).filter((r) => r != null));
+            td24.textContent = rangeText(ranks24(cur));
             td24.title = "Rank range over the last 24 hours of runs";
 
             const td7d = document.createElement("td");
             td7d.className = "col-num muted";
-            const week = [];
-            for (const hrow of kw.history.slice(-7)) {
-                const v = hrow.markets?.[cc]?.[term];
-                if (!v || v[0] == null) continue;
-                week.push(Math.round(v[2] ?? v[0]), Math.round(v[3] ?? v[0]));
-            }
-            td7d.textContent = rangeText(week);
+            td7d.textContent = rangeText(ranks7d(term));
             td7d.title = "Rank range over the last 7 days";
 
             // Best ever, and how far the current rank sits from it. The gap is
@@ -5092,7 +5134,7 @@ async function renderKeywords(kw, glossary = {}, plan = null, applePop = null, r
         th.addEventListener("click", () => {
             const key = th.dataset.sort;
             if (sort.key === key) sort.dir *= -1;
-            else Object.assign(sort, { key, dir: key === "pop" ? -1 : 1 });
+            else Object.assign(sort, { key, dir: key === "pop" ? -1 : 1 }); // demand reads biggest first
             updateArrows();
             render(currentCc);
         });
