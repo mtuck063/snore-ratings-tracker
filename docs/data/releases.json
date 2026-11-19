@@ -43651,7 +43651,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-11-19T07:44:49.441Z",
+   "computedAt": "2026-11-19T09:01:08.511Z",
    "days": 2,
    "stage": "indexing",
    "baselineDays": 7,
@@ -43730,8 +43730,8 @@
        "kw": "sleep cycle",
        "pop": 76,
        "before": 46,
-       "after": 105.5,
-       "gain": -59.5,
+       "after": 106,
+       "gain": -60,
        "cohort": "floor"
       },
       {
@@ -43925,7 +43925,7 @@
       },
       {
        "kw": "sleep talking recorder⁺",
-       "pop": 61,
+       "pop": 58,
        "before": 45,
        "after": 26,
        "gain": 19,
@@ -43973,7 +43973,7 @@
       },
       {
        "kw": "sleep talking recorder",
-       "pop": 63,
+       "pop": 60,
        "before": 55,
        "after": 44,
        "gain": 11,
@@ -44187,11 +44187,6 @@
        "was": 165
       },
       {
-       "kw": "sleep to pause",
-       "pop": 64,
-       "was": 18
-      },
-      {
        "kw": "sleep toolbox",
        "pop": 64,
        "was": 24
@@ -44200,6 +44195,11 @@
        "kw": "my sleep talks",
        "pop": 63,
        "was": 22
+      },
+      {
+       "kw": "sleep to pause",
+       "pop": 61,
+       "was": 18
       },
       {
        "kw": "smart alarm",
@@ -44258,8 +44258,8 @@
        "kw": "sleep tracker",
        "pop": 89,
        "before": 34,
-       "after": 94,
-       "gain": -60,
+       "after": 98,
+       "gain": -64,
        "cohort": "control"
       },
       {
@@ -44390,8 +44390,8 @@
        "kw": "sleep tracking",
        "pop": 64,
        "before": 48,
-       "after": 22,
-       "gain": 26,
+       "after": 24,
+       "gain": 24,
        "cohort": "floor"
       },
       {
@@ -44906,7 +44906,7 @@
      "shotsChanged": null,
      "target": {
       "n": 3,
-      "gain": -91
+      "gain": -98
      },
      "control": {
       "n": 25,
@@ -44916,7 +44916,7 @@
       "n": 9,
       "gain": -1
      },
-     "lift": -91,
+     "lift": -98,
      "appeared": [],
      "vanished": [],
      "movers": [
@@ -44932,8 +44932,8 @@
        "kw": "ciclos de sono",
        "pop": 5,
        "before": 28,
-       "after": 119,
-       "gain": -91,
+       "after": 126,
+       "gain": -98,
        "cohort": "target"
       },
       {
@@ -45461,7 +45461,7 @@
       {
        "kw": "睡眠管理",
        "pop": 54,
-       "rank": 105
+       "rank": 106
       }
      ],
      "vanished": [],
@@ -45494,8 +45494,8 @@
        "kw": "睡眠計測",
        "pop": 51,
        "before": 35,
-       "after": 45,
-       "gain": -10,
+       "after": 46,
+       "gain": -11,
        "cohort": "control"
       },
       {
