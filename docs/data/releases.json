@@ -43651,7 +43651,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-11-19T14:15:39.405Z",
+   "computedAt": "2026-11-19T14:59:19.758Z",
    "days": 2,
    "stage": "indexing",
    "baselineDays": 7,
@@ -43884,14 +43884,6 @@
      ],
      "movers": [
       {
-       "kw": "sleep apple watch",
-       "pop": 69,
-       "before": 134.5,
-       "after": 162,
-       "gain": -27.5,
-       "cohort": "control"
-      },
-      {
        "kw": "cpap",
        "pop": 53,
        "before": 76,
@@ -43925,7 +43917,7 @@
       },
       {
        "kw": "sleep talking recorder⁺",
-       "pop": 61,
+       "pop": 58,
        "before": 45,
        "after": 23,
        "gain": 22,
@@ -43978,6 +43970,14 @@
        "after": 39,
        "gain": 14,
        "cohort": "floor"
+      },
+      {
+       "kw": "sleep apple watch",
+       "pop": 69,
+       "before": 134.5,
+       "after": 148,
+       "gain": -13.5,
+       "cohort": "control"
       }
      ],
      "noisy": 10,
@@ -44078,8 +44078,8 @@
        "kw": "sleep recorder free",
        "pop": 62,
        "before": 22,
-       "after": 42,
-       "gain": -20,
+       "after": 43,
+       "gain": -21,
        "cohort": "control"
       },
       {
@@ -44247,20 +44247,20 @@
        "cohort": "floor"
       },
       {
+       "kw": "sleep tracker",
+       "pop": 89,
+       "before": 34,
+       "after": 102,
+       "gain": -68,
+       "cohort": "control"
+      },
+      {
        "kw": "sleepwatch",
        "pop": 64,
        "before": 32,
        "after": 95,
        "gain": -63,
        "cohort": "floor"
-      },
-      {
-       "kw": "sleep tracker",
-       "pop": 89,
-       "before": 34,
-       "after": 96,
-       "gain": -62,
-       "cohort": "control"
       },
       {
        "kw": "cpap",
@@ -44953,19 +44953,19 @@
        "cohort": "control"
       },
       {
+       "kw": "gravar sono",
+       "pop": 56,
+       "before": 58,
+       "after": 45,
+       "gain": 13,
+       "cohort": "control"
+      },
+      {
        "kw": "bruxismo",
        "pop": 72,
        "before": 16,
        "after": 29,
        "gain": -13,
-       "cohort": "control"
-      },
-      {
-       "kw": "gravar sono",
-       "pop": 56,
-       "before": 58,
-       "after": 47,
-       "gain": 11,
        "cohort": "control"
       },
       {
@@ -45143,6 +45143,14 @@
        "pop": 46,
        "before": 23,
        "after": 21,
+       "gain": 2,
+       "cohort": "floor"
+      },
+      {
+       "kw": "sleep monitor",
+       "pop": 74,
+       "before": 16,
+       "after": 14,
        "gain": 2,
        "cohort": "floor"
       }
