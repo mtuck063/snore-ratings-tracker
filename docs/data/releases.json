@@ -43651,7 +43651,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-11-19T14:59:19.758Z",
+   "computedAt": "2026-11-19T15:27:03.080Z",
    "days": 2,
    "stage": "indexing",
    "baselineDays": 7,
@@ -43884,6 +43884,14 @@
      ],
      "movers": [
       {
+       "kw": "sleep apple watch",
+       "pop": 69,
+       "before": 134.5,
+       "after": 162,
+       "gain": -27.5,
+       "cohort": "control"
+      },
+      {
        "kw": "cpap",
        "pop": 53,
        "before": 76,
@@ -43917,7 +43925,7 @@
       },
       {
        "kw": "sleep talking recorder⁺",
-       "pop": 58,
+       "pop": 61,
        "before": 45,
        "after": 23,
        "gain": 22,
@@ -43940,20 +43948,20 @@
        "cohort": "control"
       },
       {
-       "kw": "anti snore",
-       "pop": 5,
-       "before": 35,
-       "after": 52,
-       "gain": -17,
-       "cohort": "floor"
-      },
-      {
        "kw": "free sleep tracker",
        "pop": 71,
        "before": 39,
        "after": 55,
        "gain": -16,
        "cohort": "control"
+      },
+      {
+       "kw": "anti snore",
+       "pop": 5,
+       "before": 35,
+       "after": 51,
+       "gain": -16,
+       "cohort": "floor"
       },
       {
        "kw": "snore detection",
@@ -43970,14 +43978,6 @@
        "after": 39,
        "gain": 14,
        "cohort": "floor"
-      },
-      {
-       "kw": "sleep apple watch",
-       "pop": 69,
-       "before": 134.5,
-       "after": 148,
-       "gain": -13.5,
-       "cohort": "control"
       }
      ],
      "noisy": 10,
@@ -44247,20 +44247,20 @@
        "cohort": "floor"
       },
       {
-       "kw": "sleep tracker",
-       "pop": 89,
-       "before": 34,
-       "after": 102,
-       "gain": -68,
-       "cohort": "control"
-      },
-      {
        "kw": "sleepwatch",
        "pop": 64,
        "before": 32,
        "after": 95,
        "gain": -63,
        "cohort": "floor"
+      },
+      {
+       "kw": "sleep tracker",
+       "pop": 89,
+       "before": 34,
+       "after": 86,
+       "gain": -52,
+       "cohort": "control"
       },
       {
        "kw": "cpap",
@@ -44420,7 +44420,7 @@
       },
       {
        "kw": "sleep talking recorder",
-       "pop": 69,
+       "pop": 66,
        "before": 27,
        "after": 13,
        "gain": 14,
