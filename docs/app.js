@@ -2529,9 +2529,10 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
             .filter(Boolean)
             .map((w) => wordKeys[w] ?? keyOf.get(w) ?? w);
 
-    // Your field lives in your browser. scripts/metadata.json only ever seeds
-    // it, and that file is a note someone typed, not a reading from App Store
-    // Connect.
+    // Your field lives in your browser, seeded from scripts/metadata.json,
+    // which scripts/asc-listing.mjs syncs from App Store Connect. An edit saved
+    // here outlives the next sync, so the note below says whenever the box no
+    // longer matches the live field and offers the way back.
     const storeKey = `asoField:${cc}`;
     let savedRaw = localStorage.getItem(storeKey);
     const currentRaw = savedRaw ?? b.current ?? "";
@@ -2742,6 +2743,17 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
     // without saying which field carried it.
     const yoursWaste = document.createElement("span");
     yoursWaste.className = "fb-yours-waste";
+    // Same control as under the title and subtitle. Without it a field typed
+    // here weeks ago kept passing for the live one.
+    const yoursReset = document.createElement("button");
+    yoursReset.type = "button";
+    yoursReset.className = "fb-reset";
+    yoursReset.textContent = "reset to live";
+    yoursReset.hidden = true;
+    yoursReset.addEventListener("click", () => {
+        input.value = b.current ?? "";
+        normalise();
+    });
     const refreshNote = () => {
         const clean = tidy(input.value);
         const keys = new Set(parseField(clean));
@@ -2759,13 +2771,19 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
             : "";
         const n = b.terms.filter((t) => holdsIn(t, keys)).length;
         yoursNote.classList.toggle("over", clean.length > FIELD_MAX);
+        const liveRaw = b.current ?? "";
+        const isLive = liveRaw !== "" && clean === tidy(liveRaw);
+        const synced = m.listing?.fieldUpdated ? `, synced ${m.listing.fieldUpdated}` : "";
         const state = dirty
             ? "saving\u2026"
-            : savedRaw != null
-              ? "saved in this browser"
-              // Named for what it is rather than where it is stored. Nobody
-              // standing in App Store Connect needs a path in this repo.
-              : "a placeholder, not read from App Store Connect \u2014 paste yours to replace it";
+            : isLive
+              ? `matches App Store Connect${synced}`
+              : savedRaw != null && liveRaw
+                ? "edited in this browser, not live"
+                : savedRaw != null
+                  ? "saved in this browser"
+                  : "no live field recorded for this market \u2014 paste yours";
+        yoursReset.hidden = isLive || !liveRaw;
         yoursNote.textContent = clean
             ? `${clean.length}/${FIELD_MAX} characters, covering ${n} of ${b.terms.length} phrases` +
               (clean.length > FIELD_MAX ? " \u00b7 over the limit" : "") +
@@ -2776,7 +2794,10 @@ function renderBuilder(host, cc, plan, onFieldSaved, onDraftChange) {
             : "Paste your keywords to compare them against the draft below.";
     };
     refreshNote();
-    yours.append(yoursLabel, input, yoursNote, yoursWaste);
+    const yoursRow = document.createElement("div");
+    yoursRow.className = "fb-yours-row";
+    yoursRow.append(yoursNote, yoursReset);
+    yours.append(yoursLabel, input, yoursRow, yoursWaste);
 
     const stats = document.createElement("div");
     stats.className = "fb-stats";

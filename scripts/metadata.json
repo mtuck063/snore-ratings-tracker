@@ -1,5 +1,5 @@
 {
-  "_note": "What the App Store listing claims, per market. title and subtitle are refreshed from the live storefront pages by `node scripts/aso.mjs --fetch`; do not edit them by hand, they will be overwritten. keywordField and screenshots are NOT public anywhere and are maintained here by hand: copy the field out of App Store Connect whenever you change it, and set fieldUpdated to that date. An unrecorded field is not treated as an empty one; coverage simply reports the market as ungraded.",
+  "_note": "What the App Store listing claims, per market. title and subtitle are refreshed from the live storefront pages by `node scripts/aso.mjs --fetch`; do not edit them by hand, they will be overwritten. keywordField is not public; `ASC_KEY=admin node scripts/asc-listing.mjs` copies it from App Store Connect and sets fieldUpdated (admin key only, so it cannot run in CI). screenshots are maintained here by hand. An unrecorded field is not treated as an empty one; coverage simply reports the market as ungraded.",
   "markets": {
     "us": {
       "keywordField": "cpap,monitor,score,apple,watch,stages,stop,auto,detector,alarm,teeth,grinding,talking,quality,record",

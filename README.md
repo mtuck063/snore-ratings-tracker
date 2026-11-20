@@ -447,6 +447,7 @@ arithmetic and cannot drift from the rules in `aso.mjs`.
 
 ```sh
 node scripts/aso.mjs --fetch        # refresh live listings, rebuild aso.json
+ASC_KEY=admin node scripts/asc-listing.mjs  # sync keyword fields from App Store Connect
 node scripts/aso.mjs --report us    # coverage, gaps and chase list for a market
 node scripts/aso.mjs --csv          # the chase list, every market, as CSV
 node scripts/aso.mjs --field us     # propose a 100-char keyword field
