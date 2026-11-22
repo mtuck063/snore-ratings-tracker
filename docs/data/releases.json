@@ -43651,7 +43651,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-11-22T19:57:08.191Z",
+   "computedAt": "2026-11-22T20:02:26.857Z",
    "days": 5,
    "stage": "provisional",
    "baselineDays": 7,
@@ -43842,13 +43842,13 @@
      },
      "control": {
       "n": 66,
-      "gain": -0.2
+      "gain": 0
      },
      "floor": {
       "n": 28,
       "gain": 2.5
      },
-     "lift": -7,
+     "lift": -7.2,
      "appeared": [
       {
        "kw": "easy snore",
@@ -43912,7 +43912,7 @@
       },
       {
        "kw": "sleep talking recorder⁺",
-       "pop": 58,
+       "pop": 61,
        "before": 45,
        "after": 22.5,
        "gain": 22.5,
@@ -43968,7 +43968,7 @@
       },
       {
        "kw": "sleep talking recorder",
-       "pop": 60,
+       "pop": 63,
        "before": 55,
        "after": 42.5,
        "gain": 12.5,
@@ -44743,7 +44743,7 @@
       },
       {
        "kw": "ronquidos gratis",
-       "pop": 73,
+       "pop": 76,
        "before": 11,
        "after": 6,
        "gain": 5,
