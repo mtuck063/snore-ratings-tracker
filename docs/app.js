@@ -1374,7 +1374,11 @@ function reviewCard(r, compact) {
                 r.title ? translateToEnglish(r.title) : { text: "", src: "" },
                 r.body ? translateToEnglish(r.body) : { text: "", src: "" },
             ]);
-            if ((bodyText.src || title.src) === "en") {
+            // Judge by output, not by Google's detected language: it labels
+            // some Traditional Chinese text "en" yet still translates it.
+            // Only text that comes back unchanged is really English already.
+            const same = (a, b) => a.trim().toLowerCase() === b.trim().toLowerCase();
+            if (same(title.text, r.title ?? "") && same(bodyText.text, r.body ?? "")) {
                 tBtn.textContent = "Already English";
                 setTimeout(() => tBtn.remove(), 2000);
                 return;
