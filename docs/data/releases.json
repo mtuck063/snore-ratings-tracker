@@ -43651,7 +43651,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-11-23T18:43:00.883Z",
+   "computedAt": "2026-11-23T19:25:09.882Z",
    "days": 6,
    "stage": "provisional",
    "baselineDays": 7,
@@ -43940,7 +43940,7 @@
       },
       {
        "kw": "sleep talking recorder⁺",
-       "pop": 61,
+       "pop": 64,
        "before": 45,
        "after": 24,
        "gain": 21,
@@ -43980,7 +43980,7 @@
       },
       {
        "kw": "sleep talking recorder",
-       "pop": 63,
+       "pop": 66,
        "before": 55,
        "after": 43,
        "gain": 12,
@@ -44532,8 +44532,8 @@
        "kw": "sleep tracking",
        "pop": 61,
        "before": 48,
-       "after": 38,
-       "gain": 10,
+       "after": 36,
+       "gain": 12,
        "cohort": "floor"
       },
       {
