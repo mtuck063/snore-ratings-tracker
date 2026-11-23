@@ -4165,47 +4165,27 @@
   },
   {
    "term": "bruxismo + arregla los dientes",
-   "demand": 81,
+   "demand": 78,
    "via": "root"
   },
   {
-   "term": "ronquidos y hablar dormido",
-   "demand": 72,
+   "term": "app ronquidos",
+   "demand": 70,
    "via": "root"
   },
   {
-   "term": "bruxismo",
-   "demand": 72,
-   "via": "root"
-  },
-  {
-   "term": "despertador inteligente ia",
-   "demand": 67,
-   "via": "root"
-  },
-  {
-   "term": "calidad del sueño",
+   "term": "detector de ronquidos y sueño",
    "demand": 65,
    "via": "root"
   },
   {
-   "term": "analisis sueño",
+   "term": "despertador inteligente ia",
    "demand": 64,
    "via": "root"
   },
   {
-   "term": "grabadora nocturna",
-   "demand": 63,
-   "via": "root"
-  },
-  {
-   "term": "diario de sueños análisis ruya",
+   "term": "monitor de sueño e insomnio",
    "demand": 59,
-   "via": "root"
-  },
-  {
-   "term": "monitor de sueño y ronquidos",
-   "demand": 54,
    "via": "root"
   },
   {
@@ -4214,8 +4194,13 @@
    "via": "root"
   },
   {
-   "term": "diario de sueños y análisis ia",
-   "demand": 48,
+   "term": "diario de sueño y descanso",
+   "demand": 52,
+   "via": "root"
+  },
+  {
+   "term": "diario de sueños análisis ruya",
+   "demand": 51,
    "via": "root"
   }
  ],
@@ -4227,62 +4212,62 @@
   },
   {
    "term": "bruxismo + arregla los dientes",
-   "demand": 90,
+   "demand": 87,
    "via": "root"
   },
   {
-   "term": "ronquidos y hablar dormido",
-   "demand": 80,
+   "term": "bruxismo sob controle",
+   "demand": 79,
    "via": "root"
   },
   {
    "term": "despertador inteligente.",
-   "demand": 74,
-   "via": "root"
-  },
-  {
-   "term": "despertador inteligente ia",
-   "demand": 67,
-   "via": "root"
-  },
-  {
-   "term": "monitoreo y análisis del sueño",
-   "demand": 63,
-   "via": "root"
-  },
-  {
-   "term": "diario de sueños análisis ruya",
-   "demand": 62,
-   "via": "root"
-  },
-  {
-   "term": "diario de sueños, mi horóscopo",
-   "demand": 59,
-   "via": "root"
-  },
-  {
-   "term": "diario de sueños y análisis ia",
-   "demand": 56,
-   "via": "root"
-  },
-  {
-   "term": "monitor de sueño y ronquidos",
-   "demand": 52,
+   "demand": 71,
    "via": "root"
   },
   {
    "term": "diario de sueños",
-   "demand": 52,
+   "demand": 69,
    "via": "root"
   },
   {
-   "term": "registro de sueño",
-   "demand": 51,
+   "term": "despertador inteligente ia",
+   "demand": 64,
+   "via": "root"
+  },
+  {
+   "term": "detector de ronquidos y sueño",
+   "demand": 62,
+   "via": "root"
+  },
+  {
+   "term": "detector de ronquidos ia",
+   "demand": 58,
+   "via": "root"
+  },
+  {
+   "term": "diario de sueños análisis ruya",
+   "demand": 56,
+   "via": "root"
+  },
+  {
+   "term": "monitoreo y análisis del sueño",
+   "demand": 55,
+   "via": "root"
+  },
+  {
+   "term": "diario de sueño y descanso",
+   "demand": 55,
+   "via": "root"
+  },
+  {
+   "term": "diario de sueños, mi horóscopo",
+   "demand": 53,
    "via": "root"
   },
   {
    "term": "monitor de sueño‧",
-   "demand": 30,
+   "demand": 41,
    "via": "root"
   }
  ],
