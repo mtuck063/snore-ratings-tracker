@@ -43651,7 +43651,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-11-23T07:59:48.501Z",
+   "computedAt": "2026-11-23T09:16:56.503Z",
    "days": 6,
    "stage": "provisional",
    "baselineDays": 7,
@@ -43703,11 +43703,6 @@
        "rank": 13
       },
       {
-       "kw": "easy snore",
-       "pop": 58,
-       "rank": 11
-      },
-      {
        "kw": "snorelet",
        "pop": 47,
        "rank": 23
@@ -43721,6 +43716,11 @@
        "kw": "bearingkind baby sleep tracker",
        "pop": 5,
        "rank": 68
+      },
+      {
+       "kw": "easy snore",
+       "pop": 5,
+       "rank": 11
       }
      ],
      "vanished": [],
@@ -43861,11 +43861,6 @@
      "lift": -7.5,
      "appeared": [
       {
-       "kw": "easy snore",
-       "pop": 58,
-       "rank": 37
-      },
-      {
        "kw": "snoring elephant",
        "pop": 54,
        "rank": 17
@@ -43879,6 +43874,11 @@
        "kw": "do i grind my teeth",
        "pop": 5,
        "rank": 29
+      },
+      {
+       "kw": "easy snore",
+       "pop": 5,
+       "rank": 37
       },
       {
        "kw": "snoring monitor",
@@ -43940,7 +43940,7 @@
       },
       {
        "kw": "sleep talking recorder⁺",
-       "pop": 58,
+       "pop": 61,
        "before": 45,
        "after": 24,
        "gain": 21,
@@ -43980,7 +43980,7 @@
       },
       {
        "kw": "sleep talking recorder",
-       "pop": 60,
+       "pop": 63,
        "before": 55,
        "after": 43,
        "gain": 12,
@@ -44051,11 +44051,6 @@
      "lift": 0,
      "appeared": [
       {
-       "kw": "easy snore",
-       "pop": 58,
-       "rank": 32
-      },
-      {
        "kw": "snorelet",
        "pop": 53,
        "rank": 27
@@ -44064,6 +44059,11 @@
        "kw": "do i grind my teeth",
        "pop": 5,
        "rank": 35
+      },
+      {
+       "kw": "easy snore",
+       "pop": 5,
+       "rank": 32
       },
       {
        "kw": "snoring elephant",
@@ -44120,7 +44120,7 @@
       },
       {
        "kw": "sleep talking recorder⁺",
-       "pop": 57,
+       "pop": 49,
        "before": 51,
        "after": 27,
        "gain": 24,
@@ -44228,19 +44228,19 @@
      "lift": -3,
      "appeared": [
       {
-       "kw": "easy snore",
-       "pop": 58,
-       "rank": 23
-      },
-      {
        "kw": "snorelet",
-       "pop": 53,
+       "pop": 41,
        "rank": 20
       },
       {
        "kw": "do i grind my teeth",
        "pop": 5,
        "rank": 24
+      },
+      {
+       "kw": "easy snore",
+       "pop": 5,
+       "rank": 23
       },
       {
        "kw": "snoring elephant",
@@ -44328,8 +44328,8 @@
        "kw": "sleepwatch",
        "pop": 67,
        "before": 32,
-       "after": 105,
-       "gain": -73,
+       "after": 103,
+       "gain": -71,
        "cohort": "floor"
       },
       {
@@ -44498,7 +44498,7 @@
       },
       {
        "kw": "sleep talking recorder",
-       "pop": 69,
+       "pop": 74,
        "before": 27,
        "after": 13,
        "gain": 14,
@@ -44650,7 +44650,7 @@
       },
       {
        "kw": "ronfler",
-       "pop": 48,
+       "pop": 53,
        "before": 41,
        "after": 49,
        "gain": -8,
@@ -44740,7 +44740,7 @@
      "appeared": [
       {
        "kw": "sueño y alarma",
-       "pop": 69,
+       "pop": 5,
        "rank": 18
       }
      ],
@@ -44766,13 +44766,13 @@
        "kw": "sueño gratis",
        "pop": 70,
        "before": 23,
-       "after": 31,
-       "gain": -8,
+       "after": 30,
+       "gain": -7,
        "cohort": "control"
       },
       {
        "kw": "ronquidos gratis",
-       "pop": 73,
+       "pop": 82,
        "before": 11,
        "after": 6,
        "gain": 5,
@@ -45067,19 +45067,19 @@
        "cohort": "floor"
       },
       {
+       "kw": "gravar sono",
+       "pop": 56,
+       "before": 58,
+       "after": 44,
+       "gain": 14,
+       "cohort": "control"
+      },
+      {
        "kw": "bruxismo",
        "pop": 72,
        "before": 16,
        "after": 30,
        "gain": -14,
-       "cohort": "control"
-      },
-      {
-       "kw": "gravar sono",
-       "pop": 56,
-       "before": 58,
-       "after": 45,
-       "gain": 13,
        "cohort": "control"
       },
       {
@@ -45404,7 +45404,7 @@
      "noisy": 9,
      "ratings": {
       "before": 0.3,
-      "after": 0.3
+      "after": 0.4
      }
     },
     "nl": {
@@ -45678,7 +45678,7 @@
      "noisy": 8,
      "ratings": {
       "before": 1,
-      "after": 1.3
+      "after": 1.6
      }
     },
     "kr": {
@@ -45866,7 +45866,7 @@
      "noisy": 2,
      "ratings": {
       "before": 0.7,
-      "after": 0.4
+      "after": 0.6
      }
     },
     "cn": {
@@ -46004,7 +46004,7 @@
      "noisy": 8,
      "ratings": {
       "before": 0.3,
-      "after": 1.3
+      "after": 1.4
      }
     }
    }
