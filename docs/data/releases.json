@@ -43651,7 +43651,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-11-25T21:55:52.163Z",
+   "computedAt": "2026-11-25T22:23:41.673Z",
    "days": 8,
    "stage": "settled",
    "baselineDays": 7,
@@ -43710,7 +43710,7 @@
       {
        "kw": "snorelet",
        "pop": 47,
-       "rank": 25
+       "rank": 24
       },
       {
        "kw": "do i grind my teeth",
@@ -43725,12 +43725,12 @@
       {
        "kw": "bearingkind baby sleep tracker",
        "pop": 5,
-       "rank": 98
+       "rank": 99
       },
       {
        "kw": "easy snore",
        "pop": 5,
-       "rank": 13
+       "rank": 12
       }
      ],
      "vanished": [],
@@ -43883,12 +43883,12 @@
       {
        "kw": "snorelet",
        "pop": 50,
-       "rank": 21
+       "rank": 20
       },
       {
        "kw": "do i grind my teeth",
        "pop": 5,
-       "rank": 20
+       "rank": 23
       },
       {
        "kw": "easy snore",
@@ -43939,7 +43939,7 @@
       },
       {
        "kw": "sleep talking recorder⁺",
-       "pop": 58,
+       "pop": 61,
        "before": 45,
        "after": 21,
        "gain": 24,
@@ -43987,7 +43987,7 @@
       },
       {
        "kw": "sleep talking recorder",
-       "pop": 60,
+       "pop": 63,
        "before": 55,
        "after": 41,
        "gain": 14,
@@ -44068,12 +44068,12 @@
       {
        "kw": "snorelet",
        "pop": 53,
-       "rank": 24
+       "rank": 23
       },
       {
        "kw": "do i grind my teeth",
        "pop": 5,
-       "rank": 31
+       "rank": 32
       },
       {
        "kw": "easy snore",
@@ -44088,7 +44088,7 @@
       {
        "kw": "snoring monitor",
        "pop": 5,
-       "rank": 13
+       "rank": 14
       }
      ],
      "vanished": [
@@ -44169,8 +44169,8 @@
        "kw": "snoring king",
        "pop": 5,
        "before": 44,
-       "after": 31,
-       "gain": 13,
+       "after": 30,
+       "gain": 14,
        "cohort": "floor"
       },
       {
@@ -44245,7 +44245,7 @@
       {
        "kw": "snorelet",
        "pop": 53,
-       "rank": 17
+       "rank": 16
       },
       {
        "kw": "do i grind my teeth",
@@ -44396,6 +44396,14 @@
        "cohort": "floor"
       },
       {
+       "kw": "sleep recorder",
+       "pop": 74,
+       "before": 28,
+       "after": 43,
+       "gain": -15,
+       "cohort": "control"
+      },
+      {
        "kw": "sleep diary",
        "pop": 63,
        "before": 30,
@@ -44410,14 +44418,6 @@
        "after": 30,
        "gain": -15,
        "cohort": "floor"
-      },
-      {
-       "kw": "sleep recorder",
-       "pop": 74,
-       "before": 28,
-       "after": 42,
-       "gain": -14,
-       "cohort": "control"
       },
       {
        "kw": "free sleep talking app",
@@ -44765,12 +44765,12 @@
       {
        "kw": "horas de sueño",
        "pop": 66,
-       "rank": 54
+       "rank": 55
       },
       {
        "kw": "calidad de sueño",
        "pop": 50,
-       "rank": 45
+       "rank": 46
       },
       {
        "kw": "sueño y alarma",
@@ -44803,14 +44803,6 @@
        "after": 27,
        "gain": 7,
        "cohort": "control"
-      },
-      {
-       "kw": "registro de sueño",
-       "pop": 51,
-       "before": 66,
-       "after": 60,
-       "gain": 6,
-       "cohort": "floor"
       },
       {
        "kw": "ronquidos gratis",
@@ -44849,6 +44841,14 @@
        "pop": 78,
        "before": 18,
        "after": 14,
+       "gain": 4,
+       "cohort": "floor"
+      },
+      {
+       "kw": "registro de sueño",
+       "pop": 51,
+       "before": 66,
+       "after": 62,
        "gain": 4,
        "cohort": "floor"
       },
@@ -44917,7 +44917,7 @@
       {
        "kw": "sleep tracker",
        "pop": 74,
-       "rank": 87
+       "rank": 76
       },
       {
        "kw": "cpap tracker",
@@ -45076,7 +45076,7 @@
       {
        "kw": "aplicativo de sono",
        "pop": 38,
-       "rank": 175
+       "rank": 178
       }
      ],
      "vanished": [],
@@ -45838,8 +45838,8 @@
        "kw": "숙면",
        "pop": 100,
        "before": 156,
-       "after": 120,
-       "gain": 36,
+       "after": 122,
+       "gain": 34,
        "cohort": "floor"
       },
       {
