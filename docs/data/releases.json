@@ -43651,7 +43651,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-11-25T11:13:22.708Z",
+   "computedAt": "2026-11-25T12:40:14.947Z",
    "days": 8,
    "stage": "settled",
    "baselineDays": 7,
@@ -43947,7 +43947,7 @@
       },
       {
        "kw": "sleep talking recorder⁺",
-       "pop": 64,
+       "pop": 61,
        "before": 45,
        "after": 24,
        "gain": 21,
@@ -43986,19 +43986,19 @@
        "cohort": "control"
       },
       {
-       "kw": "stop snoring",
-       "pop": 5,
-       "before": 44,
-       "after": 30,
-       "gain": 14,
-       "cohort": "floor"
-      },
-      {
        "kw": "stop snoring free",
        "pop": 5,
        "before": 53,
        "after": 39,
        "gain": 14,
+       "cohort": "floor"
+      },
+      {
+       "kw": "stop snoring",
+       "pop": 5,
+       "before": 44,
+       "after": 31,
+       "gain": 13,
        "cohort": "floor"
       },
       {
@@ -44011,7 +44011,7 @@
       },
       {
        "kw": "sleep talking recorder",
-       "pop": 66,
+       "pop": 63,
        "before": 55,
        "after": 43,
        "gain": 12,
@@ -44127,7 +44127,7 @@
       },
       {
        "kw": "sleep talking recorder⁺",
-       "pop": 49,
+       "pop": 55,
        "before": 51,
        "after": 27,
        "gain": 24,
@@ -44177,8 +44177,8 @@
        "kw": "sleep cycle",
        "pop": 80,
        "before": 60,
-       "after": 74,
-       "gain": -14,
+       "after": 73,
+       "gain": -13,
        "cohort": "floor"
       },
       {
@@ -44513,7 +44513,7 @@
       },
       {
        "kw": "sleep talking recorder",
-       "pop": 74,
+       "pop": 72,
        "before": 27,
        "after": 13,
        "gain": 14,
@@ -44755,7 +44755,7 @@
       {
        "kw": "sleep tracker",
        "pop": 74,
-       "rank": 48
+       "rank": 43
       },
       {
        "kw": "app ronquidos",
@@ -44917,7 +44917,7 @@
       {
        "kw": "sleep tracker",
        "pop": 74,
-       "rank": 89
+       "rank": 88
       },
       {
        "kw": "cpap tracker",
@@ -45214,7 +45214,7 @@
       {
        "kw": "monitora il russare",
        "pop": 5,
-       "rank": 18
+       "rank": 19
       }
      ],
      "vanished": [],
