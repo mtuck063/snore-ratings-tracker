@@ -43651,7 +43651,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-11-26T08:43:37.458Z",
+   "computedAt": "2026-11-26T09:03:42.741Z",
    "days": 9,
    "stage": "settled",
    "baselineDays": 7,
@@ -43964,7 +43964,7 @@
       },
       {
        "kw": "sleep talking recorder⁺",
-       "pop": 58,
+       "pop": 64,
        "before": 45,
        "after": 22,
        "gain": 23,
@@ -44012,7 +44012,7 @@
       },
       {
        "kw": "sleep talking recorder",
-       "pop": 60,
+       "pop": 66,
        "before": 55,
        "after": 40.5,
        "gain": 14.5,
@@ -45119,7 +45119,7 @@
      },
      "floor": {
       "n": 9,
-      "gain": -2
+      "gain": -1
      },
      "lift": -96.5,
      "appeared": [
@@ -45131,7 +45131,7 @@
       {
        "kw": "aplicativo de sono",
        "pop": 38,
-       "rank": 124
+       "rank": 165
       }
      ],
      "vanished": [],
