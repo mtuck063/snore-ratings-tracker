@@ -43651,7 +43651,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-11-28T08:17:00.722Z",
+   "computedAt": "2026-11-28T08:29:11.022Z",
    "days": 11,
    "stage": "settled",
    "baselineDays": 7,
@@ -44768,7 +44768,7 @@
      "appeared": [
       {
        "kw": "cpap tracker",
-       "pop": 81,
+       "pop": 84,
        "rank": 7
       },
       {
@@ -44936,11 +44936,11 @@
       {
        "kw": "sleep tracker",
        "pop": 77,
-       "rank": 53
+       "rank": 51
       },
       {
        "kw": "cpap tracker",
-       "pop": 72,
+       "pop": 75,
        "rank": 8
       },
       {
@@ -45090,7 +45090,7 @@
       {
        "kw": "sleep cycle",
        "pop": 94,
-       "rank": 136
+       "rank": 139
       },
       {
        "kw": "aplicativo de sono",
@@ -45168,8 +45168,8 @@
        "kw": "sono grátis",
        "pop": 5,
        "before": 11,
-       "after": 22.5,
-       "gain": -11.5,
+       "after": 23,
+       "gain": -12,
        "cohort": "control"
       },
       {
@@ -45293,7 +45293,7 @@
       },
       {
        "kw": "cpap",
-       "pop": 8,
+       "pop": 11,
        "before": 16,
        "after": 20,
        "gain": -4,
@@ -45581,7 +45581,7 @@
       },
       {
        "kw": "cpap",
-       "pop": 8,
+       "pop": 11,
        "before": 17,
        "after": 19.5,
        "gain": -2.5,
@@ -46019,7 +46019,7 @@
       },
       {
        "kw": "梦话记录",
-       "pop": 52,
+       "pop": 55,
        "before": 66,
        "after": 48.5,
        "gain": 17.5,
