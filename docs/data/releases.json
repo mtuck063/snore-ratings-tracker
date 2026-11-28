@@ -43651,7 +43651,7 @@
    }
   },
   "effect": {
-   "computedAt": "2026-11-28T08:12:55.879Z",
+   "computedAt": "2026-11-28T08:17:00.722Z",
    "days": 11,
    "stage": "settled",
    "baselineDays": 7,
@@ -43952,7 +43952,7 @@
       },
       {
        "kw": "sleep talking recorder⁺",
-       "pop": 64,
+       "pop": 61,
        "before": 45,
        "after": 22,
        "gain": 23,
@@ -43992,7 +43992,7 @@
       },
       {
        "kw": "sleep talking recorder",
-       "pop": 66,
+       "pop": 63,
        "before": 55,
        "after": 38,
        "gain": 17,
@@ -44058,7 +44058,7 @@
      "shotsChanged": null,
      "target": {
       "n": 3,
-      "gain": 0
+      "gain": -1
      },
      "control": {
       "n": 59,
@@ -44068,7 +44068,7 @@
       "n": 35,
       "gain": 2
      },
-     "lift": 0,
+     "lift": -1,
      "appeared": [
       {
        "kw": "snoreeze",
@@ -44936,7 +44936,7 @@
       {
        "kw": "sleep tracker",
        "pop": 77,
-       "rank": 55
+       "rank": 53
       },
       {
        "kw": "cpap tracker",
@@ -45090,12 +45090,12 @@
       {
        "kw": "sleep cycle",
        "pop": 94,
-       "rank": 135
+       "rank": 136
       },
       {
        "kw": "aplicativo de sono",
        "pop": 38,
-       "rank": 153
+       "rank": 164
       }
      ],
      "vanished": [],
